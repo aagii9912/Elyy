@@ -1,0 +1,226 @@
+@import "tailwindcss";
+
+/* ============================================================
+   ELYSIUM — Design System (Tailwind v4 theme tokens)
+   Holistic luxury · minimalist · organic modernism
+   ============================================================ */
+@theme {
+  /* Canvas — ~80% near-white (brand cream #fafee5 family) */
+  --color-bone: #fdfdf6; /* primary near-white background & light text */
+  --color-cream: #fafee5; /* brand off-white (logo / soft fills) */
+  --color-sand: #f3f6e4; /* faint lime-tinted alternate band */
+  --color-clay: #dbe2c2; /* pale sage border */
+  --color-stone: #97a07f; /* muted sage — faint labels */
+  --color-taupe: #515c45; /* deep sage — secondary text */
+
+  /* Brand greens — primary text & dark sections */
+  --color-ink: #2a5124; /* deep forest green (brand) — primary ink */
+  --color-charcoal: #16280f; /* deepest green — footer / film */
+  --color-moss: #3f6a33; /* mid green — small accents */
+
+  /* Brand accents */
+  --color-gold: #faac32; /* amber — decorative accent (rules, icons, bar) */
+  --color-lime: #b4d656; /* lime — sparing pop */
+
+  /* Typography */
+  --font-display: var(--font-fraunces);
+  --font-sans: var(--font-inter);
+  /* FIND-style cinematic faces (v2 experience) */
+  --font-instrument: var(--font-instrument-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-lora: var(--font-lora-serif), Georgia, "Times New Roman", serif;
+
+  /* Neutral monochrome palette (FIND aesthetic) */
+  --color-night: #151717; /* near-black — dark sections, CTAs, ink */
+  --color-paper: #f1f1f1; /* light grey alternate band */
+  --color-mist: #8a8d8c; /* muted grey — dimmed/secondary text */
+
+  /* Motion */
+  --ease-luxe: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Fluid display scale */
+  --text-hero: clamp(2.75rem, 9vw, 9rem);
+  --text-display: clamp(2rem, 5.5vw, 5.25rem);
+  --text-title: clamp(1.6rem, 3.2vw, 3rem);
+}
+
+:root {
+  --header-h: 5rem;
+}
+
+html {
+  background-color: var(--color-bone);
+  color: var(--color-ink);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Lenis owns the scroll — no native smooth-scroll */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+body {
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  background-color: var(--color-bone);
+  color: var(--color-ink);
+  overflow-x: hidden;
+  font-feature-settings: "ss01";
+}
+
+::selection {
+  background-color: var(--color-ink);
+  color: var(--color-bone);
+}
+
+/* Custom cursor: hide native only on precise-pointer devices once mounted */
+@media (hover: hover) and (pointer: fine) {
+  html.has-cursor,
+  html.has-cursor * {
+    cursor: none !important;
+  }
+}
+
+/* Reusable reveal primitives ------------------------------------- */
+/* line-mask: child <span> slides up from behind a clip mask */
+.line-mask {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 0.04em; /* avoid descender clipping */
+}
+.line-mask > span {
+  display: block;
+  will-change: transform;
+  transform: translateY(110%);
+}
+
+.clip-reveal {
+  clip-path: inset(0 0 100% 0);
+  will-change: clip-path;
+}
+
+.fade-up {
+  opacity: 0;
+  transform: translateY(2.2rem);
+  will-change: transform, opacity;
+}
+
+/* Utility classes mapped to type scale */
+.text-hero {
+  font-size: var(--text-hero);
+  line-height: 0.94;
+}
+.text-display {
+  font-size: var(--text-display);
+  line-height: 1;
+}
+.text-title {
+  font-size: var(--text-title);
+  line-height: 1.08;
+}
+
+.overline {
+  font-size: 0.72rem;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+}
+
+/* Thin top scroll-progress bar */
+.scroll-progress {
+  transform-origin: 0% 50%;
+  transform: scaleX(0);
+}
+
+/* ============================================================
+   FIND-style cinematic utilities (v2 experience)
+   ============================================================ */
+
+/* Tight, bold display headline — Instrument Sans 700, negative tracking */
+.find-display {
+  font-family: var(--font-instrument);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 0.96;
+}
+
+/* Small section label (top-left of each section) */
+.find-label {
+  font-family: var(--font-instrument);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+/* Pill buttons */
+.find-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  border-radius: 100px;
+  padding: 0.78rem 1.4rem;
+  font-family: var(--font-instrument);
+  font-size: 0.85rem;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+  transition: transform 0.4s var(--ease-luxe), background-color 0.4s var(--ease-luxe),
+    color 0.4s var(--ease-luxe), border-color 0.4s var(--ease-luxe);
+}
+.find-pill:hover {
+  transform: translateY(-2px);
+}
+.find-pill--solid {
+  background-color: var(--color-night);
+  color: #fff;
+}
+.find-pill--light {
+  background-color: #fff;
+  color: var(--color-night);
+}
+.find-pill--outline {
+  border: 1px solid currentColor;
+}
+.find-pill .find-pill__arrow {
+  transition: transform 0.4s var(--ease-luxe);
+}
+.find-pill:hover .find-pill__arrow {
+  transform: translateX(4px);
+}
+
+/* Two-tone scroll-reveal text: words start dimmed, fill to full on scroll.
+   Color is inherited (currentColor) so it works on light AND dark sections. */
+.find-scrolltext {
+  font-family: var(--font-instrument);
+}
+.find-scrolltext .word {
+  display: inline-block;
+  white-space: pre;
+  opacity: 0.22;
+  will-change: opacity;
+}
+
+/* Accessibility: respect reduced motion -------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .line-mask > span,
+  .clip-reveal,
+  .fade-up,
+  .find-scrolltext .word {
+    transform: none !important;
+    opacity: 1 !important;
+    clip-path: none !important;
+  }
+}
