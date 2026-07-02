@@ -8,8 +8,7 @@ import { RevealText } from "@/components/Reveal";
 import { useT } from "@/components/LangProvider";
 import { HERO_IMAGE, SITE } from "@/lib/content";
 
-/* A different vantage point (looking up the towers) shown clipped inside the
-   ELYSIUM wordmark during the hero's second scroll phase. */
+/* Building shown clipped inside the ELYSIUM wordmark during phase 2. */
 const WORDMARK_IMAGE = "/images/exterior-lowangle-towers.jpg";
 
 export function V2Hero() {
@@ -17,9 +16,9 @@ export function V2Hero() {
   const lenis = useLenis();
   const root = useRef<HTMLElement>(null);
   const bg = useRef<HTMLDivElement>(null);
-  const intro = useRef<HTMLDivElement>(null);
+  const wash = useRef<HTMLDivElement>(null);
+  const headline = useRef<HTMLDivElement>(null);
   const wordmark = useRef<HTMLDivElement>(null);
-  const whiteout = useRef<HTMLDivElement>(null);
 
   const go = (e: React.MouseEvent, href: string) => {
     e.preventDefault();
@@ -31,65 +30,86 @@ export function V2Hero() {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      gsap.from(bg.current, { scale: 1.15, duration: 2.2, ease: "power3.out" });
-      gsap.from("[data-v2fade]", { y: 26, opacity: 0, duration: 1, ease: "power3.out", stagger: 0.12, delay: 0.4 });
-      gsap.to("[data-v2cue]", { y: 9, repeat: -1, yoyo: true, duration: 1.2, ease: "sine.inOut" });
+      gsap.from(bg.current, { scale: 1.18, duration: 2.4, ease: "power3.out" });
+      gsap.from("[data-hl]", { y: 30, opacity: 0, duration: 1, ease: "power3.out", stagger: 0.12, delay: 0.45 });
+      gsap.to("[data-cue]", { y: 9, repeat: -1, yoyo: true, duration: 1.2, ease: "sine.inOut" });
 
-      // drifting fog layers
-      gsap.utils.toArray<HTMLElement>(".v2-fog").forEach((el, i) => {
+      // Continuous, organic cloud + smoke drift (independent of scroll).
+      gsap.utils.toArray<HTMLElement>(".fr-cloud").forEach((el, i) => {
         gsap.to(el, {
-          xPercent: i % 2 ? 18 : -18,
-          yPercent: i % 2 ? -8 : 8,
-          scale: 1.15,
-          opacity: i % 2 ? 0.5 : 0.75,
-          duration: 16 + i * 5,
+          xPercent: i % 2 ? 14 : -14,
+          yPercent: i % 3 ? -6 : 7,
+          scale: 1.08,
+          duration: 18 + i * 4,
+          ease: "sine.inOut",
+          repeat: -1,
+          yoyo: true,
+        });
+      });
+      gsap.utils.toArray<HTMLElement>(".fr-smoke").forEach((el, i) => {
+        gsap.to(el, {
+          xPercent: i % 2 ? -10 : 10,
+          duration: 22 + i * 5,
           ease: "sine.inOut",
           repeat: -1,
           yoyo: true,
         });
       });
 
-      // Scroll-driven two-phase sequence (CSS-sticky pinned):
-      // 1) headline over the building  →  2) whiteout + ELYSIUM wordmark with
-      //    the building texture clipped inside the letters.
+      // Scroll-driven, frame-by-frame sequence (CSS-sticky pin).
       const tl = gsap.timeline({
         scrollTrigger: { trigger: root.current, start: "top top", end: "bottom bottom", scrub: true },
       });
-      tl.to(bg.current, { yPercent: 14, ease: "none" }, 0)
-        .to(intro.current, { opacity: 0, yPercent: -12, ease: "none" }, 0)
-        .to(whiteout.current, { opacity: 1, ease: "none" }, 0.12)
-        .fromTo(
-          wordmark.current,
-          { opacity: 0, scale: 1.12 },
-          { opacity: 1, scale: 1, ease: "none" },
-          0.32
-        )
-        .to(".v2-wordmark-bg", { backgroundPositionY: "60%", ease: "none" }, 0.32);
+      // building rises / parallaxes up through the clouds
+      tl.fromTo(bg.current, { yPercent: 8 }, { yPercent: -10, ease: "none" }, 0);
+      // headline fades to a ghost, then out
+      tl.to(headline.current, { opacity: 0, y: -50, scale: 0.97, ease: "none", duration: 0.4 }, 0.05);
+      // soft white wash settles over the scene (building stays faintly visible)
+      tl.fromTo(wash.current, { opacity: 0 }, { opacity: 0.72, ease: "none", duration: 0.35 }, 0.32);
+      // edge clouds part outward + low smoke sinks as the wordmark resolves
+      tl.to(".fr-cloud--edge", { xPercent: (i) => (i % 2 ? 55 : -55), ease: "none", duration: 0.5 }, 0.3);
+      tl.to(".fr-smoke", { yPercent: 60, opacity: 0.85, ease: "none", duration: 0.5 }, 0.3);
+      // ELYSIUM wordmark (building clipped inside) resolves in
+      tl.fromTo(
+        wordmark.current,
+        { opacity: 0, scale: 1.12, yPercent: 5 },
+        { opacity: 1, scale: 1, yPercent: 0, ease: "power2.out", duration: 0.45 },
+        0.42
+      );
+      tl.fromTo(".v2-wordmark-bg", { backgroundPositionY: "30%" }, { backgroundPositionY: "62%", ease: "none", duration: 0.6 }, 0.42);
     }, root);
     return () => ctx.revert();
   }, []);
 
   return (
-    <section id="v2top" ref={root} className="relative h-[220vh] bg-night">
+    <section id="v2top" ref={root} className="relative h-[340vh] bg-night">
       <div className="sticky top-0 flex h-[100svh] min-h-[640px] w-full items-center justify-center overflow-hidden">
-        <div ref={bg} className="absolute inset-x-0 -top-[8%] z-0 h-[116%] will-change-transform">
+        {/* building / scene */}
+        <div ref={bg} className="absolute inset-x-0 -top-[8%] z-0 h-[120%] will-change-transform">
           <Image src={HERO_IMAGE} alt={SITE.name} fill priority sizes="100vw" className="object-cover" />
         </div>
+        {/* subtle scene grade for headline legibility */}
+        <div className="pointer-events-none absolute inset-0 z-[4] bg-gradient-to-b from-black/30 via-transparent to-black/45" />
 
-        {/* atmospheric fog / cloud layers */}
-        <div className="pointer-events-none absolute inset-0 z-[5] overflow-hidden">
-          <div className="v2-fog absolute -left-[10%] top-[12%] h-[55vh] w-[60vw] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.85),transparent_62%)] opacity-60 blur-3xl mix-blend-screen" />
-          <div className="v2-fog absolute right-[-12%] top-[28%] h-[60vh] w-[55vw] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.7),transparent_60%)] opacity-50 blur-3xl mix-blend-screen" />
-          <div className="v2-fog absolute bottom-[-10%] left-[20%] h-[55vh] w-[70vw] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.6),transparent_60%)] opacity-50 blur-3xl mix-blend-soft-light" />
+        {/* atmospheric clouds + low smoke (CSS-built, drifting) */}
+        <div className="pointer-events-none absolute inset-0 z-[6] overflow-hidden">
+          <div className="fr-cloud fr-cloud--edge" style={{ left: "-12%", top: "8%", width: "46vw", height: "34vh" }} />
+          <div className="fr-cloud fr-cloud--edge" style={{ right: "-12%", top: "14%", width: "44vw", height: "32vh" }} />
+          <div className="fr-cloud" style={{ left: "18%", top: "30%", width: "34vw", height: "26vh", opacity: 0.7 }} />
+          <div className="fr-cloud" style={{ right: "16%", top: "40%", width: "30vw", height: "24vh", opacity: 0.65 }} />
+          <div className="fr-cloud fr-cloud--edge" style={{ left: "-8%", bottom: "16%", width: "40vw", height: "30vh" }} />
+          <div className="fr-cloud fr-cloud--edge" style={{ right: "-8%", bottom: "20%", width: "38vw", height: "28vh" }} />
+          {/* dense low smoke the building rises through */}
+          <div className="fr-smoke" style={{ left: "-15%", bottom: "-14%", width: "70vw", height: "44vh" }} />
+          <div className="fr-smoke" style={{ right: "-15%", bottom: "-16%", width: "72vw", height: "46vh" }} />
+          <div className="fr-smoke" style={{ left: "10%", bottom: "-20%", width: "80vw", height: "40vh", opacity: 0.9 }} />
         </div>
 
-        <div className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-b from-black/40 via-black/15 to-black/60" />
-
-        {/* whiteout backdrop for the wordmark phase */}
-        <div ref={whiteout} className="pointer-events-none absolute inset-0 z-[15] bg-white opacity-0" />
+        {/* soft white wash for the wordmark phase */}
+        <div ref={wash} className="pointer-events-none absolute inset-0 z-[8] bg-white opacity-0" />
 
         {/* phase 2 — ELYSIUM wordmark with the building image clipped inside */}
-        <div ref={wordmark} className="pointer-events-none absolute inset-0 z-20 flex flex-col items-center justify-center opacity-0">
+        <div ref={wordmark} className="pointer-events-none absolute inset-0 z-[10] flex flex-col items-center justify-center opacity-0">
           <span
             className="v2-wordmark-bg find-display select-none text-center uppercase leading-[0.82] text-[clamp(4rem,21vw,19rem)]"
             style={{
@@ -109,16 +129,16 @@ export function V2Hero() {
         </div>
 
         {/* phase 1 — headline + CTA */}
-        <div ref={intro} className="relative z-20 mx-auto max-w-5xl px-5 text-center text-white">
-          <p data-v2fade className="find-label text-white/75">{SITE.name} · Ulaanbaatar</p>
+        <div ref={headline} className="relative z-[10] mx-auto max-w-5xl px-5 text-center text-white">
+          <p data-hl className="find-label text-white/75">{SITE.name} · Ulaanbaatar</p>
           <RevealText
             as="h1"
             text={t.v2.hero.headline}
             className="find-display mx-auto mt-6 max-w-4xl text-[clamp(3rem,8.5vw,7.5rem)]"
             stagger={0.1}
           />
-          <p data-v2fade className="mx-auto mt-7 max-w-xl text-lg leading-relaxed text-white/85">{t.v2.hero.sub}</p>
-          <div data-v2fade className="mt-11 flex flex-wrap items-center justify-center gap-5">
+          <p data-hl className="mx-auto mt-7 max-w-xl text-lg leading-relaxed text-white/85">{t.v2.hero.sub}</p>
+          <div data-hl className="mt-11 flex flex-wrap items-center justify-center gap-5">
             <a href="#services" onClick={(e) => go(e, "#services")} data-cursor-hover className="find-pill find-pill--light">
               {t.v2.hero.primary}
               <span className="find-pill__arrow" aria-hidden>→</span>
@@ -134,9 +154,7 @@ export function V2Hero() {
           </div>
         </div>
 
-        <div data-v2cue className="absolute bottom-8 left-1/2 z-20 flex -translate-x-1/2 flex-col items-center gap-2 text-white/70">
-          <span className="h-10 w-px bg-white/50" />
-        </div>
+        <div data-cue className="absolute bottom-8 left-1/2 z-[10] h-10 w-px -translate-x-1/2 bg-white/50" />
       </div>
     </section>
   );

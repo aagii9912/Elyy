@@ -58,12 +58,12 @@ export function Cursor() {
       <div
         ref={ring}
         aria-hidden
-        className="pointer-events-none fixed left-0 top-0 z-[9999] hidden h-9 w-9 rounded-full border border-ink/70 mix-blend-difference md:block"
+        className="ely-cursor pointer-events-none fixed left-0 top-0 z-[9999] hidden h-9 w-9 rounded-full border border-ink/70 mix-blend-difference md:block"
       />
       <div
         ref={dot}
         aria-hidden
-        className="pointer-events-none fixed left-0 top-0 z-[9999] hidden h-1.5 w-1.5 rounded-full bg-ink mix-blend-difference md:block"
+        className="ely-cursor pointer-events-none fixed left-0 top-0 z-[9999] hidden h-1.5 w-1.5 rounded-full bg-ink mix-blend-difference md:block"
       />
     </>
   );

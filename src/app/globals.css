@@ -28,11 +28,20 @@
   /* FIND-style cinematic faces (v2 experience) */
   --font-instrument: var(--font-instrument-sans), ui-sans-serif, system-ui, sans-serif;
   --font-lora: var(--font-lora-serif), Georgia, "Times New Roman", serif;
+  --font-mulish: var(--font-mulish), ui-sans-serif, system-ui, sans-serif;
+  /* Client-supplied Gilroy — rounded geometric display sans for /final */
+  --font-gilroy: var(--font-gilroy), ui-sans-serif, system-ui, sans-serif;
 
   /* Neutral monochrome palette (FIND aesthetic) */
   --color-night: #151717; /* near-black — dark sections, CTAs, ink */
   --color-paper: #f1f1f1; /* light grey alternate band */
   --color-mist: #8a8d8c; /* muted grey — dimmed/secondary text */
+
+  /* LAGOM aesthetic — cream + orange (v2 experience) */
+  --color-lagom-cream: #f2efe9; /* warm off-white canvas */
+  --color-lagom-card: #ffffff; /* card surface */
+  --color-lagom-ink: #2b2b2b; /* primary dark text */
+  --color-lagom-orange: #fb7339; /* accent — CTAs, active links, highlights */
 
   /* Motion */
   --ease-luxe: cubic-bezier(0.16, 1, 0.3, 1);
@@ -41,6 +50,13 @@
   --text-hero: clamp(2.75rem, 9vw, 9rem);
   --text-display: clamp(2rem, 5.5vw, 5.25rem);
   --text-title: clamp(1.6rem, 3.2vw, 3rem);
+
+  /* ArcSphere clone palette (scoped to /arcsphere) — warm architecture aesthetic */
+  --color-acs-cream: #f0ebe6; /* primary cream background */
+  --color-acs-cream2: #e2dacf; /* deeper cream band */
+  --color-acs-brown: #4f4742; /* primary brown — text / buttons / footer */
+  --color-acs-ink: #453e3a; /* darker brown — service names & body */
+  --color-acs-mute: #8a827b; /* muted brown — placeholders / dividers */
 }
 
 :root {
@@ -205,6 +221,116 @@ body {
   will-change: opacity;
 }
 
+/* ============================================================
+   LAGOM-style utilities (cream/orange v2 experience)
+   ============================================================ */
+
+/* Geometric display — Mulish, heavy, slight positive tracking */
+.lagom-display {
+  font-family: var(--font-mulish);
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  line-height: 1;
+}
+
+/* Large faint section index (001 / 002 / 003) */
+.lagom-num {
+  font-family: var(--font-mulish);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: color-mix(in srgb, var(--color-lagom-ink) 28%, transparent);
+}
+
+/* Rectangular orange button with arrow notch (no border radius) */
+.lagom-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.85rem;
+  background-color: var(--color-lagom-orange);
+  color: #fff;
+  font-family: var(--font-mulish);
+  font-weight: 700;
+  font-size: 0.9rem;
+  letter-spacing: 0.01em;
+  padding: 0.95rem 1.5rem;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.35s var(--ease-luxe), transform 0.35s var(--ease-luxe);
+}
+.lagom-btn:hover {
+  background-color: color-mix(in srgb, var(--color-lagom-orange) 86%, #000);
+  transform: translateY(-2px);
+}
+.lagom-btn .lagom-btn__arrow {
+  transition: transform 0.35s var(--ease-luxe);
+}
+.lagom-btn:hover .lagom-btn__arrow {
+  transform: translate(3px, -3px);
+}
+
+/* Ghost / outline variant on cream */
+.lagom-btn--ghost {
+  background-color: transparent;
+  color: var(--color-lagom-ink);
+  border: 1px solid color-mix(in srgb, var(--color-lagom-ink) 22%, transparent);
+}
+.lagom-btn--ghost:hover {
+  background-color: var(--color-lagom-ink);
+  color: var(--color-lagom-cream);
+}
+
+/* ============================================================
+   /final — business-class kicker with a small gold accent rule
+   ============================================================ */
+.fnl-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  font-family: var(--font-gilroy);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.fnl-kicker::before {
+  content: "";
+  width: 1.75rem;
+  height: 2px;
+  background: var(--color-gold);
+  flex: none;
+}
+
+/* ============================================================
+   FIND-style atmospheric hero — soft clouds & smoke (CSS-built)
+   ============================================================ */
+.fr-cloud {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(255, 255, 255, 0.6) 38%,
+    rgba(255, 255, 255, 0) 72%
+  );
+  filter: blur(22px);
+  will-change: transform, opacity;
+  pointer-events: none;
+}
+/* dense low-lying smoke band the building rises through */
+.fr-smoke {
+  position: absolute;
+  background: radial-gradient(
+    ellipse at center 60%,
+    rgba(255, 255, 255, 0.98) 0%,
+    rgba(255, 255, 255, 0.85) 30%,
+    rgba(255, 255, 255, 0.45) 58%,
+    rgba(255, 255, 255, 0) 80%
+  );
+  filter: blur(28px);
+  will-change: transform, opacity;
+  pointer-events: none;
+}
+
 /* Accessibility: respect reduced motion -------------------------- */
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -223,4 +349,83 @@ body {
     opacity: 1 !important;
     clip-path: none !important;
   }
+  .acs-reveal {
+    transform: none !important;
+    opacity: 1 !important;
+  }
+  .acs-marquee-track {
+    animation: none !important;
+  }
+}
+
+/* ============================================================
+   ArcSphere clone (route /arcsphere) — scoped utilities
+   ============================================================ */
+.arcsphere {
+  background-color: var(--color-acs-cream);
+  color: var(--color-acs-brown);
+  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  font-feature-settings: normal;
+}
+.arcsphere ::selection {
+  background-color: var(--color-acs-brown);
+  color: var(--color-acs-cream);
+}
+
+/* On the ArcSphere clone route, suppress Elysium's global overlays and
+   restore the native cursor for full-fidelity emulation. */
+body:has(.arcsphere) .ely-cursor,
+body:has(.arcsphere) .scroll-progress {
+  display: none !important;
+}
+html.has-cursor:has(.arcsphere),
+html.has-cursor:has(.arcsphere) * {
+  cursor: auto !important;
+}
+
+/* Entrance reveal (IntersectionObserver toggles .is-in) */
+.acs-reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+.acs-reveal.is-in {
+  opacity: 1;
+  transform: none;
+}
+
+/* Infinite horizontal marquee (stats strip) */
+@keyframes acs-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+.acs-marquee-track {
+  display: inline-flex;
+  white-space: nowrap;
+  animation: acs-marquee 34s linear infinite;
+}
+
+/* Underline form inputs */
+.acs-input {
+  width: 100%;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid rgba(79, 71, 66, 0.28);
+  padding: 0.65rem 0;
+  font-size: 1rem;
+  color: var(--color-acs-brown);
+  outline: none;
+  transition: border-color 0.3s ease;
+}
+.arcsphere .acs-input::placeholder {
+  color: rgba(79, 71, 66, 0.55);
+}
+.acs-input:focus {
+  border-bottom-color: var(--color-acs-brown);
 }
