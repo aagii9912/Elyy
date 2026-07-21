@@ -1,0 +1,74 @@
+"use client";
+
+/* /mono — custom cursor: the Elysium logo mark (4 slivers) in the four
+   brand colours. The one place the full brand palette appears — part of
+   the deliberate ~5% green/colour budget on an otherwise black & white
+   page. Desktop (fine pointer) only. */
+
+import { useEffect, useRef } from "react";
+import { gsap } from "@/lib/gsap";
+
+const SLIVERS = [
+  "M724.7627131503,1.6928812257l-1.5571644463-1.5571639374c-.1809564854-.1809564263-.4743448685-.1809563783-.6553012947.0000001071l-10.9339166573,10.9339202305c-.0868983404.0868983688-.1357173084.2047578379-.1357172883.3276506695l.0000002984,1.8262380573c.0000000201.1228928316.0488190266.2407522848.1357173954.3276506252l1.5571644463,1.5571639374c.1809564854.1809564262.4743448685.1809563783.6553012947-.0000001071l10.9339166573-10.9339202304c.0868983404-.0868983688.1357173084-.2047578379.1357172883-.3276506695l-.0000002984-1.8262380573c-.0000000201-.1228928316-.0488190266-.2407522848-.1357173954-.3276506252Z",
+  "M724.7627131503,11.0526964505l-1.5571644463-1.5571639374c-.1809564854-.1809564262-.4743448685-.1809563783-.6553012947.0000001071l-10.9339166573,10.9339202304c-.0868983404.0868983688-.1357173084.2047578379-.1357172883.3276506695l.0000002984,1.8262380573c.0000000201.1228928316.0488190266.2407522848.1357173954.3276506252l1.5571644463,1.5571639374c.1809564854.1809564262.4743448685.1809563783.6553012947-.0000001071l10.9339166573-10.9339202304c.0868983404-.0868983688.1357173084-.2047578379.1357172883-.3276506695l-.0000002984-1.8262380573c-.0000000201-.1228928316-.0488190266-.2407522848-.1357173954-.3276506252Z",
+  "M710.6956105802,15.7571507035l-1.5571644462-1.5571639374c-.1809564854-.1809564262-.4743448685-.1809563783-.6553012947.0000001071l-10.9339166573,10.9339202304c-.0868983404.0868983688-.1357173084.2047578379-.1357172883.3276506695l.0000002984,1.8262380573c.0000000201.1228928316.0488190266.2407522848.1357173954.3276506252l1.5571644463,1.5571639374c.1809564854.1809564263.4743448685.1809563783.6553012947-.0000001071l10.9339166573-10.9339202305c.0868983404-.0868983688.1357173084-.2047578379.1357172883-.3276506695l-.0000002984-1.8262380573c-.0000000201-.1228928316-.0488190266-.2407522848-.1357173954-.3276506252Z",
+  "M710.6956105802,6.3674608853l-1.5571644462-1.5571639374c-.1809564854-.1809564262-.4743448685-.1809563783-.6553012947.0000001071l-10.9339166573,10.9339202304c-.0868983404.0868983688-.1357173084.2047578379-.1357172883.3276506695l.0000002984,1.8262380573c.0000000201.1228928316.0488190266.2407522848.1357173954.3276506252l1.5571644463,1.5571639374c.1809564854.1809564262.4743448685.1809563783.6553012947-.0000001071l10.9339166573-10.9339202304c.0868983404-.0868983688.1357173084-.2047578379.1357172883-.3276506695l-.0000002984-1.8262380573c-.0000000201-.1228928316-.0488190266-.2407522848-.1357173954-.3276506252Z",
+];
+const COLORS = ["#b4d656", "#faac32", "#fafee5", "#7fae62"];
+
+export function MonoCursor() {
+  const mark = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (window.matchMedia("(hover: none), (pointer: coarse)").matches) return;
+
+    gsap.set(mark.current, { xPercent: -50, yPercent: -50 });
+    const pos = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+    const cur = { ...pos };
+
+    const move = (e: MouseEvent) => {
+      pos.x = e.clientX;
+      pos.y = e.clientY;
+    };
+    const tick = () => {
+      cur.x += (pos.x - cur.x) * 0.2;
+      cur.y += (pos.y - cur.y) * 0.2;
+      gsap.set(mark.current, { x: cur.x, y: cur.y });
+    };
+    const enter = () => gsap.to(mark.current, { scale: 1.7, rotate: 45, duration: 0.4, ease: "power3.out" });
+    const leave = () => gsap.to(mark.current, { scale: 1, rotate: 0, duration: 0.4, ease: "power3.out" });
+
+    const interactive = "a, button, [data-cursor-hover], input, textarea, select, summary";
+    const over = (e: MouseEvent) => {
+      if ((e.target as Element)?.closest?.(interactive)) enter();
+    };
+    const out = (e: MouseEvent) => {
+      if ((e.target as Element)?.closest?.(interactive)) leave();
+    };
+
+    window.addEventListener("mousemove", move);
+    document.addEventListener("mouseover", over);
+    document.addEventListener("mouseout", out);
+    gsap.ticker.add(tick);
+    return () => {
+      window.removeEventListener("mousemove", move);
+      document.removeEventListener("mouseover", over);
+      document.removeEventListener("mouseout", out);
+      gsap.ticker.remove(tick);
+    };
+  }, []);
+
+  return (
+    <div
+      ref={mark}
+      aria-hidden
+      className="pointer-events-none fixed left-0 top-0 z-[9999] hidden h-[26px] w-[26px] md:block"
+    >
+      <svg viewBox="696.5 -1 29 30" className="h-full w-full drop-shadow-[0_1px_6px_rgba(0,0,0,0.35)]">
+        {SLIVERS.map((d, i) => (
+          <path key={i} d={d} fill={COLORS[i]} />
+        ))}
+      </svg>
+    </div>
+  );
+}
