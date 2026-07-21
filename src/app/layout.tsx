@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Fraunces, Inter, Instrument_Sans, Lora, Mulish } from "next/font/google";
+import { Fraunces, Inter, Instrument_Sans, Lora, Mulish, JetBrains_Mono } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
 import { LangProvider } from "@/components/LangProvider";
@@ -28,12 +28,20 @@ const instrumentSans = Instrument_Sans({
   display: "swap",
 });
 
-/* Editorial serif accent. */
+/* Editorial serif accent (cyrillic included for the /daylight display headings). */
 const lora = Lora({
   variable: "--font-lora-serif",
-  subsets: ["latin"],
+  subsets: ["latin", "cyrillic"],
   weight: ["400", "500", "600"],
   style: ["normal", "italic"],
+  display: "swap",
+});
+
+/* Mono labels for the /daylight experience (cyrillic-capable). */
+const jetbrainsMono = JetBrains_Mono({
+  variable: "--font-jetbrains-mono",
+  subsets: ["latin", "cyrillic"],
+  weight: ["400", "500"],
   display: "swap",
 });
 
@@ -92,7 +100,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="mn" className={`${fraunces.variable} ${inter.variable} ${instrumentSans.variable} ${lora.variable} ${mulish.variable} ${gilroy.variable}`}>
+    <html lang="mn" className={`${fraunces.variable} ${inter.variable} ${instrumentSans.variable} ${lora.variable} ${mulish.variable} ${gilroy.variable} ${jetbrainsMono.variable}`}>
       <body className="min-h-dvh bg-bone text-ink">
         <noscript>
           <style>{`.fade-up,.clip-reveal{opacity:1!important;transform:none!important;clip-path:none!important}`}</style>
