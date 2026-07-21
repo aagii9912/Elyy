@@ -8,14 +8,16 @@ export function FinalContact() {
   const { kicker, sub, phone, hours, location } = FINAL.contact;
   const [sent, setSent] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [error, setError] = useState(false);
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (busy) return;
     const data = new FormData(e.currentTarget);
     setBusy(true);
+    setError(false);
     try {
-      await fetch("/api/contact", {
+      const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -23,11 +25,16 @@ export function FinalContact() {
           phone: String(data.get("phone") ?? ""),
           email: String(data.get("email") ?? ""),
           message: "Elysium /final consultation",
+          source: "elysium/final#contact",
+          // Honeypot — жинхэнэ хэрэглэгч харагдахгүй нууц талбар
+          website: String(data.get("website") ?? ""),
         }),
       });
-      setSent(true);
+      const json = await res.json().catch(() => null);
+      if (res.ok && json?.ok) setSent(true);
+      else setError(true);
     } catch {
-      setSent(true);
+      setError(true);
     } finally {
       setBusy(false);
     }
@@ -90,6 +97,15 @@ export function FinalContact() {
                 </p>
               ) : (
                 <form onSubmit={onSubmit} className="flex flex-col gap-7">
+                  {/* Honeypot — хэрэглэгчид харагдахгүй, bot бөглөнө */}
+                  <input
+                    type="text"
+                    name="website"
+                    tabIndex={-1}
+                    autoComplete="off"
+                    aria-hidden="true"
+                    className="hidden"
+                  />
                   <input
                     type="text"
                     name="name"
@@ -111,6 +127,11 @@ export function FinalContact() {
                     placeholder="И-мэйл"
                     className="border-b border-bone/40 bg-transparent pb-3 text-lg font-semibold text-bone placeholder:text-bone/45 focus:border-bone focus:outline-none"
                   />
+                  {error && (
+                    <p role="alert" className="text-sm font-semibold text-red-300">
+                      Илгээхэд алдаа гарлаа. Дахин оролдоно уу, эсвэл шууд залгана уу.
+                    </p>
+                  )}
                   <button
                     type="submit"
                     disabled={busy}
