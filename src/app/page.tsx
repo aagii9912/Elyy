@@ -1,33 +1,55 @@
-import { V2Header } from "@/components/v2/V2Header";
-import { V2Footer } from "@/components/v2/V2Footer";
-import { V2Hero } from "@/components/v2/V2Hero";
-import { V2Why } from "@/components/v2/V2Why";
-import { V2Mosaic } from "@/components/v2/V2Mosaic";
-import { V2Process } from "@/components/v2/V2Process";
-import { V2Testimonials } from "@/components/v2/V2Testimonials";
-import { V2Services } from "@/components/v2/V2Services";
-import { V2Support } from "@/components/v2/V2Support";
-import { V2Articles } from "@/components/v2/V2Articles";
-import { V2CtaBanner } from "@/components/v2/V2CtaBanner";
+import type { Metadata } from "next";
+import { MonoCursor } from "@/components/mono/MonoCursor";
+import { MonoHeader } from "@/components/mono/MonoHeader";
+import { MonoHero } from "@/components/mono/MonoHero";
+import { MonoStats } from "@/components/mono/MonoStats";
+import { MonoMarquee } from "@/components/mono/MonoMarquee";
+import { MonoElys } from "@/components/mono/MonoElys";
+import { MonoEquip } from "@/components/mono/MonoEquip";
+import { MonoApartments } from "@/components/mono/MonoApartments";
+import { MonoDeveloper } from "@/components/mono/MonoDeveloper";
+import { MonoGallery } from "@/components/mono/MonoGallery";
+import { MonoMap } from "@/components/mono/MonoMap";
+import { MonoContact } from "@/components/mono/MonoContact";
+import { MonoManagers } from "@/components/mono/MonoManagers";
+import { MonoFaq } from "@/components/mono/MonoFaq";
+import { MonoFooter } from "@/components/mono/MonoFooter";
+import { MonoChatbot } from "@/components/mono/MonoChatbot";
+import { MonoStoryNav } from "@/components/mono/MonoStoryNav";
+import { MonoMotion } from "@/components/mono/MonoMotion";
 
-/* FIND-style cinematic homepage. The previous editorial/green layout is
-   preserved at /classic. */
+export const metadata: Metadata = {
+  title: "Elysium Residence — Бизнес зэрэглэлийн орон сууц",
+  description:
+    "4 блок, 506 айлын орон сууц. Нийт талбайн 85% нь ногоон, нийтийн эзэмшлийн орон зай. 2027 оны 2-р улиралд ашиглалтад орно.",
+};
+
+/* Black & white experience — brand green kept to a ~5% accent budget
+   (kicker rules, cursor, pins, timeline nodes). Single-page, mobile-first.
+   Promoted from /mono to the root route; /mono now redirects here. */
 export default function Home() {
   return (
-    <>
-      <V2Header />
-      <main className="bg-white text-night">
-        <V2Hero />
-        <V2Why />
-        <V2Mosaic />
-        <V2Process />
-        <V2Testimonials />
-        <V2Services />
-        <V2Support />
-        <V2Articles />
-        <V2CtaBanner />
+    <div className="mono-page min-h-screen bg-white font-gilroy text-night">
+      <MonoMotion />
+      <MonoCursor />
+      <MonoHeader />
+      <main>
+        <MonoHero />
+        <MonoStats />
+        <MonoElys />
+        <MonoEquip />
+        <MonoMarquee />
+        <MonoApartments />
+        <MonoDeveloper />
+        <MonoGallery />
+        <MonoMap />
+        <MonoContact />
+        <MonoManagers />
+        <MonoFaq />
       </main>
-      <V2Footer />
-    </>
+      <MonoFooter />
+      <MonoStoryNav />
+      <MonoChatbot />
+    </div>
   );
 }
