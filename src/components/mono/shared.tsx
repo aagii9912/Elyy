@@ -5,18 +5,22 @@
 import { useCallback, useEffect, useRef } from "react";
 import { gsap } from "@/lib/gsap";
 
-/** Section label — tiny lime rule (the ~5% green accent) + neutral label. */
+/** Section label — tiny lime rule (the ~5% green accent) + neutral label.
+ *  `reveal` opts the kicker into the MonoMotion scroll-reveal system. */
 export function MonoKicker({
   children,
   tone = "light",
   className = "",
+  reveal = false,
 }: {
   children: React.ReactNode;
   tone?: "light" | "dark";
   className?: string;
+  reveal?: boolean;
 }) {
   return (
     <p
+      data-reveal={reveal ? "up" : undefined}
       className={`flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.28em] ${
         tone === "dark" ? "text-white/60" : "text-mist"
       } ${className}`}

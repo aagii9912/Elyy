@@ -14,6 +14,8 @@ import { MonoContact } from "@/components/mono/MonoContact";
 import { MonoFaq } from "@/components/mono/MonoFaq";
 import { MonoFooter } from "@/components/mono/MonoFooter";
 import { MonoChatbot } from "@/components/mono/MonoChatbot";
+import { MonoStoryNav } from "@/components/mono/MonoStoryNav";
+import { MonoMotion } from "@/components/mono/MonoMotion";
 
 export const metadata: Metadata = {
   title: "Elysium Residence — Бизнес зэрэглэлийн орон сууц",
@@ -26,14 +28,15 @@ export const metadata: Metadata = {
 export default function MonoPage() {
   return (
     <div className="mono-page min-h-screen bg-white font-gilroy text-night">
+      <MonoMotion />
       <MonoCursor />
       <MonoHeader />
       <main>
         <MonoHero />
         <MonoStats />
-        <MonoMarquee />
         <MonoElys />
         <MonoEquip />
+        <MonoMarquee />
         <MonoApartments />
         <MonoDeveloper />
         <MonoGallery />
@@ -42,6 +45,7 @@ export default function MonoPage() {
         <MonoFaq />
       </main>
       <MonoFooter />
+      <MonoStoryNav />
       <MonoChatbot />
     </div>
   );

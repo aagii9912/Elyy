@@ -616,6 +616,26 @@ body:has(.mono-page) .ely-cursor {
 .mono-float {
   animation: mono-float 2.4s ease-in-out infinite;
 }
+/* Hero headline — per-word mask rise */
+@keyframes mono-word-up {
+  from { transform: translateY(112%); }
+  to { transform: none; }
+}
+.mono-word {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: top;
+  padding-bottom: 0.06em;
+  margin-bottom: -0.06em;
+}
+.mono-word > span {
+  display: inline-block;
+  transform: translateY(112%);
+  animation: mono-word-up 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  will-change: transform;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .mono-fade-up, .mono-float { animation: none; }
+  .mono-word > span { animation: none; transform: none; }
 }

@@ -12,8 +12,8 @@ export function MonoFaq() {
   return (
     <section id="faq" className="border-b border-night/10 bg-white py-20 md:py-28">
       <div className="mx-auto max-w-[1100px] px-5 md:px-10">
-        <MonoKicker>{FINAL.faq.kicker}</MonoKicker>
-        <h2 className="mt-4 text-[clamp(1.8rem,3.4vw,2.8rem)] font-extrabold leading-tight tracking-tight text-night">
+        <MonoKicker reveal>{FINAL.faq.kicker}</MonoKicker>
+        <h2 data-reveal="heading" className="mt-4 text-[clamp(1.8rem,3.4vw,2.8rem)] font-extrabold leading-tight tracking-tight text-night">
           Түгээмэл асуулт, хариулт
         </h2>
 
@@ -21,7 +21,7 @@ export function MonoFaq() {
           {FINAL.faq.items.map((item, i) => {
             const isOpen = open === i;
             return (
-              <div key={item.q}>
+              <div key={item.q} data-reveal="up">
                 <button
                   type="button"
                   onClick={() => setOpen(isOpen ? null : i)}

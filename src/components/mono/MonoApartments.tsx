@@ -35,12 +35,12 @@ export function MonoApartments() {
       <div className="mx-auto max-w-[1500px] px-5 md:px-10">
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
-            <MonoKicker>{FINAL.apartments.kicker}</MonoKicker>
-            <h2 className="mt-4 max-w-xl text-[clamp(1.8rem,3.4vw,2.8rem)] font-extrabold leading-tight tracking-tight text-night">
+            <MonoKicker reveal>{FINAL.apartments.kicker}</MonoKicker>
+            <h2 data-reveal="heading" className="mt-4 max-w-xl text-[clamp(1.8rem,3.4vw,2.8rem)] font-extrabold leading-tight tracking-tight text-night">
               Танд тохирох орон зай
             </h2>
           </div>
-          <p className="max-w-sm text-sm leading-relaxed text-night/60">{FINAL.apartments.body}</p>
+          <p data-reveal="up" data-reveal-delay="0.15" className="max-w-sm text-sm leading-relaxed text-night/60">{FINAL.apartments.body}</p>
         </div>
 
         <div
@@ -50,9 +50,10 @@ export function MonoApartments() {
           {FINAL.apartments.types.map((t, i) => (
             <article
               key={t.title}
+              data-reveal="up"
               className="group w-[74vw] shrink-0 snap-start overflow-hidden rounded-2xl border border-night/10 bg-white transition-colors duration-300 hover:border-night/30 sm:w-[46vw] lg:w-[30vw] xl:w-[23vw]"
             >
-              <div className="aspect-square w-full bg-paper p-8">
+              <div data-reveal="iso" className="aspect-square w-full bg-paper p-8">
                 <IsoPlan rooms={i + 1} />
               </div>
               <div className="flex items-end justify-between p-6">
@@ -75,6 +76,7 @@ export function MonoApartments() {
           <a
             href="#contact"
             data-cursor-hover
+            data-reveal="zoom"
             className="flex w-[74vw] shrink-0 snap-start flex-col items-start justify-between rounded-2xl bg-night p-6 text-white sm:w-[46vw] lg:w-[30vw] xl:w-[23vw]"
           >
             <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-white/60">Аксонометр зураг</p>

@@ -80,14 +80,14 @@ export function MonoDeveloper() {
 
         {/* header */}
         <div className="relative z-10 mx-auto w-full max-w-[1500px] px-5 md:px-10">
-          <MonoKicker tone="dark">{d.kicker}</MonoKicker>
+          <MonoKicker tone="dark" reveal>{d.kicker}</MonoKicker>
           <div className="mt-4 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-            <h2 className="max-w-xl text-[clamp(1.8rem,3.4vw,2.8rem)] font-extrabold leading-tight tracking-tight text-white">
+            <h2 data-reveal="heading" className="max-w-xl text-[clamp(1.8rem,3.4vw,2.8rem)] font-extrabold leading-tight tracking-tight text-white">
               {d.name}
             </h2>
-            <p className="max-w-md text-sm leading-relaxed text-white/60">{d.body}</p>
+            <p data-reveal="up" className="max-w-md text-sm leading-relaxed text-white/60">{d.body}</p>
           </div>
-          <div className="mt-6 flex gap-10">
+          <div data-reveal="up" className="mt-6 flex gap-10">
             <div>
               <p className="text-2xl font-extrabold text-white md:text-3xl">{d.since}</p>
               <p className="mt-1 text-[11px] font-medium uppercase tracking-[0.14em] text-white/45">оноос</p>
@@ -113,7 +113,7 @@ export function MonoDeveloper() {
             />
 
             {d.projects.map((p, i) => (
-              <div key={p.title} className="relative md:w-[30vw] md:shrink-0 lg:w-[26vw]">
+              <div key={p.title} data-reveal="up" className="relative md:w-[30vw] md:shrink-0 lg:w-[26vw]">
                 {/* year row — fixed height so the rail lines up across stations */}
                 <div className="flex h-20 items-end justify-between pb-3">
                   <p className="text-[clamp(2rem,3.6vw,3.2rem)] font-bold leading-none tracking-tight text-white/90">

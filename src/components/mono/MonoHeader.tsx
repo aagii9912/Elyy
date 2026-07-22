@@ -1,7 +1,10 @@
 "use client";
 
 /* /mono — sticky header. Transparent (white text) over the dark hero →
-   frosted white with black text once the light page begins. */
+   frosted white with black text once the light page begins. Hides on
+   scroll-down, returns on scroll-up. The mobile menu is a SIBLING of
+   <header> (not a child) because the header's transform/backdrop-filter
+   would otherwise become the containing block for its fixed panel. */
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -22,9 +25,19 @@ export function MonoHeader() {
   const lenis = useLenis();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [hidden, setHidden] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
+    let lastY = window.scrollY;
+    const onScroll = () => {
+      const y = window.scrollY;
+      setScrolled(y > 24);
+      const delta = y - lastY;
+      if (Math.abs(delta) > 8) {
+        setHidden(delta > 0 && y > 480);
+        lastY = y;
+      }
+    };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
@@ -41,11 +54,16 @@ export function MonoHeader() {
   };
 
   return (
+    <>
     <header
-      className={`fixed inset-x-0 top-0 z-50 font-gilroy transition-[background-color,box-shadow,backdrop-filter] duration-500 ${
-        scrolled
-          ? "bg-white/90 text-night shadow-[0_1px_0_rgba(21,23,23,0.08)] backdrop-blur-xl"
-          : "bg-transparent text-white"
+      className={`fixed inset-x-0 top-0 z-50 font-gilroy transition-[background-color,box-shadow,backdrop-filter,transform] duration-500 ${
+        hidden && !open ? "-translate-y-full" : ""
+      } ${
+        open
+          ? "bg-white text-night"
+          : scrolled
+            ? "bg-white/90 text-night shadow-[0_1px_0_rgba(21,23,23,0.08)] backdrop-blur-xl"
+            : "bg-transparent text-white"
       }`}
     >
       <div
@@ -111,7 +129,9 @@ export function MonoHeader() {
         </div>
       </div>
 
-      {/* Mobile menu */}
+    </header>
+
+      {/* Mobile menu — sibling of <header>, see note above */}
       <div
         className={`fixed inset-0 z-40 flex flex-col bg-white font-gilroy text-night transition-[opacity,visibility] duration-500 lg:hidden ${
           open ? "visible opacity-100" : "invisible opacity-0"
@@ -138,6 +158,6 @@ export function MonoHeader() {
           </a>
         </div>
       </div>
-    </header>
+    </>
   );
 }

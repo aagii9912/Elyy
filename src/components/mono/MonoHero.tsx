@@ -5,7 +5,7 @@
    only; mobile/reduced-motion gets a single still). The hero stays dark
    so the white page below lands with contrast. */
 
-import { useEffect, useRef } from "react";
+import { Fragment, useEffect, useRef } from "react";
 import { useLenis } from "lenis/react";
 import { gsap } from "@/lib/gsap";
 import { FINAL } from "@/lib/content";
@@ -104,11 +104,16 @@ export function MonoHero() {
             <p className="mono-fade-up mb-5 text-[11px] font-semibold uppercase tracking-[0.42em] text-lime md:mb-6 md:text-[12px]" style={{ animationDelay: "0.4s" }}>
               {FINAL.brandTag}
             </p>
-            <h1
-              className="mono-fade-up text-[clamp(2.6rem,7.5vw,4.6rem)] font-medium uppercase leading-[1.05] tracking-[-0.2px] text-white [text-wrap:balance] drop-shadow-[0_2px_30px_rgba(0,0,0,0.4)]"
-              style={{ animationDelay: "0.55s" }}
-            >
-              {FINAL.brandLine}
+            <h1 className="text-[clamp(2.6rem,7.5vw,4.6rem)] font-medium uppercase leading-[1.05] tracking-[-0.2px] text-white [text-wrap:balance] drop-shadow-[0_2px_30px_rgba(0,0,0,0.4)]">
+              {/* word-by-word mask rise */}
+              {FINAL.brandLine.split(" ").map((word, i) => (
+                <Fragment key={`${word}-${i}`}>
+                  {i > 0 && " "}
+                  <span className="mono-word">
+                    <span style={{ animationDelay: `${0.5 + i * 0.09}s` }}>{word}</span>
+                  </span>
+                </Fragment>
+              ))}
             </h1>
             <p className="mono-fade-up mt-5 max-w-md text-[15px] font-medium leading-relaxed text-white/80 md:text-base" style={{ animationDelay: "0.7s" }}>
               {FINAL.hero.sub}

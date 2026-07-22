@@ -1,9 +1,9 @@
 "use client";
 
-/* /mono — custom cursor: the Elysium logo mark (4 slivers) in the four
-   brand colours. The one place the full brand palette appears — part of
-   the deliberate ~5% green/colour budget on an otherwise black & white
-   page. Desktop (fine pointer) only. */
+/* /mono — custom cursor: the Elysium logo mark (4 slivers) in plain
+   white with mix-blend-difference, so it chameleons — white over the
+   dark sections, black over the white page. Desktop (fine pointer)
+   only. */
 
 import { useEffect, useRef } from "react";
 import { gsap } from "@/lib/gsap";
@@ -14,7 +14,6 @@ const SLIVERS = [
   "M710.6956105802,15.7571507035l-1.5571644462-1.5571639374c-.1809564854-.1809564262-.4743448685-.1809563783-.6553012947.0000001071l-10.9339166573,10.9339202304c-.0868983404.0868983688-.1357173084.2047578379-.1357172883.3276506695l.0000002984,1.8262380573c.0000000201.1228928316.0488190266.2407522848.1357173954.3276506252l1.5571644463,1.5571639374c.1809564854.1809564263.4743448685.1809563783.6553012947-.0000001071l10.9339166573-10.9339202305c.0868983404-.0868983688.1357173084-.2047578379.1357172883-.3276506695l-.0000002984-1.8262380573c-.0000000201-.1228928316-.0488190266-.2407522848-.1357173954-.3276506252Z",
   "M710.6956105802,6.3674608853l-1.5571644462-1.5571639374c-.1809564854-.1809564262-.4743448685-.1809563783-.6553012947.0000001071l-10.9339166573,10.9339202304c-.0868983404.0868983688-.1357173084.2047578379-.1357172883.3276506695l.0000002984,1.8262380573c.0000000201.1228928316.0488190266.2407522848.1357173954.3276506252l1.5571644463,1.5571639374c.1809564854.1809564262.4743448685.1809563783.6553012947-.0000001071l10.9339166573-10.9339202304c.0868983404-.0868983688.1357173084-.2047578379.1357172883-.3276506695l-.0000002984-1.8262380573c-.0000000201-.1228928316-.0488190266-.2407522848-.1357173954-.3276506252Z",
 ];
-const COLORS = ["#b4d656", "#faac32", "#fafee5", "#7fae62"];
 
 export function MonoCursor() {
   const mark = useRef<HTMLDivElement>(null);
@@ -62,11 +61,11 @@ export function MonoCursor() {
     <div
       ref={mark}
       aria-hidden
-      className="pointer-events-none fixed left-0 top-0 z-[9999] hidden h-[26px] w-[26px] md:block"
+      className="pointer-events-none fixed left-0 top-0 z-[9999] hidden h-[26px] w-[26px] mix-blend-difference md:block"
     >
-      <svg viewBox="696.5 -1 29 30" className="h-full w-full drop-shadow-[0_1px_6px_rgba(0,0,0,0.35)]">
+      <svg viewBox="696.5 -1 29 30" className="h-full w-full">
         {SLIVERS.map((d, i) => (
-          <path key={i} d={d} fill={COLORS[i]} />
+          <path key={i} d={d} fill="#fff" />
         ))}
       </svg>
     </div>

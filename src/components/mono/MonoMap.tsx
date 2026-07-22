@@ -23,8 +23,8 @@ export function MonoMap() {
       <div className="mx-auto max-w-[1500px] px-5 md:px-10">
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
-            <MonoKicker>Байршил</MonoKicker>
-            <h2 className="mt-4 max-w-xl text-[clamp(1.8rem,3.4vw,2.8rem)] font-extrabold leading-tight tracking-tight text-night">
+            <MonoKicker reveal>Байршил</MonoKicker>
+            <h2 data-reveal="heading" className="mt-4 max-w-xl text-[clamp(1.8rem,3.4vw,2.8rem)] font-extrabold leading-tight tracking-tight text-night">
               Хотын төвд, байгалийн хажууд
             </h2>
           </div>
@@ -33,6 +33,7 @@ export function MonoMap() {
             target="_blank"
             rel="noopener"
             data-cursor-hover
+            data-reveal="up"
             className="inline-flex items-center gap-2 self-start rounded-full border border-night/25 px-5 py-2.5 text-[11px] font-bold uppercase tracking-[0.08em] text-night transition-colors hover:bg-night hover:text-white md:self-auto"
           >
             Чиглэл авах ↗
@@ -40,7 +41,7 @@ export function MonoMap() {
         </div>
 
         <div className="mt-10 grid gap-6 lg:grid-cols-[1.7fr_1fr]">
-          <div className="overflow-hidden rounded-2xl border border-night/10 bg-white">
+          <div data-reveal="zoom" className="overflow-hidden rounded-2xl border border-night/10 bg-white">
             <iframe
               title="Elysium Residence — байршил"
               src={MAP_SRC}
@@ -54,6 +55,7 @@ export function MonoMap() {
             {LANDMARKS.map((l) => (
               <li
                 key={l.place}
+                data-reveal="right"
                 className="flex items-center gap-4 rounded-xl border border-night/10 bg-white px-4 py-3.5 transition-colors hover:border-night/30"
               >
                 <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-night text-sm font-extrabold text-white">

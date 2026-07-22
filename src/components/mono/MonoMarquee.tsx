@@ -6,7 +6,7 @@ const SLOGANS = ["Form Follows Function", "Form Follows Comfort", "Form Follows 
 export function MonoMarquee() {
   const track = [...SLOGANS, ...SLOGANS, ...SLOGANS];
   return (
-    <div aria-hidden className="overflow-hidden border-b border-night/10 bg-white py-5 md:py-7">
+    <div aria-hidden data-reveal="up" className="overflow-hidden border-b border-night/10 bg-white py-5 md:py-7">
       <div className="green-marquee flex w-max items-center gap-10 whitespace-nowrap pr-10">
         {[0, 1].map((half) => (
           <div key={half} className="flex items-center gap-10">

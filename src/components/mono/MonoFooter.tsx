@@ -8,14 +8,14 @@ export function MonoFooter() {
     <footer className="bg-night font-gilroy text-white">
       <div className="mx-auto max-w-[1500px] px-5 py-14 md:px-10 md:py-20">
         <div className="grid gap-10 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
-          <div>
+          <div data-reveal="up">
             <Logo className="h-4 w-auto text-white" />
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-white/55">
               {FINAL.brandTag}. {FINAL.hero.sub}
             </p>
           </div>
 
-          <div>
+          <div data-reveal="up">
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/45">Борлуулалтын алба</p>
             <ul className="mt-4 space-y-2.5 text-sm text-white/80">
               <li>{FINAL.contact.hours}</li>
@@ -33,7 +33,7 @@ export function MonoFooter() {
             </ul>
           </div>
 
-          <div>
+          <div data-reveal="up">
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/45">Цэс</p>
             <ul className="mt-4 space-y-2.5 text-sm text-white/80">
               <li><a href="#apartments" data-cursor-hover className="hover:text-white">Өрөөний сонголт</a></li>
@@ -47,7 +47,7 @@ export function MonoFooter() {
             </ul>
           </div>
 
-          <div>
+          <div data-reveal="up">
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/45">Сошиал</p>
             <ul className="mt-4 space-y-2.5 text-sm text-white/80">
               {SITE.social.map((s) => (

@@ -48,14 +48,14 @@ export function MonoContact() {
       <div className="mx-auto max-w-[1500px] px-5 md:px-10">
         <div className="grid gap-12 lg:grid-cols-2 lg:gap-20">
           <div>
-            <MonoKicker tone="dark">Холбоо барих</MonoKicker>
-            <h2 className="mt-5 max-w-md text-[clamp(2rem,4.4vw,3.4rem)] font-extrabold leading-[1.02] tracking-tight">
+            <MonoKicker tone="dark" reveal>Холбоо барих</MonoKicker>
+            <h2 data-reveal="heading" className="mt-5 max-w-md text-[clamp(2rem,4.4vw,3.4rem)] font-extrabold leading-[1.02] tracking-tight">
               {contact.kicker}
             </h2>
-            <p className="mt-5 max-w-md text-[15px] leading-relaxed text-white/65">{contact.sub}</p>
+            <p data-reveal="up" className="mt-5 max-w-md text-[15px] leading-relaxed text-white/65">{contact.sub}</p>
 
             <dl className="mt-10 space-y-6 border-t border-white/10 pt-8">
-              <div>
+              <div data-reveal="up">
                 <dt className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/45">Утас</dt>
                 <dd className="mt-1.5">
                   <a
@@ -67,15 +67,15 @@ export function MonoContact() {
                   </a>
                 </dd>
               </div>
-              <div>
+              <div data-reveal="up">
                 <dt className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/45">Цагийн хуваарь</dt>
                 <dd className="mt-1.5 text-lg font-semibold">{contact.hours}</dd>
               </div>
-              <div>
+              <div data-reveal="up">
                 <dt className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/45">Борлуулалтын алба</dt>
                 <dd className="mt-1.5 max-w-sm text-lg font-semibold leading-snug text-white/90">{contact.location}</dd>
               </div>
-              <div>
+              <div data-reveal="up">
                 <dt className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/45">И-мэйл</dt>
                 <dd className="mt-1.5">
                   <a
@@ -92,7 +92,7 @@ export function MonoContact() {
 
           <div className="max-w-md lg:pt-3">
             {sent ? (
-              <div className="rounded-2xl border border-white/20 bg-white/5 p-7">
+              <div className="mono-fade-up rounded-2xl border border-white/20 bg-white/5 p-7">
                 <p className="text-xl font-bold leading-relaxed text-white">
                   Баярлалаа! Таны хүсэлтийг хүлээн авлаа.
                 </p>
@@ -115,6 +115,7 @@ export function MonoContact() {
                   name="name"
                   required
                   placeholder="Нэр"
+                  data-reveal="up"
                   className="border-b border-white/30 bg-transparent pb-3 text-lg font-semibold text-white placeholder:text-white/40 focus:border-white focus:outline-none"
                 />
                 <input
@@ -122,9 +123,10 @@ export function MonoContact() {
                   name="phone"
                   required
                   placeholder="Утас"
+                  data-reveal="up"
                   className="border-b border-white/30 bg-transparent pb-3 text-lg font-semibold text-white placeholder:text-white/40 focus:border-white focus:outline-none"
                 />
-                <label className="block">
+                <label data-reveal="up" className="block">
                   <span className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.18em] text-white/45">
                     Уулзах хүссэн огноо
                   </span>
@@ -143,6 +145,7 @@ export function MonoContact() {
                   type="submit"
                   disabled={busy}
                   data-cursor-hover
+                  data-reveal="up"
                   className="mt-2 inline-flex items-center justify-center gap-2 self-start rounded-full bg-white px-7 py-3.5 text-sm font-bold text-night transition-transform duration-300 hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-70"
                 >
                   {busy ? "Илгээж байна…" : "Хүсэлт илгээх"}
