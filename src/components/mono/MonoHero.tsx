@@ -1,20 +1,19 @@
 "use client";
 
-/* /mono — Intro. Three client drone clips (sky reveal → descent through
-   cloud → arrival at the towers) crossfaded into one 22.8s shot and baked
-   to 144 WebP frames, scrubbed frame-by-frame by scroll (desktop only;
-   mobile/reduced-motion gets a single still). Frames are rebuilt with
-   `node scripts/build-scroll-frames.mjs hero`. */
+/* /mono — Intro. The client's Hero1 clip — the towers rising out of an
+   empty dusk sky — baked to 120 WebP frames and scrubbed frame-by-frame
+   by scroll (desktop only; mobile/reduced-motion gets a single still).
+   Rebuild with `node scripts/build-scroll-frames.mjs hero`. */
 
 import { Fragment, useEffect, useRef } from "react";
 import { useLenis } from "lenis/react";
 import { gsap } from "@/lib/gsap";
 import { FINAL } from "@/lib/content";
 
-const FRAME_COUNT = 144;
+const FRAME_COUNT = 120;
 const framePath = (i: number) => `/hero-video-frames/frame_${String(i).padStart(3, "0")}.webp`;
-/** Still shown to mobile / reduced-motion: the dusk tower reveal. */
-const STILL_FRAME = 40;
+/** Still shown to mobile / reduced-motion: the towers fully risen. */
+const STILL_FRAME = 100;
 
 export function MonoHero() {
   const lenis = useLenis();

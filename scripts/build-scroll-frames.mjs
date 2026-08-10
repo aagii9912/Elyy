@@ -20,12 +20,13 @@ const SRC = "/Users/aagii/Downloads";
 const PUBLIC = fileURLToPath(new URL("../public/", import.meta.url));
 
 const SEQUENCES = {
-  /* Hero — sky reveal → descent through cloud → arrival at the towers. */
+  /* Hero — the towers rising out of an empty dusk sky. Hero2 (descent
+     through cloud) and Hero3 (daylight arrival) are held back for now. */
   hero: {
     out: "hero-video-frames",
-    clips: ["Hero1.mp4", "Hero2.mp4", "Hero3.mp4"],
+    clips: ["Hero1.mp4"],
     xfade: 0.6,
-    frames: 144,
+    frames: 120,
     scale: "1280:720",
     quality: 62,
   },
