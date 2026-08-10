@@ -8,12 +8,14 @@ import { FINAL } from "@/lib/content";
 /* ELYS concept — each advantage maps to one initial of the acronym
    (E·L·Y·S kept for the mapping intent). The Mongolian body comes from
    FINAL.elys.items (client-approved copy); the huge center keyword is
-   presentation-only. Each row carries an exterior/amenity photo revealed
-   by the hover photo-wipe. */
+   presentation-only. Each row carries a photo revealed by the hover
+   photo-wipe — E/L/Y now use the client's own shots for the claim they
+   make (interior planning, the green spine, the live monitoring wall)
+   instead of a generic exterior. */
 const ROWS = [
-  { initial: "E", keyword: "Ergonomic", photo: "/images/exterior-elevation-dusk.jpg" },
-  { initial: "L", keyword: "Harmony", photo: "/images/aerial-courtyard-water.jpg" },
-  { initial: "Y", keyword: "Safety", photo: "/images/exterior-snow-courtyard.jpg" },
+  { initial: "E", keyword: "Ergonomic", photo: "/images/elys/ergonomic-interior.jpg" },
+  { initial: "L", keyword: "Harmony", photo: "/images/elys/harmony-courtyard.jpg" },
+  { initial: "Y", keyword: "Safety", photo: "/images/elys/safety-control-room.jpg" },
   { initial: "S", keyword: "Save", photo: "/images/amenity-retail-podium.jpg" },
 ] as const;
 

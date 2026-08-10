@@ -19,8 +19,8 @@ export function MonoEquip() {
     <MonoScrollStory
       id="equip"
       chapter="03"
-      kicker="Тоноглол ба шийдэл"
-      title="Дэлгэрэнгүйд нухацтай"
+      kicker="Дэлгэрэнгүйд нухацтай"
+      title="Тоноглол ба шийдэл"
       points={POINTS}
       frameStart={85}
       frameEnd={121}

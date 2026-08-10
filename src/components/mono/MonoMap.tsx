@@ -9,13 +9,51 @@ import { useState } from "react";
 import { FINAL, SITE } from "@/lib/content";
 import { MonoKicker } from "./shared";
 
-const LANDMARKS = [
-  { minutes: 1, place: "Үндэсний цэцэрлэгт хүрээлэн" },
-  { minutes: 2, place: "Мишээл" },
-  { minutes: 3, place: "Их дэлгүүр" },
-  { minutes: 8, place: "Сүхбаатарын талбай" },
-  { minutes: 12, place: "Зайсан" },
-  { minutes: 25, place: "Чингис хаан ОУНБ" },
+/* Ойролцоох цэгүүд — захиалагчийн хэмжсэн зайгаар, 3 бүлэгт.
+   Бүлэг бүрд хамгийн ойроос нь эрэмбэлнэ. */
+type NearbyGroup = {
+  id: string;
+  label: string;
+  items: { place: string; m: number; kind?: string }[];
+};
+
+const NEARBY: NearbyGroup[] = [
+  {
+    id: "edu",
+    label: "Боловсрол",
+    items: [
+      { place: "Номин Кидс", m: 450, kind: "Цэцэрлэг" },
+      { place: "Оном сургууль", m: 600, kind: "Сургууль" },
+      { place: "18-р сургууль", m: 1000, kind: "Сургууль" },
+      { place: "72-р цэцэрлэг", m: 1000, kind: "Цэцэрлэг" },
+      { place: "Орхон Хасу", m: 1200, kind: "Сургууль" },
+      { place: "15-р сургууль", m: 1500, kind: "Сургууль" },
+      { place: "65-р цэцэрлэг", m: 1650, kind: "Цэцэрлэг" },
+      { place: "67-р цэцэрлэг", m: 1790, kind: "Цэцэрлэг" },
+      { place: "75-р сургууль", m: 1800, kind: "Сургууль" },
+    ],
+  },
+  {
+    id: "retail",
+    label: "Худалдаа, үйлчилгээ",
+    items: [
+      { place: "Поларис их дэлгүүр", m: 550 },
+      { place: "Номин Юнайтэд", m: 620 },
+      { place: "Лавай зах", m: 1100 },
+      { place: "19-р үйлчилгээний төв", m: 1600 },
+      { place: "Хүннү молл", m: 3700 },
+      { place: "Food City", m: 3800 },
+    ],
+  },
+  {
+    id: "health",
+    label: "Эрүүл мэнд",
+    items: [
+      { place: "ХУД эрүүл мэндийн төв", m: 1000 },
+      { place: "Интермед эмнэлэг", m: 1700 },
+      { place: "Улаанбаатар сувилал", m: 1800 },
+    ],
+  },
 ];
 
 /* Яг координат — pin нь тодорхой цэг дээр буух ба чиглэл мөн үүн рүү заана. */
@@ -45,7 +83,9 @@ const TABS: { id: TabId; label: string; title: string; address: string; coords: 
 
 export function MonoMap() {
   const [active, setActive] = useState<TabId>("project");
+  const [group, setGroup] = useState(NEARBY[0].id);
   const tab = TABS.find((t) => t.id === active)!;
+  const nearby = NEARBY.find((g) => g.id === group)!;
 
   return (
     <section id="location" className="border-b border-night/10 bg-paper py-20 md:py-28">
@@ -110,7 +150,9 @@ export function MonoMap() {
               src={embed(tab.coords)}
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
-              className="h-[320px] w-full grayscale-[0.25] md:h-[440px]"
+              /* lg дээр хажуугийн жагсаалтын өндрийг дагаж дүүргэнэ —
+                 картын доор цагаан зай үлдэхгүй. */
+              className="h-[320px] w-full grayscale-[0.25] md:h-[440px] lg:h-full lg:min-h-[440px]"
             />
           </div>
 
@@ -128,24 +170,65 @@ export function MonoMap() {
             </div>
 
             {active === "project" ? (
-              <ul className="grid content-start gap-3 sm:grid-cols-2 lg:grid-cols-1">
-                {LANDMARKS.map((l) => (
-                  <li
-                    key={l.place}
-                    className="flex items-center gap-4 rounded-xl border border-night/10 bg-white px-4 py-3.5 transition-colors hover:border-night/30"
-                  >
-                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-night text-sm font-extrabold text-white">
-                      {l.minutes}
-                    </span>
-                    <div>
-                      <p className="text-sm font-bold text-night">{l.place}</p>
-                      <p className="text-[11px] uppercase tracking-[0.12em] text-night/50">
-                        мин машинаар
-                      </p>
-                    </div>
-                  </li>
-                ))}
-              </ul>
+              <div className="grid content-start gap-3">
+                {/* Ойролцоох цэгүүд — бүлгээр шүүнэ */}
+                <div
+                  role="tablist"
+                  aria-label="Ойролцоох цэгийн бүлэг"
+                  className="flex flex-wrap gap-2"
+                >
+                  {NEARBY.map((g) => (
+                    <button
+                      key={g.id}
+                      type="button"
+                      role="tab"
+                      aria-selected={group === g.id}
+                      aria-controls={`nearby-${g.id}`}
+                      onClick={() => setGroup(g.id)}
+                      data-cursor-hover
+                      className={`rounded-full border px-4 py-2 text-[11px] font-bold uppercase tracking-[0.08em] transition-colors ${
+                        group === g.id
+                          ? "border-night bg-night text-white"
+                          : "border-night/15 bg-white text-night/55 hover:border-night/40 hover:text-night"
+                      }`}
+                    >
+                      {g.label}
+                    </button>
+                  ))}
+                </div>
+
+                <ul
+                  id={`nearby-${nearby.id}`}
+                  role="tabpanel"
+                  key={nearby.id}
+                  /* min-h нь хамгийн богино бүлэг (Эрүүл мэнд, 3 мөр) сонгогдоход
+                     газрын зургийг хэт намсгахаас сэргийлнэ. */
+                  className="mono-fade-up grid content-start gap-2 sm:grid-cols-2 lg:min-h-[19rem] lg:grid-cols-1"
+                >
+                  {nearby.items.map((l, i) => (
+                    <li
+                      key={l.place}
+                      className="flex items-center gap-3 rounded-xl border border-night/10 bg-white px-4 py-3 transition-colors hover:border-night/30"
+                    >
+                      <span className="w-6 shrink-0 text-[11px] font-bold tabular-nums text-night/35">
+                        {String(i + 1).padStart(2, "0")}
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-bold text-night">{l.place}</p>
+                        {l.kind && (
+                          <p className="text-[10px] uppercase tracking-[0.16em] text-night/45">
+                            {l.kind}
+                          </p>
+                        )}
+                      </div>
+                      <span className="shrink-0 text-sm font-extrabold tabular-nums text-night">
+                        {l.m}
+                        <span className="ml-0.5 text-[11px] font-bold text-night/45">м</span>
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             ) : (
               <div className="grid content-start gap-3">
                 <div className="rounded-xl border border-night/10 bg-white px-4 py-3.5">
