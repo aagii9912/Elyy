@@ -3,38 +3,23 @@
 import { Reveal } from "@/components/Reveal";
 import { ApartmentsCarousel, type ApartmentSlide } from "@/components/final/ApartmentsCarousel";
 import { FINAL } from "@/lib/content";
-
-// Placeholder axonometric visuals until the client supplies real drawings.
-const axonoPlaceholders = [
-  "/images/exterior-elevation-dusk.jpg",
-  "/images/exterior-garden-path.jpg",
-  "/images/amenity-pool-deck.jpg",
-  "/images/exterior-cluster-dusk.jpg",
-];
+import { AXONO_UNITS, axonoSrc, axonoTitle } from "@/lib/units";
 
 // Section heading (no dedicated title field in FINAL.apartments).
 const HEADING = "Танд тохирох орон зай";
-// Placeholder badge — real axonometric drawings still pending from client.
-const BADGE = "Аксно зураг — удахгүй";
-// Qualitative planning descriptors per type — derived from the brief, no prices.
-const PLANS = [
-  "Студи / нэг өрөө",
-  "Гэр бүлд тохиромжтой",
-  "Уужим зохион байгуулалт",
-  "Дээд зэрэглэлийн орон зай",
-];
+
+// Захиалагчийн ирүүлсэн аксонометр рендерүүд, тип тус бүр 2 өнцөгтэй.
+const SLIDES: ApartmentSlide[] = AXONO_UNITS.map((u) => ({
+  title: axonoTitle(u),
+  rooms: u.rooms,
+  area: u.area,
+  floor: u.floor,
+  plan: u.plan,
+  images: u.views.map((v) => axonoSrc(v)),
+}));
 
 export function FinalApartments() {
-  const { kicker, body, types } = FINAL.apartments;
-
-  const slides: ApartmentSlide[] = types.map((t, i) => ({
-    title: t.title,
-    rooms: t.title,
-    area: t.area,
-    plan: PLANS[i] ?? "Уян хатан төлөвлөлт",
-    image: axonoPlaceholders[i % axonoPlaceholders.length],
-    badge: BADGE,
-  }));
+  const { kicker, body } = FINAL.apartments;
 
   return (
     <section
@@ -53,7 +38,7 @@ export function FinalApartments() {
         </Reveal>
 
         <Reveal delay={0.1} className="mt-16 md:mt-24">
-          <ApartmentsCarousel slides={slides} />
+          <ApartmentsCarousel slides={SLIDES} />
         </Reveal>
       </div>
     </section>

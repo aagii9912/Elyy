@@ -1,34 +1,69 @@
 "use client";
 
-/* /mono — Өрөөний сонголт. Horizontal carousel of axonometric-style
-   plans (parametric isometric SVG — monochrome walls, lime glass as the
-   tiny accent). Room count + m² explicit per the brief. */
+/* /mono — Өрөөний сонголт. Horizontal carousel of the real axonometric
+   renders, trimmed to the plan and shown on the render's own studio plate
+   (#dbe3ef). Клик → lightbox, өнцөг бүрийг гүйлгэж үзнэ. */
 
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useLenis } from "lenis/react";
 import { FINAL } from "@/lib/content";
+import { AXONO_UNITS, axonoSrc, axonoTitle, type AxonoUnit } from "@/lib/units";
 import { MonoKicker, useDragScroll } from "./shared";
 
-/** Isometric unit plan. `rooms` (1–4) draws partition walls. */
-function IsoPlan({ rooms }: { rooms: number }) {
-  const iso = (x: number, y: number, z = 0) => `${50 + (x - y) * 30},${58 + (x + y) * 15 - z * 26}`;
-  const wall = (x1: number, y1: number, x2: number, y2: number, h: number) =>
-    `M${iso(x1, y1)} L${iso(x2, y2)} L${iso(x2, y2, h)} L${iso(x1, y1, h)} Z`;
+/** Flattened view list — lightbox нь бүх типийн дундуур шууд гүйнэ. */
+const SLIDES = AXONO_UNITS.flatMap((unit) =>
+  unit.views.map((view, viewIndex) => ({ unit, view, viewIndex }))
+);
 
-  return (
-    <svg viewBox="0 0 100 100" className="h-full w-full" aria-hidden>
-      <path d={`M${iso(0, 0)} L${iso(1, 0)} L${iso(1, 1)} L${iso(0, 1)} Z`} fill="#151717" opacity="0.08" />
-      <path d={wall(0, 0, 1, 0, 0.42)} fill="#151717" />
-      <path d={wall(1, 0, 1, 1, 0.42)} fill="#3a3d3c" />
-      {rooms >= 2 && <path d={wall(0.52, 0, 0.52, 1, 0.42)} fill="#151717" opacity="0.9" />}
-      {rooms >= 3 && <path d={wall(0, 0.52, 0.52, 0.52, 0.42)} fill="#3a3d3c" opacity="0.9" />}
-      {rooms >= 4 && <path d={wall(0.52, 0.62, 1, 0.62, 0.42)} fill="#151717" opacity="0.9" />}
-      <path d={wall(0.15, 0, 0.42, 0, 0.34)} fill="#b4d656" opacity="0.9" />
-      {rooms >= 3 && <path d={wall(0.6, 0, 0.88, 0, 0.34)} fill="#b4d656" opacity="0.9" />}
-    </svg>
-  );
-}
+const unitMeta = (u: AxonoUnit) =>
+  u.area ? `${u.rooms} · ${u.area}` : `${u.rooms} · 2-р давхрын төлөвлөлт`;
+const alt = (u: AxonoUnit, i: number) =>
+  `${axonoTitle(u)} — аксонометр төлөвлөгөө, өнцөг ${i + 1}`;
 
 export function MonoApartments() {
   const drag = useDragScroll<HTMLDivElement>();
+  const [open, setOpen] = useState<number | null>(null);
+  const lenis = useLenis();
+  const closeRef = useRef<HTMLButtonElement>(null);
+  const restoreRef = useRef<HTMLElement | null>(null);
+
+  const close = useCallback(() => setOpen(null), []);
+  const step = useCallback(
+    (dir: number) => setOpen((i) => (i === null ? i : (i + dir + SLIDES.length) % SLIDES.length)),
+    []
+  );
+
+  const openAt = (index: number) => {
+    restoreRef.current = document.activeElement as HTMLElement | null;
+    setOpen(index);
+  };
+
+  const isOpen = open !== null;
+
+  /* Lightbox нээлттэй үед хуудасны гүйлтийг зогсоож, фокусыг барина. */
+  useEffect(() => {
+    if (!isOpen) return;
+    lenis?.stop();
+    closeRef.current?.focus();
+    return () => {
+      lenis?.start();
+      restoreRef.current?.focus?.();
+    };
+  }, [isOpen, lenis]);
+
+  /* Esc — хаах, сум — өнцөг солих. */
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") close();
+      else if (e.key === "ArrowRight") step(1);
+      else if (e.key === "ArrowLeft") step(-1);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [isOpen, close, step]);
+
+  const current = open === null ? null : SLIDES[open];
 
   return (
     <section id="apartments" className="border-b border-night/10 bg-paper py-20 md:py-28">
@@ -47,30 +82,56 @@ export function MonoApartments() {
           {...drag}
           className="mt-12 flex snap-x snap-mandatory gap-5 overflow-x-auto pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
-          {FINAL.apartments.types.map((t, i) => (
-            <article
-              key={t.title}
-              data-reveal="up"
-              className="group w-[74vw] shrink-0 snap-start overflow-hidden rounded-2xl border border-night/10 bg-white transition-colors duration-300 hover:border-night/30 sm:w-[46vw] lg:w-[30vw] xl:w-[23vw]"
-            >
-              <div data-reveal="iso" className="aspect-square w-full bg-paper p-8">
-                <IsoPlan rooms={i + 1} />
-              </div>
-              <div className="flex items-end justify-between p-6">
-                <div>
-                  <h3 className="text-2xl font-extrabold tracking-tight text-night">{t.title}</h3>
-                  <p className="mt-1 text-sm font-semibold text-night/55">{t.area}</p>
-                </div>
-                <a
-                  href="#contact"
+          {SLIDES.filter((s) => s.viewIndex === 0).map((slide) => {
+            const { unit } = slide;
+            return (
+              <article
+                key={`${unit.letter}-${unit.floor ?? "std"}`}
+                data-reveal="up"
+                className="group w-[74vw] shrink-0 snap-start overflow-hidden rounded-2xl border border-night/10 bg-white transition-colors duration-300 hover:border-night/30 sm:w-[46vw] lg:w-[30vw] xl:w-[23vw]"
+              >
+                <button
+                  type="button"
                   data-cursor-hover
-                  className="rounded-full border border-night/25 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.08em] text-night transition-colors group-hover:border-night group-hover:bg-night group-hover:text-white"
+                  onClick={() => openAt(SLIDES.indexOf(slide))}
+                  /* Плейт өнгө = рендерийн студийн дэвсгэр, ингэснээр
+                     object-contain-ий хажуугийн зай нь салангид харагдахгүй. */
+                  className="relative block w-full cursor-zoom-in overflow-hidden bg-[#dbe3ef]"
+                  aria-label={`${axonoTitle(unit)} — аксонометр зургийг томруулж үзэх`}
                 >
-                  Үзэх
-                </a>
-              </div>
-            </article>
-          ))}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={axonoSrc(unit.views[0], "sm")}
+                    alt={alt(unit, 0)}
+                    loading="lazy"
+                    decoding="async"
+                    className="aspect-[4/3] w-full object-contain transition-transform duration-700 group-hover:scale-105"
+                  />
+                  <span className="absolute left-4 top-4 rounded-full bg-night px-3 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-white">
+                    {axonoTitle(unit)}
+                  </span>
+                  <span className="absolute bottom-4 right-4 rounded-full border border-night/15 bg-white/85 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.1em] text-night backdrop-blur">
+                    {unit.views.length} өнцөг
+                  </span>
+                </button>
+                <div className="flex items-end justify-between border-t border-night/10 p-6">
+                  <div>
+                    <h3 className="text-2xl font-extrabold tracking-tight text-night">{unit.rooms}</h3>
+                    <p className="mt-1 text-sm font-semibold text-night/55">
+                      {unit.area ?? "2-р давхрын төлөвлөлт"}
+                    </p>
+                  </div>
+                  <a
+                    href="#contact"
+                    data-cursor-hover
+                    className="rounded-full border border-night/25 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.08em] text-night transition-colors group-hover:border-night group-hover:bg-night group-hover:text-white"
+                  >
+                    Сонирхох
+                  </a>
+                </div>
+              </article>
+            );
+          })}
 
           {/* closing card — pushes to contact */}
           <a
@@ -91,6 +152,71 @@ export function MonoApartments() {
           </a>
         </div>
       </div>
+
+      {current && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label={`${axonoTitle(current.unit)} — аксонометр төлөвлөгөө`}
+          className="fixed inset-0 z-[80] flex flex-col bg-white"
+          onClick={close}
+        >
+          <div className="flex items-start justify-between gap-4 px-5 py-5 md:px-10" onClick={(e) => e.stopPropagation()}>
+            <div>
+              <p className="flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.28em] text-mist">
+                <span aria-hidden className="h-px w-8 bg-lime" />
+                {axonoTitle(current.unit)}
+              </p>
+              <p className="mt-2 text-lg font-extrabold tracking-tight text-night">{unitMeta(current.unit)}</p>
+            </div>
+            <button
+              ref={closeRef}
+              type="button"
+              data-cursor-hover
+              onClick={close}
+              aria-label="Хаах"
+              className="rounded-full border border-night/25 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.08em] text-night transition-colors hover:bg-night hover:text-white"
+            >
+              Хаах ✕
+            </button>
+          </div>
+
+          <div className="flex min-h-0 flex-1 items-center justify-center px-5 pb-2 md:px-10" onClick={(e) => e.stopPropagation()}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              key={current.view}
+              src={axonoSrc(current.view)}
+              alt={alt(current.unit, current.viewIndex)}
+              decoding="async"
+              className="max-h-full max-w-full rounded-2xl object-contain"
+            />
+          </div>
+
+          <div className="flex items-center justify-between gap-4 px-5 py-5 md:px-10" onClick={(e) => e.stopPropagation()}>
+            <button
+              type="button"
+              data-cursor-hover
+              onClick={() => step(-1)}
+              aria-label="Өмнөх зураг"
+              className="rounded-full border border-night/25 px-4 py-2 text-sm font-bold text-night transition-colors hover:bg-night hover:text-white"
+            >
+              ←
+            </button>
+            <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-night/50">
+              Өнцөг {current.viewIndex + 1}/{current.unit.views.length} · {(open ?? 0) + 1}/{SLIDES.length}
+            </p>
+            <button
+              type="button"
+              data-cursor-hover
+              onClick={() => step(1)}
+              aria-label="Дараах зураг"
+              className="rounded-full border border-night/25 px-4 py-2 text-sm font-bold text-night transition-colors hover:bg-night hover:text-white"
+            >
+              →
+            </button>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

@@ -8,18 +8,18 @@ import "swiper/css";
 import type { Swiper as SwiperType } from "swiper";
 
 export type ApartmentSlide = {
-  /** Big room-type title, e.g. "1 өрөө". */
+  /** Big unit title, e.g. "A тип". */
   title: string;
-  /** Room-count descriptor, e.g. "1 өрөө". */
+  /** Room-count descriptor, e.g. "3 өрөө". */
   rooms: string;
-  /** Area range with unit, e.g. "38–52 м²". */
-  area: string;
+  /** Area with unit, e.g. "79.70 м²". Missing on the 2F variants. */
+  area?: string;
+  /** Floor note used in place of the area, e.g. "2 давхар". */
+  floor?: string;
   /** Qualitative planning descriptor derived from copy (no prices). */
   plan: string;
-  /** Axonometric placeholder image. */
-  image: string;
-  /** Badge copy shown over the (placeholder) image. */
-  badge: string;
+  /** Axonometric renders — one per angle, first one is the default view. */
+  images: string[];
 };
 
 function Chevron({ dir }: { dir: "prev" | "next" }) {
@@ -47,6 +47,8 @@ function Chevron({ dir }: { dir: "prev" | "next" }) {
 export function ApartmentsCarousel({ slides }: { slides: ApartmentSlide[] }) {
   const [swiper, setSwiper] = useState<SwiperType | null>(null);
   const [active, setActive] = useState(0);
+  /** Selected axonometric angle per slide. */
+  const [angles, setAngles] = useState<number[]>(() => slides.map(() => 0));
 
   // Keep external chevron/tab disabled states honest on loop-less bounds.
   const atStart = active === 0;
@@ -68,7 +70,7 @@ export function ApartmentsCarousel({ slides }: { slides: ApartmentSlide[] }) {
           const isActive = active === i;
           return (
             <button
-              key={s.rooms}
+              key={s.title}
               type="button"
               data-cursor-hover
               onClick={() => swiper?.slideTo(i)}
@@ -89,7 +91,7 @@ export function ApartmentsCarousel({ slides }: { slides: ApartmentSlide[] }) {
                   (isActive ? "text-ink/55" : "text-stone/70")
                 }
               >
-                {s.area}
+                {s.area ?? s.floor}
               </span>
             </button>
           );
@@ -130,41 +132,71 @@ export function ApartmentsCarousel({ slides }: { slides: ApartmentSlide[] }) {
           onSlideChange={(sw) => setActive(sw.activeIndex)}
           className="!overflow-visible"
         >
-          {slides.map((s) => (
-            <SwiperSlide key={s.title} className="!h-auto">
-              <div className="grid items-start gap-12 md:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] md:gap-16 lg:gap-24">
-                {/* Left — serif-feel gold unit title + pure typographic spec list */}
-                <div>
-                  <h3 className="font-display text-[clamp(1.75rem,3vw,2.25rem)] font-light leading-[1.2] tracking-[0] text-gold">
-                    {s.title}
-                  </h3>
+          {slides.map((s, i) => {
+            const angle = angles[i] ?? 0;
+            return (
+              <SwiperSlide key={s.title} className="!h-auto">
+                <div className="grid items-start gap-12 md:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] md:gap-16 lg:gap-24">
+                  {/* Left — serif-feel gold unit title + pure typographic spec list */}
+                  <div>
+                    <h3 className="font-display text-[clamp(1.75rem,3vw,2.25rem)] font-light leading-[1.2] tracking-[0] text-gold">
+                      {s.title}
+                    </h3>
 
-                  <dl className="mt-10 md:mt-12">
-                    <SpecRow label="Өрөө" value={s.rooms} />
-                    <SpecRow label="Талбай" value={s.area} />
-                    <SpecRow label="Төлөвлөлт" value={s.plan} />
-                  </dl>
-                </div>
+                    <dl className="mt-10 md:mt-12">
+                      <SpecRow label="Өрөө" value={s.rooms} />
+                      {s.area ? (
+                        <SpecRow label="Талбай" value={s.area} />
+                      ) : s.floor ? (
+                        <SpecRow label="Давхар" value={s.floor} />
+                      ) : null}
+                      <SpecRow label="Төлөвлөлт" value={s.plan} />
+                    </dl>
+                  </div>
 
-                {/* Right — large plan drawing (~580px), plain bg, no frame (placeholder) */}
-                <div className="relative w-full max-w-[580px] justify-self-center md:justify-self-end">
-                  <div className="relative aspect-[4/3] bg-transparent md:aspect-[16/11]">
-                    <Image
-                      src={s.image}
-                      alt={`${s.title} — ${s.area}`}
-                      fill
-                      sizes="(max-width:768px) 92vw, 580px"
-                      className="object-contain"
-                      draggable={false}
-                    />
-                    <span className="absolute bottom-2 left-2 rounded-full bg-bone/85 px-3 py-1 text-[0.7rem] font-light uppercase tracking-[0.14em] text-ink/55 backdrop-blur-sm">
-                      {s.badge}
-                    </span>
+                  {/* Right — large axonometric render (~580px) on the render's
+                      own studio plate, so object-contain leaves no seam. */}
+                  <div className="relative w-full max-w-[580px] justify-self-center md:justify-self-end">
+                    <div className="relative aspect-[4/3] overflow-hidden rounded-lg bg-[#dbe3ef] md:aspect-[16/11]">
+                      <Image
+                        src={s.images[angle]}
+                        alt={`${s.title} — аксонометр төлөвлөгөө, өнцөг ${angle + 1}`}
+                        fill
+                        sizes="(max-width:768px) 92vw, 580px"
+                        className="object-contain"
+                        draggable={false}
+                      />
+                    </div>
+
+                    {s.images.length > 1 && (
+                      <div className="mt-4 flex gap-2">
+                        {s.images.map((src, a) => (
+                          <button
+                            key={src}
+                            type="button"
+                            data-cursor-hover
+                            aria-label={`Өнцөг ${a + 1}`}
+                            aria-current={a === angle}
+                            onClick={() =>
+                              setAngles((prev) => prev.map((v, idx) => (idx === i ? a : v)))
+                            }
+                            className={
+                              "rounded-full border px-4 py-1.5 text-[0.7rem] font-light uppercase tracking-[0.14em] transition-colors " +
+                              (a === angle
+                                ? "border-ink bg-ink text-bone"
+                                : "border-ink/20 text-ink/55 hover:border-ink/50 hover:text-ink")
+                            }
+                          >
+                            {`Өнцөг ${a + 1}`}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
-              </div>
-            </SwiperSlide>
-          ))}
+              </SwiperSlide>
+            );
+          })}
         </Swiper>
 
         {/* Mobile / progress controls */}
