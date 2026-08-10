@@ -3,13 +3,7 @@
 import { Reveal } from "@/components/Reveal";
 import { ProjectsCarousel, type ProjectItem } from "@/components/final/ProjectsCarousel";
 import { FINAL } from "@/lib/content";
-
-const projectImages = [
-  "/images/aerial-masterplan.jpg",
-  "/images/exterior-towers-winter.jpg",
-  "/images/aerial-courtyard-water.jpg",
-  "/images/exterior-lowangle-towers.jpg",
-];
+import { PROJECT_PHOTOS } from "@/lib/projects";
 
 // Fallbacks in case a data field is missing (per client brief).
 const FALLBACK: Omit<ProjectItem, "image">[] = [
@@ -29,7 +23,7 @@ export function FinalProjects() {
     floors: p.floors ?? FALLBACK[i % FALLBACK.length].floors,
     units: p.units ?? FALLBACK[i % FALLBACK.length].units,
     years: p.years ?? FALLBACK[i % FALLBACK.length].years,
-    image: projectImages[i % projectImages.length],
+    image: PROJECT_PHOTOS[i % PROJECT_PHOTOS.length].src,
   }));
 
   return (

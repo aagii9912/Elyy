@@ -16,15 +16,8 @@
 import { useEffect, useRef } from "react";
 import { gsap } from "@/lib/gsap";
 import { FINAL } from "@/lib/content";
+import { PROJECT_PHOTOS } from "@/lib/projects";
 import { MonoKicker } from "./shared";
-
-/* indexed by the original FINAL.developer.projects order */
-const PROJECT_IMAGES = [
-  { src: "/images/exterior-towers-winter.jpg", alt: "Комфорт хотхон" },
-  { src: "/images/exterior-lowangle-towers.jpg", alt: "Мандала хотхон" },
-  { src: "/images/aerial-courtyard-promenade.jpg", alt: "Мандала гарден" },
-  { src: "/images/hero-towers-bluesky.png", alt: "360, 365 Мандала Тауэр" },
-];
 
 const YEAR_START = 2006;
 const YEAR_END = 2026;
@@ -39,7 +32,7 @@ export function MonoDeveloper() {
 
   /* chronological stations (project + its image, sorted by start year) */
   const stations = d.projects
-    .map((p, i) => ({ ...p, image: PROJECT_IMAGES[i] }))
+    .map((p, i) => ({ ...p, image: PROJECT_PHOTOS[i] }))
     .sort((a, b) => parseInt(a.years, 10) - parseInt(b.years, 10));
 
   useEffect(() => {
