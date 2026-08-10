@@ -2,6 +2,7 @@
 
 import { ReactLenis, useLenis } from "lenis/react";
 import { useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { gsap, ScrollTrigger } from "@/lib/gsap";
 
 function LenisGsapBridge() {
@@ -29,6 +30,11 @@ function LenisGsapBridge() {
 }
 
 export function SmoothScroll({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  // Админ (/admin) — native scroll ашиглана (форм-ийн UX, sticky toolbar
+  // тогтвортой). Бусад бүх маркетингийн хуудсанд Lenis smooth scroll.
+  if (pathname?.startsWith("/admin")) return <>{children}</>;
+
   return (
     <ReactLenis
       root

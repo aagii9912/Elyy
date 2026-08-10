@@ -12,6 +12,12 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev", "--", "-p", "3100"],
       "port": 3100
+    },
+    {
+      "name": "elysium-verify",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--", "-p", "3200"],
+      "port": 3200
     }
   ]
 }

@@ -639,3 +639,23 @@ body:has(.mono-page) .ely-cursor {
   .mono-fade-up, .mono-float { animation: none; }
   .mono-word > span { animation: none; transform: none; }
 }
+
+/* ============================================================
+   /admin — ажлын хэрэгслийн UI. Маркетингийн custom cursor,
+   scroll progress bar-ыг унтрааж, native курсорыг сэргээнэ.
+   ============================================================ */
+html.has-cursor:has(.admin-shell),
+html.has-cursor:has(.admin-shell) * {
+  cursor: auto !important;
+}
+body:has(.admin-shell) .ely-cursor,
+body:has(.admin-shell) .scroll-progress {
+  display: none !important;
+}
+input[type="color"] {
+  -webkit-appearance: none;
+  appearance: none;
+  padding: 0;
+}
+input[type="color"]::-webkit-color-swatch-wrapper { padding: 2px; }
+input[type="color"]::-webkit-color-swatch { border: none; border-radius: 6px; }

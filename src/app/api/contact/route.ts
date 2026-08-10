@@ -28,18 +28,19 @@ function sheetsConfigured() {
   return Boolean(SHEET_ID && CLIENT_EMAIL && PRIVATE_KEY);
 }
 
-/** Sheet мөр: Огноо (UB) | Нэр | Утас | И-мэйл | Мессеж | Эх сурвалж */
+/** Sheet мөр: Огноо (UB) | Нэр | Утас | И-мэйл | Мессеж | Эх сурвалж | Эвент */
 function leadRow(lead: {
   name: string;
   phone: string;
   email: string;
   message: string;
   source: string;
+  event: string;
 }) {
   const timestamp = new Date().toLocaleString("sv-SE", {
     timeZone: "Asia/Ulaanbaatar",
   });
-  return [timestamp, lead.name, lead.phone, lead.email, lead.message, lead.source];
+  return [timestamp, lead.name, lead.phone, lead.email, lead.message, lead.source, lead.event];
 }
 
 async function appendToSheet(row: string[]) {
@@ -79,6 +80,8 @@ export async function POST(request: Request) {
     const phone = String(body?.phone ?? "").trim();
     const message = String(body?.message ?? "").trim();
     const source = String(body?.source ?? request.headers.get("referer") ?? "unknown").trim();
+    // Эвентийн landing page-аас ирсэн бол аль эвент болохыг тэмдэглэнэ.
+    const event = String(body?.event ?? "").trim();
 
     // Honeypot: bot бөглөдөг нуугдсан талбар — чимээгүйхэн амжилттай мэт хариулна
     if (String(body?.website ?? "").trim()) {
@@ -92,7 +95,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const lead = { name, phone, email, message, source };
+    const lead = { name, phone, email, message, source, event };
 
     if (!sheetsConfigured()) {
       console.warn(
