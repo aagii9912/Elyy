@@ -32,7 +32,8 @@ export type StoryPoint = {
 
 export type StoryVariant = "numbers" | "letters" | "callouts";
 
-const framePath = (i: number) => `/hero-frames/frame_${String(i).padStart(3, "0")}.jpg`;
+const framePathIn = (dir: string, ext: string) => (i: number) =>
+  `${dir}/frame_${String(i).padStart(3, "0")}.${ext}`;
 
 /* facade anchor positions (viewport %) for the callouts variant */
 const CALLOUT_ANCHORS = [
@@ -50,6 +51,10 @@ export function MonoScrollStory({
   points,
   frameStart,
   frameEnd,
+  frameDir = "/hero-frames",
+  frameExt = "jpg",
+  stillAt = 0.6,
+  heightClass = "h-[300vh] md:h-[380vh]",
   variant,
 }: {
   id?: string;
@@ -60,6 +65,13 @@ export function MonoScrollStory({
   points: StoryPoint[];
   frameStart: number;
   frameEnd: number;
+  /** Public folder holding the `frame_NNN` sequence. */
+  frameDir?: string;
+  frameExt?: string;
+  /** Where in the sequence the mobile / reduced-motion still is taken from (0–1). */
+  stillAt?: number;
+  /** Section height — controls how much scroll each point gets. */
+  heightClass?: string;
   variant: StoryVariant;
 }) {
   const lenis = useLenis();
@@ -90,6 +102,7 @@ export function MonoScrollStory({
 
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const isMobile = window.matchMedia("(max-width: 767px)").matches;
+    const framePath = framePathIn(frameDir, frameExt);
     const count = frameEnd - frameStart + 1;
     const framesToLoad = !reduce && !isMobile ? count : 1;
     const images: HTMLImageElement[] = [];
@@ -117,7 +130,7 @@ export function MonoScrollStory({
       loading = true;
       for (let i = 0; i < framesToLoad; i++) {
         const im = new Image();
-        im.src = framePath(frameStart + (framesToLoad === 1 ? Math.floor(count * 0.6) : i));
+        im.src = framePath(frameStart + (framesToLoad === 1 ? Math.floor(count * stillAt) : i));
         if (i === 0) im.onload = () => { resize(); draw(); };
         images.push(im);
       }
@@ -226,7 +239,10 @@ export function MonoScrollStory({
         }
 
         // chapter exit: content clears first, then the veil dips to black,
-        // so the handoff to the next chapter is a seamless dark bridge
+        // so the handoff to the next chapter is a seamless dark bridge.
+        // The exit has to stay inside the last ~22% of the pin — start it
+        // any earlier and the final point is wiped off screen almost as
+        // soon as it becomes active.
         const exitEls = [layersEl, railEl, chromeEl, headEl].filter(Boolean) as Element[];
         if (exitEls.length) {
           gsap.fromTo(
@@ -239,8 +255,8 @@ export function MonoScrollStory({
               immediateRender: false,
               scrollTrigger: {
                 trigger: sec,
-                start: "bottom 165%",
-                end: "bottom 125%",
+                start: "bottom 122%",
+                end: "bottom 106%",
                 scrub: true,
                 invalidateOnRefresh: true,
               },
@@ -272,8 +288,8 @@ export function MonoScrollStory({
               immediateRender: false,
               scrollTrigger: {
                 trigger: sec,
-                start: "bottom 135%",
-                end: "bottom 102%",
+                start: "bottom 116%",
+                end: "bottom 103%",
                 scrub: true,
                 invalidateOnRefresh: true,
               },
@@ -289,7 +305,7 @@ export function MonoScrollStory({
       st.current = null;
       ctx.revert();
     };
-  }, [frameStart, frameEnd, points.length]);
+  }, [frameStart, frameEnd, frameDir, frameExt, stillAt, points.length]);
 
   /* ---- point crossfade engine (no remounts) ------------------------- */
   useEffect(() => {
@@ -354,7 +370,7 @@ export function MonoScrollStory({
     variant === "letters" ? p.heading.charAt(0).toUpperCase() : p.n;
 
   return (
-    <section id={id} ref={root} className="relative h-[300vh] bg-night md:h-[380vh]">
+    <section id={id} ref={root} className={`relative bg-night ${heightClass}`}>
       <div className="sticky top-0 flex h-[100svh] min-h-[560px] w-full overflow-hidden">
         <canvas ref={canvas} className="absolute inset-0 z-0 h-full w-full" />
         <div className="pointer-events-none absolute inset-0 z-[5] bg-gradient-to-b from-night/75 via-night/40 to-night/85" />

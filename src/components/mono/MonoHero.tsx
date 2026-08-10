@@ -1,17 +1,20 @@
 "use client";
 
-/* /mono — Intro. Drone shot descending through clouds toward the
-   building, scrubbed frame-by-frame by scroll (121 JPEG frames, desktop
-   only; mobile/reduced-motion gets a single still). The hero stays dark
-   so the white page below lands with contrast. */
+/* /mono — Intro. Three client drone clips (sky reveal → descent through
+   cloud → arrival at the towers) crossfaded into one 22.8s shot and baked
+   to 144 WebP frames, scrubbed frame-by-frame by scroll (desktop only;
+   mobile/reduced-motion gets a single still). Frames are rebuilt with
+   `node scripts/build-scroll-frames.mjs hero`. */
 
 import { Fragment, useEffect, useRef } from "react";
 import { useLenis } from "lenis/react";
 import { gsap } from "@/lib/gsap";
 import { FINAL } from "@/lib/content";
 
-const FRAME_COUNT = 121;
-const framePath = (i: number) => `/hero-frames/frame_${String(i).padStart(3, "0")}.jpg`;
+const FRAME_COUNT = 144;
+const framePath = (i: number) => `/hero-video-frames/frame_${String(i).padStart(3, "0")}.webp`;
+/** Still shown to mobile / reduced-motion: the dusk tower reveal. */
+const STILL_FRAME = 40;
 
 export function MonoHero() {
   const lenis = useLenis();
@@ -60,7 +63,9 @@ export function MonoHero() {
     const framesToLoad = !reduce && !isMobile ? FRAME_COUNT : 1;
     for (let i = 1; i <= framesToLoad; i++) {
       const im = new Image();
-      im.src = framePath(i);
+      // Frame 1 is bare sky before the towers rise — the single-frame
+      // fallback needs a shot that actually shows the buildings.
+      im.src = framePath(framesToLoad === 1 ? STILL_FRAME : i);
       if (i === 1) im.onload = () => { resize(); draw(); };
       images.push(im);
     }
