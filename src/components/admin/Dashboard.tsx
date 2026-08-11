@@ -80,6 +80,9 @@ export function Dashboard({
           <p className="text-sm text-neutral-500">Эвентийн landing page удирдлага</p>
         </div>
         <div className="ml-auto flex items-center gap-2">
+          <Button variant="dark" type="button" onClick={() => router.push("/admin/leads")}>
+            Бүртгэл
+          </Button>
           <a href="/" target="_blank" rel="noreferrer">
             <Button variant="ghost" type="button">Үндсэн сайт ↗</Button>
           </a>

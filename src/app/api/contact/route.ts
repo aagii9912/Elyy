@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { JWT } from "google-auth-library";
+import { getStore } from "@/lib/store";
 
 /* ============================================================
    LEAD CAPTURE → Google Sheet
@@ -97,16 +98,57 @@ export async function POST(request: Request) {
 
     const lead = { name, phone, email, message, source, event };
 
-    if (!sheetsConfigured()) {
-      console.warn(
-        "[leads] Google Sheets ТОХИРУУЛАГААГҮЙ — lead зөвхөн log-д хадгалагдлаа. docs/lead-integration.md"
-      );
-      console.log("[leads] New lead:", JSON.stringify(lead));
-      return NextResponse.json({ ok: true, delivered: "log" });
+    /* Хоёр тийш зэрэг бичнэ: Google Sheet (борлуулалтын багийн ажлын хэрэгсэл)
+       БА Supabase (нөөц). Аль нэг нь унасан ч нөгөөд нь хадгалагдана —
+       хүсэлт алдагдахгүй. Хоёул бүтэлгүйтсэн үед л алдаа буцаана. */
+    const delivered: string[] = [];
+    const failures: string[] = [];
+
+    // Эвентийн slug-ийг source-оос салгаж (event/<slug>), эвентийг олно.
+    const slug = source.startsWith("event/") ? source.slice("event/".length) : null;
+
+    const [sheetResult, storeResult] = await Promise.allSettled([
+      sheetsConfigured() ? appendToSheet(leadRow(lead)) : Promise.reject(new Error("not-configured")),
+      (async () => {
+        const store = getStore();
+        const doc = slug ? await store.getEventBySlug(slug).catch(() => null) : null;
+        await store.createLead({
+          eventId: doc?.id ?? null,
+          eventSlug: doc?.slug ?? slug,
+          eventName: doc?.name ?? (event || null),
+          name,
+          phone,
+          email,
+          message,
+          source,
+        });
+      })(),
+    ]);
+
+    if (sheetResult.status === "fulfilled") delivered.push("sheets");
+    else if (sheetResult.reason?.message === "not-configured") failures.push("sheets:тохируулаагүй");
+    else {
+      failures.push("sheets");
+      console.error("[leads] Sheets append failed:", sheetResult.reason);
     }
 
-    await appendToSheet(leadRow(lead));
-    return NextResponse.json({ ok: true, delivered: "sheets" });
+    if (storeResult.status === "fulfilled") delivered.push("store");
+    else {
+      failures.push("store");
+      console.error("[leads] Store write failed:", storeResult.reason);
+    }
+
+    if (delivered.length === 0) {
+      // Хаана ч хадгалагдаагүй — ядаж log-д үлдээж, алдаа мэдэгдэнэ.
+      console.error("[leads] ХААНА Ч ХАДГАЛАГДСАНГҮЙ:", JSON.stringify(lead), failures);
+      return NextResponse.json(
+        { ok: false, error: "Could not deliver your request. Please try again." },
+        { status: 502 }
+      );
+    }
+
+    if (failures.length) console.warn("[leads] Хэсэгчлэн хадгалагдлаа:", delivered, failures);
+    return NextResponse.json({ ok: true, delivered: delivered.join("+") });
   } catch (err) {
     console.error("[leads] Delivery failed:", err);
     return NextResponse.json(

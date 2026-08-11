@@ -18,6 +18,20 @@ import type { EventDoc } from "./events";
 
 export type UploadInput = { buffer: Buffer; filename: string; contentType: string };
 
+/** Бүртгэл / холбоо барих хүсэлт. eventId=null → үндсэн сайтын маягт. */
+export type LeadInput = {
+  eventId: string | null;
+  eventSlug: string | null;
+  eventName: string | null;
+  name: string;
+  phone: string;
+  email: string;
+  message: string;
+  source: string;
+};
+
+export type LeadDoc = LeadInput & { id: string; createdAt: string };
+
 export interface Store {
   listEvents(): Promise<EventDoc[]>;
   getEvent(id: string): Promise<EventDoc | null>;
@@ -26,6 +40,8 @@ export interface Store {
   updateEvent(id: string, patch: Partial<Omit<EventDoc, "id">>): Promise<EventDoc | null>;
   deleteEvent(id: string): Promise<void>;
   uploadImage(input: UploadInput): Promise<string>;
+  createLead(input: LeadInput): Promise<void>;
+  listLeads(eventId?: string): Promise<LeadDoc[]>;
 }
 
 /* ------------------------------------------------------------ */
@@ -50,6 +66,33 @@ type Row = {
   created_at: string;
   updated_at: string;
 };
+type LeadRow = {
+  id: string;
+  event_id: string | null;
+  event_slug: string | null;
+  event_name: string | null;
+  name: string;
+  phone: string | null;
+  email: string | null;
+  message: string | null;
+  source: string | null;
+  created_at: string;
+};
+function rowToLead(r: LeadRow): LeadDoc {
+  return {
+    id: r.id,
+    eventId: r.event_id,
+    eventSlug: r.event_slug,
+    eventName: r.event_name,
+    name: r.name,
+    phone: r.phone ?? "",
+    email: r.email ?? "",
+    message: r.message ?? "",
+    source: r.source ?? "",
+    createdAt: r.created_at,
+  };
+}
+
 function rowToDoc(r: Row): EventDoc {
   return {
     id: r.id,
@@ -62,12 +105,28 @@ function rowToDoc(r: Row): EventDoc {
   };
 }
 
-async function sb() {
+// Client-ийг нэг удаа үүсгээд дахин ашиглана (дуудалт бүрт шинээр үүсгэх шаардлагагүй).
+let clientPromise: Promise<SupabaseClientLike> | null = null;
+type SupabaseClientLike = Awaited<ReturnType<typeof createSupabaseClient>>;
+
+async function createSupabaseClient() {
   // Dynamic import — Supabase тохируулаагүй локалд энэ модуль ачаалагдахгүй.
   const { createClient } = await import("@supabase/supabase-js");
   return createClient(SUPABASE_URL!, SERVICE_ROLE_KEY!, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
+}
+
+function sb(): Promise<SupabaseClientLike> {
+  if (!clientPromise) clientPromise = createSupabaseClient();
+  return clientPromise;
+}
+
+/** Postgres-ийн unique violation (slug давхцсан) эсэхийг таних.
+ *  Дуудагч тал `slug-taken` алдааг 409 болгон хөрвүүлдэг —
+ *  LocalStore-той ижил зан төлөвийг Supabase дээр ч хангана. */
+function isUniqueViolation(error: { code?: string; message?: string } | null): boolean {
+  return error?.code === "23505" || Boolean(error?.message?.includes("duplicate key value"));
 }
 
 class SupabaseStore implements Store {
@@ -110,7 +169,10 @@ class SupabaseStore implements Store {
       })
       .select("*")
       .single();
-    if (error) throw new Error(`Supabase createEvent: ${error.message}`);
+    if (error) {
+      if (isUniqueViolation(error)) throw new Error("slug-taken");
+      throw new Error(`Supabase createEvent: ${error.message}`);
+    }
     return rowToDoc(data as Row);
   }
 
@@ -127,7 +189,10 @@ class SupabaseStore implements Store {
       .eq("id", id)
       .select("*")
       .maybeSingle();
-    if (error) throw new Error(`Supabase updateEvent: ${error.message}`);
+    if (error) {
+      if (isUniqueViolation(error)) throw new Error("slug-taken");
+      throw new Error(`Supabase updateEvent: ${error.message}`);
+    }
     return data ? rowToDoc(data as Row) : null;
   }
 
@@ -135,6 +200,30 @@ class SupabaseStore implements Store {
     const client = await sb();
     const { error } = await client.from("events").delete().eq("id", id);
     if (error) throw new Error(`Supabase deleteEvent: ${error.message}`);
+  }
+
+  async createLead(input: LeadInput): Promise<void> {
+    const client = await sb();
+    const { error } = await client.from("event_leads").insert({
+      event_id: input.eventId,
+      event_slug: input.eventSlug,
+      event_name: input.eventName,
+      name: input.name,
+      phone: input.phone,
+      email: input.email,
+      message: input.message,
+      source: input.source,
+    });
+    if (error) throw new Error(`Supabase createLead: ${error.message}`);
+  }
+
+  async listLeads(eventId?: string): Promise<LeadDoc[]> {
+    const client = await sb();
+    let q = client.from("event_leads").select("*").order("created_at", { ascending: false });
+    if (eventId) q = q.eq("event_id", eventId);
+    const { data, error } = await q;
+    if (error) throw new Error(`Supabase listLeads: ${error.message}`);
+    return (data as LeadRow[]).map(rowToLead);
   }
 
   async uploadImage(input: UploadInput): Promise<string> {
@@ -155,6 +244,7 @@ class SupabaseStore implements Store {
 
 const DATA_DIR = path.join(process.cwd(), ".data");
 const DATA_FILE = path.join(DATA_DIR, "events.json");
+const LEADS_FILE = path.join(DATA_DIR, "leads.json");
 const UPLOAD_DIR = path.join(process.cwd(), "public", "uploads");
 
 class LocalStore implements Store {
@@ -209,6 +299,28 @@ class LocalStore implements Store {
   async deleteEvent(id: string): Promise<void> {
     const docs = await this.readAll();
     await this.writeAll(docs.filter((d) => d.id !== id));
+  }
+
+  async createLead(input: LeadInput): Promise<void> {
+    const leads = await this.readLeads();
+    leads.push({ ...input, id: randomUUID(), createdAt: new Date().toISOString() });
+    await fs.mkdir(DATA_DIR, { recursive: true });
+    await fs.writeFile(LEADS_FILE, JSON.stringify(leads, null, 2), "utf8");
+  }
+
+  async listLeads(eventId?: string): Promise<LeadDoc[]> {
+    const leads = await this.readLeads();
+    const filtered = eventId ? leads.filter((l) => l.eventId === eventId) : leads;
+    return filtered.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+  }
+
+  private async readLeads(): Promise<LeadDoc[]> {
+    try {
+      const parsed = JSON.parse(await fs.readFile(LEADS_FILE, "utf8"));
+      return Array.isArray(parsed) ? (parsed as LeadDoc[]) : [];
+    } catch {
+      return [];
+    }
   }
 
   async uploadImage(input: UploadInput): Promise<string> {

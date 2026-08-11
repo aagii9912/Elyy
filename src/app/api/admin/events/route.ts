@@ -34,8 +34,19 @@ export async function POST(req: Request) {
     while (await store.getEventBySlug(slug)) slug = `${base}-${n++}`;
 
     const doc = newEvent({ id: randomUUID(), name, slug, now: new Date().toISOString() });
-    const created = await store.createEvent(doc);
-    return NextResponse.json({ ok: true, event: created });
+    try {
+      const created = await store.createEvent(doc);
+      return NextResponse.json({ ok: true, event: created });
+    } catch (e) {
+      // Давхцлыг дээрх давталтаар шалгасан ч зэрэг үүсгэлт (race) тохиолдож болно.
+      if (e instanceof Error && e.message === "slug-taken") {
+        return NextResponse.json(
+          { ok: false, error: "Энэ нэртэй эвент дөнгөж үүслээ. Дахин оролдоно уу." },
+          { status: 409 }
+        );
+      }
+      throw e;
+    }
   } catch (err) {
     console.error("[admin] createEvent:", err);
     return NextResponse.json({ ok: false, error: "Эвент үүсгэхэд алдаа гарлаа." }, { status: 500 });
