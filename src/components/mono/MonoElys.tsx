@@ -4,12 +4,12 @@
    typography variant — the E·L·Y·S acronym letters loom over the
    mid-flight segment while each advantage sequences through. */
 
-import { FINAL } from "@/lib/content";
+import type { SiteContent } from "@/lib/site-content";
 import { MonoScrollStory } from "./MonoScrollStory";
 
-export function MonoElys() {
-  const points = FINAL.elys.items.map((item, i) => ({
-    n: `0${i + 1}`,
+export function MonoElys({ site }: { site: SiteContent }) {
+  const points = site.elys.items.map((item, i) => ({
+    n: String(i + 1).padStart(2, "0"),
     heading: item.title,
     text: item.body,
   }));
@@ -18,8 +18,8 @@ export function MonoElys() {
     <MonoScrollStory
       id="elys"
       chapter="02"
-      kicker={FINAL.elys.kicker}
-      title={FINAL.elys.title}
+      kicker={site.elys.kicker}
+      title={site.elys.title}
       points={points}
       frameStart={45}
       frameEnd={85}

@@ -1,76 +1,33 @@
 "use client";
 
 /* /mono — AI туслах. Төслийн мэдээлэл дээр суурилсан чатбот.
-   Keyword-суурьлагдсан (client-side); бодит LLM endpoint холбохдоо
-   answer() функцийг солино. Monochrome panel, lime avatar accent. */
+   Keyword-суурьлагдсан (client-side); мэндчилгээ, түлхүүр үг, хариултууд
+   нь админаас (`/admin/site` → Чатбот) удирдагдана. Бодит LLM endpoint
+   холбохдоо answerFrom() функцийг солино. Monochrome panel, lime avatar
+   accent. */
 
 import { useEffect, useRef, useState } from "react";
-import { FINAL } from "@/lib/content";
+import type { SiteContent } from "@/lib/site-content";
 
 type Msg = { from: "bot" | "user"; text: string };
 
-const GREETING =
-  "Сайн байна уу! Би Elysium Residence-ийн туслах. Байршил, өрөөний сонголт, ашиглалтад орох хугацааны талаар асуугаарай.";
-
-const KB: { keys: string[]; a: string }[] = [
-  {
-    keys: ["байршил", "хаана", "байр", "map", "зураг"],
-    a: `Төсөл ${FINAL.contact.location} оршино. Үндэсний цэцэрлэгт хүрээлэн 1 мин, Мишээл 2 мин, Их дэлгүүр 3 мин машины замтай.`,
-  },
-  {
-    keys: ["хэзээ", "ашиглалт", "хугацаа", "бэлэн болох", "2027"],
-    a: `${FINAL.about.completionLabel}: ${FINAL.about.completion}.`,
-  },
-  {
-    keys: ["өрөө", "мкв", "м²", "талбай", "сонголт", "загвар"],
-    a: `1 өрөө 38–52 м², 2 өрөө 58–74 м², 3 өрөө 82–104 м², 4 өрөө 110 м²-аас дээш талбайтай. "Өрөөний сонголт" хэсгээс дэлгэрэнгүйг үзнэ үү.`,
-  },
-  {
-    keys: ["үнэ", "ханш", "зээл", "төлбөр", "өртөг", "скидк", "хөнгөлөлт"],
-    a: `Үнийн мэдээллийг борлуулалтын менежер танд тохирох өрөөний төлөвлөгөөний хамт тодруулж өгнө. Утас: ${FINAL.contact.phone}.`,
-  },
-  {
-    keys: ["блок", "айл", "506", "хэд"],
-    a: "Нийт 4 блок, 506 айлын орон сууцтай. Нийт талбайн 85% нь нийтийн эзэмшлийн ногоон орон зай.",
-  },
-  {
-    keys: ["зогсоол", "машин", "паркинг"],
-    a: "513 автомашины зогсоолтой — айл бүрд хангалттай хуваарилна.",
-  },
-  {
-    keys: ["монкон", "хэрэгжүүлэгч", "барилгачин", "компани"],
-    a: `${FINAL.developer.name} — ${FINAL.developer.since} оноос хойш ${FINAL.developer.projectCount} гаруй төсөл хэрэгжүүлсэн (Мандала хотхон, Мандала гарден, 360/365 Мандала Тауэр г.м.).`,
-  },
-  {
-    keys: ["уулзалт", "захиалга", "үзлэг", "бүртгэл"],
-    a: `Доорх "Уулзалт товлох" хэсэгт нэр, утас, огноогоо үлдээхэд манай менежер холбогдоно. Эсвэл шууд ${FINAL.contact.phone} руу залгана уу.`,
-  },
-  {
-    keys: ["ногоон", "цэцэрлэг", "green"],
-    a: "Нийт талбайн 85% нь нийтийн эзэмшлийн ногоон байгууламж — Үндэсний цэцэрлэгт хүрээлэнтэй зэрэгцдэг.",
-  },
-  {
-    keys: ["гадаад", "гадаадаас", "зайнаас"],
-    a: "Тийм — цахим үзлэг, онлайн захиалга, зайнаас гэрээ байгуулах боломжтой. Менежер таньд тусална: " + FINAL.contact.phone,
-  },
-];
-
-const QUICK = ["Үнэ хэд вэ?", "Байршил хаана вэ?", "Хэзээ ашиглалтад орох вэ?", "Өрөөний сонголт"];
-
-function answer(q: string): string {
+/** Түлхүүр үгээр хариулт хайна. Түлхүүрүүд таслалаар тусгаарлагдана. */
+function answerFrom(chatbot: SiteContent["chatbot"], q: string): string {
   const t = q.toLowerCase();
-  for (const item of KB) {
-    if (item.keys.some((k) => t.includes(k))) return item.a;
+  for (const item of chatbot.answers) {
+    const keys = item.keys
+      .split(",")
+      .map((k) => k.trim().toLowerCase())
+      .filter(Boolean);
+    if (keys.some((k) => t.includes(k))) return item.a;
   }
-  if (t.includes("сайн") || t.includes("hello") || t.includes("hi")) {
-    return "Сайн байна уу! Танд юугаар туслах вэ?";
-  }
-  return `Уучлаарай, тодорхой ойлгосонгүй. Борлуулалтын менежер дэлгэрэнгүй хариулна: ${FINAL.contact.phone}. Эсвэл доорх сэдвүүдээс сонгоно уу.`;
+  return chatbot.fallback;
 }
 
-export function MonoChatbot() {
+export function MonoChatbot({ site }: { site: SiteContent }) {
+  const { chatbot } = site;
   const [open, setOpen] = useState(false);
-  const [msgs, setMsgs] = useState<Msg[]>([{ from: "bot", text: GREETING }]);
+  const [msgs, setMsgs] = useState<Msg[]>([{ from: "bot", text: chatbot.greeting }]);
   const [input, setInput] = useState("");
   const [typing, setTyping] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
@@ -86,7 +43,7 @@ export function MonoChatbot() {
     setInput("");
     setTyping(true);
     window.setTimeout(() => {
-      setMsgs((m) => [...m, { from: "bot", text: answer(q) }]);
+      setMsgs((m) => [...m, { from: "bot", text: answerFrom(chatbot, q) }]);
       setTyping(false);
     }, 550);
   };
@@ -119,13 +76,13 @@ export function MonoChatbot() {
           open ? "visible translate-y-0 opacity-100" : "invisible translate-y-3 opacity-0"
         }`}
         role="dialog"
-        aria-label="Elysium туслах"
+        aria-label={chatbot.title}
       >
         <div className="flex items-center gap-3 border-b border-white/10 bg-night px-5 py-4">
           <span className="flex h-8 w-8 items-center justify-center rounded-full bg-lime text-sm font-bold text-night">E</span>
           <div>
-            <p className="text-sm font-bold text-white">Elysium туслах</p>
-            <p className="text-[11px] text-white/55">Төслийн мэдээлэл дээр суурилсан</p>
+            <p className="text-sm font-bold text-white">{chatbot.title}</p>
+            <p className="text-[11px] text-white/55">{chatbot.subtitle}</p>
           </div>
         </div>
 
@@ -156,7 +113,7 @@ export function MonoChatbot() {
         </div>
 
         <div className="flex flex-wrap gap-2 px-4 pb-3">
-          {QUICK.map((q) => (
+          {chatbot.quick.map((q) => (
             <button
               key={q}
               type="button"
@@ -179,7 +136,7 @@ export function MonoChatbot() {
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Асуултаа бичнэ үү…"
+            placeholder={chatbot.placeholder}
             className="flex-1 bg-transparent text-sm text-night placeholder:text-night/40 focus:outline-none"
           />
           <button

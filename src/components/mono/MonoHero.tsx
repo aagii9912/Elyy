@@ -8,14 +8,15 @@
 import { Fragment, useEffect, useRef } from "react";
 import { useLenis } from "lenis/react";
 import { gsap } from "@/lib/gsap";
-import { FINAL } from "@/lib/content";
+import type { SiteContent } from "@/lib/site-content";
 
 const FRAME_COUNT = 120;
 const framePath = (i: number) => `/hero-video-frames/frame_${String(i).padStart(3, "0")}.webp`;
 /** Still shown to mobile / reduced-motion: the towers fully risen. */
 const STILL_FRAME = 100;
 
-export function MonoHero() {
+export function MonoHero({ site }: { site: SiteContent }) {
+  const { brand, hero, nav } = site;
   const lenis = useLenis();
   const root = useRef<HTMLElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
@@ -106,11 +107,11 @@ export function MonoHero() {
         <div data-mh-copy className="relative z-10 flex h-full w-full flex-col items-center px-6">
           <div className="flex flex-1 flex-col items-center justify-center text-center">
             <p className="mono-fade-up mb-5 text-[11px] font-semibold uppercase tracking-[0.42em] text-lime md:mb-6 md:text-[12px]" style={{ animationDelay: "0.4s" }}>
-              {FINAL.brandTag}
+              {brand.tag}
             </p>
             <h1 className="text-[clamp(2.6rem,7.5vw,4.6rem)] font-medium uppercase leading-[1.05] tracking-[-0.2px] text-white [text-wrap:balance] drop-shadow-[0_2px_30px_rgba(0,0,0,0.4)]">
               {/* word-by-word mask rise */}
-              {FINAL.brandLine.split(" ").map((word, i) => (
+              {brand.line.split(" ").map((word, i) => (
                 <Fragment key={`${word}-${i}`}>
                   {i > 0 && " "}
                   <span className="mono-word">
@@ -120,7 +121,7 @@ export function MonoHero() {
               ))}
             </h1>
             <p className="mono-fade-up mt-5 max-w-md text-[15px] font-medium leading-relaxed text-white/80 md:text-base" style={{ animationDelay: "0.7s" }}>
-              {FINAL.hero.sub}
+              {hero.sub}
             </p>
           </div>
 
@@ -132,17 +133,17 @@ export function MonoHero() {
               className="mono-fade-up inline-flex w-full items-center justify-center gap-2 rounded-[50px] bg-white px-6 py-4 text-[14px] font-bold uppercase tracking-[-0.2px] text-night transition-transform duration-300 hover:-translate-y-0.5 sm:w-auto"
               style={{ animationDelay: "0.85s" }}
             >
-              {FINAL.hero.cta}
+              {nav.ctaLabel}
             </a>
             <a
-              href="/brochure.pdf"
+              href={brand.brochureUrl}
               target="_blank"
               rel="noopener"
               data-cursor-hover
               className="mono-fade-up inline-flex w-full items-center justify-center gap-2 rounded-[50px] border border-white/40 bg-white/[0.06] px-6 py-4 text-[14px] font-medium uppercase tracking-[-0.2px] text-white backdrop-blur-[16px] transition-colors duration-300 hover:bg-white/15 sm:w-auto"
               style={{ animationDelay: "1s" }}
             >
-              {FINAL.hero.brochure}
+              {nav.brochureLabel}
             </a>
           </div>
         </div>

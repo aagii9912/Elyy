@@ -1,35 +1,18 @@
 /* /mono — Зургийн цомог. Interior renders (зочны / унтлагын / угаалгын
    өрөө) drift sideways on an infinite marquee. */
 
-import { FINAL } from "@/lib/content";
+import type { SiteContent } from "@/lib/site-content";
 import { MonoKicker } from "./shared";
 
-type Img = { src: string; tag: string };
+export function MonoGallery({ site }: { site: SiteContent }) {
+  const { gallery } = site;
 
-const IMAGES: Img[] = [
-  { src: "/images/interior/living-01.jpg", tag: "Зочны өрөө" },
-  { src: "/images/interior/bedroom-01.jpg", tag: "Унтлагын өрөө" },
-  { src: "/images/interior/living-02.jpg", tag: "Зочны өрөө" },
-  { src: "/images/interior/bath-01.jpg", tag: "Угаалгын өрөө" },
-  { src: "/images/interior/living-03.jpg", tag: "Зочны өрөө" },
-  { src: "/images/interior/bedroom-02.jpg", tag: "Унтлагын өрөө" },
-  { src: "/images/interior/living-04.jpg", tag: "Зочны өрөө" },
-  { src: "/images/interior/bedroom-03.jpg", tag: "Унтлагын өрөө" },
-  { src: "/images/interior/living-05.jpg", tag: "Зочны өрөө" },
-  { src: "/images/interior/bath-02.jpg", tag: "Угаалгын өрөө" },
-  { src: "/images/interior/living-06.jpg", tag: "Зочны өрөө" },
-  { src: "/images/interior/bedroom-04.jpg", tag: "Унтлагын өрөө" },
-  { src: "/images/interior/bedroom-05.jpg", tag: "Унтлагын өрөө" },
-  { src: "/images/interior/bath-03.jpg", tag: "Угаалгын өрөө" },
-];
-
-export function MonoGallery() {
   return (
     <section className="overflow-hidden border-b border-night/10 bg-white py-20 md:py-28">
       <div className="mx-auto max-w-[1500px] px-5 md:px-10">
-        <MonoKicker reveal>{FINAL.gallery.kicker}</MonoKicker>
+        <MonoKicker reveal>{gallery.kicker}</MonoKicker>
         <h2 data-reveal="heading" className="mt-4 text-[clamp(1.8rem,3.4vw,2.8rem)] font-extrabold leading-tight tracking-tight text-night">
-          {FINAL.gallery.title}
+          {gallery.title}
         </h2>
       </div>
 
@@ -37,9 +20,9 @@ export function MonoGallery() {
         <div className="green-marquee fast flex w-max gap-5 pr-5">
           {[0, 1].map((half) => (
             <div key={half} className="flex gap-5" aria-hidden={half === 1}>
-              {IMAGES.map((img) => (
+              {gallery.images.map((img, i) => (
                 <figure
-                  key={`${half}-${img.src}`}
+                  key={`${half}-${i}`}
                   className="relative w-[68vw] shrink-0 overflow-hidden rounded-2xl border border-night/10 sm:w-[42vw] md:w-[30vw] lg:w-[24vw]"
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}

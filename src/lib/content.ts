@@ -1,6 +1,8 @@
 /* ============================================================
-   ELYSIUM — Bilingual content (MN default / EN).
-   Single source of truth. Edit copy here.
+   ELYSIUM — Bilingual content (MN default / EN) for the legacy design
+   routes (/classic, /v2, /final). The LIVE site (`/`) does not read
+   this file — its copy lives in `src/lib/site-content.ts` and is
+   edited from `/admin/site`.
    Video, interior & axonometric visuals are placeholders.
    ============================================================ */
 
@@ -434,8 +436,12 @@ export const APARTMENT_IMAGES = [
 export const HERO_IMAGE = "/images/hero-sunset.png";
 
 /* ============================================================
-   FINAL — unified /final page content (MN only; client v2 review).
-   Single source of truth for the redesigned page.
+   FINAL — /final хуудасны контент (MN; захиалагчийн v2 хувилбар).
+
+   ⚠ Үндсэн сайт (`/`) ЭНДЭЭС УНШИХАА БОЛЬСОН. Түүний бүх текст,
+   зураг нь `src/lib/site-content.ts` (өгөгдмөл) + storage-д хадгалсан
+   засвараас бүрдэх ба `/admin/site`-аас удирдагдана. Доорх FINAL нь
+   зөвхөн хуучин `/final` route-д үлдсэн.
    ============================================================ */
 export const FINAL = {
   brandLine: "Elysium Residence",

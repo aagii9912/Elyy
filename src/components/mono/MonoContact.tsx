@@ -5,11 +5,12 @@
    Dark band. */
 
 import { useState } from "react";
-import { FINAL, SITE } from "@/lib/content";
+import type { SiteContent } from "@/lib/site-content";
 import { MonoKicker } from "./shared";
 
-export function MonoContact() {
-  const { contact } = FINAL;
+export function MonoContact({ site }: { site: SiteContent }) {
+  const { contact, brand } = site;
+  const f = contact.form;
   const [sent, setSent] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(false);
@@ -48,15 +49,15 @@ export function MonoContact() {
       <div className="mx-auto max-w-[1500px] px-5 md:px-10">
         <div className="grid gap-12 lg:grid-cols-2 lg:gap-20">
           <div>
-            <MonoKicker tone="dark" reveal>Холбоо барих</MonoKicker>
+            <MonoKicker tone="dark" reveal>{contact.kicker}</MonoKicker>
             <h2 data-reveal="heading" className="mt-5 max-w-md text-[clamp(2rem,4.4vw,3.4rem)] font-extrabold leading-[1.02] tracking-tight">
-              {contact.kicker}
+              {contact.title}
             </h2>
             <p data-reveal="up" className="mt-5 max-w-md text-[15px] leading-relaxed text-white/65">{contact.sub}</p>
 
             <dl className="mt-10 space-y-6 border-t border-white/10 pt-8">
               <div data-reveal="up">
-                <dt className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/45">Утас</dt>
+                <dt className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/45">{contact.labels.phone}</dt>
                 <dd className="mt-1.5">
                   <a
                     href={`tel:+976${contact.phone.replace(/[^0-9]/g, "")}`}
@@ -68,22 +69,22 @@ export function MonoContact() {
                 </dd>
               </div>
               <div data-reveal="up">
-                <dt className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/45">Цагийн хуваарь</dt>
+                <dt className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/45">{contact.labels.hours}</dt>
                 <dd className="mt-1.5 text-lg font-semibold">{contact.hours}</dd>
               </div>
               <div data-reveal="up">
-                <dt className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/45">Борлуулалтын алба</dt>
+                <dt className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/45">{contact.labels.office}</dt>
                 <dd className="mt-1.5 max-w-sm text-lg font-semibold leading-snug text-white/90">{contact.location}</dd>
               </div>
               <div data-reveal="up">
-                <dt className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/45">И-мэйл</dt>
+                <dt className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/45">{contact.labels.email}</dt>
                 <dd className="mt-1.5">
                   <a
-                    href={`mailto:${SITE.email}`}
+                    href={`mailto:${brand.email}`}
                     data-cursor-hover
                     className="text-lg font-semibold underline-offset-4 transition-opacity hover:underline hover:opacity-70"
                   >
-                    {SITE.email}
+                    {brand.email}
                   </a>
                 </dd>
               </div>
@@ -93,12 +94,8 @@ export function MonoContact() {
           <div className="max-w-md lg:pt-3">
             {sent ? (
               <div className="mono-fade-up rounded-2xl border border-white/20 bg-white/5 p-7">
-                <p className="text-xl font-bold leading-relaxed text-white">
-                  Баярлалаа! Таны хүсэлтийг хүлээн авлаа.
-                </p>
-                <p className="mt-2 text-sm text-white/65">
-                  Борлуулалтын менежер тантай удахгүй холбогдож, уулзалтын өдрийг баталгаажуулна.
-                </p>
+                <p className="text-xl font-bold leading-relaxed text-white">{f.successTitle}</p>
+                <p className="mt-2 text-sm text-white/65">{f.successBody}</p>
               </div>
             ) : (
               <form onSubmit={onSubmit} className="flex flex-col gap-7">
@@ -114,7 +111,7 @@ export function MonoContact() {
                   type="text"
                   name="name"
                   required
-                  placeholder="Нэр"
+                  placeholder={f.name}
                   data-reveal="up"
                   className="border-b border-white/30 bg-transparent pb-3 text-lg font-semibold text-white placeholder:text-white/40 focus:border-white focus:outline-none"
                 />
@@ -122,13 +119,13 @@ export function MonoContact() {
                   type="tel"
                   name="phone"
                   required
-                  placeholder="Утас"
+                  placeholder={f.phone}
                   data-reveal="up"
                   className="border-b border-white/30 bg-transparent pb-3 text-lg font-semibold text-white placeholder:text-white/40 focus:border-white focus:outline-none"
                 />
                 <label data-reveal="up" className="block">
                   <span className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.18em] text-white/45">
-                    Уулзах хүссэн огноо
+                    {f.dateLabel}
                   </span>
                   <input
                     type="date"
@@ -138,7 +135,7 @@ export function MonoContact() {
                 </label>
                 {error && (
                   <p role="alert" className="text-sm font-semibold text-red-300">
-                    Илгээхэд алдаа гарлаа. Дахин оролдоно уу, эсвэл {contact.phone} руу залгана уу.
+                    {f.error} {contact.phone}
                   </p>
                 )}
                 <button
@@ -148,7 +145,7 @@ export function MonoContact() {
                   data-reveal="up"
                   className="mt-2 inline-flex items-center justify-center gap-2 self-start rounded-full bg-white px-7 py-3.5 text-sm font-bold text-night transition-transform duration-300 hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-70"
                 >
-                  {busy ? "Илгээж байна…" : "Хүсэлт илгээх"}
+                  {busy ? f.sending : f.submit}
                   <span aria-hidden>→</span>
                 </button>
               </form>

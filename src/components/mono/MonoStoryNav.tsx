@@ -7,14 +7,17 @@
 
 import { useEffect, useState } from "react";
 import { useLenis } from "lenis/react";
+import type { SiteContent } from "@/lib/site-content";
 
-const ITEMS = [
-  { id: "about", label: "Ерөнхий төлөвлөлт" },
-  { id: "elys", label: "ELYS концепц" },
-  { id: "equip", label: "Тоноглол ба шийдэл" },
-];
+/** Хэсгүүдийн id — DOM хэмжилтэд ашиглана (шошго нь админаас ирнэ). */
+const SECTION_IDS = ["about", "elys", "equip"] as const;
 
-export function MonoStoryNav() {
+export function MonoStoryNav({ site }: { site: SiteContent }) {
+  const items = [
+    { id: SECTION_IDS[0], label: site.storyNav.plan },
+    { id: SECTION_IDS[1], label: site.storyNav.elys },
+    { id: SECTION_IDS[2], label: site.storyNav.equip },
+  ];
   const lenis = useLenis();
   const [active, setActive] = useState(0);
   const [visible, setVisible] = useState(false);
@@ -24,7 +27,7 @@ export function MonoStoryNav() {
     const measure = () => {
       raf = 0;
       const mid = window.scrollY + window.innerHeight * 0.5;
-      const secs = ITEMS.map((it) => document.getElementById(it.id));
+      const secs = SECTION_IDS.map((id) => document.getElementById(id));
       if (secs.some((s) => !s)) return;
       const first = secs[0]!;
       const last = secs[secs.length - 1]!;
@@ -67,7 +70,7 @@ export function MonoStoryNav() {
         visible ? "translate-x-0 opacity-100" : "pointer-events-none translate-x-4 opacity-0"
       }`}
     >
-      {ITEMS.map((it, i) => (
+      {items.map((it, i) => (
         <button
           key={it.id}
           type="button"

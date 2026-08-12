@@ -10,18 +10,10 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useLenis } from "lenis/react";
 import { Logo, LogoMark } from "@/components/Logo";
-import { FINAL } from "@/lib/content";
+import type { SiteContent } from "@/lib/site-content";
 
-const NAV = [
-  { label: "Төслийн тухай", href: "#about" },
-  { label: "Давуу тал", href: "#elys" },
-  { label: "Өрөөний сонголт", href: "#apartments" },
-  { label: "Хэрэгжүүлэгч", href: "#developer" },
-  { label: "Байршил", href: "#location" },
-  { label: "FAQ", href: "#faq" },
-];
-
-export function MonoHeader() {
+export function MonoHeader({ site }: { site: SiteContent }) {
+  const { nav, brand } = site;
   const lenis = useLenis();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -77,7 +69,7 @@ export function MonoHeader() {
         </Link>
 
         <nav className="ml-4 hidden items-center gap-6 lg:flex xl:gap-8">
-          {NAV.map((item) => (
+          {nav.items.map((item) => (
             <a
               key={item.href}
               href={item.href}
@@ -94,7 +86,7 @@ export function MonoHeader() {
 
         <div className="ml-auto flex items-center gap-2.5">
           <a
-            href="/brochure.pdf"
+            href={brand.brochureUrl}
             target="_blank"
             rel="noopener"
             data-cursor-hover
@@ -104,7 +96,7 @@ export function MonoHeader() {
                 : "border-white/40 text-white hover:bg-white/10"
             }`}
           >
-            {FINAL.hero.brochure} ↓
+            {nav.brochureLabel} ↓
           </a>
           <a
             href="#contact"
@@ -114,11 +106,11 @@ export function MonoHeader() {
               scrolled ? "bg-night text-white" : "bg-white text-night"
             }`}
           >
-            {FINAL.hero.cta}
+            {nav.ctaLabel}
           </a>
           <button
             type="button"
-            aria-label="Цэс"
+            aria-label={nav.menuAria}
             aria-expanded={open}
             onClick={() => setOpen((v) => !v)}
             className={`relative z-50 flex h-10 w-10 flex-col items-center justify-center gap-[5px] lg:hidden ${open ? "text-night" : ""}`}
@@ -138,7 +130,7 @@ export function MonoHeader() {
         }`}
       >
         <nav className="mt-24 flex flex-col gap-2.5 px-7">
-          {NAV.map((item) => (
+          {nav.items.map((item) => (
             <a
               key={item.href}
               href={item.href}
@@ -151,10 +143,10 @@ export function MonoHeader() {
         </nav>
         <div className="mt-auto flex flex-col gap-3 border-t border-night/10 px-7 py-7">
           <a href="#contact" onClick={(e) => go(e, "#contact")} className="rounded-full bg-night px-6 py-3 text-center text-sm font-bold text-white">
-            {FINAL.hero.cta}
+            {nav.ctaLabel}
           </a>
-          <a href="/brochure.pdf" target="_blank" rel="noopener" className="rounded-full border border-night/25 px-6 py-3 text-center text-sm font-semibold">
-            {FINAL.hero.brochure} ↓
+          <a href={brand.brochureUrl} target="_blank" rel="noopener" className="rounded-full border border-night/25 px-6 py-3 text-center text-sm font-semibold">
+            {nav.brochureLabel} ↓
           </a>
         </div>
       </div>

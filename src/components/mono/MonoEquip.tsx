@@ -5,23 +5,23 @@
    (frames 85–121) with connector lines drawing toward sharp spec
    cards. */
 
+import type { SiteContent } from "@/lib/site-content";
 import { MonoScrollStory } from "./MonoScrollStory";
 
-const POINTS = [
-  { n: "01", heading: "Дулаан алдагдал багатай цонх", text: "Гурван давхар шилтэй, эрчим хүч хэмнэх цонхны систем — өвлийн дулааныг дотогшоо хадгална." },
-  { n: "02", heading: "Ухаалаг нэвтрэлтийн систем", text: "Нүүр таних + RFID нэгдсэн хяналт — зөвхөн оршин суугчид болон зөвшөөрөлтэй зочид нэвтэрнэ." },
-  { n: "03", heading: "Солонгос лифт", text: "Өндөр хурдны, ачаалал даацтай зорчигчийн лифт — хүлээх цагийг багасгана." },
-  { n: "04", heading: "Агаар сэлгэлтийн систем", text: "Шүүлттэй агааржуулалт — тоос, хийг шүүж, айл бүрд цэвэр агаар орж байршуулна." },
-];
+export function MonoEquip({ site }: { site: SiteContent }) {
+  const points = site.equip.items.map((item, i) => ({
+    n: String(i + 1).padStart(2, "0"),
+    heading: item.title,
+    text: item.body,
+  }));
 
-export function MonoEquip() {
   return (
     <MonoScrollStory
       id="equip"
       chapter="03"
-      kicker="Дэлгэрэнгүйд нухацтай"
-      title="Тоноглол ба шийдэл"
-      points={POINTS}
+      kicker={site.equip.kicker}
+      title={site.equip.title}
+      points={points}
       frameStart={85}
       frameEnd={121}
       variant="callouts"

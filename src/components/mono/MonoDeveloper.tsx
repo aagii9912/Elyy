@@ -15,25 +15,28 @@
 
 import { useEffect, useRef } from "react";
 import { gsap } from "@/lib/gsap";
-import { FINAL } from "@/lib/content";
-import { PROJECT_PHOTOS } from "@/lib/projects";
+import type { SiteContent } from "@/lib/site-content";
 import { MonoKicker } from "./shared";
 
 const YEAR_START = 2006;
 const YEAR_END = 2026;
 
-export function MonoDeveloper() {
+/** "2014–2019" → 2014. Буруу бичсэн ч эрэмбэ унахгүй. */
+const startYear = (years: string) => {
+  const n = parseInt(years, 10);
+  return Number.isFinite(n) ? n : 0;
+};
+
+export function MonoDeveloper({ site }: { site: SiteContent }) {
   const root = useRef<HTMLElement>(null);
   const track = useRef<HTMLDivElement>(null);
   const prog = useRef<HTMLDivElement>(null);
   const mark = useRef<HTMLDivElement>(null);
   const mobileProg = useRef<HTMLDivElement>(null);
-  const { developer: d } = FINAL;
+  const d = site.developer;
 
-  /* chronological stations (project + its image, sorted by start year) */
-  const stations = d.projects
-    .map((p, i) => ({ ...p, image: PROJECT_PHOTOS[i] }))
-    .sort((a, b) => parseInt(a.years, 10) - parseInt(b.years, 10));
+  /* chronological stations (sorted by start year) */
+  const stations = [...d.projects].sort((a, b) => startYear(a.years) - startYear(b.years));
 
   useEffect(() => {
     const sec = root.current;
@@ -80,7 +83,7 @@ export function MonoDeveloper() {
 
         // the running year: full-pin progress → year, anchored so the
         // counter reads a station's start year exactly when it is centred
-        const years = d.projects.map((p) => parseInt(p.years, 10)).sort((a, b) => a - b);
+        const years = d.projects.map((p) => startYear(p.years)).sort((a, b) => a - b);
         const anchors: [number, number][] = [
           [0, YEAR_START],
           ...years.map(
@@ -186,9 +189,7 @@ export function MonoDeveloper() {
       });
     }, sec);
     return () => ctx.revert();
-    // FINAL is a module constant — the project list never changes at runtime
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [d.projects]);
 
   return (
     <section id="developer" ref={root} className="relative border-b border-night/10 bg-night md:h-[380vh]">
@@ -215,11 +216,11 @@ export function MonoDeveloper() {
           <div data-reveal="up" className="mt-6 flex gap-10">
             <div>
               <p className="text-2xl font-extrabold text-white md:text-3xl">{d.since}</p>
-              <p className="mt-1 text-[11px] font-medium uppercase tracking-[0.14em] text-white/45">оноос</p>
+              <p className="mt-1 text-[11px] font-medium uppercase tracking-[0.14em] text-white/45">{d.sinceLabel}</p>
             </div>
             <div>
               <p className="text-2xl font-extrabold text-white md:text-3xl">{d.projectCount}</p>
-              <p className="mt-1 text-[11px] font-medium uppercase tracking-[0.14em] text-white/45">төсөл</p>
+              <p className="mt-1 text-[11px] font-medium uppercase tracking-[0.14em] text-white/45">{d.projectCountLabel}</p>
             </div>
           </div>
         </div>
@@ -238,7 +239,7 @@ export function MonoDeveloper() {
             />
 
             {stations.map((p, i) => (
-              <div key={p.title} data-reveal="up" data-md-station className="relative md:w-[30vw] md:shrink-0 lg:w-[26vw]">
+              <div key={`${p.title}-${i}`} data-reveal="up" data-md-station className="relative md:w-[30vw] md:shrink-0 lg:w-[26vw]">
                 {/* year row — fixed height so the rail lines up across stations */}
                 <div data-md-year className="flex h-20 items-end justify-between pb-3">
                   <p className="text-[clamp(2rem,3.6vw,3.2rem)] font-bold leading-none tracking-tight text-white/90">
@@ -265,8 +266,8 @@ export function MonoDeveloper() {
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       data-md-img
-                      src={p.image.src}
-                      alt={p.image.alt}
+                      src={p.image}
+                      alt={`${p.title} — ${d.name}`}
                       loading="lazy"
                       decoding="async"
                       className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
@@ -278,7 +279,7 @@ export function MonoDeveloper() {
                     <p className="mt-1 text-[13px] text-white/65">{p.meta}</p>
                   </div>
                   <span className="absolute right-4 top-4 rounded-full bg-night/60 px-3 py-1 text-[11px] font-bold text-white/85 backdrop-blur">
-                    {p.units} айл
+                    {p.units}
                   </span>
                 </article>
               </div>
@@ -295,7 +296,7 @@ export function MonoDeveloper() {
         </div>
 
         <p className="relative z-10 mt-6 hidden px-10 text-[11px] font-medium uppercase tracking-[0.24em] text-white/40 md:block">
-          Гүйлгэж үргэлжлүүлэх →
+          {d.scrollHint}
         </p>
       </div>
     </section>

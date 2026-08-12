@@ -3,25 +3,26 @@
 /* /mono — FAQ accordion (soft height+opacity expand). */
 
 import { useState } from "react";
-import { FINAL } from "@/lib/content";
+import type { SiteContent } from "@/lib/site-content";
 import { MonoKicker } from "./shared";
 
-export function MonoFaq() {
+export function MonoFaq({ site }: { site: SiteContent }) {
+  const { faq } = site;
   const [open, setOpen] = useState<number | null>(0);
 
   return (
     <section id="faq" className="border-b border-night/10 bg-white py-20 md:py-28">
       <div className="mx-auto max-w-[1100px] px-5 md:px-10">
-        <MonoKicker reveal>{FINAL.faq.kicker}</MonoKicker>
+        <MonoKicker reveal>{faq.kicker}</MonoKicker>
         <h2 data-reveal="heading" className="mt-4 text-[clamp(1.8rem,3.4vw,2.8rem)] font-extrabold leading-tight tracking-tight text-night">
-          Түгээмэл асуулт, хариулт
+          {faq.title}
         </h2>
 
         <div className="mt-10 divide-y divide-night/10 border-y border-night/10">
-          {FINAL.faq.items.map((item, i) => {
+          {faq.items.map((item, i) => {
             const isOpen = open === i;
             return (
-              <div key={item.q} data-reveal="up">
+              <div key={`${item.q}-${i}`} data-reveal="up">
                 <button
                   type="button"
                   onClick={() => setOpen(isOpen ? null : i)}

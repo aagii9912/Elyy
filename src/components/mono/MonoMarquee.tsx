@@ -1,10 +1,11 @@
 /* /mono — slogan band: the three "Form Follows …" lines on an infinite
    marquee. Black text, lime diamond as the lone colour accent. */
 
-const SLOGANS = ["Form Follows Function", "Form Follows Comfort", "Form Follows Serenity"];
+import type { SiteContent } from "@/lib/site-content";
 
-export function MonoMarquee() {
-  const track = [...SLOGANS, ...SLOGANS, ...SLOGANS];
+export function MonoMarquee({ site }: { site: SiteContent }) {
+  const slogans = site.marquee.slogans;
+  const track = [...slogans, ...slogans, ...slogans];
   return (
     <div aria-hidden data-reveal="up" className="overflow-hidden border-b border-night/10 bg-white py-5 md:py-7">
       <div className="green-marquee flex w-max items-center gap-10 whitespace-nowrap pr-10">

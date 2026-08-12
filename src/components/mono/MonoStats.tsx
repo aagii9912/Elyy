@@ -12,24 +12,24 @@
    The section runs taller than the default chapter so the last point —
    the 2027 handover date — gets the same dwell as the other three. */
 
-import { FINAL } from "@/lib/content";
+import type { SiteContent } from "@/lib/site-content";
 import { MonoScrollStory } from "./MonoScrollStory";
 
-const POINTS = [
-  { n: "01", heading: "506", text: "айлын орон сууц · 4 блок" },
-  { n: "02", heading: "85", accent: "%", text: "нийтийн эзэмшлийн талбай — ногоон байгууламж, орон зай" },
-  { n: "03", heading: "513", text: "автомашины зогсоол" },
-  { n: "04", heading: "2027 · II", text: "улиралд ашиглалтад орно" },
-];
+export function MonoStats({ site }: { site: SiteContent }) {
+  const points = site.plan.points.map((p, i) => ({
+    n: String(i + 1).padStart(2, "0"),
+    heading: p.heading,
+    accent: p.accent || undefined,
+    text: p.text,
+  }));
 
-export function MonoStats() {
   return (
     <MonoScrollStory
       id="about"
       chapter="01"
-      kicker={FINAL.stats.kicker}
-      title={FINAL.about.title}
-      points={POINTS}
+      kicker={site.plan.kicker}
+      title={site.plan.title}
+      points={points}
       frameStart={1}
       frameEnd={180}
       frameDir="/plan-frames"

@@ -6,8 +6,9 @@
    авсан). Эх файлуудыг 4:3 болгож хэрчээд 1600×1200 JPEG болгосон —
    дэлгэрэнгүйг docs/ASSETS-NEEDED.md §7-оос үз.
 
-   Зураг солих бол зөвхөн энэ файлын `src`/`alt`-ыг өөрчилнө: / (MonoDeveloper)
-   болон /final (FinalProjects) хоёул эндээс уншина. */
+   Зөвхөн хуучин `/final` (FinalProjects) эндээс уншина. Үндсэн сайтын
+   (`/`) төслийн зургууд нь админаас (`/admin/site` → Төсөл хэрэгжүүлэгч)
+   удирдагдана — `src/lib/site-content.ts`-ийг үз. */
 
 export type ProjectPhoto = {
   /** файлын нэр болгож ашиглах slug — public/images/projects/<slug>.jpg */

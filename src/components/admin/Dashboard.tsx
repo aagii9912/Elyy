@@ -77,9 +77,12 @@ export function Dashboard({
       <header className="mb-8 flex flex-wrap items-center gap-3">
         <div>
           <h1 className="text-2xl font-extrabold tracking-tight text-neutral-900">Elysium — Админ</h1>
-          <p className="text-sm text-neutral-500">Эвентийн landing page удирдлага</p>
+          <p className="text-sm text-neutral-500">Сайтын контент, эвентийн landing page удирдлага</p>
         </div>
-        <div className="ml-auto flex items-center gap-2">
+        <div className="ml-auto flex flex-wrap items-center gap-2">
+          <Button variant="primary" type="button" onClick={() => router.push("/admin/site")}>
+            Сайтын контент
+          </Button>
           <Button variant="dark" type="button" onClick={() => router.push("/admin/leads")}>
             Бүртгэл
           </Button>

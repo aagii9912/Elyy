@@ -15,6 +15,7 @@ import { promises as fs } from "fs";
 import path from "path";
 import { randomUUID } from "crypto";
 import type { EventDoc } from "./events";
+import type { SiteContent } from "./site-content";
 
 export type UploadInput = { buffer: Buffer; filename: string; contentType: string };
 
@@ -33,6 +34,10 @@ export type LeadInput = {
 export type LeadDoc = LeadInput & { id: string; createdAt: string };
 
 export interface Store {
+  /** Үндсэн сайтын контент (хадгалаагүй бол `null`). Түүхий JSON —
+   *  дуудагч тал `mergeSiteContent`-оор өгөгдмөл дээр давхарлана. */
+  getSiteContent(): Promise<unknown | null>;
+  saveSiteContent(content: SiteContent): Promise<void>;
   listEvents(): Promise<EventDoc[]>;
   getEvent(id: string): Promise<EventDoc | null>;
   getEventBySlug(slug: string): Promise<EventDoc | null>;
@@ -129,7 +134,29 @@ function isUniqueViolation(error: { code?: string; message?: string } | null): b
   return error?.code === "23505" || Boolean(error?.message?.includes("duplicate key value"));
 }
 
+/** Үндсэн сайтын контентын мөрийн түлхүүр — үргэлж ганц мөр. */
+const SITE_ROW_ID = "main";
+
 class SupabaseStore implements Store {
+  async getSiteContent(): Promise<unknown | null> {
+    const client = await sb();
+    const { data, error } = await client
+      .from("site_content")
+      .select("content")
+      .eq("id", SITE_ROW_ID)
+      .maybeSingle();
+    if (error) throw new Error(`Supabase getSiteContent: ${error.message}`);
+    return data ? (data as { content: unknown }).content : null;
+  }
+
+  async saveSiteContent(content: SiteContent): Promise<void> {
+    const client = await sb();
+    const { error } = await client
+      .from("site_content")
+      .upsert({ id: SITE_ROW_ID, content, updated_at: new Date().toISOString() });
+    if (error) throw new Error(`Supabase saveSiteContent: ${error.message}`);
+  }
+
   async listEvents(): Promise<EventDoc[]> {
     const client = await sb();
     const { data, error } = await client
@@ -245,9 +272,23 @@ class SupabaseStore implements Store {
 const DATA_DIR = path.join(process.cwd(), ".data");
 const DATA_FILE = path.join(DATA_DIR, "events.json");
 const LEADS_FILE = path.join(DATA_DIR, "leads.json");
+const SITE_FILE = path.join(DATA_DIR, "site.json");
 const UPLOAD_DIR = path.join(process.cwd(), "public", "uploads");
 
 class LocalStore implements Store {
+  async getSiteContent(): Promise<unknown | null> {
+    try {
+      return JSON.parse(await fs.readFile(SITE_FILE, "utf8"));
+    } catch {
+      return null;
+    }
+  }
+
+  async saveSiteContent(content: SiteContent): Promise<void> {
+    await fs.mkdir(DATA_DIR, { recursive: true });
+    await fs.writeFile(SITE_FILE, JSON.stringify(content, null, 2), "utf8");
+  }
+
   private async readAll(): Promise<EventDoc[]> {
     try {
       const raw = await fs.readFile(DATA_FILE, "utf8");

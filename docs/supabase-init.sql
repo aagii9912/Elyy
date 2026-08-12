@@ -45,6 +45,18 @@ create index if not exists event_leads_created_idx on public.event_leads (create
 
 alter table public.event_leads enable row level security;
 
+-- ── 1c. site_content хүснэгт (үндсэн сайтын контент) ────────
+-- Ганц мөр (id = 'main') дотор үндсэн хуудасны бүх текст/зураг
+-- JSON хэлбэрээр хадгалагдана. `/admin/site` эндээс уншиж бичнэ.
+-- Мөр байхгүй бол сайт кодон дахь өгөгдмөл контентоор ажиллана.
+create table if not exists public.site_content (
+  id         text        primary key,
+  content    jsonb       not null,
+  updated_at timestamptz not null default now()
+);
+
+alter table public.site_content enable row level security;
+
 -- ── 2. RLS ──────────────────────────────────────────────────
 -- Апп зөвхөн service_role key-ээр (сервер талаас) ханддаг.
 -- service_role нь RLS-ийг тойрдог тул policy шаардлагагүй.
@@ -69,6 +81,7 @@ create policy "elysium_media_public_read"
 select
   (select count(*) from public.events)                                        as events_count,
   (select count(*) from public.event_leads)                                   as leads_count,
+  (select count(*) from public.site_content)                                  as site_content_rows,
   (select relrowsecurity from pg_class where oid = 'public.events'::regclass)      as rls_on,
   (select relrowsecurity from pg_class where oid = 'public.event_leads'::regclass) as leads_rls_on,
   (select public from storage.buckets where id = 'elysium-media')             as bucket_public;
