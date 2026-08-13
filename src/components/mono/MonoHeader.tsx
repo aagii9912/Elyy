@@ -4,20 +4,36 @@
    frosted white with black text once the light page begins. Hides on
    scroll-down, returns on scroll-up. The mobile menu is a SIBLING of
    <header> (not a child) because the header's transform/backdrop-filter
-   would otherwise become the containing block for its fixed panel. */
+   would otherwise become the containing block for its fixed panel.
+
+   `variant`:
+     home — нүүр хуудас: hash холбоос зөөлөн гүйлгэнэ, hero дээр тунгалаг.
+     page — дотоод хуудас (ж: /news): үргэлж цагаан, hash холбоос нүүр
+            хуудасны тухайн хэсэг рүү (`/#about`) шилжинэ. */
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useLenis } from "lenis/react";
 import { Logo, LogoMark } from "@/components/Logo";
 import type { SiteContent } from "@/lib/site-content";
+import { NEWS_PATH } from "@/lib/news-links";
 
-export function MonoHeader({ site }: { site: SiteContent }) {
-  const { nav, brand } = site;
+export function MonoHeader({
+  site,
+  variant = "home",
+}: {
+  site: SiteContent;
+  variant?: "home" | "page";
+}) {
+  const { nav, brand, news } = site;
   const lenis = useLenis();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [hidden, setHidden] = useState(false);
+
+  const isHome = variant === "home";
+  /* Дотоод хуудсанд толгой хэсэг үргэлж цагаан (ард нь dark hero байхгүй). */
+  const solid = scrolled || !isHome;
 
   useEffect(() => {
     let lastY = window.scrollY;
@@ -35,7 +51,15 @@ export function MonoHeader({ site }: { site: SiteContent }) {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  const isHash = (href: string) => href.startsWith("#");
+  /** Дотоод хуудсанд `#about` → `/#about` (нүүр рүү буцаж очно). */
+  const resolve = (href: string) => (isHash(href) && !isHome ? `/${href}` : href);
+
   const go = (e: React.MouseEvent, href: string) => {
+    if (!isHome || !isHash(href)) {
+      setOpen(false);
+      return; // жирийн навигаци
+    }
     e.preventDefault();
     const el = document.querySelector(href);
     if (el) {
@@ -45,83 +69,94 @@ export function MonoHeader({ site }: { site: SiteContent }) {
     setOpen(false);
   };
 
+  /* Мэдээний холбоос үргэлж цэсэнд байна. Админ гараар нэмсэн бол
+     давхардуулахгүй. */
+  const items = [
+    ...nav.items.filter((i) => i.href !== NEWS_PATH),
+    { label: news.navLabel, href: NEWS_PATH },
+  ];
+
   return (
     <>
-    <header
-      className={`fixed inset-x-0 top-0 z-50 font-gilroy transition-[background-color,box-shadow,backdrop-filter,transform] duration-500 ${
-        hidden && !open ? "-translate-y-full" : ""
-      } ${
-        open
-          ? "bg-white text-night"
-          : scrolled
-            ? "bg-white/90 text-night shadow-[0_1px_0_rgba(21,23,23,0.08)] backdrop-blur-xl"
-            : "bg-transparent text-white"
-      }`}
-    >
-      <div
-        className={`mx-auto flex max-w-[1600px] items-center gap-6 px-5 transition-[height] duration-500 md:px-10 ${
-          scrolled ? "h-[58px]" : "h-[80px]"
+      <header
+        className={`fixed inset-x-0 top-0 z-50 font-gilroy transition-[background-color,box-shadow,backdrop-filter,transform] duration-500 ${
+          hidden && !open ? "-translate-y-full" : ""
+        } ${
+          open
+            ? "bg-white text-night"
+            : solid
+              ? "bg-white/90 text-night shadow-[0_1px_0_rgba(21,23,23,0.08)] backdrop-blur-xl"
+              : "bg-transparent text-white"
         }`}
       >
-        <Link href="#top" onClick={(e) => go(e, "#top")} aria-label="Elysium" className="flex items-center gap-2.5">
-          <LogoMark className="h-[18px] w-auto" />
-          <Logo className="h-3 w-auto" />
-        </Link>
+        <div
+          className={`mx-auto flex max-w-[1600px] items-center gap-6 px-5 transition-[height] duration-500 md:px-10 ${
+            scrolled ? "h-[58px]" : "h-[80px]"
+          }`}
+        >
+          <Link
+            href={isHome ? "#top" : "/"}
+            onClick={(e) => go(e, "#top")}
+            aria-label="Elysium"
+            className="flex items-center gap-2.5"
+          >
+            <LogoMark className="h-[18px] w-auto" />
+            <Logo className="h-3 w-auto" />
+          </Link>
 
-        <nav className="ml-4 hidden items-center gap-6 lg:flex xl:gap-8">
-          {nav.items.map((item) => (
+          <nav className="ml-4 hidden items-center gap-6 lg:flex xl:gap-8">
+            {items.map((item) => (
+              <Link
+                key={item.href}
+                href={resolve(item.href)}
+                onClick={(e) => go(e, item.href)}
+                data-cursor-hover
+                className={`text-[11px] font-medium uppercase tracking-[0.08em] transition-colors ${
+                  solid ? "text-night/60 hover:text-night" : "text-white/70 hover:text-white"
+                }`}
+              >
+                {item.label}
+              </Link>
+            ))}
+          </nav>
+
+          <div className="ml-auto flex items-center gap-2.5">
             <a
-              key={item.href}
-              href={item.href}
-              onClick={(e) => go(e, item.href)}
+              href={brand.brochureUrl}
+              target="_blank"
+              rel="noopener"
               data-cursor-hover
-              className={`text-[11px] font-medium uppercase tracking-[0.08em] transition-colors ${
-                scrolled ? "text-night/60 hover:text-night" : "text-white/70 hover:text-white"
+              className={`hidden items-center gap-2 rounded-full border px-5 py-2 text-[11px] font-medium uppercase tracking-[0.08em] transition-colors duration-300 sm:inline-flex ${
+                solid
+                  ? "border-night/25 text-night hover:bg-night hover:text-white"
+                  : "border-white/40 text-white hover:bg-white/10"
               }`}
             >
-              {item.label}
+              {nav.brochureLabel} ↓
             </a>
-          ))}
-        </nav>
-
-        <div className="ml-auto flex items-center gap-2.5">
-          <a
-            href={brand.brochureUrl}
-            target="_blank"
-            rel="noopener"
-            data-cursor-hover
-            className={`hidden items-center gap-2 rounded-full border px-5 py-2 text-[11px] font-medium uppercase tracking-[0.08em] transition-colors duration-300 sm:inline-flex ${
-              scrolled
-                ? "border-night/25 text-night hover:bg-night hover:text-white"
-                : "border-white/40 text-white hover:bg-white/10"
-            }`}
-          >
-            {nav.brochureLabel} ↓
-          </a>
-          <a
-            href="#contact"
-            onClick={(e) => go(e, "#contact")}
-            data-cursor-hover
-            className={`hidden items-center gap-2 rounded-full px-5 py-2 text-[11px] font-bold uppercase tracking-[0.08em] transition-transform duration-300 hover:-translate-y-0.5 md:inline-flex ${
-              scrolled ? "bg-night text-white" : "bg-white text-night"
-            }`}
-          >
-            {nav.ctaLabel}
-          </a>
-          <button
-            type="button"
-            aria-label={nav.menuAria}
-            aria-expanded={open}
-            onClick={() => setOpen((v) => !v)}
-            className={`relative z-50 flex h-10 w-10 flex-col items-center justify-center gap-[5px] lg:hidden ${open ? "text-night" : ""}`}
-          >
-            <span className={`h-0.5 w-6 bg-current transition-transform duration-300 ${open ? "translate-y-[3px] rotate-45" : ""}`} />
-            <span className={`h-0.5 w-6 bg-current transition-transform duration-300 ${open ? "-translate-y-[3px] -rotate-45" : ""}`} />
-          </button>
+            <Link
+              href={resolve("#contact")}
+              onClick={(e) => go(e, "#contact")}
+              data-cursor-hover
+              className={`hidden items-center gap-2 rounded-full px-5 py-2 text-[11px] font-bold uppercase tracking-[0.08em] transition-transform duration-300 hover:-translate-y-0.5 md:inline-flex ${
+                solid ? "bg-night text-white" : "bg-white text-night"
+              }`}
+            >
+              {nav.ctaLabel}
+            </Link>
+            <button
+              type="button"
+              aria-label={nav.menuAria}
+              aria-expanded={open}
+              onClick={() => setOpen((v) => !v)}
+              className={`relative z-50 flex h-10 w-10 flex-col items-center justify-center gap-[5px] lg:hidden ${open ? "text-night" : ""}`}
+            >
+              <span className={`h-0.5 w-6 bg-current transition-transform duration-300 ${open ? "translate-y-[3px] rotate-45" : ""}`} />
+              <span className={`h-0.5 w-6 bg-current transition-transform duration-300 ${open ? "-translate-y-[3px] -rotate-45" : ""}`} />
+            </button>
+          </div>
         </div>
-      </div>
-
-    </header>
+      </header>
 
       {/* Mobile menu — sibling of <header>, see note above */}
       <div
@@ -130,22 +165,31 @@ export function MonoHeader({ site }: { site: SiteContent }) {
         }`}
       >
         <nav className="mt-24 flex flex-col gap-2.5 px-7">
-          {nav.items.map((item) => (
-            <a
+          {items.map((item) => (
+            <Link
               key={item.href}
-              href={item.href}
+              href={resolve(item.href)}
               onClick={(e) => go(e, item.href)}
               className="text-[1.75rem] font-extrabold leading-tight tracking-[-0.01em]"
             >
               {item.label}
-            </a>
+            </Link>
           ))}
         </nav>
         <div className="mt-auto flex flex-col gap-3 border-t border-night/10 px-7 py-7">
-          <a href="#contact" onClick={(e) => go(e, "#contact")} className="rounded-full bg-night px-6 py-3 text-center text-sm font-bold text-white">
+          <Link
+            href={resolve("#contact")}
+            onClick={(e) => go(e, "#contact")}
+            className="rounded-full bg-night px-6 py-3 text-center text-sm font-bold text-white"
+          >
             {nav.ctaLabel}
-          </a>
-          <a href={brand.brochureUrl} target="_blank" rel="noopener" className="rounded-full border border-night/25 px-6 py-3 text-center text-sm font-semibold">
+          </Link>
+          <a
+            href={brand.brochureUrl}
+            target="_blank"
+            rel="noopener"
+            className="rounded-full border border-night/25 px-6 py-3 text-center text-sm font-semibold"
+          >
             {nav.brochureLabel} ↓
           </a>
         </div>

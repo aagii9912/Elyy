@@ -25,6 +25,7 @@ type SectionId =
   | "contact"
   | "managers"
   | "faq"
+  | "news"
   | "footer"
   | "chatbot"
   | "seo";
@@ -44,6 +45,7 @@ const SECTIONS: { id: SectionId; label: string; hint: string }[] = [
   { id: "contact", label: "Холбоо барих", hint: "Утас, хаяг, маягт" },
   { id: "managers", label: "Борлуулалтын баг", hint: "Менежерүүд" },
   { id: "faq", label: "Түгээмэл асуулт", hint: "Асуулт & хариулт" },
+  { id: "news", label: "Мэдээ (хуудасны текст)", hint: "Нийтлэлүүд → /admin/news" },
   { id: "footer", label: "Хөл хэсэг", hint: "Цэс, сошиал" },
   { id: "chatbot", label: "Чатбот", hint: "Мэндчилгээ, хариултууд" },
   { id: "seo", label: "SEO / мета", hint: "Хайлтын гарчиг, тайлбар" },
@@ -1223,6 +1225,80 @@ function renderSection(
                 </>
               )}
             </ListEditor>
+          </Card>
+        </>
+      );
+
+    /* ---------------------------------------------------------- */
+    case "news":
+      return (
+        <>
+          <Card
+            title="Мэдээний хуудас"
+            right={
+              <Link href="/admin/news" className="text-[13px] font-semibold text-[#2a5124] hover:underline">
+                Нийтлэлүүд →
+              </Link>
+            }
+          >
+            <p className="mb-4 text-xs text-neutral-400">
+              Энд зөвхөн <b>/news</b> хуудасны бэлэн текстийг засна. Нийтлэл өөрөө нэмэх,
+              засах, устгах бол <b>Мэдээ</b> хэсэг рүү орно уу.
+            </p>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field label="Цэсний нэр" hint="Толгой болон хөлний цэсэнд харагдана.">
+                <TextInput
+                  value={c.news.navLabel}
+                  onChange={(e) => edit((d) => void (d.news.navLabel = e.target.value))}
+                />
+              </Field>
+              <Field label="Kicker">
+                <TextInput
+                  value={c.news.kicker}
+                  onChange={(e) => edit((d) => void (d.news.kicker = e.target.value))}
+                />
+              </Field>
+              <Field label="Гарчиг">
+                <TextInput
+                  value={c.news.title}
+                  onChange={(e) => edit((d) => void (d.news.title = e.target.value))}
+                />
+              </Field>
+              <Field label="“Дэлгэрэнгүй” товч">
+                <TextInput
+                  value={c.news.readMore}
+                  onChange={(e) => edit((d) => void (d.news.readMore = e.target.value))}
+                />
+              </Field>
+              <Field label="Буцах холбоос">
+                <TextInput
+                  value={c.news.backLabel}
+                  onChange={(e) => edit((d) => void (d.news.backLabel = e.target.value))}
+                />
+              </Field>
+              <Field label="“Бусад мэдээ” гарчиг">
+                <TextInput
+                  value={c.news.moreTitle}
+                  onChange={(e) => edit((d) => void (d.news.moreTitle = e.target.value))}
+                />
+              </Field>
+            </div>
+            <div className="mt-4 space-y-4">
+              <Field label="Тайлбар">
+                <TextArea
+                  rows={3}
+                  value={c.news.sub}
+                  onChange={(e) => edit((d) => void (d.news.sub = e.target.value))}
+                />
+              </Field>
+              <Field label="Мэдээ байхгүй үеийн текст">
+                <TextArea
+                  rows={2}
+                  value={c.news.empty}
+                  onChange={(e) => edit((d) => void (d.news.empty = e.target.value))}
+                />
+              </Field>
+            </div>
           </Card>
         </>
       );

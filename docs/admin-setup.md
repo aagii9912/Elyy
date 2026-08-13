@@ -11,6 +11,10 @@ landing page generator)-ыг production-д (Vercel) ажиллуулах тох�
   засварлагч.** Толгой цэс, hero, бүх хэсгийн гарчиг/тайлбар, өрөөний
   типүүд, өмнөх төслүүд, зургийн цомог, байршил, холбоо барих, менежерүүд,
   FAQ, хөл хэсэг, чатбот, SEO мета — бүгд эндээс засагдана.
+- **`/admin/news`** — **мэдээ / нийтлэлийн удирдлага.** Нийтлэл нэмэх, засах,
+  зураг оруулах, ноорог ↔ нийтлэх. Public хаяг: `elysium.mn/news` (жагсаалт),
+  `elysium.mn/news/<slug>` (дэлгэрэнгүй). Толгой болон хөлний цэсэнд
+  “Мэдээ” холбоос автоматаар байрлана.
 - **Эвент үүсгэх** → `/admin` дээрээс нэр өгөөд үүсгэнэ. Public хаяг нь `elysium.mn/<slug>`.
 - **Lead capture** — эвентийн маягт нь одоо байгаа `/api/contact` → Google Sheet рүү очно.
   Sheet-д `Эх сурвалж = event/<slug>`, `Эвент = <нэр>` гэж бичигдэнэ.
@@ -25,8 +29,8 @@ npm run dev
 ```
 
 - Нээх: `http://localhost:3000/admin`
-- Өгөгдөл: `.data/events.json`, `.data/site.json`, зураг: `public/uploads/`
-  (git-д орохгүй).
+- Өгөгдөл: `.data/events.json`, `.data/site.json`, `.data/news.json`,
+  зураг: `public/uploads/` (git-д орохгүй).
 - `ADMIN_PASSWORD` тохируулаагүй тул нэвтрэлт идэвхгүй (локалд зүгээр).
 
 > ⚠️ Локал горим зөвхөн хөгжүүлэлтэд. Vercel дээр файл систем read-only тул
@@ -61,9 +65,26 @@ create table if not exists public.site_content (
   updated_at timestamptz not null default now()
 );
 
+-- Мэдээ / нийтлэл.
+create table if not exists public.news (
+  id uuid primary key,
+  slug text unique not null,
+  title text not null,
+  excerpt text not null default '',
+  cover text not null default '',
+  tag text not null default '',
+  date text not null default '',
+  body text not null default '',
+  status text not null default 'draft',
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+create index if not exists news_slug_idx on public.news (slug);
+
 -- RLS-ийг асаана. Бүх хандалт service_role key-ээр (server талаас) явна.
 alter table public.events enable row level security;
 alter table public.site_content enable row level security;
+alter table public.news enable row level security;
 ```
 
 > Тайлбар: Апп нь зөвхөн **service role key**-ээр (сервер талаас) хандана.
@@ -125,7 +146,20 @@ Sheet-ийн эхний мөрөнд гарчгаа тааруулж (сонго
 > Хадгалаагүй өөрчлөлттэй үед хуудсыг хаах гэвэл браузер анхааруулна.
 > Хадгалаагүй бол сайт дээр юу ч өөрчлөгдөхгүй.
 
-### 5.2 Эвент үүсгэх
+### 5.2 Мэдээ нэмэх
+
+1. `/admin` → **Мэдээ** (эсвэл шууд `/admin/news`).
+2. Гарчиг бичээд **+ Мэдээ нэмэх** → засварлагч нээгдэнэ (slug автоматаар үүснэ).
+3. Огноо, шошго, нүүр зураг, товч танилцуулга, агуулгаа бөглөнө.
+   Агуулгад: хоосон мөр = шинэ догол мөр, `## ` = дэд гарчиг, `- ` = жагсаалт.
+   Доор нь урьдчилсан харагдац шууд харагдана.
+4. **Урьдчилж үзэх** → `/news/<slug>?preview=1` (ноорог хэвээр).
+5. **Нийтлэх** → `/news` жагсаалтад болон `/news/<slug>` дээр нээлттэй болно.
+
+> `/news` хуудасны бэлэн текст (гарчиг, тайлбар, цэсний нэр г.м.)-ийг
+> `/admin/site` → **Мэдээ (хуудасны текст)** хэсгээс засна.
+
+### 5.3 Эвент үүсгэх
 
 1. `/admin` → нэвтрэх.
 2. Нэр өгөөд **Эвент үүсгэх** → засварлагч нээгдэнэ.
@@ -136,8 +170,10 @@ Sheet-ийн эхний мөрөнд гарчгаа тааруулж (сонго
 
 ## 6. Санамж
 
-- Slug давхцвал автоматаар `-2`, `-3` залгана. `admin`, `api`, `final`, `mono`
-  зэрэг системийн нэрсийг ашиглах боломжгүй.
+- Slug давхцвал автоматаар `-2`, `-3` залгана. `admin`, `api`, `news`, `final`,
+  `mono` зэрэг системийн нэрсийг ашиглах боломжгүй.
+- Мэдээ нэмэх/засахад `/news` болон тухайн нийтлэлийн хуудас автоматаар
+  шинэчлэгдэнэ (slug сольсон ч хуучин зам нь цэвэрлэгдэнэ).
 - Ноорог эвентийг зөвхөн `?preview=1`-тэй үзнэ, хайлтын системд индекслэгдэхгүй.
 - Сайтын контентын **өгөгдмөл утга** нь `src/lib/site-content.ts` дотор.
   Хадгалсан өгөгдөл дээр давхарлагддаг тул:

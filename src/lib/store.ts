@@ -16,6 +16,7 @@ import path from "path";
 import { randomUUID } from "crypto";
 import type { EventDoc } from "./events";
 import type { SiteContent } from "./site-content";
+import type { NewsDoc } from "./news";
 
 export type UploadInput = { buffer: Buffer; filename: string; contentType: string };
 
@@ -38,6 +39,15 @@ export interface Store {
    *  дуудагч тал `mergeSiteContent`-оор өгөгдмөл дээр давхарлана. */
   getSiteContent(): Promise<unknown | null>;
   saveSiteContent(content: SiteContent): Promise<void>;
+
+  /** Мэдээ. `publishedOnly` — public хуудсанд ноорогийг хасна. */
+  listNews(publishedOnly?: boolean): Promise<NewsDoc[]>;
+  getNews(id: string): Promise<NewsDoc | null>;
+  getNewsBySlug(slug: string): Promise<NewsDoc | null>;
+  createNews(doc: NewsDoc): Promise<NewsDoc>;
+  updateNews(id: string, patch: Partial<Omit<NewsDoc, "id">>): Promise<NewsDoc | null>;
+  deleteNews(id: string): Promise<void>;
+
   listEvents(): Promise<EventDoc[]>;
   getEvent(id: string): Promise<EventDoc | null>;
   getEventBySlug(slug: string): Promise<EventDoc | null>;
@@ -98,6 +108,52 @@ function rowToLead(r: LeadRow): LeadDoc {
   };
 }
 
+type NewsRow = {
+  id: string;
+  slug: string;
+  title: string;
+  excerpt: string | null;
+  cover: string | null;
+  tag: string | null;
+  date: string | null;
+  body: string | null;
+  status: string;
+  created_at: string;
+  updated_at: string;
+};
+
+function rowToNews(r: NewsRow): NewsDoc {
+  return {
+    id: r.id,
+    slug: r.slug,
+    title: r.title,
+    excerpt: r.excerpt ?? "",
+    cover: r.cover ?? "",
+    tag: r.tag ?? "",
+    date: r.date ?? "",
+    body: r.body ?? "",
+    status: r.status === "published" ? "published" : "draft",
+    createdAt: r.created_at,
+    updatedAt: r.updated_at,
+  };
+}
+
+function newsToRow(d: NewsDoc) {
+  return {
+    id: d.id,
+    slug: d.slug,
+    title: d.title,
+    excerpt: d.excerpt,
+    cover: d.cover,
+    tag: d.tag,
+    date: d.date,
+    body: d.body,
+    status: d.status,
+    created_at: d.createdAt,
+    updated_at: d.updatedAt,
+  };
+}
+
 function rowToDoc(r: Row): EventDoc {
   return {
     id: r.id,
@@ -155,6 +211,68 @@ class SupabaseStore implements Store {
       .from("site_content")
       .upsert({ id: SITE_ROW_ID, content, updated_at: new Date().toISOString() });
     if (error) throw new Error(`Supabase saveSiteContent: ${error.message}`);
+  }
+
+  async listNews(publishedOnly = false): Promise<NewsDoc[]> {
+    const client = await sb();
+    let q = client
+      .from("news")
+      .select("*")
+      .order("date", { ascending: false })
+      .order("created_at", { ascending: false });
+    if (publishedOnly) q = q.eq("status", "published");
+    const { data, error } = await q;
+    if (error) throw new Error(`Supabase listNews: ${error.message}`);
+    return (data as NewsRow[]).map(rowToNews);
+  }
+
+  async getNews(id: string): Promise<NewsDoc | null> {
+    const client = await sb();
+    const { data, error } = await client.from("news").select("*").eq("id", id).maybeSingle();
+    if (error) throw new Error(`Supabase getNews: ${error.message}`);
+    return data ? rowToNews(data as NewsRow) : null;
+  }
+
+  async getNewsBySlug(slug: string): Promise<NewsDoc | null> {
+    const client = await sb();
+    const { data, error } = await client.from("news").select("*").eq("slug", slug).maybeSingle();
+    if (error) throw new Error(`Supabase getNewsBySlug: ${error.message}`);
+    return data ? rowToNews(data as NewsRow) : null;
+  }
+
+  async createNews(doc: NewsDoc): Promise<NewsDoc> {
+    const client = await sb();
+    const { data, error } = await client.from("news").insert(newsToRow(doc)).select("*").single();
+    if (error) {
+      if (isUniqueViolation(error)) throw new Error("slug-taken");
+      throw new Error(`Supabase createNews: ${error.message}`);
+    }
+    return rowToNews(data as NewsRow);
+  }
+
+  async updateNews(id: string, patch: Partial<Omit<NewsDoc, "id">>): Promise<NewsDoc | null> {
+    const client = await sb();
+    const update: Record<string, unknown> = { updated_at: new Date().toISOString() };
+    for (const key of ["slug", "title", "excerpt", "cover", "tag", "date", "body", "status"] as const) {
+      if (patch[key] !== undefined) update[key] = patch[key];
+    }
+    const { data, error } = await client
+      .from("news")
+      .update(update)
+      .eq("id", id)
+      .select("*")
+      .maybeSingle();
+    if (error) {
+      if (isUniqueViolation(error)) throw new Error("slug-taken");
+      throw new Error(`Supabase updateNews: ${error.message}`);
+    }
+    return data ? rowToNews(data as NewsRow) : null;
+  }
+
+  async deleteNews(id: string): Promise<void> {
+    const client = await sb();
+    const { error } = await client.from("news").delete().eq("id", id);
+    if (error) throw new Error(`Supabase deleteNews: ${error.message}`);
   }
 
   async listEvents(): Promise<EventDoc[]> {
@@ -273,6 +391,7 @@ const DATA_DIR = path.join(process.cwd(), ".data");
 const DATA_FILE = path.join(DATA_DIR, "events.json");
 const LEADS_FILE = path.join(DATA_DIR, "leads.json");
 const SITE_FILE = path.join(DATA_DIR, "site.json");
+const NEWS_FILE = path.join(DATA_DIR, "news.json");
 const UPLOAD_DIR = path.join(process.cwd(), "public", "uploads");
 
 class LocalStore implements Store {
@@ -287,6 +406,60 @@ class LocalStore implements Store {
   async saveSiteContent(content: SiteContent): Promise<void> {
     await fs.mkdir(DATA_DIR, { recursive: true });
     await fs.writeFile(SITE_FILE, JSON.stringify(content, null, 2), "utf8");
+  }
+
+  private async readNewsAll(): Promise<NewsDoc[]> {
+    try {
+      const parsed = JSON.parse(await fs.readFile(NEWS_FILE, "utf8"));
+      return Array.isArray(parsed) ? (parsed as NewsDoc[]) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  private async writeNewsAll(docs: NewsDoc[]): Promise<void> {
+    await fs.mkdir(DATA_DIR, { recursive: true });
+    await fs.writeFile(NEWS_FILE, JSON.stringify(docs, null, 2), "utf8");
+  }
+
+  async listNews(publishedOnly = false): Promise<NewsDoc[]> {
+    const docs = await this.readNewsAll();
+    return docs
+      .filter((d) => !publishedOnly || d.status === "published")
+      .sort((a, b) => (a.date === b.date ? (a.createdAt < b.createdAt ? 1 : -1) : a.date < b.date ? 1 : -1));
+  }
+
+  async getNews(id: string): Promise<NewsDoc | null> {
+    return (await this.readNewsAll()).find((d) => d.id === id) ?? null;
+  }
+
+  async getNewsBySlug(slug: string): Promise<NewsDoc | null> {
+    return (await this.readNewsAll()).find((d) => d.slug === slug) ?? null;
+  }
+
+  async createNews(doc: NewsDoc): Promise<NewsDoc> {
+    const docs = await this.readNewsAll();
+    if (docs.some((d) => d.slug === doc.slug)) throw new Error("slug-taken");
+    docs.push(doc);
+    await this.writeNewsAll(docs);
+    return doc;
+  }
+
+  async updateNews(id: string, patch: Partial<Omit<NewsDoc, "id">>): Promise<NewsDoc | null> {
+    const docs = await this.readNewsAll();
+    const i = docs.findIndex((d) => d.id === id);
+    if (i === -1) return null;
+    if (patch.slug && docs.some((d) => d.slug === patch.slug && d.id !== id)) {
+      throw new Error("slug-taken");
+    }
+    docs[i] = { ...docs[i], ...patch, updatedAt: new Date().toISOString() };
+    await this.writeNewsAll(docs);
+    return docs[i];
+  }
+
+  async deleteNews(id: string): Promise<void> {
+    const docs = await this.readNewsAll();
+    await this.writeNewsAll(docs.filter((d) => d.id !== id));
   }
 
   private async readAll(): Promise<EventDoc[]> {

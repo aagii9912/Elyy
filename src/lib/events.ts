@@ -73,6 +73,7 @@ export type EventDoc = {
 export const RESERVED_SLUGS = new Set([
   "admin",
   "api",
+  "news",
   "final",
   "mono",
   "v2",

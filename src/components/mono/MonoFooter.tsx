@@ -1,10 +1,30 @@
-/* /mono — Footer: sales hours, contacts, socials, nav + wordmark. Dark. */
+/* /mono — Footer: sales hours, contacts, socials, nav + wordmark. Dark.
+   `variant="page"` (ж: /news) үед hash холбоос нүүр хуудас руу заана. */
 
+import Link from "next/link";
 import { Logo } from "@/components/Logo";
 import type { SiteContent } from "@/lib/site-content";
+import { NEWS_PATH } from "@/lib/news-links";
 
-export function MonoFooter({ site }: { site: SiteContent }) {
-  const { footer, brand, contact, developer, hero } = site;
+/** Файл/гадаад холбоосыг шинэ табд нээнэ, дотоод замыг апп дотор. */
+const opensInNewTab = (href: string) => /^https?:\/\//.test(href) || /\.[a-z0-9]{2,4}$/i.test(href);
+
+export function MonoFooter({
+  site,
+  variant = "home",
+}: {
+  site: SiteContent;
+  variant?: "home" | "page";
+}) {
+  const { footer, brand, contact, developer, hero, news } = site;
+  const resolve = (href: string) =>
+    href.startsWith("#") && variant !== "home" ? `/${href}` : href;
+
+  /* Мэдээний холбоос үргэлж хөлний цэсэнд байна. */
+  const menu = [
+    ...footer.menu.filter((i) => i.href !== NEWS_PATH),
+    { label: news.navLabel, href: NEWS_PATH },
+  ];
 
   return (
     <footer className="bg-night font-gilroy text-white">
@@ -38,16 +58,23 @@ export function MonoFooter({ site }: { site: SiteContent }) {
           <div data-reveal="up">
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/45">{footer.menuTitle}</p>
             <ul className="mt-4 space-y-2.5 text-sm text-white/80">
-              {footer.menu.map((item, i) => (
+              {menu.map((item, i) => (
                 <li key={`${item.href}-${i}`}>
-                  <a
-                    href={item.href}
-                    {...(item.href.startsWith("#") ? {} : { target: "_blank", rel: "noopener" })}
-                    data-cursor-hover
-                    className="hover:text-white"
-                  >
-                    {item.label}
-                  </a>
+                  {opensInNewTab(item.href) ? (
+                    <a
+                      href={item.href}
+                      target="_blank"
+                      rel="noopener"
+                      data-cursor-hover
+                      className="hover:text-white"
+                    >
+                      {item.label}
+                    </a>
+                  ) : (
+                    <Link href={resolve(item.href)} data-cursor-hover className="hover:text-white">
+                      {item.label}
+                    </Link>
+                  )}
                 </li>
               ))}
             </ul>

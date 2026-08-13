@@ -137,6 +137,20 @@ export type SiteContent = {
 
   faq: { kicker: string; title: string; items: { q: string; a: string }[] };
 
+  /** `/news` хуудасны текст. Нийтлэлүүд өөрсдөө storage-д тусдаа
+   *  хадгалагдаж, `/admin/news`-ээс удирдагдана. */
+  news: {
+    /** Толгой/хөл цэсэнд харагдах нэр. */
+    navLabel: string;
+    kicker: string;
+    title: string;
+    sub: string;
+    empty: string;
+    readMore: string;
+    backLabel: string;
+    moreTitle: string;
+  };
+
   footer: {
     salesTitle: string;
     menuTitle: string;
@@ -511,6 +525,17 @@ export const DEFAULT_SITE_CONTENT: SiteContent = {
         a: "Тийм. Цахим үзлэг, онлайн захиалга, зайнаас гэрээ байгуулах боломжтой.",
       },
     ],
+  },
+
+  news: {
+    navLabel: "Мэдээ",
+    kicker: "Мэдээ & нийтлэл",
+    title: "Төслийн явц, мэдээ мэдээлэл",
+    sub: "Хотхоны бүтээн байгуулалтын явц, арга хэмжээ, шинэ мэдээллийг эндээс тогтмол хүлээн авна уу.",
+    empty: "Одоогоор нийтэлсэн мэдээ алга. Удахгүй шинэ мэдээлэл нэмэгдэнэ.",
+    readMore: "Дэлгэрэнгүй",
+    backLabel: "Бүх мэдээ",
+    moreTitle: "Бусад мэдээ",
   },
 
   footer: {

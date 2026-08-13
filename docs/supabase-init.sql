@@ -57,6 +57,32 @@ create table if not exists public.site_content (
 
 alter table public.site_content enable row level security;
 
+-- ── 1d. news хүснэгт (мэдээ / нийтлэл) ──────────────────────
+-- Public: /news (жагсаалт), /news/<slug> (дэлгэрэнгүй).
+-- `/admin/news`-ээс нэмэх, засах, нийтлэх/ноорогт буцаах.
+create table if not exists public.news (
+  id         uuid        primary key,
+  slug       text        unique not null,
+  title      text        not null,
+  excerpt    text        not null default '',
+  cover      text        not null default '',
+  tag        text        not null default '',
+  date       text        not null default '',
+  body       text        not null default '',
+  status     text        not null default 'draft',
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create index if not exists news_slug_idx on public.news (slug);
+create index if not exists news_date_idx on public.news (date desc, created_at desc);
+
+alter table public.news drop constraint if exists news_status_check;
+alter table public.news add  constraint news_status_check
+  check (status in ('draft', 'published'));
+
+alter table public.news enable row level security;
+
 -- ── 2. RLS ──────────────────────────────────────────────────
 -- Апп зөвхөн service_role key-ээр (сервер талаас) ханддаг.
 -- service_role нь RLS-ийг тойрдог тул policy шаардлагагүй.
@@ -82,6 +108,7 @@ select
   (select count(*) from public.events)                                        as events_count,
   (select count(*) from public.event_leads)                                   as leads_count,
   (select count(*) from public.site_content)                                  as site_content_rows,
+  (select count(*) from public.news)                                          as news_count,
   (select relrowsecurity from pg_class where oid = 'public.events'::regclass)      as rls_on,
   (select relrowsecurity from pg_class where oid = 'public.event_leads'::regclass) as leads_rls_on,
   (select public from storage.buckets where id = 'elysium-media')             as bucket_public;
