@@ -40,6 +40,17 @@ const SEQUENCES = {
     scale: "1152:648",
     quality: 60,
   },
+  /* Барилгын бүтэц — single 15s clip: bare monolithic frame → windows →
+     finished facade. Drives chapter 03's scrub in that same order. */
+  structure: {
+    out: "structure-frames",
+    clips: ["hf_20260813_071108_b9b49fe3-27bd-465a-8d0d-75de7c5f6ef5_1.mp4"],
+    clipLen: 15.125,
+    xfade: 0,
+    frames: 120,
+    scale: "1280:-2",
+    quality: 62,
+  },
 };
 
 /** Duration of each source clip, in seconds. */
@@ -83,8 +94,8 @@ function build(name) {
   rmSync(outDir, { recursive: true, force: true });
   mkdirSync(outDir, { recursive: true });
 
-  // Every source clip is a uniform 8s / 24fps / 4K export.
-  const CLIP_LEN = 8;
+  // Client clips are a uniform 8s / 24fps / 4K export unless overridden.
+  const CLIP_LEN = seq.clipLen ?? 8;
   const { filter, total } = filterChain(seq, CLIP_LEN);
 
   const args = [

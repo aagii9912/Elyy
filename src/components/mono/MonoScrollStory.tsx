@@ -21,6 +21,7 @@
 import { Fragment, useEffect, useRef, useState } from "react";
 import { useLenis } from "lenis/react";
 import { gsap, type ScrollTrigger as ScrollTriggerType } from "@/lib/gsap";
+import { LogoMark } from "@/components/Logo";
 import { MonoKicker } from "./shared";
 
 export type StoryPoint = {
@@ -30,6 +31,11 @@ export type StoryPoint = {
   text: string;
   /** Optional source link (callouts variant) — e.g. the maker's product page. */
   link?: string;
+  /** Brand mark under the spec-card text (callouts variant) — a white
+      logo image, or the Elysium diamond when `mark` is set. */
+  logo?: { src?: string; alt: string; mark?: boolean };
+  /** Where the callout pin sits on the footage (viewport %). */
+  anchor?: { x: number; y: number };
 };
 
 export type StoryVariant = "numbers" | "letters" | "callouts";
@@ -512,16 +518,15 @@ export function MonoScrollStory({
                 </div>
               )}
 
-              {variant === "callouts" && (
+              {variant === "callouts" && (() => {
+                const anchor = p.anchor ?? CALLOUT_ANCHORS[i % CALLOUT_ANCHORS.length];
+                return (
                 <div className="relative h-full">
                   <span
                     data-sw
                     aria-hidden
                     className="green-ping absolute hidden h-3 w-3 rounded-full bg-lime text-lime md:block"
-                    style={{
-                      left: `${CALLOUT_ANCHORS[i % CALLOUT_ANCHORS.length].x}%`,
-                      top: `${CALLOUT_ANCHORS[i % CALLOUT_ANCHORS.length].y}%`,
-                    }}
+                    style={{ left: `${anchor.x}%`, top: `${anchor.y}%` }}
                   />
                   <svg
                     aria-hidden
@@ -531,7 +536,7 @@ export function MonoScrollStory({
                   >
                     <path
                       data-line
-                      d={`M ${CALLOUT_ANCHORS[i % CALLOUT_ANCHORS.length].x} ${CALLOUT_ANCHORS[i % CALLOUT_ANCHORS.length].y} L ${CALLOUT_ANCHORS[i % CALLOUT_ANCHORS.length].x + 6} ${CALLOUT_ANCHORS[i % CALLOUT_ANCHORS.length].y} L 67 66`}
+                      d={`M ${anchor.x} ${anchor.y} L ${anchor.x + 6} ${anchor.y} L 67 66`}
                       fill="none"
                       stroke="rgba(180,214,86,0.75)"
                       strokeWidth="1.25"
@@ -563,9 +568,20 @@ export function MonoScrollStory({
                         Дэлгэрэнгүй <span aria-hidden>↗</span>
                       </a>
                     )}
+                    {p.logo && (
+                      <div data-sw className="mt-5 flex items-center border-t border-white/15 pt-4">
+                        {p.logo.mark ? (
+                          <LogoMark className="h-6 w-auto text-white" />
+                        ) : (
+                          /* eslint-disable-next-line @next/next/no-img-element */
+                          <img src={p.logo.src} alt={p.logo.alt} className="h-6 w-auto" />
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
-              )}
+                );
+              })()}
             </div>
           ))}
         </div>

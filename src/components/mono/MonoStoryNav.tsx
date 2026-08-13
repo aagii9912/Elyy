@@ -1,7 +1,7 @@
 "use client";
 
 /* /mono — fixed side navigation for the three scroll-story sections
-   (Ерөнхий төлөвлөлт / ELYS концепц / Тоноглол ба шийдэл).
+   (Ерөнхий төлөвлөлт / ELYS концепц / Барилгын бүтэц).
    Visible only while the scroll is inside the story zone; the active
    label follows the scroll; clicking a label jumps to that section. */
 
