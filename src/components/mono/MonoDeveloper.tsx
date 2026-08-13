@@ -139,8 +139,11 @@ export function MonoDeveloper({ site }: { site: SiteContent }) {
             const scale = 1.1 - e * 0.8;
             const year = s.querySelector("[data-md-year]");
             const card = s.querySelector("[data-md-card]");
+            // Төвөөс хол картууд ~0.15 хүртэл бүдгэрч, хар дэвсгэр рүү шингэнэ
+            // (зөвхөн голд байгаа төсөл тод — spotlight эффект). Он тодрол
+            // өмнөх түвшиндээ — цаг хугацааны шугам уншигдахуйц хэвээр.
             if (year) gsap.set(year, { scale, transformOrigin: "center bottom", opacity: 1 - e * 0.55 });
-            if (card) gsap.set(card, { scale, transformOrigin: "center top", opacity: 1 - e * 0.55 });
+            if (card) gsap.set(card, { scale, transformOrigin: "center top", opacity: 1 - e * 0.85 });
           });
         };
         focal();
