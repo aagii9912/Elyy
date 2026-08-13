@@ -20,6 +20,9 @@ import type { NewsDoc } from "./news";
 
 export type UploadInput = { buffer: Buffer; filename: string; contentType: string };
 
+/** Browser-ээс шууд Storage руу илгээх зөвшөөрөл (том файлд). */
+export type SignedUpload = { uploadUrl: string; publicUrl: string };
+
 /** Бүртгэл / холбоо барих хүсэлт. eventId=null → үндсэн сайтын маягт. */
 export type LeadInput = {
   eventId: string | null;
@@ -55,6 +58,9 @@ export interface Store {
   updateEvent(id: string, patch: Partial<Omit<EventDoc, "id">>): Promise<EventDoc | null>;
   deleteEvent(id: string): Promise<void>;
   uploadImage(input: UploadInput): Promise<string>;
+  /** Том файлыг server-ээр дамжуулахгүй шууд илгээх зөвшөөрөл.
+   *  Дэмжихгүй driver `null` буцаана (дуудагч тал энгийн upload руу шилжинэ). */
+  createSignedUpload(input: { filename: string; contentType: string }): Promise<SignedUpload | null>;
   createLead(input: LeadInput): Promise<void>;
   listLeads(eventId?: string): Promise<LeadDoc[]>;
 }
@@ -371,9 +377,42 @@ class SupabaseStore implements Store {
     return (data as LeadRow[]).map(rowToLead);
   }
 
+  /** Bucket байхгүй бол нэг удаа үүсгэнэ (init SQL-ийн storage хэсгийг
+   *  ажиллуулаагүй тохиолдолд өөрөө эдгэрнэ). */
+  private async ensureBucket(client: SupabaseClientLike): Promise<void> {
+    const { error } = await client.storage.createBucket(MEDIA_BUCKET, { public: true });
+    if (error && !/already exists/i.test(error.message)) {
+      throw new Error(
+        `"${MEDIA_BUCKET}" storage bucket байхгүй бөгөөд үүсгэж чадсангүй: ${error.message}`
+      );
+    }
+  }
+
+  async createSignedUpload(input: {
+    filename: string;
+    contentType: string;
+  }): Promise<SignedUpload> {
+    const client = await sb();
+    const key = objectKey(input.filename);
+    const sign = () => client.storage.from(MEDIA_BUCKET).createSignedUploadUrl(key);
+
+    let { data, error } = await sign();
+    if (error && /bucket not found/i.test(error.message)) {
+      await this.ensureBucket(client);
+      ({ data, error } = await sign());
+    }
+    if (error || !data) {
+      throw new Error(
+        `Supabase storage "${MEDIA_BUCKET}": ${error?.message ?? "signed URL буцаагаагүй."}`
+      );
+    }
+    const { data: pub } = client.storage.from(MEDIA_BUCKET).getPublicUrl(key);
+    return { uploadUrl: data.signedUrl, publicUrl: pub.publicUrl };
+  }
+
   async uploadImage(input: UploadInput): Promise<string> {
     const client = await sb();
-    const key = `${new Date().toISOString().slice(0, 10)}/${randomUUID()}-${safeName(input.filename)}`;
+    const key = objectKey(input.filename);
     const put = () =>
       client.storage
         .from(MEDIA_BUCKET)
@@ -384,12 +423,7 @@ class SupabaseStore implements Store {
     // `docs/supabase-init.sql`-ийн storage хэсгийг ажиллуулаагүй бол bucket
     // байхгүй байна. Нэг удаа өөрөө үүсгээд дахин оролдоно.
     if (error && /bucket not found/i.test(error.message)) {
-      const { error: mkErr } = await client.storage.createBucket(MEDIA_BUCKET, { public: true });
-      if (mkErr && !/already exists/i.test(mkErr.message)) {
-        throw new Error(
-          `"${MEDIA_BUCKET}" storage bucket байхгүй бөгөөд үүсгэж чадсангүй: ${mkErr.message}`
-        );
-      }
+      await this.ensureBucket(client);
       ({ error } = await put());
     }
 
@@ -553,6 +587,11 @@ class LocalStore implements Store {
     }
   }
 
+  /** Локал драйвер шууд илгээхийг дэмжихгүй — энгийн upload-аар явна. */
+  async createSignedUpload(): Promise<SignedUpload | null> {
+    return null;
+  }
+
   async uploadImage(input: UploadInput): Promise<string> {
     const name = `${Date.now()}-${randomUUID().slice(0, 8)}-${safeName(input.filename)}`;
     try {
@@ -576,6 +615,11 @@ class LocalStore implements Store {
 function safeName(filename: string): string {
   const base = filename.split(/[\\/]/).pop() || "file";
   return base.replace(/[^a-zA-Z0-9._-]/g, "_").slice(-80);
+}
+
+/** Storage доторх өдрөөр бүлэглэсэн давхцахгүй зам. */
+function objectKey(filename: string): string {
+  return `${new Date().toISOString().slice(0, 10)}/${randomUUID()}-${safeName(filename)}`;
 }
 
 let cached: Store | null = null;

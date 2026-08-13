@@ -8,7 +8,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { cloneDefaultSiteContent, type SiteContent } from "@/lib/site-content";
-import { Button, Card, Field, ImageField, TextArea, TextInput } from "./ui";
+import { Button, Card, Field, FileField, ImageField, TextArea, TextInput } from "./ui";
 
 type SectionId =
   | "brand"
@@ -384,12 +384,24 @@ function renderSection(
                 onChange={(e) => edit((d) => void (d.brand.email = e.target.value))}
               />
             </Field>
-            <Field label="Танилцуулгын холбоос" hint="Ж: /brochure.pdf">
-              <TextInput
-                value={c.brand.brochureUrl}
-                onChange={(e) => edit((d) => void (d.brand.brochureUrl = e.target.value))}
-              />
-            </Field>
+          </div>
+          <div className="mt-4">
+            <FileField
+              label="Онлайн танилцуулга (PDF)"
+              value={c.brand.brochureUrl}
+              onChange={(url) =>
+                edit((d) => {
+                  const prev = d.brand.brochureUrl;
+                  d.brand.brochureUrl = url;
+                  // Хөл хэсгийн цэс дэх танилцуулгын холбоосыг хамт шинэчилнэ —
+                  // эс бөгөөс тэр линк хуучин файл руу заасаар үлдэнэ.
+                  for (const item of d.footer.menu) {
+                    if (item.href === prev) item.href = url;
+                  }
+                })
+              }
+              hint="«Танилцуулга татах» товч болон хөлний цэснээс энэ файл нээгдэнэ. Шинэ PDF хавсаргахад хуучин холбоос автоматаар солигдоно."
+            />
           </div>
         </Card>
       );

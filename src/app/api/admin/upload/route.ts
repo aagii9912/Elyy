@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server";
 import { getStore, storeMode } from "@/lib/store";
+import { isAllowedUploadType, UPLOAD_TYPE_ERROR } from "@/lib/upload-types";
 
 export const runtime = "nodejs";
 
 /* Vercel дээр serverless функцийн хүсэлтийн бие ~4.5MB-аар хязгаарлагддаг тул
-   клиент тал зургийг илгээхээсээ өмнө шахдаг (`components/admin/upload.ts`).
+   клиент тал зургийг илгээхээсээ өмнө шахдаг (`components/admin/upload.ts`),
+   том файлыг `upload/sign`-аар шууд Storage руу илгээдэг.
    Доорх хязгаар нь зөвхөн эцсийн хамгаалалт. */
 const MAX_BYTES = 4 * 1024 * 1024;
 
@@ -52,15 +54,15 @@ export async function POST(req: Request) {
 
   const file = form.get("file");
   if (!(file instanceof File)) {
-    return NextResponse.json({ ok: false, error: "Зураг хавсаргана уу." }, { status: 400 });
+    return NextResponse.json({ ok: false, error: "Файл хавсаргана уу." }, { status: 400 });
   }
-  if (!file.type.startsWith("image/")) {
-    return NextResponse.json({ ok: false, error: "Зөвхөн зураг оруулах боломжтой." }, { status: 400 });
+  if (!isAllowedUploadType(file.type)) {
+    return NextResponse.json({ ok: false, error: UPLOAD_TYPE_ERROR }, { status: 400 });
   }
 
   const buffer = Buffer.from(await file.arrayBuffer());
   if (buffer.length > MAX_BYTES) {
-    return NextResponse.json({ ok: false, error: "Зураг 4MB-аас бага байх ёстой." }, { status: 413 });
+    return NextResponse.json({ ok: false, error: "Файл 4MB-аас бага байх ёстой." }, { status: 413 });
   }
 
   try {

@@ -10,7 +10,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { newsImageMarkup, parseNewsBody, type NewsDoc } from "@/lib/news";
 import { Button, Card, Field, ImageField, TextArea, TextInput } from "./ui";
-import { uploadImageFile } from "./upload";
+import { uploadFile } from "./upload";
 
 type Draft = Pick<NewsDoc, "title" | "slug" | "excerpt" | "cover" | "tag" | "date" | "body" | "status">;
 
@@ -67,7 +67,7 @@ export function NewsEditor({ initial }: { initial: NewsDoc }) {
   const addBodyImage = async (file: File) => {
     setImgBusy(true);
     setImgErr(null);
-    const res = await uploadImageFile(file);
+    const res = await uploadFile(file);
     if (res.ok) insertImage(res.url);
     else setImgErr(res.error);
     setImgBusy(false);

@@ -4,7 +4,7 @@
    Маркетингийн брэнд бус — цэвэрхэн, ажлын хэрэгслийн загвар. */
 
 import { forwardRef, useRef, useState } from "react";
-import { uploadImageFile } from "./upload";
+import { uploadFile } from "./upload";
 
 export function Button({
   children,
@@ -127,7 +127,7 @@ export function ImageField({
   const upload = async (file: File) => {
     setBusy(true);
     setErr(null);
-    const res = await uploadImageFile(file);
+    const res = await uploadFile(file);
     if (res.ok) onChange(res.url);
     else {
       setErr(res.error);
@@ -178,6 +178,115 @@ export function ImageField({
           <TextInput
             value={value}
             placeholder="/images/axono/a-01.jpg"
+            onChange={(e) => onChange(e.target.value)}
+          />
+        </div>
+      )}
+      {hint && <span className="mt-1 block text-xs text-neutral-400">{hint}</span>}
+      {err && <span className="mt-1 block text-xs text-red-500">{err}</span>}
+    </div>
+  );
+}
+
+/** Storage-д давхцахгүй байлгах үүднээс нэмсэн угтвар (uuid / timestamp). */
+const KEY_PREFIX =
+  /^(?:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}|\d{13}-[0-9a-f]{8})-/i;
+
+/** URL-аас уншигдахуйц файлын нэр (`…/1786-ab12-brochure.pdf` → `brochure.pdf`). */
+function fileNameOf(url: string): string {
+  const clean = url.split(/[?#]/)[0];
+  let base = clean.split("/").pop() || url;
+  try {
+    base = decodeURIComponent(base);
+  } catch {
+    /* хөрвүүлэлт бүтэхгүй бол түүхий нэрээр */
+  }
+  return base.replace(KEY_PREFIX, "") || base;
+}
+
+/** Баримт (PDF) хавсаргах талбар — танилцуулга г.м.
+ *  Том файлыг Storage руу шууд илгээнэ; хаягийг гараар ч бичиж болно. */
+export function FileField({
+  label,
+  value,
+  onChange,
+  hint,
+  accept = "application/pdf",
+}: {
+  label: string;
+  value: string;
+  onChange: (url: string) => void;
+  hint?: string;
+  accept?: string;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  const [manual, setManual] = useState(false);
+
+  const upload = async (file: File) => {
+    setBusy(true);
+    setErr(null);
+    const res = await uploadFile(file);
+    if (res.ok) onChange(res.url);
+    else {
+      setErr(res.error);
+      setManual(true);
+    }
+    setBusy(false);
+  };
+
+  return (
+    <div>
+      <span className="mb-1.5 block text-[13px] font-semibold text-neutral-700">{label}</span>
+      <div className="flex items-center gap-3 rounded-lg border border-dashed border-neutral-300 bg-neutral-50 px-4 py-3">
+        <span aria-hidden className="text-lg">
+          📄
+        </span>
+        {value ? (
+          <a
+            href={value}
+            target="_blank"
+            rel="noreferrer"
+            className="min-w-0 flex-1 truncate text-sm font-semibold text-[#2a5124] underline underline-offset-2"
+          >
+            {fileNameOf(value)}
+          </a>
+        ) : (
+          <span className="flex-1 text-xs text-neutral-400">
+            {busy ? "Байршуулж байна…" : "Файл хавсаргаагүй"}
+          </span>
+        )}
+      </div>
+      <div className="mt-2 flex flex-wrap items-center gap-2">
+        <input
+          ref={inputRef}
+          type="file"
+          accept={accept}
+          className="hidden"
+          onChange={(e) => {
+            const f = e.target.files?.[0];
+            if (f) upload(f);
+            e.target.value = "";
+          }}
+        />
+        <Button type="button" variant="ghost" onClick={() => inputRef.current?.click()} disabled={busy}>
+          {busy ? "Түр хүлээнэ үү…" : value ? "Солих" : "Файл хавсаргах"}
+        </Button>
+        <Button type="button" variant="ghost" onClick={() => setManual((v) => !v)}>
+          {manual ? "Хаягийг нуух" : "Хаягаар оруулах"}
+        </Button>
+        {value && (
+          <Button type="button" variant="danger" onClick={() => onChange("")}>
+            Устгах
+          </Button>
+        )}
+      </div>
+      {manual && (
+        <div className="mt-2">
+          <TextInput
+            value={value}
+            placeholder="/brochure.pdf"
             onChange={(e) => onChange(e.target.value)}
           />
         </div>
