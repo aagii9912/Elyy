@@ -36,7 +36,7 @@ const SECTIONS: { id: SectionId; label: string; hint: string }[] = [
   { id: "hero", label: "Нүүр дэлгэц", hint: "Hero-гийн тайлбар" },
   { id: "plan", label: "01 · Ерөнхий төлөвлөлт", hint: "Тоон үзүүлэлтүүд" },
   { id: "elys", label: "02 · ELYS консепц", hint: "Дөрвөн зарчим" },
-  { id: "equip", label: "03 · Тоноглол ба шийдэл", hint: "Инженерийн шийдлүүд" },
+  { id: "equip", label: "03 · Үндсэн бүтээц", hint: "Материал, инженерийн шийдэл" },
   { id: "marquee", label: "Уриа (гүйдэг мөр)", hint: "Form Follows …" },
   { id: "apartments", label: "Өрөөний сонголт", hint: "Типүүд, аксонометр зураг" },
   { id: "developer", label: "Төсөл хэрэгжүүлэгч", hint: "Компани, өмнөх төслүүд" },
@@ -236,6 +236,21 @@ export function SiteEditor({ initial }: { initial: SiteContent }) {
     });
   };
 
+  /* Кодын өгөгдмөлөөс ялгарч буй хэсгүүд. Хадгалсан контент өгөгдмөлийг
+     дардаг тул шинэ өгөгдмөл текст автоматаар гарч ирэхгүй — аль хэсгийг
+     гараар шинэчлэх шаардлагатайг эндээс шууд харна. */
+  const edited = useMemo(() => {
+    const defaults = cloneDefaultSiteContent();
+    const same = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b);
+    const ids = new Set<SectionId>();
+    for (const s of SECTIONS) {
+      const storyKey = s.id === "plan" || s.id === "elys" || s.id === "equip" ? s.id : null;
+      const navSame = !storyKey || content.storyNav[storyKey] === defaults.storyNav[storyKey];
+      if (!same(content[s.id], defaults[s.id]) || !navSame) ids.add(s.id);
+    }
+    return ids;
+  }, [content]);
+
   const body = useMemo(() => renderSection(section, content, edit), [section, content, edit]);
 
   return (
@@ -290,7 +305,18 @@ export function SiteEditor({ initial }: { initial: SiteContent }) {
                       : "text-neutral-600 hover:bg-neutral-200/60"
                   }`}
                 >
-                  {s.label}
+                  <span className="flex items-center gap-1.5">
+                    {s.label}
+                    {edited.has(s.id) && (
+                      <span
+                        aria-hidden
+                        title="Энэ хэсэг өгөгдмөлөөс өөрчлөгдсөн"
+                        className={`h-1.5 w-1.5 shrink-0 rounded-full ${
+                          section === s.id ? "bg-white/80" : "bg-amber-500"
+                        }`}
+                      />
+                    )}
+                  </span>
                   <span
                     className={`hidden text-[11px] font-medium lg:block ${
                       section === s.id ? "text-white/70" : "text-neutral-400"
@@ -302,6 +328,11 @@ export function SiteEditor({ initial }: { initial: SiteContent }) {
               </li>
             ))}
           </ul>
+          <p className="mt-3 hidden text-[11px] leading-relaxed text-neutral-400 lg:block">
+            <span aria-hidden className="mr-1 inline-block h-1.5 w-1.5 rounded-full bg-amber-500 align-middle" />
+            Өгөгдмөлөөс өөрчлөгдсөн хэсэг. Шинэ өгөгдмөл текстийг татах бол
+            тухайн хэсэг дээр “Өгөгдмөл рүү буцаах” дараад хадгална уу.
+          </p>
         </nav>
 
         <div className="space-y-5">
@@ -518,24 +549,53 @@ function renderSection(
             </div>
           </Card>
           <Card title="Зүйлүүд">
-            <ListEditor
-              items={c[key].items}
-              onChange={(next) => edit((d) => void (d[key].items = next))}
-              blank={() => ({ title: "Гарчиг", body: "Тайлбар." })}
-              title={(item) => item.title}
-              addLabel="Зүйл нэмэх"
-            >
-              {(item, set) => (
-                <>
-                  <Field label="Гарчиг">
-                    <TextInput value={item.title} onChange={(e) => set({ title: e.target.value })} />
-                  </Field>
-                  <Field label="Тайлбар">
-                    <TextArea rows={3} value={item.body} onChange={(e) => set({ body: e.target.value })} />
-                  </Field>
-                </>
-              )}
-            </ListEditor>
+            {key === "equip" ? (
+              /* Үндсэн бүтээцийн зүйл бүр эх сурвалжийн линктэй байж болно. */
+              <ListEditor
+                items={c.equip.items}
+                onChange={(next) => edit((d) => void (d.equip.items = next))}
+                blank={() => ({ title: "Гарчиг", body: "Тайлбар.", link: "" })}
+                title={(item) => item.title}
+                addLabel="Зүйл нэмэх"
+              >
+                {(item, set) => (
+                  <>
+                    <Field label="Гарчиг">
+                      <TextInput value={item.title} onChange={(e) => set({ title: e.target.value })} />
+                    </Field>
+                    <Field label="Тайлбар">
+                      <TextArea rows={3} value={item.body} onChange={(e) => set({ body: e.target.value })} />
+                    </Field>
+                    <Field label="Холбоос" hint="Үйлдвэрлэгчийн хуудас. Хоосон бол линк харагдахгүй.">
+                      <TextInput
+                        value={item.link}
+                        placeholder="https://…"
+                        onChange={(e) => set({ link: e.target.value })}
+                      />
+                    </Field>
+                  </>
+                )}
+              </ListEditor>
+            ) : (
+              <ListEditor
+                items={c.elys.items}
+                onChange={(next) => edit((d) => void (d.elys.items = next))}
+                blank={() => ({ title: "Гарчиг", body: "Тайлбар." })}
+                title={(item) => item.title}
+                addLabel="Зүйл нэмэх"
+              >
+                {(item, set) => (
+                  <>
+                    <Field label="Гарчиг">
+                      <TextInput value={item.title} onChange={(e) => set({ title: e.target.value })} />
+                    </Field>
+                    <Field label="Тайлбар">
+                      <TextArea rows={3} value={item.body} onChange={(e) => set({ body: e.target.value })} />
+                    </Field>
+                  </>
+                )}
+              </ListEditor>
+            )}
           </Card>
         </>
       );
@@ -629,63 +689,72 @@ function renderSection(
               title={(item) => `${item.title} · ${item.rooms}`}
               addLabel="Тип нэмэх"
             >
-              {(item, set) => (
-                <>
-                  <div className="grid gap-3 sm:grid-cols-3">
-                    <Field label="Типийн нэр">
-                      <TextInput value={item.title} onChange={(e) => set({ title: e.target.value })} />
-                    </Field>
-                    <Field label="Өрөөний тоо">
-                      <TextInput value={item.rooms} onChange={(e) => set({ rooms: e.target.value })} />
-                    </Field>
-                    <Field label="Талбай / тэмдэглэгээ">
-                      <TextInput value={item.area} onChange={(e) => set({ area: e.target.value })} />
-                    </Field>
-                  </div>
-                  <ImageField
-                    label="Картын зураг"
-                    value={item.thumb}
-                    onChange={(url) => set({ thumb: url })}
-                    aspect="aspect-[4/3]"
-                    hint="Хоосон бол эхний өнцгийн зургийг ашиглана."
-                  />
-                  <div>
-                    <span className="mb-1.5 block text-[13px] font-semibold text-neutral-700">
-                      Томруулж үзэх өнцгүүд
-                    </span>
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      {item.views.map((view, vi) => (
-                        <div key={vi} className="rounded-lg border border-neutral-200 bg-white p-3">
-                          <ImageField
-                            label={`Өнцөг ${vi + 1}`}
-                            value={view}
-                            onChange={(url) =>
-                              set({ views: item.views.map((v, j) => (j === vi ? url : v)) })
-                            }
-                            aspect="aspect-[4/3]"
-                          />
-                          <Button
-                            type="button"
-                            variant="danger"
-                            className="mt-2"
-                            onClick={() => set({ views: item.views.filter((_, j) => j !== vi) })}
-                          >
-                            Өнцөг устгах
-                          </Button>
-                        </div>
-                      ))}
+              {(item, set, unitIndex) => {
+                /* Зураг байршуулах нь async тул `item`-ийн render үеийн
+                   хуулбараар бичвэл зэрэг оруулсан хоёр зургийн нэг нь
+                   дарагдана. Тиймээс `edit`-ээр хамгийн сүүлийн төлөв дээр
+                   индексээр нь шууд бичнэ. */
+                const editUnit = (fn: (unit: SiteContent["apartments"]["units"][number]) => void) =>
+                  edit((d) => {
+                    const unit = d.apartments.units[unitIndex];
+                    if (unit) fn(unit);
+                  });
+                return (
+                  <>
+                    <div className="grid gap-3 sm:grid-cols-3">
+                      <Field label="Типийн нэр">
+                        <TextInput value={item.title} onChange={(e) => set({ title: e.target.value })} />
+                      </Field>
+                      <Field label="Өрөөний тоо">
+                        <TextInput value={item.rooms} onChange={(e) => set({ rooms: e.target.value })} />
+                      </Field>
+                      <Field label="Талбай / тэмдэглэгээ">
+                        <TextInput value={item.area} onChange={(e) => set({ area: e.target.value })} />
+                      </Field>
                     </div>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      className="mt-3"
-                      onClick={() => set({ views: [...item.views, ""] })}
-                    >
-                      + Өнцөг нэмэх
-                    </Button>
-                  </div>
-                </>
-              )}
+                    <ImageField
+                      label="Картын зураг"
+                      value={item.thumb}
+                      onChange={(url) => editUnit((u) => void (u.thumb = url))}
+                      aspect="aspect-[4/3]"
+                      hint="Хоосон бол эхний өнцгийн зургийг ашиглана."
+                    />
+                    <div>
+                      <span className="mb-1.5 block text-[13px] font-semibold text-neutral-700">
+                        Томруулж үзэх өнцгүүд
+                      </span>
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        {item.views.map((view, vi) => (
+                          <div key={vi} className="rounded-lg border border-neutral-200 bg-white p-3">
+                            <ImageField
+                              label={`Өнцөг ${vi + 1}`}
+                              value={view}
+                              onChange={(url) => editUnit((u) => void (u.views[vi] = url))}
+                              aspect="aspect-[4/3]"
+                            />
+                            <Button
+                              type="button"
+                              variant="danger"
+                              className="mt-2"
+                              onClick={() => editUnit((u) => void u.views.splice(vi, 1))}
+                            >
+                              Өнцөг устгах
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        className="mt-3"
+                        onClick={() => editUnit((u) => void u.views.push(""))}
+                      >
+                        + Өнцөг нэмэх
+                      </Button>
+                    </div>
+                  </>
+                );
+              }}
             </ListEditor>
           </Card>
         </>
@@ -752,6 +821,15 @@ function renderSection(
                   onChange={(e) => edit((d) => void (d.developer.scrollHint = e.target.value))}
                 />
               </Field>
+            </div>
+            <div className="mt-4 max-w-xs">
+              <ImageField
+                label="Компанийн icon"
+                value={c.developer.logo}
+                onChange={(url) => edit((d) => void (d.developer.logo = url))}
+                aspect="aspect-square"
+                hint="Timeline-ийн ард сүүдэр болж харагдана. Хоосон бол 2006 → 2026 гүйдэг он гарна."
+              />
             </div>
           </Card>
 
@@ -1138,6 +1216,20 @@ function renderSection(
                   rows={3}
                   value={c.managers.body}
                   onChange={(e) => edit((d) => void (d.managers.body = e.target.value))}
+                />
+              </Field>
+            </div>
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              <Field label="Цагийн хуваарийн гарчиг">
+                <TextInput
+                  value={c.managers.hoursLabel}
+                  onChange={(e) => edit((d) => void (d.managers.hoursLabel = e.target.value))}
+                />
+              </Field>
+              <Field label="Цагийн хуваарь" hint="Ж: Даваа – Ням · 09:00 – 18:00">
+                <TextInput
+                  value={c.managers.hours}
+                  onChange={(e) => edit((d) => void (d.managers.hours = e.target.value))}
                 />
               </Field>
             </div>

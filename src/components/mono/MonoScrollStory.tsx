@@ -28,12 +28,21 @@ export type StoryPoint = {
   heading: string;
   accent?: string; // rendered in lime right after the heading (e.g. "%")
   text: string;
+  /** Optional source link (callouts variant) — e.g. the maker's product page. */
+  link?: string;
 };
 
 export type StoryVariant = "numbers" | "letters" | "callouts";
 
 const framePathIn = (dir: string, ext: string) => (i: number) =>
   `${dir}/frame_${String(i).padStart(3, "0")}.${ext}`;
+
+/* The chapter intro title scrubs away over the first INTRO_OUT screens and
+   the chapter exit takes the last EXIT_IN screens. Point layers live strictly
+   between the two: they never overlap the intro title, and the window they
+   share is split into equal slices so every point runs for the same distance. */
+const INTRO_OUT = 0.55;
+const EXIT_IN = 0.22;
 
 /* facade anchor positions (viewport %) for the callouts variant */
 const CALLOUT_ANCHORS = [
@@ -81,13 +90,17 @@ export function MonoScrollStory({
   const progFill = useRef<HTMLDivElement>(null);
   const st = useRef<ScrollTriggerType | null>(null);
   const prevActive = useRef(0);
+  /** Progress window the points share, minus the intro / exit run-outs. */
+  const slot = useRef({ lead: 0, span: 1 });
   const [active, setActive] = useState(0);
 
-  /** Jump the scroll so point `i` is centred in its quarter. */
+  /** Jump the scroll so point `i` is centred in its own equal slice. */
   const goTo = (i: number) => {
     const t = st.current;
     if (!t) return;
-    const target = t.start + ((i + 0.5) / points.length) * (t.end - t.start);
+    const { lead, span } = slot.current;
+    const p = lead + ((i + 0.5) / points.length) * span;
+    const target = t.start + p * (t.end - t.start);
     if (lenis) lenis.scrollTo(target, { duration: 1.1 });
     else window.scrollTo({ top: target, behavior: "smooth" });
   };
@@ -152,6 +165,16 @@ export function MonoScrollStory({
     const onResize = () => { resize(); draw(); };
     window.addEventListener("resize", onResize);
 
+    /* The slice each point owns, expressed in pin progress. Recomputed on
+       every update so a resize (or a refresh) can't desync it from goTo. */
+    const pointSlot = () => {
+      const travel = Math.max(1, sec.offsetHeight - window.innerHeight);
+      const lead = Math.min(0.35, (window.innerHeight * INTRO_OUT) / travel);
+      const tail = Math.min(0.25, (window.innerHeight * EXIT_IN) / travel);
+      return { lead, span: Math.max(0.1, 1 - lead - tail) };
+    };
+    slot.current = pointSlot(); // rail clicks work before the first scroll
+
     const ctx = gsap.context(() => {
       const tween = gsap.to(state, {
         f: count - 1,
@@ -163,7 +186,10 @@ export function MonoScrollStory({
           scrub: 0.4,
           onUpdate: (self) => {
             if (progFill.current) gsap.set(progFill.current, { scaleX: self.progress });
-            const idx = Math.min(points.length - 1, Math.floor(self.progress * points.length));
+            const { lead, span } = pointSlot();
+            slot.current = { lead, span };
+            const t = (self.progress - lead) / span;
+            const idx = Math.min(points.length - 1, Math.max(0, Math.floor(t * points.length)));
             setActive((prev) => (prev === idx ? prev : idx));
           },
         },
@@ -211,8 +237,8 @@ export function MonoScrollStory({
               ease: "none",
               scrollTrigger: {
                 trigger: sec,
-                start: () => "top+=" + window.innerHeight * 0.3 + " top",
-                end: () => "+=" + window.innerHeight * 0.35,
+                start: () => "top+=" + window.innerHeight * INTRO_OUT + " top",
+                end: () => "+=" + window.innerHeight * 0.25,
                 scrub: true,
                 invalidateOnRefresh: true,
               },
@@ -229,8 +255,8 @@ export function MonoScrollStory({
               ease: "none",
               scrollTrigger: {
                 trigger: sec,
-                start: () => "top+=" + window.innerHeight * 0.28 + " top",
-                end: () => "+=" + window.innerHeight * 0.3,
+                start: () => "top+=" + window.innerHeight * INTRO_OUT + " top",
+                end: () => "+=" + window.innerHeight * 0.2,
                 scrub: true,
                 invalidateOnRefresh: true,
               },
@@ -524,6 +550,19 @@ export function MonoScrollStory({
                     <p data-sw className="mt-3 text-[14px] leading-relaxed text-white/75">
                       {p.text}
                     </p>
+                    {p.link && (
+                      /* the layer stack is pointer-events-none — opt this back in */
+                      <a
+                        data-sw
+                        data-cursor-hover
+                        href={p.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="pointer-events-auto mt-4 inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-lime transition-opacity hover:opacity-70"
+                      >
+                        Дэлгэрэнгүй <span aria-hidden>↗</span>
+                      </a>
+                    )}
                   </div>
                 </div>
               )}

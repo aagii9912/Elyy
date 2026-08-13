@@ -32,6 +32,7 @@ export function MonoDeveloper({ site }: { site: SiteContent }) {
   const track = useRef<HTMLDivElement>(null);
   const prog = useRef<HTMLDivElement>(null);
   const mark = useRef<HTMLDivElement>(null);
+  const logoMark = useRef<HTMLImageElement>(null);
   const mobileProg = useRef<HTMLDivElement>(null);
   const d = site.developer;
 
@@ -117,13 +118,11 @@ export function MonoDeveloper({ site }: { site: SiteContent }) {
             }
           );
         }
-        // giant year drifts slower than the track → parallax depth
-        if (mark.current) {
-          gsap.fromTo(
-            mark.current,
-            { xPercent: 6 },
-            { xPercent: -10, ease: "none", scrollTrigger: stBase }
-          );
+        // the backdrop mark (year counter or company icon) drifts slower
+        // than the track → parallax depth
+        const drift = mark.current ?? logoMark.current;
+        if (drift) {
+          gsap.fromTo(drift, { xPercent: 6 }, { xPercent: -10, ease: "none", scrollTrigger: stBase });
         }
 
         // focal zoom: the station nearest the viewport centre grows to
@@ -189,29 +188,48 @@ export function MonoDeveloper({ site }: { site: SiteContent }) {
       });
     }, sec);
     return () => ctx.revert();
-  }, [d.projects]);
+  }, [d.projects, d.logo]);
 
   return (
     <section id="developer" ref={root} className="relative border-b border-night/10 bg-night md:h-[380vh]">
       <div className="flex flex-col justify-center overflow-hidden py-20 md:sticky md:top-0 md:h-[100svh] md:py-0">
-        {/* giant running year — desktop only, counts 2006 → 2026 */}
-        <div
-          ref={mark}
-          aria-hidden
-          className="pointer-events-none absolute bottom-[2vh] left-[4vw] hidden select-none whitespace-nowrap font-bold uppercase leading-none tracking-tight text-transparent md:block md:text-[clamp(9rem,24vw,20rem)]"
-          style={{ WebkitTextStroke: "1.5px rgba(255,255,255,0.12)" }}
-        >
-          2006
-        </div>
+        {/* backdrop mark — the company icon when one is set, otherwise the
+            giant year counter running 2006 → 2026 (desktop only) */}
+        {d.logo ? (
+          <div
+            aria-hidden
+            className="pointer-events-none absolute bottom-[2vh] left-[4vw] hidden select-none md:block"
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              ref={logoMark}
+              src={d.logo}
+              alt=""
+              decoding="async"
+              className="h-[clamp(9rem,22vw,18rem)] w-auto opacity-[0.13]"
+            />
+          </div>
+        ) : (
+          <div
+            ref={mark}
+            aria-hidden
+            className="pointer-events-none absolute bottom-[2vh] left-[4vw] hidden select-none whitespace-nowrap font-bold uppercase leading-none tracking-tight text-transparent md:block md:text-[clamp(9rem,24vw,20rem)]"
+            style={{ WebkitTextStroke: "1.5px rgba(255,255,255,0.12)" }}
+          >
+            2006
+          </div>
+        )}
 
-        {/* header */}
+        {/* header — kicker, name, then the company blurb directly beneath it
+            (it used to sit off to the right, where it collided with the
+            timeline and the backdrop mark) */}
         <div className="relative z-10 mx-auto w-full max-w-[1500px] px-5 md:px-10">
           <MonoKicker tone="dark" reveal>{d.kicker}</MonoKicker>
-          <div className="mt-4 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+          <div className="mt-4 flex flex-col gap-4">
             <h2 data-reveal="heading" className="max-w-xl text-[clamp(1.8rem,3.4vw,2.8rem)] font-extrabold leading-tight tracking-tight text-white">
               {d.name}
             </h2>
-            <p data-reveal="up" className="max-w-md text-sm leading-relaxed text-white/60">{d.body}</p>
+            <p data-reveal="up" className="max-w-2xl text-sm leading-relaxed text-white/60">{d.body}</p>
           </div>
           <div data-reveal="up" className="mt-6 flex gap-10">
             <div>

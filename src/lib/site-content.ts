@@ -17,6 +17,8 @@
 export type NavLink = { label: string; href: string };
 export type StoryPointContent = { heading: string; accent: string; text: string };
 export type TitledItem = { title: string; body: string };
+/** Гадаад эх сурвалж руу заасан карт (ж: үйлдвэрлэгчийн хуудас). */
+export type LinkedItem = TitledItem & { link: string };
 
 export type SiteContent = {
   seo: { title: string; description: string };
@@ -46,8 +48,8 @@ export type SiteContent = {
   /** Chapter 02 — ELYS консепц. */
   elys: { kicker: string; title: string; items: TitledItem[] };
 
-  /** Chapter 03 — Тоноглол ба шийдэл. */
-  equip: { kicker: string; title: string; items: TitledItem[] };
+  /** Chapter 03 — Үндсэн бүтээц (материал бүр эх сурвалжийн линктэй). */
+  equip: { kicker: string; title: string; items: LinkedItem[] };
 
   /** Гурван бүлгийн баруун талын навигацийн шошго. */
   storyNav: { plan: string; elys: string; equip: string };
@@ -79,6 +81,8 @@ export type SiteContent = {
     kicker: string;
     name: string;
     body: string;
+    /** Timeline-ийн ард гарах компанийн icon. Хоосон бол гүйдэг он харагдана. */
+    logo: string;
     since: string;
     sinceLabel: string;
     projectCount: string;
@@ -130,6 +134,9 @@ export type SiteContent = {
     kicker: string;
     title: string;
     body: string;
+    /** Борлуулалтын албаны цагийн хуваарь — тайлбарын доор гарна. */
+    hoursLabel: string;
+    hours: string;
     callLabel: string;
     viberLabel: string;
     items: { name: string; initials: string; role: string; phone: string }[];
@@ -195,7 +202,7 @@ export const DEFAULT_SITE_CONTENT: SiteContent = {
       { label: "Төслийн тухай", href: "#about" },
       { label: "Давуу тал", href: "#elys" },
       { label: "Өрөөний сонголт", href: "#apartments" },
-      { label: "Хэрэгжүүлэгч", href: "#developer" },
+      { label: "Төсөл хэрэгжүүлэгч", href: "#developer" },
       { label: "Байршил", href: "#location" },
       { label: "FAQ", href: "#faq" },
     ],
@@ -205,7 +212,7 @@ export const DEFAULT_SITE_CONTENT: SiteContent = {
   },
 
   hero: {
-    sub: "Туул голын эрэгт байрлах, шинэ стандарт тогтоох бизнес зэрэглэлийн орон сууц.",
+    sub: "Туул голын салхи илбэсэн бүсэд байршилтай, архитектур болон инженерингийн эргономик шийдэлтэй орон сууц.",
   },
 
   plan: {
@@ -244,23 +251,27 @@ export const DEFAULT_SITE_CONTENT: SiteContent = {
 
   equip: {
     kicker: "Дэлгэрэнгүйд нухацтай",
-    title: "Тоноглол ба шийдэл",
+    title: "Үндсэн бүтээц",
     items: [
       {
-        title: "Дулаан алдагдал багатай цонх",
-        body: "Гурван давхар шилтэй, эрчим хүч хэмнэх цонхны систем — өвлийн дулааныг дотогшоо хадгална.",
+        title: "Veka Softline",
+        body: "E-Low түрхлэгтэй, гурван давхар шилтэй вакум цонх нь гэрт буй дулааныг гадагшлуулахгүй байхаас гадна хэт халалтаас хамгаална.",
+        link: "https://www.veka.de/window-fabricators/products-services/front-doors/softline-82/",
       },
       {
-        title: "Ухаалаг нэвтрэлтийн систем",
-        body: "Нүүр таних + RFID нэгдсэн хяналт — зөвхөн оршин суугчид болон зөвшөөрөлтэй зочид нэвтэрнэ.",
+        title: "Yaret aluminum composite panels",
+        body: "Гурван давхар дулаалга бүхий гал дэмжихгүй метал фасад.",
+        link: "https://www.yaretacp.com/",
       },
       {
-        title: "Солонгос лифт",
-        body: "Өндөр хурдны, ачаалал даацтай зорчигчийн лифт — хүлээх цагийг багасгана.",
+        title: "Бүрэн цутгамал хийцлэл",
+        body: "Газар хөдлөлтийн 8 баллд тэсвэртэй, айл хоорондын дуу тусгаарлалт сайтай бүрэн цутгамал хийцлэл.",
+        link: "",
       },
       {
-        title: "Агаар сэлгэлтийн систем",
-        body: "Шүүлттэй агааржуулалт — тоос, хийг шүүж, айл бүрд цэвэр агаар орж байршуулна.",
+        title: "Desenk elevator",
+        body: "Аюулгүй байдал болон тав тухыг хослуулсан эрчим хүчний хэмнэлттэй цахилгаан шат.",
+        link: "http://www.desenkelevator.com/products/passenger-elevator/",
       },
     ],
   },
@@ -268,7 +279,7 @@ export const DEFAULT_SITE_CONTENT: SiteContent = {
   storyNav: {
     plan: "Ерөнхий төлөвлөлт",
     elys: "ELYS концепц",
-    equip: "Тоноглол ба шийдэл",
+    equip: "Үндсэн бүтээц",
   },
 
   marquee: {
@@ -343,6 +354,7 @@ export const DEFAULT_SITE_CONTENT: SiteContent = {
     kicker: "Төсөл хэрэгжүүлэгч",
     name: "Монкон Констракшн ХХК",
     body: "Монкон Констракшн ХХК нь 2006 оноос хойш захиалагч, хэрэглэгчдэдээ барилгын зураг төслөөс эхлээд түлхүүр гардуулах хүртэлх барилгын цогц үйлчилгээг хүргэхдээ архитектурын шинэлэг шийдлийг нэвтрүүлж, барилга угсралтын чанараа тогтмол сайжруулсаар ирсэн. Өнөөдрийг хүртэл 60 гаруй төслийг амжилттай хэрэгжүүлээд байна.",
+    logo: "",
     since: "2006",
     sinceLabel: "оноос",
     projectCount: "60+",
@@ -490,13 +502,15 @@ export const DEFAULT_SITE_CONTENT: SiteContent = {
   managers: {
     kicker: "Борлуулалтын баг",
     title: "Менежертэй шууд холбогдох",
-    body: "Даваа–Ням · 09:00–18:00 цагт залгах эсвэл Viber-ээр бичээрэй — менежер тантай шууд ярилцаж, үзүүлэх цагийг тохирно.",
+    body: "Залгах эсвэл Viber-ээр бичээрэй — менежер тантай шууд ярилцаж, үзүүлэх цагийг тохирно.",
+    hoursLabel: "Борлуулалтын албаны цагийн хуваарь",
+    hours: "Даваа – Ням · 09:00 – 18:00",
     callLabel: "Залгах",
     viberLabel: "Viber",
     items: [
-      { name: "Б. Анужин", initials: "БА", role: "Ахлах борлуулалтын менежер", phone: "7786-2222" },
-      { name: "Д. Тэмүүлэн", initials: "ДТ", role: "Борлуулалтын менежер", phone: "7786-2222" },
-      { name: "С. Номин", initials: "СН", role: "Борлуулалтын менежер", phone: "7786-2222" },
+      { name: "Н.Ариунбилэг", initials: "НА", role: "Борлуулалтын ахлах менежер", phone: "8888-3374" },
+      { name: "Б.Энхзул", initials: "БЭ", role: "Борлуулалтын менежер", phone: "9008-3374" },
+      { name: "Р.Чанцалдулам", initials: "РЧ", role: "Борлуулалтын менежер", phone: "8888-3375" },
     ],
   },
 

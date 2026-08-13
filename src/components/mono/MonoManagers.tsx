@@ -22,9 +22,17 @@ export function MonoManagers({ site }: { site: SiteContent }) {
               {managers.title}
             </h2>
           </div>
-          <p data-reveal="up" data-reveal-delay="0.15" className="max-w-sm text-sm leading-relaxed text-night/60">
-            {managers.body}
-          </p>
+          <div data-reveal="up" data-reveal-delay="0.15" className="max-w-sm">
+            <p className="text-sm leading-relaxed text-night/60">{managers.body}</p>
+            {(managers.hoursLabel || managers.hours) && (
+              <div className="mt-4 border-t border-night/10 pt-4">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-night/45">
+                  {managers.hoursLabel}
+                </p>
+                <p className="mt-1 text-sm font-bold text-night">{managers.hours}</p>
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">

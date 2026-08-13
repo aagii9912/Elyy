@@ -21,7 +21,8 @@ export type NewsDoc = {
   /** Нийтлэлийн огноо — YYYY-MM-DD. */
   date: string;
   /** Агуулга — энгийн текст. `## ` дэд гарчиг, `- ` жагсаалт,
-   *  хоосон мөр шинэ догол мөр болно. */
+   *  `![тайлбар](зургийн-URL)` дангаараа мөр = зураг, хоосон мөр
+   *  шинэ догол мөр болно. */
   body: string;
   status: NewsStatus;
   createdAt: string;
@@ -67,7 +68,16 @@ export function newNews(params: {
 export type NewsBlock =
   | { kind: "heading"; text: string }
   | { kind: "list"; items: string[] }
+  | { kind: "image"; src: string; caption: string }
   | { kind: "paragraph"; text: string };
+
+/** Нийтлэлийн дунд орох зураг: `![тайлбар](URL)` дангаараа нэг мөр. */
+const IMAGE_LINE = /^!\[([^\]]*)\]\(\s*(\S+?)\s*\)$/;
+
+/** Агуулгын мөрөнд оруулах зургийн тэмдэглэгээ (админ талд ашиглана). */
+export function newsImageMarkup(src: string, caption = ""): string {
+  return `![${caption}](${src})`;
+}
 
 /** Текст агуулгыг рендерлэхэд бэлэн блокууд болгоно.
  *  HTML оруулахгүй тул хэрэглэгчийн текст аюулгүй рендерлэгдэнэ. */
@@ -94,6 +104,11 @@ export function parseNewsBody(body: string): NewsBlock[] {
       flushList();
       flushPara();
       blocks.push({ kind: "heading", text: line.slice(3).trim() });
+    } else if (IMAGE_LINE.test(line)) {
+      flushList();
+      flushPara();
+      const [, caption, src] = IMAGE_LINE.exec(line)!;
+      blocks.push({ kind: "image", src, caption: caption.trim() });
     } else if (line.startsWith("- ")) {
       flushPara();
       list.push(line.slice(2).trim());

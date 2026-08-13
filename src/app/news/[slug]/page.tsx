@@ -123,6 +123,23 @@ export default async function NewsDetailPage({ params, searchParams }: Props) {
                     </li>
                   ))}
                 </ul>
+              ) : block.kind === "image" ? (
+                <figure key={i} className="mt-8 first:mt-0">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    data-reveal="zoom"
+                    src={block.src}
+                    alt={block.caption || post.title}
+                    loading="lazy"
+                    decoding="async"
+                    className="w-full rounded-2xl border border-night/10"
+                  />
+                  {block.caption && (
+                    <figcaption className="mt-3 text-[13px] leading-relaxed text-night/50">
+                      {block.caption}
+                    </figcaption>
+                  )}
+                </figure>
               ) : (
                 <p key={i} className="mt-5 text-[16px] leading-relaxed text-night/75 first:mt-0">
                   {block.text}

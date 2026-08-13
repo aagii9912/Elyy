@@ -3,7 +3,8 @@
 /* Админ UI-ийн дахин ашиглагдах жижиг блокууд.
    Маркетингийн брэнд бус — цэвэрхэн, ажлын хэрэгслийн загвар. */
 
-import { useRef, useState } from "react";
+import { forwardRef, useRef, useState } from "react";
+import { uploadImageFile } from "./upload";
 
 export function Button({
   children,
@@ -53,9 +54,13 @@ export function TextInput(props: React.InputHTMLAttributes<HTMLInputElement>) {
   return <input {...props} className={`${inputCls} ${props.className ?? ""}`} />;
 }
 
-export function TextArea(props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
-  return <textarea {...props} className={`${inputCls} resize-y ${props.className ?? ""}`} />;
-}
+/* ref-ийг дамжуулна — нийтлэлийн засварлагч курсорын байрлалд зураг
+   оруулахдаа textarea-д шууд хандах шаардлагатай. */
+export const TextArea = forwardRef<HTMLTextAreaElement, React.TextareaHTMLAttributes<HTMLTextAreaElement>>(
+  function TextArea(props, ref) {
+    return <textarea ref={ref} {...props} className={`${inputCls} resize-y ${props.className ?? ""}`} />;
+  }
+);
 
 export function Toggle({
   checked,
@@ -98,7 +103,9 @@ export function Card({ title, children, right }: { title?: string; children: Rea
   );
 }
 
-/** Зураг байршуулах талбар — /api/admin/upload руу upload хийж URL авна. */
+/** Зураг байршуулах талбар — /api/admin/upload руу upload хийж URL авна.
+ *  Upload бүтэхгүй тохиолдолд (Supabase тохируулаагүй г.м.) хаягийг гараар
+ *  бичих боломжтой — ж: `/images/axono/a-01.jpg`. */
 export function ImageField({
   label,
   value,
@@ -115,22 +122,18 @@ export function ImageField({
   const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  const [manual, setManual] = useState(false);
 
   const upload = async (file: File) => {
     setBusy(true);
     setErr(null);
-    try {
-      const fd = new FormData();
-      fd.append("file", file);
-      const res = await fetch("/api/admin/upload", { method: "POST", body: fd });
-      const json = await res.json().catch(() => null);
-      if (res.ok && json?.ok) onChange(json.url);
-      else setErr(json?.error || "Байршуулж чадсангүй.");
-    } catch {
-      setErr("Сүлжээний алдаа.");
-    } finally {
-      setBusy(false);
+    const res = await uploadImageFile(file);
+    if (res.ok) onChange(res.url);
+    else {
+      setErr(res.error);
+      setManual(true); // upload унасан — гар аргыг шууд нээнэ
     }
+    setBusy(false);
   };
 
   return (
@@ -161,12 +164,24 @@ export function ImageField({
         <Button type="button" variant="ghost" onClick={() => inputRef.current?.click()} disabled={busy}>
           {busy ? "Түр хүлээнэ үү…" : value ? "Солих" : "Зураг оруулах"}
         </Button>
+        <Button type="button" variant="ghost" onClick={() => setManual((v) => !v)}>
+          {manual ? "Хаягийг нуух" : "Хаягаар оруулах"}
+        </Button>
         {value && (
           <Button type="button" variant="danger" onClick={() => onChange("")}>
             Устгах
           </Button>
         )}
       </div>
+      {manual && (
+        <div className="mt-2">
+          <TextInput
+            value={value}
+            placeholder="/images/axono/a-01.jpg"
+            onChange={(e) => onChange(e.target.value)}
+          />
+        </div>
+      )}
       {hint && <span className="mt-1 block text-xs text-neutral-400">{hint}</span>}
       {err && <span className="mt-1 block text-xs text-red-500">{err}</span>}
     </div>

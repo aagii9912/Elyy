@@ -8,6 +8,9 @@ import { useRouter } from "next/navigation";
 import type { EventDoc } from "@/lib/events";
 import { Button, TextInput } from "./ui";
 
+/** `GET /api/admin/upload` оношилгооны хариу. */
+type UploadHealth = { ok: boolean; mode: string; bucket: string | null; error: string | null };
+
 function fmtDate(iso: string): string {
   // Тогтвортой (locale-агностик) огноо — hydration зөрүүгүй.
   return iso.slice(0, 16).replace("T", " ");
@@ -27,6 +30,8 @@ export function Dashboard({
   const [name, setName] = useState("");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  const [checking, setChecking] = useState(false);
+  const [health, setHealth] = useState<UploadHealth | null>(null);
 
   const create = async () => {
     const n = name.trim();
@@ -71,6 +76,18 @@ export function Dashboard({
     router.refresh();
   };
 
+  const checkUpload = async () => {
+    setChecking(true);
+    try {
+      const res = await fetch("/api/admin/upload");
+      setHealth(await res.json());
+    } catch {
+      setHealth({ ok: false, mode: "?", bucket: null, error: "Сүлжээний алдаа." });
+    } finally {
+      setChecking(false);
+    }
+  };
+
   return (
     <div className="mx-auto max-w-4xl px-4 py-8">
       {/* header */}
@@ -106,9 +123,26 @@ export function Dashboard({
       {storeMode === "local" && (
         <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
           Локал горим: өгөгдөл <code>.data/events.json</code>, зураг <code>public/uploads/</code>-д хадгалагдана.
-          Production (Vercel)-д Supabase-г тохируулна уу — <code>docs/admin-setup.md</code>.
+          Production (Vercel)-д файл систем read-only тул <b>зураг байршуулах ажиллахгүй</b> —
+          Supabase-г тохируулна уу (<code>docs/admin-setup.md</code>).
         </div>
       )}
+
+      {/* Зураг байршуулалтын эрүүл мэнд — «алдаа гарлаа» гэсний оронд
+          яг ямар тохиргоо дутуу байгааг шууд харуулна. */}
+      <div className="mb-6 flex flex-wrap items-center gap-3 rounded-xl border border-neutral-200 bg-white px-4 py-3 text-sm">
+        <span className="font-semibold text-neutral-700">Зураг хадгалалт</span>
+        <Button variant="ghost" type="button" onClick={checkUpload} disabled={checking}>
+          {checking ? "Шалгаж байна…" : "Шалгах"}
+        </Button>
+        {health && (
+          <span className={health.ok ? "text-green-700" : "text-red-600"}>
+            {health.ok
+              ? `Бэлэн · ${health.mode}${health.bucket ? ` · ${health.bucket}` : ""}`
+              : health.error || "Тохируулаагүй байна."}
+          </span>
+        )}
+      </div>
 
       {/* create */}
       <div className="mb-8 flex flex-col gap-2 rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm sm:flex-row sm:items-center">

@@ -374,10 +374,26 @@ class SupabaseStore implements Store {
   async uploadImage(input: UploadInput): Promise<string> {
     const client = await sb();
     const key = `${new Date().toISOString().slice(0, 10)}/${randomUUID()}-${safeName(input.filename)}`;
-    const { error } = await client.storage
-      .from(MEDIA_BUCKET)
-      .upload(key, input.buffer, { contentType: input.contentType, upsert: false });
-    if (error) throw new Error(`Supabase upload: ${error.message}`);
+    const put = () =>
+      client.storage
+        .from(MEDIA_BUCKET)
+        .upload(key, input.buffer, { contentType: input.contentType, upsert: false });
+
+    let { error } = await put();
+
+    // `docs/supabase-init.sql`-ийн storage хэсгийг ажиллуулаагүй бол bucket
+    // байхгүй байна. Нэг удаа өөрөө үүсгээд дахин оролдоно.
+    if (error && /bucket not found/i.test(error.message)) {
+      const { error: mkErr } = await client.storage.createBucket(MEDIA_BUCKET, { public: true });
+      if (mkErr && !/already exists/i.test(mkErr.message)) {
+        throw new Error(
+          `"${MEDIA_BUCKET}" storage bucket байхгүй бөгөөд үүсгэж чадсангүй: ${mkErr.message}`
+        );
+      }
+      ({ error } = await put());
+    }
+
+    if (error) throw new Error(`Supabase storage "${MEDIA_BUCKET}": ${error.message}`);
     const { data } = client.storage.from(MEDIA_BUCKET).getPublicUrl(key);
     return data.publicUrl;
   }
@@ -538,9 +554,19 @@ class LocalStore implements Store {
   }
 
   async uploadImage(input: UploadInput): Promise<string> {
-    await fs.mkdir(UPLOAD_DIR, { recursive: true });
     const name = `${Date.now()}-${randomUUID().slice(0, 8)}-${safeName(input.filename)}`;
-    await fs.writeFile(path.join(UPLOAD_DIR, name), input.buffer);
+    try {
+      await fs.mkdir(UPLOAD_DIR, { recursive: true });
+      await fs.writeFile(path.join(UPLOAD_DIR, name), input.buffer);
+    } catch (err) {
+      const code = (err as NodeJS.ErrnoException).code;
+      if (code === "EROFS" || code === "EACCES") {
+        throw new Error(
+          "Файл систем бичих боломжгүй байна (read-only). Supabase-г тохируулна уу."
+        );
+      }
+      throw err;
+    }
     return `/uploads/${name}`;
   }
 }

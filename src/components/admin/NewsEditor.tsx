@@ -2,13 +2,15 @@
 
 /* Нэг мэдээний засварлагч — гарчиг, slug, огноо, шошго, нүүр зураг,
    товч танилцуулга, агуулга. Агуулга нь энгийн текст: хоосон мөр =
-   шинэ догол мөр, `## ` = дэд гарчиг, `- ` = жагсаалт. */
+   шинэ догол мөр, `## ` = дэд гарчиг, `- ` = жагсаалт,
+   `![тайлбар](URL)` = нийтлэлийн дунд орох зураг. */
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { parseNewsBody, type NewsDoc } from "@/lib/news";
+import { newsImageMarkup, parseNewsBody, type NewsDoc } from "@/lib/news";
 import { Button, Card, Field, ImageField, TextArea, TextInput } from "./ui";
+import { uploadImageFile } from "./upload";
 
 type Draft = Pick<NewsDoc, "title" | "slug" | "excerpt" | "cover" | "tag" | "date" | "body" | "status">;
 
@@ -30,10 +32,45 @@ export function NewsEditor({ initial }: { initial: NewsDoc }) {
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
 
+  const bodyRef = useRef<HTMLTextAreaElement>(null);
+  const bodyFileRef = useRef<HTMLInputElement>(null);
+  const [imgBusy, setImgBusy] = useState(false);
+  const [imgErr, setImgErr] = useState<string | null>(null);
+
   const set = (patch: Partial<Draft>) => {
     setDraft((d) => ({ ...d, ...patch }));
     setDirty(true);
     setMsg(null);
+  };
+
+  /** Зургийн тэмдэглэгээг курсорын байрлалд, өөрийн мөрөнд нь оруулна. */
+  const insertImage = (url: string) => {
+    const el = bodyRef.current;
+    const markup = newsImageMarkup(url);
+    setDraft((d) => {
+      const at = el ? el.selectionStart : d.body.length;
+      const head = d.body.slice(0, at).replace(/\s+$/, "");
+      const tail = d.body.slice(at).replace(/^\s+/, "");
+      const body = `${head}${head ? "\n\n" : ""}${markup}${tail ? `\n\n${tail}` : "\n"}`;
+      // Курсорыг оруулсан мөрийн ард нь буцаана.
+      const caret = (head ? head.length + 2 : 0) + markup.length;
+      requestAnimationFrame(() => {
+        el?.focus();
+        el?.setSelectionRange(caret, caret);
+      });
+      return { ...d, body };
+    });
+    setDirty(true);
+    setMsg(null);
+  };
+
+  const addBodyImage = async (file: File) => {
+    setImgBusy(true);
+    setImgErr(null);
+    const res = await uploadImageFile(file);
+    if (res.ok) insertImage(res.url);
+    else setImgErr(res.error);
+    setImgBusy(false);
   };
 
   useEffect(() => {
@@ -171,15 +208,41 @@ export function NewsEditor({ initial }: { initial: NewsDoc }) {
         <Card title="Агуулга">
           <Field
             label="Текст"
-            hint="Хоосон мөр = шинэ догол мөр · “## ” = дэд гарчиг · “- ” = жагсаалтын мөр."
+            hint="Хоосон мөр = шинэ догол мөр · “## ” = дэд гарчиг · “- ” = жагсаалтын мөр · “![тайлбар](зургийн-хаяг)” = зураг."
           >
             <TextArea
+              ref={bodyRef}
               rows={18}
               value={draft.body}
               onChange={(e) => set({ body: e.target.value })}
               className="font-mono text-[13px] leading-relaxed"
             />
           </Field>
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <input
+              ref={bodyFileRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) addBodyImage(f);
+                e.target.value = "";
+              }}
+            />
+            <Button
+              type="button"
+              variant="ghost"
+              disabled={imgBusy}
+              onClick={() => bodyFileRef.current?.click()}
+            >
+              {imgBusy ? "Байршуулж байна…" : "Зураг оруулах"}
+            </Button>
+            <span className="text-xs text-neutral-400">
+              Курсорын байрлалд нэмэгдэнэ. Тайлбарыг “![…]” дотор бичнэ.
+            </span>
+          </div>
+          {imgErr && <p className="mt-2 text-xs text-red-500">{imgErr}</p>}
         </Card>
 
         <Card title="Урьдчилсан харагдац">
@@ -198,6 +261,18 @@ export function NewsEditor({ initial }: { initial: NewsDoc }) {
                       <li key={j}>{li}</li>
                     ))}
                   </ul>
+                ) : b.kind === "image" ? (
+                  <figure key={i}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={b.src}
+                      alt={b.caption}
+                      className="w-full rounded-lg border border-neutral-200"
+                    />
+                    {b.caption && (
+                      <figcaption className="mt-1.5 text-xs text-neutral-400">{b.caption}</figcaption>
+                    )}
+                  </figure>
                 ) : (
                   <p key={i} className="text-[15px] leading-relaxed text-neutral-700">
                     {b.text}
