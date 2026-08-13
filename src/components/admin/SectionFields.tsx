@@ -141,7 +141,8 @@ export function SectionFields({
                 <ImageField
                   label={`Зураг ${i + 1}`}
                   value={img.url}
-                  aspect="aspect-[4/3]"
+                  ratio="4/3"
+                  maxEdge={1600}
                   onChange={(url) => {
                     const images = [...section.images];
                     images[i] = { ...img, url };
@@ -167,7 +168,14 @@ export function SectionFields({
     case "image":
       return (
         <div className="space-y-3">
-          <ImageField label="Зураг" value={section.url} onChange={(url) => onChange({ ...section, url })} />
+          <ImageField
+            label="Зураг"
+            value={section.url}
+            onChange={(url) => onChange({ ...section, url })}
+            ratio="16/9"
+            maxEdge={2000}
+            hint="Хэсгийн бүтэн өргөнөөр харагдана."
+          />
           <Field label="Тайлбар (заавал биш)">
             <TextInput value={section.caption} onChange={(e) => onChange({ ...section, caption: e.target.value })} />
           </Field>
@@ -186,7 +194,8 @@ export function SectionFields({
                 <ImageField
                   label="Зураг"
                   value={it.image}
-                  aspect="aspect-[4/3]"
+                  ratio="4/3"
+                  maxEdge={1200}
                   onChange={(image) => {
                     const items = [...section.items];
                     items[i] = { ...it, image };

@@ -15,10 +15,10 @@
 
 import { UPLOAD_TYPE_ERROR, isAllowedUploadType } from "@/lib/upload-types";
 
-/** Зургийн илгээхийн өмнөх дээд хэмжээ — уртаашаа пиксел. */
-const MAX_EDGE = 2000;
-/** Үүнээс жижиг зургийг дахин кодлохгүй (лого, icon г.м. хэвээр үлдэнэ). */
-const SKIP_UNDER_BYTES = 600 * 1024;
+/** Талбар хэмжээгээ заагаагүй үеийн зургийн дээд тал — уртаашаа пиксел. */
+const DEFAULT_MAX_EDGE = 1600;
+/** Аль хэдийн хэмжээндээ багтсан, ийм жижиг файлыг дахин кодлохгүй. */
+const SKIP_UNDER_BYTES = 400 * 1024;
 /** Үүнээс том файлыг server-ээр дамжуулахгүй, шууд Storage руу илгээнэ. */
 const DIRECT_MIN_BYTES = 3.5 * 1024 * 1024;
 
@@ -52,16 +52,20 @@ async function decode(file: File): Promise<CanvasImageSource & { width: number; 
   }
 }
 
-/** Зургийг MAX_EDGE-д багтаан дахин кодлоно. Ашиггүй бол эх файлаа буцаана. */
-async function shrink(file: File): Promise<Blob> {
-  if (!isRaster(file.type) || file.size <= SKIP_UNDER_BYTES) return file;
+/** Зургийг талбарын дээд хэмжээнд багтаан дахин кодлоно.
+ *  Ашиггүй (аль хэдийн жижиг) бол эх файлаа буцаана. */
+async function shrink(file: File, maxEdge: number): Promise<Blob> {
+  if (!isRaster(file.type)) return file;
 
   const src = await decode(file);
   const sw = src.width;
   const sh = src.height;
   if (!sw || !sh) return file;
 
-  const scale = Math.min(1, MAX_EDGE / Math.max(sw, sh));
+  const scale = Math.min(1, maxEdge / Math.max(sw, sh));
+  // Хэмжээндээ багтсан бөгөөд файл нь ч жижиг бол дахин кодлох нь дэмий.
+  if (scale === 1 && file.size <= SKIP_UNDER_BYTES) return file;
+
   const canvas = document.createElement("canvas");
   canvas.width = Math.round(sw * scale);
   canvas.height = Math.round(sh * scale);
@@ -165,15 +169,20 @@ async function viaApi(blob: Blob, name: string, type: string): Promise<UploadRes
   return { ok: false, error: await errorFrom(res, blob.size) };
 }
 
-/** Зураг эсвэл PDF-ийг байршуулж нийтийн URL-ийг буцаана. */
-export async function uploadFile(file: File): Promise<UploadResult> {
+/** Зураг эсвэл PDF-ийг байршуулж нийтийн URL-ийг буцаана.
+ *  `maxEdge` — тухайн талбарт хэрэгтэй дээд хэмжээ (уртаашаа пиксел);
+ *  зургийг илгээхийн өмнө browser дээр тэр хэмжээ рүү буулгана. */
+export async function uploadFile(
+  file: File,
+  opts: { maxEdge?: number } = {}
+): Promise<UploadResult> {
   if (!isAllowedUploadType(file.type)) return { ok: false, error: UPLOAD_TYPE_ERROR };
 
   let payload: Blob = file;
   let name = file.name || "file";
   const type = file.type;
   try {
-    const smaller = await shrink(file);
+    const smaller = await shrink(file, opts.maxEdge ?? DEFAULT_MAX_EDGE);
     if (smaller !== file) {
       payload = smaller;
       name = withExt(name, smaller.type);

@@ -139,7 +139,8 @@ export type SiteContent = {
     hours: string;
     callLabel: string;
     viberLabel: string;
-    items: { name: string; initials: string; role: string; phone: string }[];
+    /** `photo` хоосон бол товчлол (initials) бүхий дугуй харагдана. */
+    items: { name: string; initials: string; role: string; phone: string; photo: string }[];
   };
 
   faq: { kicker: string; title: string; items: { q: string; a: string }[] };
@@ -508,9 +509,9 @@ export const DEFAULT_SITE_CONTENT: SiteContent = {
     callLabel: "Залгах",
     viberLabel: "Viber",
     items: [
-      { name: "Н.Ариунбилэг", initials: "НА", role: "Борлуулалтын ахлах менежер", phone: "8888-3374" },
-      { name: "Б.Энхзул", initials: "БЭ", role: "Борлуулалтын менежер", phone: "9008-3374" },
-      { name: "Р.Чанцалдулам", initials: "РЧ", role: "Борлуулалтын менежер", phone: "8888-3375" },
+      { name: "Н.Ариунбилэг", initials: "НА", role: "Борлуулалтын ахлах менежер", phone: "8888-3374", photo: "" },
+      { name: "Б.Энхзул", initials: "БЭ", role: "Борлуулалтын менежер", phone: "9008-3374", photo: "" },
+      { name: "Р.Чанцалдулам", initials: "РЧ", role: "Борлуулалтын менежер", phone: "8888-3375", photo: "" },
     ],
   },
 

@@ -1,8 +1,9 @@
 /* /mono — Борлуулалтын менежерүүд. Placed right before the FAQ:
    2–3 profiles with a direct-call button and a Viber deep link so a
-   lead can reach a human in one tap. Initials avatars stand in until
-   Монкон supplies real portraits; names/numbers are edited from the
-   admin (`/admin/site` → Борлуулалтын баг). */
+   lead can reach a human in one tap. A portrait sits at the top of the
+   card when one is uploaded; without it the card falls back to the
+   initials avatar. Photos/names/numbers are edited from the admin
+   (`/admin/site` → Борлуулалтын баг). */
 
 import type { SiteContent } from "@/lib/site-content";
 import { MonoKicker } from "./shared";
@@ -42,13 +43,30 @@ export function MonoManagers({ site }: { site: SiteContent }) {
               data-reveal="up"
               className="group flex flex-col rounded-2xl border border-night/10 bg-white p-7 transition-colors duration-300 hover:border-night/30"
             >
+              {m.photo && (
+                /* Хөрөг нь тунгалаг дэвсгэртэй тайрсан зураг байх тул
+                   `contain` + доод захад нааж бүтэн биеийг харуулна. */
+                <div className="relative mb-5 aspect-[3/4] overflow-hidden rounded-xl bg-paper">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={m.photo}
+                    alt={m.name}
+                    loading="lazy"
+                    decoding="async"
+                    className="absolute inset-x-0 bottom-0 mx-auto h-full w-full object-contain object-bottom transition-transform duration-700 group-hover:scale-[1.03]"
+                  />
+                </div>
+              )}
+
               <div className="flex items-center gap-4">
-                <span
-                  aria-hidden
-                  className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-night text-base font-extrabold text-white ring-2 ring-transparent transition-shadow duration-300 group-hover:ring-lime"
-                >
-                  {m.initials}
-                </span>
+                {!m.photo && (
+                  <span
+                    aria-hidden
+                    className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-night text-base font-extrabold text-white ring-2 ring-transparent transition-shadow duration-300 group-hover:ring-lime"
+                  >
+                    {m.initials}
+                  </span>
+                )}
                 <div>
                   <h3 className="text-lg font-extrabold tracking-tight text-night">{m.name}</h3>
                   <p className="mt-0.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-night/50">
@@ -57,10 +75,12 @@ export function MonoManagers({ site }: { site: SiteContent }) {
                 </div>
               </div>
 
+              {/* `mt-auto` — зурагтай/зураггүй картууд холилдсон ч холбоо
+                  барих блок бүгд картын доод захад тэгширнэ. */}
               <a
                 href={`tel:+${digits(m.phone)}`}
                 data-cursor-hover
-                className="mt-6 text-2xl font-extrabold tracking-tight text-night transition-opacity hover:opacity-60"
+                className="mt-auto pt-6 text-2xl font-extrabold tracking-tight text-night transition-opacity hover:opacity-60"
               >
                 {m.phone}
               </a>

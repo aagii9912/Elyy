@@ -103,31 +103,50 @@ export function Card({ title, children, right }: { title?: string; children: Rea
   );
 }
 
+/** `"4/3"` → санал болгох пиксел хэмжээ (урт тал нь `maxEdge`). */
+function recommendedSize(ratio: string, maxEdge: number): { w: number; h: number } {
+  const [rw, rh] = ratio.split("/").map((n) => Number(n) || 1);
+  return rw >= rh
+    ? { w: maxEdge, h: Math.round((maxEdge * rh) / rw) }
+    : { w: Math.round((maxEdge * rw) / rh), h: maxEdge };
+}
+
 /** Зураг байршуулах талбар — /api/admin/upload руу upload хийж URL авна.
- *  Upload бүтэхгүй тохиолдолд (Supabase тохируулаагүй г.м.) хаягийг гараар
- *  бичих боломжтой — ж: `/images/axono/a-01.jpg`. */
+ *  Илгээхийн өмнө зургийг `maxEdge` хүртэл багасгана; санал болгох хэмжээ,
+ *  харьцааг талбар дээрээ өөрөө бичиж харуулна. Upload бүтэхгүй тохиолдолд
+ *  (Supabase тохируулаагүй г.м.) хаягийг гараар бичиж болно. */
 export function ImageField({
   label,
   value,
   onChange,
   hint,
-  aspect = "aspect-[16/9]",
+  ratio = "16/9",
+  maxEdge = 1600,
+  fit = "cover",
 }: {
   label: string;
   value: string;
   onChange: (url: string) => void;
   hint?: string;
-  aspect?: string;
+  /** Талбарын харьцаа — ж: `"4/3"`, `"3/4"`, `"1/1"`. */
+  ratio?: string;
+  /** Хадгалах дээд хэмжээ (уртаашаа пиксел). */
+  maxEdge?: number;
+  /** Тунгалаг дэвсгэртэй зурагт `contain` тохиромжтой. */
+  fit?: "cover" | "contain";
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [manual, setManual] = useState(false);
 
+  const { w, h } = recommendedSize(ratio, maxEdge);
+  const sizeNote = `Санал болгох ${w}×${h}px (${ratio.replace("/", ":")}) · JPG, PNG эсвэл WebP · том зураг автоматаар багасна`;
+
   const upload = async (file: File) => {
     setBusy(true);
     setErr(null);
-    const res = await uploadFile(file);
+    const res = await uploadFile(file, { maxEdge });
     if (res.ok) onChange(res.url);
     else {
       setErr(res.error);
@@ -139,10 +158,17 @@ export function ImageField({
   return (
     <div>
       <span className="mb-1.5 block text-[13px] font-semibold text-neutral-700">{label}</span>
-      <div className={`relative overflow-hidden rounded-lg border border-dashed border-neutral-300 bg-neutral-50 ${aspect}`}>
+      <div
+        style={{ aspectRatio: ratio }}
+        className="relative overflow-hidden rounded-lg border border-dashed border-neutral-300 bg-neutral-50"
+      >
         {value ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={value} alt="" className="h-full w-full object-cover" />
+          <img
+            src={value}
+            alt=""
+            className={`h-full w-full ${fit === "contain" ? "object-contain" : "object-cover"}`}
+          />
         ) : (
           <div className="flex h-full w-full items-center justify-center text-xs text-neutral-400">
             {busy ? "Байршуулж байна…" : "Зураг алга"}
@@ -182,7 +208,8 @@ export function ImageField({
           />
         </div>
       )}
-      {hint && <span className="mt-1 block text-xs text-neutral-400">{hint}</span>}
+      <span className="mt-1 block text-xs text-neutral-400">{sizeNote}</span>
+      {hint && <span className="mt-0.5 block text-xs text-neutral-400">{hint}</span>}
       {err && <span className="mt-1 block text-xs text-red-500">{err}</span>}
     </div>
   );
@@ -291,7 +318,10 @@ export function FileField({
           />
         </div>
       )}
-      {hint && <span className="mt-1 block text-xs text-neutral-400">{hint}</span>}
+      <span className="mt-1 block text-xs text-neutral-400">
+        PDF · хэмжээний хязгаар байхгүй (3.5MB-аас том файл Storage руу шууд илгээгдэнэ)
+      </span>
+      {hint && <span className="mt-0.5 block text-xs text-neutral-400">{hint}</span>}
       {err && <span className="mt-1 block text-xs text-red-500">{err}</span>}
     </div>
   );

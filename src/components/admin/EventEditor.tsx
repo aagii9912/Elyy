@@ -250,7 +250,14 @@ export function EventEditor({
         {/* ---------- Hero ---------- */}
         <Card title="Hero (эхний дэлгэц)">
           <div className="space-y-4">
-            <ImageField label="Дэвсгэр зураг" value={content.hero.image} onChange={(url) => patchHero({ image: url })} hint="Заавал биш. Байхгүй бол дан өнгө." />
+            <ImageField
+              label="Дэвсгэр зураг"
+              value={content.hero.image}
+              onChange={(url) => patchHero({ image: url })}
+              ratio="16/9"
+              maxEdge={2000}
+              hint="Заавал биш. Байхгүй бол дан өнгө."
+            />
             <div className="grid gap-4 sm:grid-cols-2">
               <Field label="Kicker (жижиг гарчиг)">
                 <TextInput value={content.hero.kicker} onChange={(e) => patchHero({ kicker: e.target.value })} />

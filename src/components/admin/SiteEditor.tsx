@@ -728,8 +728,10 @@ function renderSection(
                       label="Картын зураг"
                       value={item.thumb}
                       onChange={(url) => editUnit((u) => void (u.thumb = url))}
-                      aspect="aspect-[4/3]"
-                      hint="Хоосон бол эхний өнцгийн зургийг ашиглана."
+                      ratio="4/3"
+                      maxEdge={800}
+                      fit="contain"
+                      hint="Аксонометрын жижиг хувилбар. Хоосон бол эхний өнцгийн зургийг ашиглана."
                     />
                     <div>
                       <span className="mb-1.5 block text-[13px] font-semibold text-neutral-700">
@@ -742,7 +744,10 @@ function renderSection(
                               label={`Өнцөг ${vi + 1}`}
                               value={view}
                               onChange={(url) => editUnit((u) => void (u.views[vi] = url))}
-                              aspect="aspect-[4/3]"
+                              ratio="4/3"
+                              maxEdge={1600}
+                              fit="contain"
+                              hint="Lightbox-д томруулж үзэх аксонометр зураг."
                             />
                             <Button
                               type="button"
@@ -839,8 +844,10 @@ function renderSection(
                 label="Компанийн icon"
                 value={c.developer.logo}
                 onChange={(url) => edit((d) => void (d.developer.logo = url))}
-                aspect="aspect-square"
-                hint="Timeline-ийн ард сүүдэр болж харагдана. Хоосон бол 2006 → 2026 гүйдэг он гарна."
+                ratio="1/1"
+                maxEdge={512}
+                fit="contain"
+                hint="Дөрвөлжин лого (тунгалаг PNG/SVG). Timeline-ийн ард сүүдэр болж харагдана. Хоосон бол 2006 → 2026 гүйдэг он гарна."
               />
             </div>
           </Card>
@@ -873,10 +880,12 @@ function renderSection(
                     </Field>
                   </div>
                   <ImageField
-                    label="Зураг"
+                    label="Төслийн зураг"
                     value={item.image}
                     onChange={(url) => set({ image: url })}
-                    aspect="aspect-[4/3]"
+                    ratio="4/3"
+                    maxEdge={1600}
+                    hint="Цагийн шугамын карт дээр харагдана — барилгын гадна талын зураг тохиромжтой."
                   />
                 </>
               )}
@@ -922,7 +931,9 @@ function renderSection(
                     label="Зураг"
                     value={item.src}
                     onChange={(url) => set({ src: url })}
-                    aspect="aspect-[4/3]"
+                    ratio="4/3"
+                    maxEdge={2000}
+                    hint="Цомогт бүтэн өргөнөөр харагдана — интерьерийн чанартай зураг."
                   />
                 </>
               )}
@@ -1265,24 +1276,47 @@ function renderSection(
             <ListEditor
               items={c.managers.items}
               onChange={(next) => edit((d) => void (d.managers.items = next))}
-              blank={() => ({ name: "Шинэ менежер", initials: "", role: "Борлуулалтын менежер", phone: "" })}
+              blank={() => ({
+                name: "Шинэ менежер",
+                initials: "",
+                role: "Борлуулалтын менежер",
+                phone: "",
+                photo: "",
+              })}
               title={(item) => item.name}
               addLabel="Менежер нэмэх"
             >
-              {(item, set) => (
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <Field label="Нэр">
-                    <TextInput value={item.name} onChange={(e) => set({ name: e.target.value })} />
-                  </Field>
-                  <Field label="Товчлол" hint="Дугуй зураг дээрх 2 үсэг.">
-                    <TextInput value={item.initials} onChange={(e) => set({ initials: e.target.value })} />
-                  </Field>
-                  <Field label="Албан тушаал">
-                    <TextInput value={item.role} onChange={(e) => set({ role: e.target.value })} />
-                  </Field>
-                  <Field label="Утас" hint="Ж: 7786-2222">
-                    <TextInput value={item.phone} onChange={(e) => set({ phone: e.target.value })} />
-                  </Field>
+              {(item, set, i) => (
+                <div className="grid gap-4 sm:grid-cols-[200px_1fr]">
+                  <ImageField
+                    label="Хөрөг зураг"
+                    value={item.photo}
+                    onChange={(url) =>
+                      edit((d) => {
+                        // Байршуулалт async тул хамгийн сүүлийн төлөв дээр индексээр бичнэ.
+                        const m = d.managers.items[i];
+                        if (m) m.photo = url;
+                      })
+                    }
+                    ratio="3/4"
+                    maxEdge={900}
+                    fit="contain"
+                    hint="Дэвсгэрийг нь салгасан (тунгалаг) босоо хөрөг тохиромжтой. Хоосон бол товчлол бүхий дугуй харагдана."
+                  />
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <Field label="Нэр">
+                      <TextInput value={item.name} onChange={(e) => set({ name: e.target.value })} />
+                    </Field>
+                    <Field label="Товчлол" hint="Зураггүй үед дугуйд гарах 2 үсэг.">
+                      <TextInput value={item.initials} onChange={(e) => set({ initials: e.target.value })} />
+                    </Field>
+                    <Field label="Албан тушаал">
+                      <TextInput value={item.role} onChange={(e) => set({ role: e.target.value })} />
+                    </Field>
+                    <Field label="Утас" hint="Ж: 8888-3374">
+                      <TextInput value={item.phone} onChange={(e) => set({ phone: e.target.value })} />
+                    </Field>
+                  </div>
                 </div>
               )}
             </ListEditor>

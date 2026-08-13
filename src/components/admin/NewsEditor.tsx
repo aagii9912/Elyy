@@ -200,8 +200,9 @@ export function NewsEditor({ initial }: { initial: NewsDoc }) {
             label="Зураг"
             value={draft.cover}
             onChange={(url) => set({ cover: url })}
-            aspect="aspect-[16/9]"
-            hint="Жагсаалтын карт болон нийтлэлийн толгойд харагдана."
+            ratio="16/9"
+            maxEdge={1600}
+            hint="Жагсаалтын карт болон нийтлэлийн толгойд харагдана. Сошиалд хуваалцахад ч энэ зураг гарна."
           />
         </Card>
 
