@@ -10,9 +10,9 @@ export function NewsCard({ item, readMore }: { item: NewsDoc; readMore: string }
       <Link
         href={newsHref(item.slug)}
         data-cursor-hover
-        className="flex h-full flex-col overflow-hidden rounded-2xl border border-night/10 bg-white transition-colors duration-300 hover:border-night/30"
+        className="flex h-full flex-col overflow-hidden rounded-2xl border border-night/10 bg-surface transition-colors duration-300 hover:border-night/30"
       >
-        <div className="relative overflow-hidden bg-paper">
+        <div className="relative overflow-hidden bg-night/5">
           {item.cover ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img

@@ -19,6 +19,9 @@ export type StoryPointContent = { heading: string; accent: string; text: string 
 export type TitledItem = { title: string; body: string };
 /** Гадаад эх сурвалж руу заасан карт (ж: үйлдвэрлэгчийн хуудас). */
 export type LinkedItem = TitledItem & { link: string };
+/** Сошиал холбоос. `icon` — facebook | instagram | youtube | tiktok |
+ *  linkedin | twitter | link. `href` хоосон/"#" бол харагдахгүй. */
+export type SocialLink = NavLink & { icon: string };
 
 export type SiteContent = {
   seo: { title: string; description: string };
@@ -31,6 +34,24 @@ export type SiteContent = {
     email: string;
     /** Танилцуулга PDF-ийн зам. */
     brochureUrl: string;
+  };
+
+  /** Танилцуулга татахын өмнөх холбоо барих маягт (lead capture).
+   *  `enabled: false` үед PDF шууд нээгдэнэ. */
+  brochure: {
+    enabled: boolean;
+    title: string;
+    sub: string;
+    name: string;
+    phone: string;
+    email: string;
+    consent: string;
+    submit: string;
+    sending: string;
+    error: string;
+    successTitle: string;
+    successBody: string;
+    downloadLabel: string;
   };
 
   nav: {
@@ -48,8 +69,31 @@ export type SiteContent = {
   /** Chapter 02 — ELYS консепц. */
   elys: { kicker: string; title: string; items: TitledItem[] };
 
-  /** Chapter 03 — Үндсэн бүтээц (материал бүр эх сурвалжийн линктэй). */
-  equip: { kicker: string; title: string; items: LinkedItem[] };
+  /** Үндсэн бүтээц — материалын карт бүр дээр дарахад дэлгэрэнгүй
+   *  pop-up нээгдэнэ (`image` = pop-up доторх зураг, хоосон байж болно). */
+  equip: {
+    kicker: string;
+    title: string;
+    body: string;
+    /** Карт дээрх "дэлгэрэнгүй" шошго. */
+    moreLabel: string;
+    /** Pop-up доторх эх сурвалжийн холбоосын шошго. */
+    sourceLabel: string;
+    items: (LinkedItem & { image: string })[];
+  };
+
+  /** VR / 360° аялал. `embedUrl` хоосон бол секц харагдахгүй. */
+  vr: {
+    kicker: string;
+    title: string;
+    body: string;
+    /** Matterport / Kuula / YouTube 360 embed URL. */
+    embedUrl: string;
+    /** Тоглуулахаас өмнөх постер зураг. */
+    poster: string;
+    ctaLabel: string;
+    note: string;
+  };
 
   /** Гурван бүлгийн баруун талын навигацийн шошго. */
   storyNav: { plan: string; elys: string; equip: string };
@@ -63,6 +107,21 @@ export type SiteContent = {
     /** Карт дээрх "N өнцөг" гэсний дараах үг. */
     viewsWord: string;
     cardCta: string;
+    /** B1/B2 шүүлтүүрийн "бүгд" таб. */
+    allLabel: string;
+    /** Тухайн тип рүү чиглэсэн хүсэлтийн pop-up. */
+    inquiry: {
+      title: string;
+      sub: string;
+      name: string;
+      phone: string;
+      note: string;
+      submit: string;
+      sending: string;
+      error: string;
+      successTitle: string;
+      successBody: string;
+    };
     ctaCard: { kicker: string; title: string; link: string };
     units: {
       /** Типийн нэр — карт дээрх шошго (ж: "A тип"). */
@@ -70,6 +129,8 @@ export type SiteContent = {
       rooms: string;
       /** Талбай эсвэл давхрын тэмдэглэгээ. */
       area: string;
+      /** Барилгын блок (ж: "B1"). Хоосон бол шүүлтүүрт орохгүй. */
+      block: string;
       /** Карт дээрх жижиг зураг. */
       thumb: string;
       /** Lightbox-д гүйлгэх өнцгүүд. */
@@ -164,7 +225,7 @@ export type SiteContent = {
     menuTitle: string;
     socialTitle: string;
     menu: NavLink[];
-    social: NavLink[];
+    social: SocialLink[];
     note: string;
   };
 
@@ -196,6 +257,22 @@ export const DEFAULT_SITE_CONTENT: SiteContent = {
     tag: "Бизнес зэрэглэлийн орон сууц",
     email: "info@elysium.mn",
     brochureUrl: "/brochure.pdf",
+  },
+
+  brochure: {
+    enabled: true,
+    title: "Танилцуулга татах",
+    sub: "Утас, и-мэйлээ үлдээснээр танилцуулга шууд татагдаж, менежер тантай холбогдоно.",
+    name: "Нэр",
+    phone: "Утас",
+    email: "И-мэйл",
+    consent: "Мэдээллийг зөвхөн танилцуулга хүргэх, холбогдох зорилгоор ашиглана.",
+    submit: "Татах",
+    sending: "Илгээж байна…",
+    error: "Илгээхэд алдаа гарлаа. Дахин оролдоно уу.",
+    successTitle: "Баярлалаа! Татаж эхэллээ.",
+    successBody: "Хэрэв автоматаар татагдаагүй бол доорх холбоосыг дарна уу.",
+    downloadLabel: "Танилцуулга нээх ↓",
   },
 
   nav: {
@@ -253,25 +330,46 @@ export const DEFAULT_SITE_CONTENT: SiteContent = {
   equip: {
     kicker: "Дэлгэрэнгүйд нухацтай",
     title: "Барилгын бүтэц",
-    /* Дараалал нь ард нь гүйх барилгын бичлэгийн үе шатыг дагана:
-       цутгамал каркас → цонх → фасад. */
+    body: "Каркасаас фасад хүртэл ашигласан үндсэн материал, тоноглол бүр нь урт хугацааны тав тух, эрчим хүчний хэмнэлтэд ажиллана.",
+    moreLabel: "Дэлгэрэнгүй",
+    sourceLabel: "Үйлдвэрлэгчийн хуудас",
+    /* Дараалал нь барилгын бичлэгийн үе шатыг дагана:
+       цутгамал каркас → цонх → фасад. `image` хоосон үед MonoEquip нь
+       барилгын бичлэгээс дарааллын дагуу кадр авна — өгөгдмөлд зураг
+       бичвэл `mergeSiteContent` түүнийг ХАДГАЛСАН бүх материал руу
+       хуулж, бүгд нэг ижил зурагтай болно. */
     items: [
       {
         title: "Бүрэн цутгамал хийцлэл",
         body: "Газар хөдлөлтийн 8 баллд тэсвэртэй, айл хоорондын дуу тусгаарлалт сайтай бүрэн цутгамал хийцлэл.",
         link: "",
+        image: "",
       },
       {
         title: "Veka Softline",
         body: "E-Low түрхлэгтэй, гурван давхар шилтэй вакум цонх нь гэрт буй дулааныг гадагшлуулахгүй байхаас гадна хэт халалтаас хамгаална.",
         link: "https://www.veka.de/window-fabricators/products-services/front-doors/softline-82/",
+        image: "",
       },
       {
         title: "Yaret aluminum composite panels",
         body: "Гурван давхар дулаалга бүхий гал дэмжихгүй метал фасад.",
         link: "https://www.yaretacp.com/",
+        image: "",
       },
     ],
+  },
+
+  vr: {
+    kicker: "Виртуал аялал",
+    title: "Elysium-ийг 360°-аар үзэх",
+    body: "Байрандаа биечлэн ирэхээсээ өмнө өрөө бүрийг виртуалаар тойрон үзэж, орон зайн мэдрэмжийг аваарай.",
+    /* Админаас (`/admin/site` → VR аялал) Matterport / Kuula / YouTube 360
+       embed URL оруулна. Хоосон бол секц огт харагдахгүй. */
+    embedUrl: "",
+    poster: "/images/interior/living-01.jpg",
+    ctaLabel: "Аялал эхлүүлэх",
+    note: "Хамгийн сайн үзэгдэл — бүтэн дэлгэц эсвэл VR төхөөрөмж дээр.",
   },
 
   storyNav: {
@@ -290,16 +388,32 @@ export const DEFAULT_SITE_CONTENT: SiteContent = {
     body: "Уужим, ашигтай, минимал орон сууцны сонголтоос та өөрт тохирохыг сонгоорой.",
     viewsWord: "өнцөг",
     cardCta: "Сонирхох",
+    allLabel: "Бүх тип",
+    inquiry: {
+      title: "Энэ типийг сонирхож байна",
+      sub: "Нэр, утсаа үлдээгээрэй — менежер тухайн типийн төлөвлөгөө, үнийн мэдээллийг хүргэнэ.",
+      name: "Нэр",
+      phone: "Утас",
+      note: "Нэмэлт тайлбар (заавал биш)",
+      submit: "Хүсэлт илгээх",
+      sending: "Илгээж байна…",
+      error: "Илгээхэд алдаа гарлаа. Дахин оролдоно уу.",
+      successTitle: "Хүсэлтийг хүлээн авлаа.",
+      successBody: "Борлуулалтын менежер тантай удахгүй холбогдоно.",
+    },
     ctaCard: {
       kicker: "Аксонометр зураг",
       title: "Төлөвлөгөөгөө менежертэй хамт сонгоорой",
       link: "Уулзалт товлох",
     },
+    /* `block` — B1/B2 шүүлтүүр. Одоогоор бүгд B1 дээр байна; зөв
+       хуваарилалтыг `/admin/site` → Өрөөний сонголт хэсгээс сонгоно. */
     units: [
       {
         title: "A тип",
         rooms: "3 өрөө",
         area: "79.70 м²",
+        block: "B1",
         thumb: "/images/axono/a-01-sm.jpg",
         views: ["/images/axono/a-01.jpg", "/images/axono/a-02.jpg"],
       },
@@ -307,6 +421,7 @@ export const DEFAULT_SITE_CONTENT: SiteContent = {
         title: "B тип",
         rooms: "4 өрөө",
         area: "137.59 м²",
+        block: "B1",
         thumb: "/images/axono/b-01-sm.jpg",
         views: ["/images/axono/b-01.jpg", "/images/axono/b-02.jpg"],
       },
@@ -314,6 +429,7 @@ export const DEFAULT_SITE_CONTENT: SiteContent = {
         title: "C тип",
         rooms: "3 өрөө",
         area: "78.67 м²",
+        block: "B1",
         thumb: "/images/axono/c-01-sm.jpg",
         views: ["/images/axono/c-01.jpg", "/images/axono/c-02.jpg"],
       },
@@ -321,6 +437,7 @@ export const DEFAULT_SITE_CONTENT: SiteContent = {
         title: "D тип",
         rooms: "2 өрөө",
         area: "50.15 м²",
+        block: "B1",
         thumb: "/images/axono/d-01-sm.jpg",
         views: ["/images/axono/d-01.jpg", "/images/axono/d-02.jpg"],
       },
@@ -328,6 +445,7 @@ export const DEFAULT_SITE_CONTENT: SiteContent = {
         title: "D тип · 2 давхар",
         rooms: "2 өрөө",
         area: "2-р давхрын төлөвлөлт",
+        block: "B1",
         thumb: "/images/axono/d2f-01-sm.jpg",
         views: ["/images/axono/d2f-01.jpg", "/images/axono/d2f-02.jpg"],
       },
@@ -335,6 +453,7 @@ export const DEFAULT_SITE_CONTENT: SiteContent = {
         title: "E тип",
         rooms: "3 өрөө",
         area: "88.08 м²",
+        block: "B2",
         thumb: "/images/axono/e-01-sm.jpg",
         views: ["/images/axono/e-01.jpg", "/images/axono/e-02.jpg"],
       },
@@ -342,6 +461,7 @@ export const DEFAULT_SITE_CONTENT: SiteContent = {
         title: "E тип · 2 давхар",
         rooms: "2 өрөө",
         area: "2-р давхрын төлөвлөлт",
+        block: "B2",
         thumb: "/images/axono/e2f-01-sm.jpg",
         views: ["/images/axono/e2f-01.jpg", "/images/axono/e2f-02.jpg"],
       },
@@ -560,10 +680,13 @@ export const DEFAULT_SITE_CONTENT: SiteContent = {
       { label: "Байршил", href: "#location" },
       { label: "Танилцуулга татах", href: "/brochure.pdf" },
     ],
+    /* `href` хоосон эсвэл "#" бол тухайн холбоос сайт дээр харагдахгүй —
+       жинхэнэ хаягаа `/admin/site` → Хөл хэсэг дээрээс оруулна. */
     social: [
-      { label: "Facebook", href: "#" },
-      { label: "Instagram", href: "#" },
-      { label: "YouTube", href: "#" },
+      { label: "Facebook", href: "", icon: "facebook" },
+      { label: "Instagram", href: "", icon: "instagram" },
+      { label: "YouTube", href: "", icon: "youtube" },
+      { label: "TikTok", href: "", icon: "tiktok" },
     ],
     note: "Form Follows Function · Comfort · Serenity",
   },

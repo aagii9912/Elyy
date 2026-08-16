@@ -14,7 +14,7 @@ export function MonoManagers({ site }: { site: SiteContent }) {
   const { managers } = site;
 
   return (
-    <section id="managers" className="border-b border-night/10 bg-paper py-20 md:py-28">
+    <section id="managers" className="border-b border-night/10 bg-ground py-20 md:py-28">
       <div className="mx-auto max-w-[1500px] px-5 md:px-10">
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
@@ -41,12 +41,12 @@ export function MonoManagers({ site }: { site: SiteContent }) {
             <article
               key={`${m.name}-${i}`}
               data-reveal="up"
-              className="group flex flex-col rounded-2xl border border-night/10 bg-white p-7 transition-colors duration-300 hover:border-night/30"
+              className="group flex flex-col rounded-2xl border border-night/10 bg-surface p-7 transition-colors duration-300 hover:border-night/30"
             >
               {m.photo && (
                 /* Хөрөг нь тунгалаг дэвсгэртэй тайрсан зураг байх тул
                    `contain` + доод захад нааж бүтэн биеийг харуулна. */
-                <div className="relative mb-5 aspect-[3/4] overflow-hidden rounded-xl bg-paper">
+                <div className="relative mb-5 aspect-[3/4] overflow-hidden rounded-xl bg-night/5">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={m.photo}

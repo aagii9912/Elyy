@@ -8,7 +8,7 @@ export function MonoGallery({ site }: { site: SiteContent }) {
   const { gallery } = site;
 
   return (
-    <section className="overflow-hidden border-b border-night/10 bg-white py-20 md:py-28">
+    <section className="overflow-hidden border-b border-night/10 bg-ground py-20 md:py-28">
       <div className="mx-auto max-w-[1500px] px-5 md:px-10">
         <MonoKicker reveal>{gallery.kicker}</MonoKicker>
         <h2 data-reveal="heading" className="mt-4 text-[clamp(1.8rem,3.4vw,2.8rem)] font-extrabold leading-tight tracking-tight text-night">

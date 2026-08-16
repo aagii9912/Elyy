@@ -70,6 +70,7 @@ export function MonoScrollStory({
   frameExt = "jpg",
   stillAt = 0.6,
   heightClass = "h-[300vh] md:h-[380vh]",
+  exitVeilClass = "bg-ground",
   variant,
 }: {
   id?: string;
@@ -87,6 +88,8 @@ export function MonoScrollStory({
   stillAt?: number;
   /** Section height — controls how much scroll each point gets. */
   heightClass?: string;
+  /** Colour the chapter dips to on the way out — match the next section. */
+  exitVeilClass?: string;
   variant: StoryVariant;
 }) {
   const lenis = useLenis();
@@ -189,7 +192,7 @@ export function MonoScrollStory({
           trigger: sec,
           start: "top top",
           end: "bottom bottom",
-          scrub: 0.4,
+          scrub: 0.9,
           onUpdate: (self) => {
             if (progFill.current) gsap.set(progFill.current, { scaleX: self.progress });
             const { lead, span } = pointSlot();
@@ -209,10 +212,15 @@ export function MonoScrollStory({
       const layersEl = sec.querySelector("[data-layers]");
       const railEl = sec.querySelector("[data-rail]");
       const chromeEl = sec.querySelector("[data-chrome]");
-      const veilEl = sec.querySelector("[data-veil]");
+      /* Two veils: the chapter is entered out of the dark hero, but it
+         exits into the light page ground — one shared black veil would
+         flash to black right before a near-white section. */
+      const veilInEl = sec.querySelector("[data-veil-in]");
+      const veilOutEl = sec.querySelector("[data-veil-out]");
       if (reduce) {
         if (introEl) gsap.set(introEl, { autoAlpha: 0 });
-        if (veilEl) gsap.set(veilEl, { autoAlpha: 0 });
+        if (veilInEl) gsap.set(veilInEl, { autoAlpha: 0 });
+        if (veilOutEl) gsap.set(veilOutEl, { autoAlpha: 0 });
       } else {
         if (introEl) {
           gsap.fromTo(
@@ -295,9 +303,9 @@ export function MonoScrollStory({
             }
           );
         }
-        if (veilEl) {
+        if (veilInEl) {
           gsap.fromTo(
-            veilEl,
+            veilInEl,
             { autoAlpha: 1 },
             {
               autoAlpha: 0,
@@ -311,8 +319,10 @@ export function MonoScrollStory({
               },
             }
           );
+        }
+        if (veilOutEl) {
           gsap.fromTo(
-            veilEl,
+            veilOutEl,
             { autoAlpha: 0 },
             {
               autoAlpha: 1,
@@ -363,18 +373,18 @@ export function MonoScrollStory({
     }
 
     if (outgoing) {
-      gsap.to(outgoing, { autoAlpha: 0, y: -18, duration: 0.3, ease: "power2.in", overwrite: true });
+      gsap.to(outgoing, { autoAlpha: 0, y: -14, duration: 0.45, ease: "power2.inOut", overwrite: true });
     }
     gsap.set(incoming, { y: 0 });
-    gsap.to(incoming, { autoAlpha: 1, duration: 0.35, ease: "power2.out", overwrite: true });
+    gsap.to(incoming, { autoAlpha: 1, duration: 0.5, ease: "power2.out", overwrite: true });
 
     // staggered children
     const kids = incoming.querySelectorAll("[data-sw]");
     if (kids.length) {
       gsap.fromTo(
         kids,
-        { autoAlpha: 0, y: 22 },
-        { autoAlpha: 1, y: 0, duration: 0.55, ease: "power3.out", stagger: 0.07, delay: 0.05, overwrite: true }
+        { autoAlpha: 0, y: 18 },
+        { autoAlpha: 1, y: 0, duration: 0.7, ease: "power3.out", stagger: 0.06, delay: 0.08, overwrite: true }
       );
     }
     // char roll (numbers variant)
@@ -405,14 +415,18 @@ export function MonoScrollStory({
     <section id={id} ref={root} className={`relative bg-night ${heightClass}`}>
       <div className="sticky top-0 flex h-[100svh] min-h-[560px] w-full overflow-hidden">
         <canvas ref={canvas} className="absolute inset-0 z-0 h-full w-full" />
-        <div className="pointer-events-none absolute inset-0 z-[5] bg-gradient-to-b from-night/75 via-night/40 to-night/85" />
+        {/* Scrim carries just enough weight for white type over the footage —
+            it used to sit at 75/40/85 and made the whole chapter read black. */}
+        <div className="pointer-events-none absolute inset-0 z-[5] bg-gradient-to-b from-night/55 via-night/15 to-night/70" />
         {/* letters chapter reads on the left — extra side scrim for contrast */}
         {variant === "letters" && (
-          <div className="pointer-events-none absolute inset-0 z-[5] bg-gradient-to-r from-night/70 via-night/30 to-transparent" />
+          <div className="pointer-events-none absolute inset-0 z-[5] bg-gradient-to-r from-night/60 via-night/20 to-transparent" />
         )}
 
-        {/* chapter veil — black bridge into/out of the chapter */}
-        <div data-veil aria-hidden className="pointer-events-none absolute inset-0 z-[7] bg-night" />
+        {/* entry veil — dark bridge in from the hero */}
+        <div data-veil-in aria-hidden className="pointer-events-none absolute inset-0 z-[7] bg-night" />
+        {/* exit veil — hands off to the light page ground */}
+        <div data-veil-out aria-hidden className={`pointer-events-none absolute inset-0 z-[7] opacity-0 ${exitVeilClass}`} />
 
         {/* blueprint HUD chrome — numbers chapter only */}
         {variant === "numbers" && (

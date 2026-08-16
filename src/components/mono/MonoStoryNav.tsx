@@ -66,7 +66,9 @@ export function MonoStoryNav({ site }: { site: SiteContent }) {
   return (
     <nav
       aria-label="Хэсгийн навигаци"
-      className={`fixed right-4 top-1/2 z-40 hidden -translate-y-1/2 flex-col gap-1 rounded-full bg-night/50 p-2 backdrop-blur-md transition-all duration-500 md:flex lg:right-6 ${
+      /* Хоёр бүлэг нь одоо цайвар суурьтай тул бөмбөлөг илүү тод байх
+         шаардлагатай — 50% дээр цагаан текст бүдгэрдэг байсан. */
+      className={`fixed right-4 top-1/2 z-40 hidden -translate-y-1/2 flex-col gap-1 rounded-full bg-night/85 p-2 backdrop-blur-md transition-all duration-500 md:flex lg:right-6 ${
         visible ? "translate-x-0 opacity-100" : "pointer-events-none translate-x-4 opacity-0"
       }`}
     >

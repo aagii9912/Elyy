@@ -29,13 +29,13 @@ export default async function NewsListPage() {
   ]);
 
   return (
-    <div className="mono-page min-h-screen bg-white font-gilroy text-night">
+    <div className="mono-page min-h-screen bg-ground font-gilroy text-night">
       <MonoMotion />
       <MonoCursor />
       <MonoHeader site={site} variant="page" />
 
       <main className="pt-[104px] md:pt-[124px]">
-        <section className="border-b border-night/10 bg-paper py-14 md:py-20">
+        <section className="border-b border-night/10 bg-ground py-14 md:py-20">
           <div className="mx-auto max-w-[1500px] px-5 md:px-10">
             <MonoKicker reveal>{site.news.kicker}</MonoKicker>
             <h1

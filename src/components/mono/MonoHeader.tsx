@@ -17,6 +17,7 @@ import { useLenis } from "lenis/react";
 import { Logo, LogoMark } from "@/components/Logo";
 import type { SiteContent } from "@/lib/site-content";
 import { NEWS_PATH } from "@/lib/news-links";
+import { BrochureButton } from "./MonoBrochure";
 
 export function MonoHeader({
   site,
@@ -25,7 +26,7 @@ export function MonoHeader({
   site: SiteContent;
   variant?: "home" | "page";
 }) {
-  const { nav, brand, news } = site;
+  const { nav, news } = site;
   const lenis = useLenis();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -50,6 +51,19 @@ export function MonoHeader({
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  /* Гар утасны цэс нээлттэй үед ард нь хуудас гүйдэг байсан — Lenis-ийг
+     зогсоож, native гүйлтийг ч барина. */
+  useEffect(() => {
+    if (!open) return;
+    lenis?.stop();
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+      lenis?.start();
+    };
+  }, [open, lenis]);
 
   const isHash = (href: string) => href.startsWith("#");
   /** Дотоод хуудсанд `#about` → `/#about` (нүүр рүү буцаж очно). */
@@ -98,7 +112,7 @@ export function MonoHeader({
             href={isHome ? "#top" : "/"}
             onClick={(e) => go(e, "#top")}
             aria-label="Elysium"
-            className="flex items-center gap-2.5"
+            className="flex min-h-11 items-center gap-2.5"
           >
             <LogoMark className="h-[18px] w-auto" />
             <Logo className="h-3 w-auto" />
@@ -121,11 +135,9 @@ export function MonoHeader({
           </nav>
 
           <div className="ml-auto flex items-center gap-2.5">
-            <a
-              href={brand.brochureUrl}
-              target="_blank"
-              rel="noopener"
-              data-cursor-hover
+            <BrochureButton
+              site={site}
+              source="elysium/mono#header"
               className={`hidden items-center gap-2 rounded-full border px-5 py-2 text-[11px] font-medium uppercase tracking-[0.08em] transition-colors duration-300 sm:inline-flex ${
                 solid
                   ? "border-night/25 text-night hover:bg-night hover:text-white"
@@ -133,7 +145,7 @@ export function MonoHeader({
               }`}
             >
               {nav.brochureLabel} ↓
-            </a>
+            </BrochureButton>
             <Link
               href={resolve("#contact")}
               onClick={(e) => go(e, "#contact")}
@@ -164,13 +176,14 @@ export function MonoHeader({
           open ? "visible opacity-100" : "invisible opacity-0"
         }`}
       >
-        <nav className="mt-24 flex flex-col gap-2.5 px-7">
+        <nav className="mt-24 flex flex-col gap-1 overflow-y-auto px-7">
           {items.map((item) => (
             <Link
               key={item.href}
               href={resolve(item.href)}
               onClick={(e) => go(e, item.href)}
-              className="text-[1.75rem] font-extrabold leading-tight tracking-[-0.01em]"
+              /* Хүрэх талбай 44px-аас багагүй байхаар босоо зай нэмэв. */
+              className="flex min-h-12 items-center py-1.5 text-[1.6rem] font-extrabold leading-tight tracking-[-0.01em]"
             >
               {item.label}
             </Link>
@@ -184,14 +197,13 @@ export function MonoHeader({
           >
             {nav.ctaLabel}
           </Link>
-          <a
-            href={brand.brochureUrl}
-            target="_blank"
-            rel="noopener"
-            className="rounded-full border border-night/25 px-6 py-3 text-center text-sm font-semibold"
+          <BrochureButton
+            site={site}
+            source="elysium/mono#menu"
+            className="w-full rounded-full border border-night/25 px-6 py-3.5 text-center text-sm font-semibold"
           >
             {nav.brochureLabel} ↓
-          </a>
+          </BrochureButton>
         </div>
       </div>
     </>

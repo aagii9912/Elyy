@@ -1,10 +1,10 @@
 "use client";
 
-/* /mono — ELYS concept. Chapter 02: hover/tap stack interactor — the
-   E·L·Y·S advantages drive a GSAP clip-path collage of client renders
-   (interior / courtyard / entrance street / tower crown). Sits between
-   the two pinned scroll-story chapters on the same night ground, so the
-   dark bridge out of chapter 01 and into chapter 03 stays seamless. */
+/* /mono — ELYS concept. Hover/tap stack interactor — the E·L·Y·S
+   advantages drive a GSAP clip-path collage of client renders (interior /
+   courtyard / entrance street / tower crown). Now on the page's single
+   light ground: it is the first section after the dark opening chapter,
+   so it carries the handoff from cinematic footage into the light page. */
 
 import type { SiteContent } from "@/lib/site-content";
 import { MonoKicker } from "./shared";
@@ -50,11 +50,9 @@ export function MonoElys({ site }: { site: SiteContent }) {
   }));
 
   return (
-    <section id="elys" className="relative bg-night text-white">
-      <div className="mx-auto max-w-7xl px-5 pb-20 pt-24 md:px-10 md:pb-28 md:pt-32">
-        <MonoKicker tone="dark" reveal>
-          02 — {site.elys.kicker}
-        </MonoKicker>
+    <section id="elys" className="relative border-b border-night/10 bg-ground text-night">
+      <div className="mx-auto max-w-7xl px-5 pb-20 pt-20 md:px-10 md:pb-28 md:pt-32">
+        <MonoKicker reveal>02 — {site.elys.kicker}</MonoKicker>
         <h2
           data-reveal="heading"
           className="mt-4 max-w-2xl text-[clamp(1.9rem,4vw,3.2rem)] font-extrabold leading-[1.05] tracking-tight"
@@ -63,7 +61,7 @@ export function MonoElys({ site }: { site: SiteContent }) {
         </h2>
 
         <div data-reveal="up" data-reveal-delay="0.1">
-          <ConnoisseurStackInteractor items={items} className="mt-12 md:mt-16" />
+          <ConnoisseurStackInteractor items={items} className="mt-10 md:mt-16" />
         </div>
       </div>
     </section>

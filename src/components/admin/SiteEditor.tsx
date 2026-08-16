@@ -8,10 +8,11 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { cloneDefaultSiteContent, type SiteContent } from "@/lib/site-content";
-import { Button, Card, Field, FileField, ImageField, TextArea, TextInput } from "./ui";
+import { Button, Card, Field, FileField, ImageField, Select, TextArea, TextInput, Toggle } from "./ui";
 
 type SectionId =
   | "brand"
+  | "brochure"
   | "nav"
   | "hero"
   | "plan"
@@ -21,6 +22,7 @@ type SectionId =
   | "apartments"
   | "developer"
   | "gallery"
+  | "vr"
   | "location"
   | "contact"
   | "managers"
@@ -32,6 +34,7 @@ type SectionId =
 
 const SECTIONS: { id: SectionId; label: string; hint: string }[] = [
   { id: "brand", label: "Брэнд & холбоо", hint: "Нэр, уриа, и-мэйл, танилцуулга" },
+  { id: "brochure", label: "Танилцуулга татах", hint: "Утас/и-мэйл цуглуулах маягт" },
   { id: "nav", label: "Толгой цэс", hint: "Навигац, товчнууд" },
   { id: "hero", label: "Нүүр дэлгэц", hint: "Hero-гийн тайлбар" },
   { id: "plan", label: "01 · Ерөнхий төлөвлөлт", hint: "Тоон үзүүлэлтүүд" },
@@ -41,6 +44,7 @@ const SECTIONS: { id: SectionId; label: string; hint: string }[] = [
   { id: "apartments", label: "Өрөөний сонголт", hint: "Типүүд, аксонометр зураг" },
   { id: "developer", label: "Төсөл хэрэгжүүлэгч", hint: "Компани, өмнөх төслүүд" },
   { id: "gallery", label: "Зургийн цомог", hint: "Интерьер зургууд" },
+  { id: "vr", label: "VR аялал", hint: "360° embed холбоос, постер" },
   { id: "location", label: "Байршил", hint: "Газрын зураг, ойролцоох цэгүүд" },
   { id: "contact", label: "Холбоо барих", hint: "Утас, хаяг, маягт" },
   { id: "managers", label: "Борлуулалтын баг", hint: "Менежерүүд" },
@@ -547,6 +551,29 @@ function renderSection(
                   onChange={(e) => edit((d) => void (d[key].title = e.target.value))}
                 />
               </Field>
+              {key === "equip" && (
+                <>
+                  <Field label="Хэсгийн тайлбар">
+                    <TextArea
+                      rows={2}
+                      value={c.equip.body}
+                      onChange={(e) => edit((d) => void (d.equip.body = e.target.value))}
+                    />
+                  </Field>
+                  <Field label="Картын “дэлгэрэнгүй” текст">
+                    <TextInput
+                      value={c.equip.moreLabel}
+                      onChange={(e) => edit((d) => void (d.equip.moreLabel = e.target.value))}
+                    />
+                  </Field>
+                  <Field label="Pop-up доторх холбоосын текст">
+                    <TextInput
+                      value={c.equip.sourceLabel}
+                      onChange={(e) => edit((d) => void (d.equip.sourceLabel = e.target.value))}
+                    />
+                  </Field>
+                </>
+              )}
               <Field label="Навигацийн шошго">
                 <TextInput
                   value={nav}
@@ -566,18 +593,31 @@ function renderSection(
               <ListEditor
                 items={c.equip.items}
                 onChange={(next) => edit((d) => void (d.equip.items = next))}
-                blank={() => ({ title: "Гарчиг", body: "Тайлбар.", link: "" })}
+                blank={() => ({ title: "Гарчиг", body: "Тайлбар.", link: "", image: "" })}
                 title={(item) => item.title}
                 addLabel="Зүйл нэмэх"
               >
-                {(item, set) => (
+                {(item, set, itemIndex) => (
                   <>
                     <Field label="Гарчиг">
                       <TextInput value={item.title} onChange={(e) => set({ title: e.target.value })} />
                     </Field>
-                    <Field label="Тайлбар">
+                    <Field label="Тайлбар" hint="Картан дээр 3 мөр, pop-up дотор бүтнээрээ харагдана.">
                       <TextArea rows={3} value={item.body} onChange={(e) => set({ body: e.target.value })} />
                     </Field>
+                    <ImageField
+                      label="Зураг"
+                      value={item.image}
+                      onChange={(url) =>
+                        edit((d) => {
+                          const it = d.equip.items[itemIndex];
+                          if (it) it.image = url;
+                        })
+                      }
+                      ratio="4/3"
+                      maxEdge={1600}
+                      hint="Картын болон pop-up-ын зураг."
+                    />
                     <Field label="Холбоос" hint="Үйлдвэрлэгчийн хуудас. Хоосон бол линк харагдахгүй.">
                       <TextInput
                         value={item.link}
@@ -612,6 +652,194 @@ function renderSection(
         </>
       );
     }
+
+    /* ---------------------------------------------------------- */
+    case "brochure":
+      return (
+        <>
+          <Card title="Маягт асаах">
+            <Toggle
+              checked={c.brochure.enabled}
+              onChange={(v) => edit((d) => void (d.brochure.enabled = v))}
+              label="Танилцуулга татахын өмнө холбоо барих мэдээлэл авах"
+            />
+            <p className="mt-3 text-xs text-neutral-500">
+              Асаалттай үед “Танилцуулга татах” товч дарахад нэр / утас / и-мэйл авах pop-up
+              нээгдэж, хүсэлт Google Sheet болон админы “Хүсэлтүүд” хэсэгт очоод дараа нь PDF
+              татагдана. Унтраалттай үед PDF шууд нээгдэнэ.
+            </p>
+          </Card>
+
+          <Card title="Текстүүд">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field label="Гарчиг">
+                <TextInput
+                  value={c.brochure.title}
+                  onChange={(e) => edit((d) => void (d.brochure.title = e.target.value))}
+                />
+              </Field>
+              <Field label="Илгээх товч">
+                <TextInput
+                  value={c.brochure.submit}
+                  onChange={(e) => edit((d) => void (d.brochure.submit = e.target.value))}
+                />
+              </Field>
+            </div>
+            <div className="mt-4">
+              <Field label="Тайлбар">
+                <TextArea
+                  rows={2}
+                  value={c.brochure.sub}
+                  onChange={(e) => edit((d) => void (d.brochure.sub = e.target.value))}
+                />
+              </Field>
+            </div>
+            <div className="mt-4 grid gap-4 sm:grid-cols-3">
+              <Field label="Нэр талбар">
+                <TextInput
+                  value={c.brochure.name}
+                  onChange={(e) => edit((d) => void (d.brochure.name = e.target.value))}
+                />
+              </Field>
+              <Field label="Утас талбар">
+                <TextInput
+                  value={c.brochure.phone}
+                  onChange={(e) => edit((d) => void (d.brochure.phone = e.target.value))}
+                />
+              </Field>
+              <Field label="И-мэйл талбар">
+                <TextInput
+                  value={c.brochure.email}
+                  onChange={(e) => edit((d) => void (d.brochure.email = e.target.value))}
+                />
+              </Field>
+            </div>
+            <div className="mt-4">
+              <Field label="Нууцлалын тэмдэглэл">
+                <TextInput
+                  value={c.brochure.consent}
+                  onChange={(e) => edit((d) => void (d.brochure.consent = e.target.value))}
+                />
+              </Field>
+            </div>
+          </Card>
+
+          <Card title="Илгээсний дараа">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field label="Амжилттай гарчиг">
+                <TextInput
+                  value={c.brochure.successTitle}
+                  onChange={(e) => edit((d) => void (d.brochure.successTitle = e.target.value))}
+                />
+              </Field>
+              <Field label="Татах товчны текст">
+                <TextInput
+                  value={c.brochure.downloadLabel}
+                  onChange={(e) => edit((d) => void (d.brochure.downloadLabel = e.target.value))}
+                />
+              </Field>
+            </div>
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              <Field label="Амжилттай тайлбар">
+                <TextArea
+                  rows={2}
+                  value={c.brochure.successBody}
+                  onChange={(e) => edit((d) => void (d.brochure.successBody = e.target.value))}
+                />
+              </Field>
+              <Field label="Алдааны мэдэгдэл">
+                <TextArea
+                  rows={2}
+                  value={c.brochure.error}
+                  onChange={(e) => edit((d) => void (d.brochure.error = e.target.value))}
+                />
+              </Field>
+            </div>
+            <div className="mt-4">
+              <Field label="Илгээж байх үеийн текст">
+                <TextInput
+                  value={c.brochure.sending}
+                  onChange={(e) => edit((d) => void (d.brochure.sending = e.target.value))}
+                />
+              </Field>
+            </div>
+          </Card>
+        </>
+      );
+
+    /* ---------------------------------------------------------- */
+    case "vr":
+      return (
+        <>
+          <Card title="360° холбоос">
+            <Field
+              label="Embed URL"
+              hint="Matterport / Kuula / YouTube 360-ийн embed холбоос. Хоосон бол VR хэсэг сайт дээр огт харагдахгүй."
+            >
+              <TextInput
+                value={c.vr.embedUrl}
+                placeholder="https://my.matterport.com/show/?m=…"
+                onChange={(e) => edit((d) => void (d.vr.embedUrl = e.target.value))}
+              />
+            </Field>
+            <p className="mt-3 text-xs text-neutral-500">
+              YouTube дээрх 360° бичлэг бол “Embed” хувилбарыг (https://www.youtube.com/embed/…)
+              ашиглана. Энгийн watch холбоос ажиллахгүй.
+            </p>
+          </Card>
+
+          <Card title="Гарчиг & текст">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field label="Kicker">
+                <TextInput
+                  value={c.vr.kicker}
+                  onChange={(e) => edit((d) => void (d.vr.kicker = e.target.value))}
+                />
+              </Field>
+              <Field label="Гарчиг">
+                <TextInput
+                  value={c.vr.title}
+                  onChange={(e) => edit((d) => void (d.vr.title = e.target.value))}
+                />
+              </Field>
+            </div>
+            <div className="mt-4">
+              <Field label="Тайлбар">
+                <TextArea
+                  rows={2}
+                  value={c.vr.body}
+                  onChange={(e) => edit((d) => void (d.vr.body = e.target.value))}
+                />
+              </Field>
+            </div>
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              <Field label="Товчны текст">
+                <TextInput
+                  value={c.vr.ctaLabel}
+                  onChange={(e) => edit((d) => void (d.vr.ctaLabel = e.target.value))}
+                />
+              </Field>
+              <Field label="Жижиг тэмдэглэл">
+                <TextInput
+                  value={c.vr.note}
+                  onChange={(e) => edit((d) => void (d.vr.note = e.target.value))}
+                />
+              </Field>
+            </div>
+          </Card>
+
+          <Card title="Постер зураг">
+            <ImageField
+              label="Постер"
+              value={c.vr.poster}
+              onChange={(url) => edit((d) => void (d.vr.poster = url))}
+              ratio="16/7"
+              maxEdge={2000}
+              hint="Аялал эхлүүлэхээс өмнө харагдах зураг."
+            />
+          </Card>
+        </>
+      );
 
     /* ---------------------------------------------------------- */
     case "marquee":
@@ -667,6 +895,92 @@ function renderSection(
                   onChange={(e) => edit((d) => void (d.apartments.viewsWord = e.target.value))}
                 />
               </Field>
+              <Field label="“Бүх тип” табны нэр" hint="B1/B2 шүүлтүүрийн эхний таб.">
+                <TextInput
+                  value={c.apartments.allLabel}
+                  onChange={(e) => edit((d) => void (d.apartments.allLabel = e.target.value))}
+                />
+              </Field>
+            </div>
+          </Card>
+
+          <Card title="“Сонирхох” хүсэлтийн pop-up">
+            <p className="mb-4 text-xs text-neutral-500">
+              Карт дээрх “Сонирхох” дарахад гарах маягт. Илгээхэд сонгосон типийн нэр, блок,
+              өрөө, талбай автоматаар хүсэлтэд бичигдэнэ.
+            </p>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field label="Гарчиг">
+                <TextInput
+                  value={c.apartments.inquiry.title}
+                  onChange={(e) => edit((d) => void (d.apartments.inquiry.title = e.target.value))}
+                />
+              </Field>
+              <Field label="Илгээх товч">
+                <TextInput
+                  value={c.apartments.inquiry.submit}
+                  onChange={(e) => edit((d) => void (d.apartments.inquiry.submit = e.target.value))}
+                />
+              </Field>
+            </div>
+            <div className="mt-4">
+              <Field label="Тайлбар">
+                <TextArea
+                  rows={2}
+                  value={c.apartments.inquiry.sub}
+                  onChange={(e) => edit((d) => void (d.apartments.inquiry.sub = e.target.value))}
+                />
+              </Field>
+            </div>
+            <div className="mt-4 grid gap-4 sm:grid-cols-3">
+              <Field label="Нэр талбар">
+                <TextInput
+                  value={c.apartments.inquiry.name}
+                  onChange={(e) => edit((d) => void (d.apartments.inquiry.name = e.target.value))}
+                />
+              </Field>
+              <Field label="Утас талбар">
+                <TextInput
+                  value={c.apartments.inquiry.phone}
+                  onChange={(e) => edit((d) => void (d.apartments.inquiry.phone = e.target.value))}
+                />
+              </Field>
+              <Field label="Нэмэлт тайлбар талбар">
+                <TextInput
+                  value={c.apartments.inquiry.note}
+                  onChange={(e) => edit((d) => void (d.apartments.inquiry.note = e.target.value))}
+                />
+              </Field>
+            </div>
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              <Field label="Амжилттай гарчиг">
+                <TextInput
+                  value={c.apartments.inquiry.successTitle}
+                  onChange={(e) => edit((d) => void (d.apartments.inquiry.successTitle = e.target.value))}
+                />
+              </Field>
+              <Field label="Илгээж байх үеийн текст">
+                <TextInput
+                  value={c.apartments.inquiry.sending}
+                  onChange={(e) => edit((d) => void (d.apartments.inquiry.sending = e.target.value))}
+                />
+              </Field>
+            </div>
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              <Field label="Амжилттай тайлбар">
+                <TextArea
+                  rows={2}
+                  value={c.apartments.inquiry.successBody}
+                  onChange={(e) => edit((d) => void (d.apartments.inquiry.successBody = e.target.value))}
+                />
+              </Field>
+              <Field label="Алдааны мэдэгдэл">
+                <TextArea
+                  rows={2}
+                  value={c.apartments.inquiry.error}
+                  onChange={(e) => edit((d) => void (d.apartments.inquiry.error = e.target.value))}
+                />
+              </Field>
             </div>
           </Card>
 
@@ -697,7 +1011,7 @@ function renderSection(
             <ListEditor
               items={c.apartments.units}
               onChange={(next) => edit((d) => void (d.apartments.units = next))}
-              blank={() => ({ title: "Шинэ тип", rooms: "1 өрөө", area: "", thumb: "", views: [] })}
+              blank={() => ({ title: "Шинэ тип", rooms: "1 өрөө", area: "", block: "", thumb: "", views: [] })}
               title={(item) => `${item.title} · ${item.rooms}`}
               addLabel="Тип нэмэх"
             >
@@ -724,6 +1038,16 @@ function renderSection(
                         <TextInput value={item.area} onChange={(e) => set({ area: e.target.value })} />
                       </Field>
                     </div>
+                    <Field
+                      label="Блок"
+                      hint="Ж: B1, B2. Хоёроос дээш блок тохируулбал сайт дээр шүүлтүүрийн таб гарна. Хоосон бол шүүлтүүрт орохгүй."
+                    >
+                      <TextInput
+                        value={item.block}
+                        placeholder="B1"
+                        onChange={(e) => set({ block: e.target.value })}
+                      />
+                    </Field>
                     <ImageField
                       label="Картын зураг"
                       value={item.thumb}
@@ -1498,20 +1822,39 @@ function renderSection(
           </Card>
 
           <Card title="Сошиал холбоос">
+            <p className="mb-4 text-xs text-neutral-500">
+              Холбоос хоосон бол тухайн сошиал сайт дээр огт харагдахгүй — жинхэнэ хаягаа
+              оруулсны дараа хөл хэсэг болон “Холбоо барих” хэсэгт гарч ирнэ.
+            </p>
             <ListEditor
               items={c.footer.social}
               onChange={(next) => edit((d) => void (d.footer.social = next))}
-              blank={() => ({ label: "Facebook", href: "#" })}
+              blank={() => ({ label: "Facebook", href: "", icon: "facebook" })}
               title={(item) => item.label}
               addLabel="Сошиал нэмэх"
             >
               {(item, set) => (
-                <div className="grid gap-3 sm:grid-cols-2">
+                <div className="grid gap-3 sm:grid-cols-3">
                   <Field label="Нэр">
                     <TextInput value={item.label} onChange={(e) => set({ label: e.target.value })} />
                   </Field>
-                  <Field label="Холбоос">
-                    <TextInput value={item.href} onChange={(e) => set({ href: e.target.value })} />
+                  <Field label="Icon">
+                    <Select value={item.icon} onChange={(e) => set({ icon: e.target.value })}>
+                      <option value="facebook">Facebook</option>
+                      <option value="instagram">Instagram</option>
+                      <option value="youtube">YouTube</option>
+                      <option value="tiktok">TikTok</option>
+                      <option value="linkedin">LinkedIn</option>
+                      <option value="twitter">X (Twitter)</option>
+                      <option value="link">Ерөнхий холбоос</option>
+                    </Select>
+                  </Field>
+                  <Field label="Холбоос" hint="https://…">
+                    <TextInput
+                      value={item.href}
+                      placeholder="https://www.facebook.com/…"
+                      onChange={(e) => set({ href: e.target.value })}
+                    />
                   </Field>
                 </div>
               )}

@@ -9,6 +9,7 @@ import { Fragment, useEffect, useRef } from "react";
 import { useLenis } from "lenis/react";
 import { gsap } from "@/lib/gsap";
 import type { SiteContent } from "@/lib/site-content";
+import { BrochureButton } from "./MonoBrochure";
 
 const FRAME_COUNT = 120;
 const framePath = (i: number) => `/hero-video-frames/frame_${String(i).padStart(3, "0")}.webp`;
@@ -80,7 +81,7 @@ export function MonoHero({ site }: { site: SiteContent }) {
         gsap.to(state, {
           frame: FRAME_COUNT - 1,
           ease: "none",
-          scrollTrigger: { trigger: sec, start: "top top", end: "bottom bottom", scrub: 0.4 },
+          scrollTrigger: { trigger: sec, start: "top top", end: "bottom bottom", scrub: 0.9 },
           onUpdate: draw,
         });
         gsap.to("[data-mh-copy]", {
@@ -99,10 +100,10 @@ export function MonoHero({ site }: { site: SiteContent }) {
   }, []);
 
   return (
-    <section id="top" ref={root} className="relative h-[100svh] w-full bg-night md:h-[260vh]">
+    <section id="top" ref={root} className="relative h-[100svh] w-full bg-night md:h-[210vh]">
       <div className="sticky top-0 flex h-[100svh] min-h-[620px] w-full overflow-hidden">
         <canvas ref={canvas} className="absolute inset-0 z-0 h-full w-full" />
-        <div className="pointer-events-none absolute inset-0 z-[5] bg-gradient-to-b from-night/60 via-night/15 to-night/70" />
+        <div className="pointer-events-none absolute inset-0 z-[5] bg-gradient-to-b from-night/45 via-night/5 to-night/60" />
 
         <div data-mh-copy className="relative z-10 flex h-full w-full flex-col items-center px-6">
           <div className="flex flex-1 flex-col items-center justify-center text-center">
@@ -135,16 +136,15 @@ export function MonoHero({ site }: { site: SiteContent }) {
             >
               {nav.ctaLabel}
             </a>
-            <a
-              href={brand.brochureUrl}
-              target="_blank"
-              rel="noopener"
-              data-cursor-hover
-              className="mono-fade-up inline-flex w-full items-center justify-center gap-2 rounded-[50px] border border-white/40 bg-white/[0.06] px-6 py-4 text-[14px] font-medium uppercase tracking-[-0.2px] text-white backdrop-blur-[16px] transition-colors duration-300 hover:bg-white/15 sm:w-auto"
-              style={{ animationDelay: "1s" }}
-            >
-              {nav.brochureLabel}
-            </a>
+            <span className="mono-fade-up w-full sm:w-auto" style={{ animationDelay: "1s" }}>
+              <BrochureButton
+                site={site}
+                source="elysium/mono#hero"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-[50px] border border-white/40 bg-white/[0.06] px-6 py-4 text-[14px] font-medium uppercase tracking-[-0.2px] text-white backdrop-blur-[16px] transition-colors duration-300 hover:bg-white/15 sm:w-auto"
+              >
+                {nav.brochureLabel}
+              </BrochureButton>
+            </span>
           </div>
         </div>
 

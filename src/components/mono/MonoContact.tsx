@@ -2,11 +2,12 @@
 
 /* /mono — Уулзалт товлох. Brief: "маш энгийн (нэр, утас, огноо)".
    Posts to /api/contact → Google Sheet (борлуулалтын менежерүүдэд).
-   Dark band. */
+   Хуудасны нэгдсэн цайвар суурин дээр, маягт нь цагаан карт дээр. */
 
 import { useState } from "react";
 import type { SiteContent } from "@/lib/site-content";
 import { MonoKicker } from "./shared";
+import { SocialRow } from "./MonoSocial";
 
 export function MonoContact({ site }: { site: SiteContent }) {
   const { contact, brand } = site;
@@ -45,60 +46,66 @@ export function MonoContact({ site }: { site: SiteContent }) {
   };
 
   return (
-    <section id="contact" className="bg-night py-20 font-gilroy text-white md:py-28">
+    <section id="contact" className="border-b border-night/10 bg-ground py-20 font-gilroy text-night md:py-28">
       <div className="mx-auto max-w-[1500px] px-5 md:px-10">
         <div className="grid gap-12 lg:grid-cols-2 lg:gap-20">
           <div>
-            <MonoKicker tone="dark" reveal>{contact.kicker}</MonoKicker>
+            <MonoKicker reveal>{contact.kicker}</MonoKicker>
             <h2 data-reveal="heading" className="mt-5 max-w-md text-[clamp(2rem,4.4vw,3.4rem)] font-extrabold leading-[1.02] tracking-tight">
               {contact.title}
             </h2>
-            <p data-reveal="up" className="mt-5 max-w-md text-[15px] leading-relaxed text-white/65">{contact.sub}</p>
+            <p data-reveal="up" className="mt-5 max-w-md text-[15px] leading-relaxed text-night/60">{contact.sub}</p>
 
-            <dl className="mt-10 space-y-6 border-t border-white/10 pt-8">
+            <dl className="mt-10 space-y-6 border-t border-night/10 pt-8">
               <div data-reveal="up">
-                <dt className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/45">{contact.labels.phone}</dt>
+                <dt className="text-[11px] font-semibold uppercase tracking-[0.18em] text-night/45">{contact.labels.phone}</dt>
                 <dd className="mt-1.5">
                   <a
                     href={`tel:+976${contact.phone.replace(/[^0-9]/g, "")}`}
                     data-cursor-hover
-                    className="text-2xl font-extrabold text-white transition-opacity hover:opacity-70"
+                    className="inline-flex min-h-11 items-center text-2xl font-extrabold text-night transition-opacity hover:opacity-70"
                   >
                     {contact.phone}
                   </a>
                 </dd>
               </div>
               <div data-reveal="up">
-                <dt className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/45">{contact.labels.hours}</dt>
+                <dt className="text-[11px] font-semibold uppercase tracking-[0.18em] text-night/45">{contact.labels.hours}</dt>
                 <dd className="mt-1.5 text-lg font-semibold">{contact.hours}</dd>
               </div>
               <div data-reveal="up">
-                <dt className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/45">{contact.labels.office}</dt>
-                <dd className="mt-1.5 max-w-sm text-lg font-semibold leading-snug text-white/90">{contact.location}</dd>
+                <dt className="text-[11px] font-semibold uppercase tracking-[0.18em] text-night/45">{contact.labels.office}</dt>
+                <dd className="mt-1.5 max-w-sm text-lg font-semibold leading-snug text-night/85">{contact.location}</dd>
               </div>
               <div data-reveal="up">
-                <dt className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/45">{contact.labels.email}</dt>
+                <dt className="text-[11px] font-semibold uppercase tracking-[0.18em] text-night/45">{contact.labels.email}</dt>
                 <dd className="mt-1.5">
                   <a
                     href={`mailto:${brand.email}`}
                     data-cursor-hover
-                    className="text-lg font-semibold underline-offset-4 transition-opacity hover:underline hover:opacity-70"
+                    className="inline-flex min-h-11 items-center text-lg font-semibold underline-offset-4 transition-opacity hover:underline hover:opacity-70"
                   >
                     {brand.email}
                   </a>
                 </dd>
               </div>
             </dl>
+
+            <SocialRow items={site.footer.social} className="mt-9 border-t border-night/10 pt-7" />
           </div>
 
-          <div className="max-w-md lg:pt-3">
+          <div className="lg:pt-3">
             {sent ? (
-              <div className="mono-fade-up rounded-2xl border border-white/20 bg-white/5 p-7">
-                <p className="text-xl font-bold leading-relaxed text-white">{f.successTitle}</p>
-                <p className="mt-2 text-sm text-white/65">{f.successBody}</p>
+              <div className="mono-fade-up max-w-md rounded-2xl border border-night/10 bg-surface p-7 shadow-[0_18px_50px_-32px_rgba(21,23,23,0.4)]">
+                <p className="text-xl font-bold leading-relaxed text-night">{f.successTitle}</p>
+                <p className="mt-2 text-sm text-night/60">{f.successBody}</p>
               </div>
             ) : (
-              <form onSubmit={onSubmit} className="flex flex-col gap-7">
+              <form
+                onSubmit={onSubmit}
+                data-reveal="up"
+                className="flex max-w-md flex-col gap-7 rounded-2xl border border-night/10 bg-surface p-7 shadow-[0_18px_50px_-32px_rgba(21,23,23,0.4)] md:p-9"
+              >
                 <input
                   type="text"
                   name="website"
@@ -112,29 +119,27 @@ export function MonoContact({ site }: { site: SiteContent }) {
                   name="name"
                   required
                   placeholder={f.name}
-                  data-reveal="up"
-                  className="border-b border-white/30 bg-transparent pb-3 text-lg font-semibold text-white placeholder:text-white/40 focus:border-white focus:outline-none"
+                  className="border-b border-night/20 bg-transparent pb-3 text-lg font-semibold text-night placeholder:text-night/35 focus:border-night focus:outline-none"
                 />
                 <input
                   type="tel"
                   name="phone"
                   required
                   placeholder={f.phone}
-                  data-reveal="up"
-                  className="border-b border-white/30 bg-transparent pb-3 text-lg font-semibold text-white placeholder:text-white/40 focus:border-white focus:outline-none"
+                  className="border-b border-night/20 bg-transparent pb-3 text-lg font-semibold text-night placeholder:text-night/35 focus:border-night focus:outline-none"
                 />
-                <label data-reveal="up" className="block">
-                  <span className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.18em] text-white/45">
+                <label className="block">
+                  <span className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.18em] text-night/45">
                     {f.dateLabel}
                   </span>
                   <input
                     type="date"
                     name="date"
-                    className="w-full border-b border-white/30 bg-transparent pb-3 text-lg font-semibold text-white [color-scheme:dark] focus:border-white focus:outline-none"
+                    className="w-full border-b border-night/20 bg-transparent pb-3 text-lg font-semibold text-night focus:border-night focus:outline-none"
                   />
                 </label>
                 {error && (
-                  <p role="alert" className="text-sm font-semibold text-red-300">
+                  <p role="alert" className="text-sm font-semibold text-red-600">
                     {f.error} {contact.phone}
                   </p>
                 )}
@@ -142,8 +147,7 @@ export function MonoContact({ site }: { site: SiteContent }) {
                   type="submit"
                   disabled={busy}
                   data-cursor-hover
-                  data-reveal="up"
-                  className="mt-2 inline-flex items-center justify-center gap-2 self-start rounded-full bg-white px-7 py-3.5 text-sm font-bold text-night transition-transform duration-300 hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-70"
+                  className="mt-2 inline-flex min-h-12 items-center justify-center gap-2 self-start rounded-full bg-night px-7 py-3.5 text-sm font-bold text-white transition-transform duration-300 hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-70"
                 >
                   {busy ? f.sending : f.submit}
                   <span aria-hidden>→</span>

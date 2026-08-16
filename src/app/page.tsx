@@ -10,6 +10,7 @@ import { MonoEquip } from "@/components/mono/MonoEquip";
 import { MonoApartments } from "@/components/mono/MonoApartments";
 import { MonoDeveloper } from "@/components/mono/MonoDeveloper";
 import { MonoGallery } from "@/components/mono/MonoGallery";
+import { MonoVr } from "@/components/mono/MonoVr";
 import { MonoMap } from "@/components/mono/MonoMap";
 import { MonoContact } from "@/components/mono/MonoContact";
 import { MonoManagers } from "@/components/mono/MonoManagers";
@@ -36,7 +37,7 @@ export default async function Home() {
   const site = await loadSiteContent();
 
   return (
-    <div className="mono-page min-h-screen bg-white font-gilroy text-night">
+    <div className="mono-page min-h-screen bg-ground font-gilroy text-night">
       <MonoMotion />
       <MonoCursor />
       <MonoHeader site={site} />
@@ -49,6 +50,8 @@ export default async function Home() {
         <MonoApartments site={site} />
         <MonoDeveloper site={site} />
         <MonoGallery site={site} />
+        {/* VR аялал — `vr.embedUrl` тохируулаагүй бол өөрөө рендерлэгдэхгүй */}
+        <MonoVr site={site} />
         <MonoMap site={site} />
         <MonoContact site={site} />
         <MonoManagers site={site} />

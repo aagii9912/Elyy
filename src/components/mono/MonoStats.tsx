@@ -10,7 +10,10 @@
    `node scripts/build-scroll-frames.mjs plan`.
 
    The section runs taller than the default chapter so the last point —
-   the 2027 handover date — gets the same dwell as the other three. */
+   the 2027 handover date — gets the same dwell as the other three.
+   It was taller still (340/440vh); trimmed because it is now the ONLY
+   dark chapter and 4.4 screens of black before any light section read as
+   the page being unrelievedly dark. */
 
 import type { SiteContent } from "@/lib/site-content";
 import { MonoScrollStory } from "./MonoScrollStory";
@@ -35,7 +38,7 @@ export function MonoStats({ site }: { site: SiteContent }) {
       frameDir="/plan-frames"
       frameExt="webp"
       stillAt={0.12}
-      heightClass="h-[340vh] md:h-[440vh]"
+      heightClass="h-[280vh] md:h-[340vh]"
       variant="numbers"
     />
   );

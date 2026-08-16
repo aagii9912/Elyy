@@ -2,11 +2,19 @@
 
 /* Hover/tap stack interactor — numbered menu on the left drives a GSAP
    clip-path collage on the right (each item owns its own mask shape:
-   bands / blocks / pixels / columns). The reveal loop breathes, folds
-   away and auto-advances to the next item; resting the pointer on an
-   entry holds its loop. Tuned to the mono design language: night bg
-   supplied by the parent, lime kept as the sparing accent, first
-   letters of the entries spell the E·L·Y·S acronym. */
+   bands / blocks / pixels / columns).
+
+   Reveal model: the mask NEVER collapses to nothing. Switching entries
+   re-cuts the shapes from 0.86 → 1 with a soft random stagger while the
+   artwork crossfades between two stacked <image> layers, so the collage
+   always shows something. (The previous version scaled every shape to 0,
+   held an empty frame, then scaled back in — which read as the section
+   breaking rather than transitioning.) A slow idle breath keeps it alive
+   and a timer auto-advances; resting the pointer on an entry holds it.
+
+   Tuned to the mono design language on the light page ground; `tone`
+   flips it back for dark surfaces. Lime stays the sparing accent and the
+   first letters of the entries spell the E·L·Y·S acronym. */
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
@@ -24,6 +32,9 @@ export interface StackItem {
   alt?: string;
 }
 
+/** How long an entry holds before the collage advances on its own. */
+const DWELL_MS = 5200;
+
 /** "Live in Harmony" → ["Live in", "Harmony"]; single words stay whole. */
 const splitName = (name: string): readonly [string, string | null] => {
   const words = name.trim().split(/\s+/);
@@ -34,86 +45,102 @@ const splitName = (name: string): readonly [string, string | null] => {
 export function ConnoisseurStackInteractor({
   items,
   className,
+  tone = "light",
 }: {
   items: StackItem[];
   className?: string;
+  tone?: "light" | "dark";
 }) {
+  const dark = tone === "dark";
   const [activeIndex, setActiveIndex] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
-  const imageRef = useRef<SVGImageElement>(null);
+  /** Two stacked layers — one holds the outgoing art while the other fades in. */
+  const layerA = useRef<SVGImageElement>(null);
+  const layerB = useRef<SVGImageElement>(null);
+  const frontIsA = useRef(true);
   const mainGroupRef = useRef<SVGGElement>(null);
   const bodyRef = useRef<HTMLParagraphElement>(null);
   const letterRef = useRef<HTMLSpanElement>(null);
-  const masterTl = useRef<gsap.core.Timeline | null>(null);
+  const breathTl = useRef<gsap.core.Timeline | null>(null);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const idxRef = useRef(0);
-  const hoverRef = useRef<number | null>(null);
+  const holdRef = useRef(false);
   const inViewRef = useRef(true);
   const reduceRef = useRef(false);
+  /* Auto-advance fires from a timer, long after render — it needs the
+     latest items without re-arming the whole loop, hence a ref synced
+     after each commit (never written during render). */
   const itemsRef = useRef(items);
-  itemsRef.current = items;
+  useEffect(() => {
+    itemsRef.current = items;
+  });
 
-  const createLoop = (index: number) => {
+  /** Queue the next auto-advance (skipped while held or off-screen). */
+  const schedule = () => {
+    if (timer.current) clearTimeout(timer.current);
+    if (reduceRef.current) return;
+    timer.current = setTimeout(() => {
+      if (holdRef.current || !inViewRef.current) {
+        schedule();
+        return;
+      }
+      show((idxRef.current + 1) % itemsRef.current.length);
+    }, DWELL_MS);
+  };
+
+  /** Swap to `index`: re-cut the mask, crossfade the art, restart the breath. */
+  const show = (index: number) => {
     const list = itemsRef.current;
     const item = list[index];
     if (!item) return;
-    const selector = `#${item.clipId} .path`;
+    idxRef.current = index;
+    setActiveIndex(index);
+    schedule();
 
-    masterTl.current?.kill();
-    imageRef.current?.setAttribute("href", item.image);
+    const selector = `#${item.clipId} .path`;
     mainGroupRef.current?.setAttribute("clip-path", `url(#${item.clipId})`);
+
+    const incoming = frontIsA.current ? layerB.current : layerA.current;
+    const outgoing = frontIsA.current ? layerA.current : layerB.current;
+    frontIsA.current = !frontIsA.current;
+    incoming?.setAttribute("href", item.image);
+
+    breathTl.current?.kill();
 
     if (reduceRef.current) {
       gsap.set(selector, { scale: 1, transformOrigin: "50% 50%" });
+      if (incoming) gsap.set(incoming, { opacity: 1 });
+      if (outgoing) gsap.set(outgoing, { opacity: 0 });
       return;
     }
 
-    gsap.set(selector, { scale: 0, transformOrigin: "50% 50%" });
+    // artwork crossfade — both layers stay painted, so no empty frame
+    if (incoming) gsap.to(incoming, { opacity: 1, duration: 0.75, ease: "power2.inOut", overwrite: true });
+    if (outgoing) gsap.to(outgoing, { opacity: 0, duration: 0.75, ease: "power2.inOut", overwrite: true });
 
-    const tl = gsap.timeline({
-      onComplete: () => {
-        const cur = idxRef.current;
-        // pointer resting on the menu → keep replaying the held entry
-        if (hoverRef.current !== null) {
-          createLoop(cur);
-          return;
-        }
-        const next = (cur + 1) % itemsRef.current.length;
-        idxRef.current = next;
-        setActiveIndex(next);
-        createLoop(next);
-      },
-    });
+    // mask re-cut — shapes shrink only to 0.86, never out of sight
+    gsap.fromTo(
+      selector,
+      { scale: 0.86, transformOrigin: "50% 50%" },
+      {
+        scale: 1,
+        duration: 1.05,
+        stagger: { amount: 0.45, from: "random" },
+        ease: "expo.out",
+        overwrite: true,
+      }
+    );
 
-    // 1. IN (expo out)
+    // slow idle breath — alive without ever clearing the frame
+    const tl = gsap.timeline({ repeat: -1, yoyo: true, delay: 1.1 });
     tl.to(selector, {
-      scale: 1,
-      duration: 0.8,
-      stagger: { amount: 0.4, from: "random" },
-      ease: "expo.out",
-    })
-      // 2. IDLE (sine breath)
-      .to(selector, {
-        scale: 1.05,
-        duration: 1.5,
-        yoyo: true,
-        repeat: 1,
-        ease: "sine.inOut",
-        stagger: { amount: 0.2, from: "center" },
-      })
-      // 3. OUT (expo in) after a short hold
-      .to(
-        selector,
-        {
-          scale: 0,
-          duration: 0.6,
-          stagger: { amount: 0.3, from: "edges" },
-          ease: "expo.in",
-        },
-        "+=0.5"
-      );
-
+      scale: 1.03,
+      duration: 2.6,
+      ease: "sine.inOut",
+      stagger: { amount: 0.5, from: "center" },
+    });
     if (!inViewRef.current) tl.pause();
-    masterTl.current = tl;
+    breathTl.current = tl;
   };
 
   useLayoutEffect(() => {
@@ -125,16 +152,16 @@ export function ConnoisseurStackInteractor({
     });
 
     const ctx = gsap.context(() => {
-      createLoop(0);
+      show(0);
     }, containerRef);
 
-    // off-screen → hold the loop (also stops auto-advance)
+    // off-screen → hold the breath and stop auto-advancing
     const io = new IntersectionObserver(
       (entries) => {
         const on = entries.some((e) => e.isIntersecting);
         inViewRef.current = on;
-        if (on) masterTl.current?.play();
-        else masterTl.current?.pause();
+        if (on) breathTl.current?.play();
+        else breathTl.current?.pause();
       },
       { rootMargin: "15% 0px" }
     );
@@ -142,8 +169,9 @@ export function ConnoisseurStackInteractor({
 
     return () => {
       io.disconnect();
-      masterTl.current?.kill();
-      masterTl.current = null;
+      if (timer.current) clearTimeout(timer.current);
+      breathTl.current?.kill();
+      breathTl.current = null;
       ctx.revert();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -155,24 +183,22 @@ export function ConnoisseurStackInteractor({
     if (bodyRef.current) {
       gsap.fromTo(
         bodyRef.current,
-        { autoAlpha: 0, y: 14 },
-        { autoAlpha: 1, y: 0, duration: 0.5, ease: "power3.out", overwrite: true }
+        { autoAlpha: 0, y: 12 },
+        { autoAlpha: 1, y: 0, duration: 0.6, ease: "power3.out", overwrite: true }
       );
     }
     if (letterRef.current) {
       gsap.fromTo(
         letterRef.current,
         { autoAlpha: 0 },
-        { autoAlpha: 1, duration: 0.7, ease: "power2.out", overwrite: true }
+        { autoAlpha: 1, duration: 0.8, ease: "power2.out", overwrite: true }
       );
     }
   }, [activeIndex]);
 
   const select = (index: number) => {
     if (index === idxRef.current) return;
-    idxRef.current = index;
-    setActiveIndex(index);
-    createLoop(index);
+    show(index);
   };
 
   const active = items[activeIndex];
@@ -187,8 +213,13 @@ export function ConnoisseurStackInteractor({
     >
       {/* LEFT — numbered E·L·Y·S menu + active description */}
       <div className="z-10 w-full md:w-1/2">
-        <nav aria-label="ELYS концепцын жагсаалт" onMouseLeave={() => (hoverRef.current = null)}>
-          <ul className="flex flex-col gap-7 md:gap-9">
+        <nav
+          aria-label="ELYS концепцын жагсаалт"
+          onMouseLeave={() => {
+            holdRef.current = false;
+          }}
+        >
+          <ul className="flex flex-col gap-6 md:gap-9">
             {items.map((item, index) => {
               const [lineA, lineB] = splitName(item.name);
               const isActive = activeIndex === index;
@@ -199,29 +230,35 @@ export function ConnoisseurStackInteractor({
                     data-cursor-hover
                     aria-current={isActive}
                     onMouseEnter={() => {
-                      hoverRef.current = index;
+                      holdRef.current = true;
                       select(index);
                     }}
                     onFocus={() => select(index)}
                     onClick={() => select(index)}
-                    className="group flex w-full items-start gap-5 text-left md:gap-6"
+                    className="group flex w-full items-start gap-4 py-1 text-left md:gap-6"
                   >
                     <span
                       className={`mt-1.5 inline-block text-base font-bold transition-all duration-500 md:text-lg ${
-                        isActive ? "scale-110 text-lime" : "text-white/30"
+                        isActive
+                          ? "scale-110 text-moss"
+                          : dark
+                            ? "text-white/30"
+                            : "text-night/25"
                       }`}
                     >
                       {item.num}
                     </span>
                     <span
-                      className={`inline-block text-[clamp(1.7rem,3.3vw,2.6rem)] font-extrabold uppercase leading-[0.92] tracking-tight transition-all duration-700 ${
+                      className={`inline-block text-[clamp(1.5rem,3.3vw,2.6rem)] font-extrabold uppercase leading-[0.95] tracking-tight transition-all duration-700 ${
                         isActive
-                          ? "translate-x-2 text-white md:translate-x-3"
-                          : "translate-x-0 text-transparent opacity-60 [-webkit-text-stroke:1.5px_rgba(255,255,255,0.30)] group-hover:opacity-90 group-hover:[-webkit-text-stroke:1.5px_rgba(255,255,255,0.55)]"
+                          ? `translate-x-1.5 md:translate-x-3 ${dark ? "text-white" : "text-night"}`
+                          : dark
+                            ? "translate-x-0 text-transparent opacity-60 [-webkit-text-stroke:1.5px_rgba(255,255,255,0.30)] group-hover:opacity-90 group-hover:[-webkit-text-stroke:1.5px_rgba(255,255,255,0.55)]"
+                            : "translate-x-0 text-transparent opacity-70 [-webkit-text-stroke:1.5px_rgba(21,23,23,0.28)] group-hover:opacity-100 group-hover:[-webkit-text-stroke:1.5px_rgba(21,23,23,0.55)]"
                       }`}
                     >
                       {/* first letter carries the acronym accent */}
-                      <span className={isActive ? "text-lime" : undefined}>{lineA.charAt(0)}</span>
+                      <span className={isActive ? "text-moss" : undefined}>{lineA.charAt(0)}</span>
                       {lineA.slice(1)}
                       {lineB && (
                         <>
@@ -237,8 +274,13 @@ export function ConnoisseurStackInteractor({
           </ul>
         </nav>
 
-        <div className="mt-9 max-w-md border-t border-white/10 pt-6 md:mt-12">
-          <p ref={bodyRef} className="min-h-[4.5rem] text-[14px] leading-relaxed text-white/75 md:text-[15px]">
+        <div className={`mt-8 max-w-md border-t pt-6 md:mt-12 ${dark ? "border-white/10" : "border-night/12"}`}>
+          <p
+            ref={bodyRef}
+            className={`min-h-[5.5rem] text-[14px] leading-relaxed md:min-h-[4.5rem] md:text-[15px] ${
+              dark ? "text-white/75" : "text-night/70"
+            }`}
+          >
             {active.body}
           </p>
         </div>
@@ -248,13 +290,19 @@ export function ConnoisseurStackInteractor({
       <div className="relative flex w-full items-center justify-center md:w-1/2">
         <div
           aria-hidden
-          className="absolute h-[75%] w-[75%] rounded-full bg-lime/10 blur-[110px] transition-opacity duration-1000"
+          className={`absolute h-[75%] w-[75%] rounded-full blur-[110px] transition-opacity duration-1000 ${
+            dark ? "bg-lime/10" : "bg-moss/10"
+          }`}
         />
         {/* ghost acronym letter — echo of the letters scroll chapter */}
         <span
           ref={letterRef}
           aria-hidden
-          className="pointer-events-none absolute -left-4 top-1/2 hidden -translate-y-1/2 select-none font-extrabold uppercase leading-none text-transparent [font-size:clamp(9rem,19vw,15rem)] [-webkit-text-stroke:2px_rgba(255,255,255,0.14)] md:block"
+          className={`pointer-events-none absolute -left-4 top-1/2 hidden -translate-y-1/2 select-none font-extrabold uppercase leading-none text-transparent [font-size:clamp(9rem,19vw,15rem)] md:block ${
+            dark
+              ? "[-webkit-text-stroke:2px_rgba(255,255,255,0.14)]"
+              : "[-webkit-text-stroke:2px_rgba(21,23,23,0.10)]"
+          }`}
         >
           {active.name.charAt(0)}
         </span>
@@ -263,7 +311,11 @@ export function ConnoisseurStackInteractor({
           viewBox="0 0 500 500"
           role="img"
           aria-label={active.alt ?? active.name}
-          className="relative z-10 h-auto w-full max-w-[440px] drop-shadow-[0_24px_80px_rgba(0,0,0,0.55)] md:max-w-[500px]"
+          className={`relative z-10 h-auto w-full max-w-[440px] md:max-w-[500px] ${
+            dark
+              ? "drop-shadow-[0_24px_80px_rgba(0,0,0,0.55)]"
+              : "drop-shadow-[0_24px_70px_rgba(21,23,23,0.22)]"
+          }`}
         >
           <defs>
             {/* horizontal louver slats — thick/thin floorplate rhythm */}
@@ -317,10 +369,18 @@ export function ConnoisseurStackInteractor({
 
           <g ref={mainGroupRef} clipPath={`url(#${items[0].clipId})`}>
             <image
-              ref={imageRef}
+              ref={layerA}
               href={items[0].image}
               width="500"
               height="500"
+              preserveAspectRatio="xMidYMid slice"
+            />
+            <image
+              ref={layerB}
+              href={items[0].image}
+              width="500"
+              height="500"
+              opacity="0"
               preserveAspectRatio="xMidYMid slice"
             />
           </g>

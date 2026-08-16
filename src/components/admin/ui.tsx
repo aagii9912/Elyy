@@ -54,6 +54,10 @@ export function TextInput(props: React.InputHTMLAttributes<HTMLInputElement>) {
   return <input {...props} className={`${inputCls} ${props.className ?? ""}`} />;
 }
 
+export function Select(props: React.SelectHTMLAttributes<HTMLSelectElement>) {
+  return <select {...props} className={`${inputCls} ${props.className ?? ""}`} />;
+}
+
 /* ref-ийг дамжуулна — нийтлэлийн засварлагч курсорын байрлалд зураг
    оруулахдаа textarea-д шууд хандах шаардлагатай. */
 export const TextArea = forwardRef<HTMLTextAreaElement, React.TextareaHTMLAttributes<HTMLTextAreaElement>>(

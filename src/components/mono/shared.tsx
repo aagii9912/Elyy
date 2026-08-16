@@ -22,10 +22,12 @@ export function MonoKicker({
     <p
       data-reveal={reveal ? "up" : undefined}
       className={`flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.28em] ${
-        tone === "dark" ? "text-white/60" : "text-mist"
+        tone === "dark" ? "text-white/60" : "text-night/50"
       } ${className}`}
     >
-      <span aria-hidden className="h-px w-8 bg-lime" />
+      {/* lime reads on the dark chapters; on the light ground it all but
+          disappears, so the rule steps down to the deeper brand green */}
+      <span aria-hidden className={`h-px w-8 ${tone === "dark" ? "bg-lime" : "bg-moss"}`} />
       {children}
     </p>
   );

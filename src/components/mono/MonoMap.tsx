@@ -26,7 +26,7 @@ export function MonoMap({ site }: { site: SiteContent }) {
   const nearby = location.nearby[group] ?? location.nearby[0];
 
   return (
-    <section id="location" className="border-b border-night/10 bg-paper py-20 md:py-28">
+    <section id="location" className="border-b border-night/10 bg-ground py-20 md:py-28">
       <div className="mx-auto max-w-[1500px] px-5 md:px-10">
         <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <div>
@@ -44,7 +44,7 @@ export function MonoMap({ site }: { site: SiteContent }) {
             rel="noopener"
             data-cursor-hover
             data-reveal="up"
-            className="inline-flex items-center gap-2 self-start rounded-full border border-night/25 px-5 py-2.5 text-[11px] font-bold uppercase tracking-[0.08em] text-night transition-colors hover:bg-night hover:text-white md:self-auto"
+            className="inline-flex min-h-11 items-center gap-2 self-start rounded-full border border-night/25 px-5 text-[11px] font-bold uppercase tracking-[0.08em] text-night transition-colors hover:bg-night hover:text-white md:self-auto"
           >
             {location.directionsLabel}
           </a>
@@ -55,7 +55,7 @@ export function MonoMap({ site }: { site: SiteContent }) {
           role="tablist"
           aria-label="Байршлын төрөл"
           data-reveal="up"
-          className="mt-8 inline-flex rounded-full border border-night/15 bg-white p-1"
+          className="mt-8 inline-flex rounded-full border border-night/15 bg-surface p-1"
         >
           {(["project", "office"] as const).map((id) => (
             <button
@@ -66,7 +66,7 @@ export function MonoMap({ site }: { site: SiteContent }) {
               aria-controls={`map-panel-${id}`}
               onClick={() => setActive(id)}
               data-cursor-hover
-              className={`rounded-full px-5 py-2.5 text-[11px] font-bold uppercase tracking-[0.08em] transition-colors ${
+              className={`min-h-11 rounded-full px-5 text-[11px] font-bold uppercase tracking-[0.08em] transition-colors ${
                 active === id
                   ? "bg-night text-white"
                   : "text-night/55 hover:text-night"
@@ -80,7 +80,7 @@ export function MonoMap({ site }: { site: SiteContent }) {
         <div className="mt-8 grid gap-6 lg:grid-cols-[1.7fr_1fr]">
           <div
             data-reveal="zoom"
-            className="overflow-hidden rounded-2xl border border-night/10 bg-white"
+            className="overflow-hidden rounded-2xl border border-night/10 bg-surface"
           >
             <iframe
               key={tab.id}
@@ -100,7 +100,7 @@ export function MonoMap({ site }: { site: SiteContent }) {
             key={active}
             className="mono-fade-up grid content-start gap-3"
           >
-            <div className="rounded-xl border border-night/10 bg-white px-4 py-3.5">
+            <div className="rounded-xl border border-night/10 bg-surface px-4 py-3.5">
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-night/45">
                 {location.addressLabel}
               </p>
@@ -124,10 +124,10 @@ export function MonoMap({ site }: { site: SiteContent }) {
                       aria-controls={`nearby-${i}`}
                       onClick={() => setGroup(i)}
                       data-cursor-hover
-                      className={`rounded-full border px-4 py-2 text-[11px] font-bold uppercase tracking-[0.08em] transition-colors ${
+                      className={`min-h-11 rounded-full border px-4 text-[11px] font-bold uppercase tracking-[0.08em] transition-colors ${
                         group === i
                           ? "border-night bg-night text-white"
-                          : "border-night/15 bg-white text-night/55 hover:border-night/40 hover:text-night"
+                          : "border-night/15 bg-surface text-night/55 hover:border-night/40 hover:text-night"
                       }`}
                     >
                       {g.label}
@@ -146,7 +146,7 @@ export function MonoMap({ site }: { site: SiteContent }) {
                   {nearby.items.map((l, i) => (
                     <li
                       key={`${l.place}-${i}`}
-                      className="flex items-center gap-3 rounded-xl border border-night/10 bg-white px-4 py-3 transition-colors hover:border-night/30"
+                      className="flex items-center gap-3 rounded-xl border border-night/10 bg-surface px-4 py-3 transition-colors hover:border-night/30"
                     >
                       <span className="w-6 shrink-0 text-[11px] font-bold tabular-nums text-night/35">
                         {String(i + 1).padStart(2, "0")}
@@ -169,7 +169,7 @@ export function MonoMap({ site }: { site: SiteContent }) {
               </div>
             ) : (
               <div className="grid content-start gap-3">
-                <div className="rounded-xl border border-night/10 bg-white px-4 py-3.5">
+                <div className="rounded-xl border border-night/10 bg-surface px-4 py-3.5">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-night/45">
                     {location.office.phoneLabel}
                   </p>
@@ -181,13 +181,13 @@ export function MonoMap({ site }: { site: SiteContent }) {
                     {contact.phone}
                   </a>
                 </div>
-                <div className="rounded-xl border border-night/10 bg-white px-4 py-3.5">
+                <div className="rounded-xl border border-night/10 bg-surface px-4 py-3.5">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-night/45">
                     {location.office.hoursLabel}
                   </p>
                   <p className="mt-1.5 text-sm font-bold text-night">{contact.hours}</p>
                 </div>
-                <div className="rounded-xl border border-night/10 bg-white px-4 py-3.5">
+                <div className="rounded-xl border border-night/10 bg-surface px-4 py-3.5">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-night/45">
                     {location.office.emailLabel}
                   </p>

@@ -33,9 +33,17 @@
   --font-gilroy: var(--font-gilroy), ui-sans-serif, system-ui, sans-serif;
 
   /* Neutral monochrome palette (FIND aesthetic) */
-  --color-night: #151717; /* near-black — dark sections, CTAs, ink */
-  --color-paper: #f1f1f1; /* light grey alternate band */
+  --color-night: #151717; /* near-black — ink, CTAs, footer */
+  --color-paper: #f1f1f1; /* light grey alternate band (legacy routes) */
   --color-mist: #8a8d8c; /* muted grey — dimmed/secondary text */
+
+  /* Mono (`/`) single light canvas. The page used to alternate
+     bg-white / bg-paper / bg-night band by band, which read as uneven
+     and far too dark. Every content section now sits on ONE ground and
+     separation comes from hairlines + raised white surfaces instead. */
+  --color-ground: #f4f4f1; /* the one page canvas */
+  --color-surface: #ffffff; /* cards / insets raised off the ground */
+  --color-shade: #1c1f1e; /* softened dark for the few cinematic blocks */
 
   /* LAGOM aesthetic — cream + orange (v2 experience) */
   --color-lagom-cream: #f2efe9; /* warm off-white canvas */
@@ -635,9 +643,26 @@ body:has(.mono-page) .ely-cursor {
   will-change: transform;
 }
 
+/* Pop-up — дэвсгэр зөөлөн гарч ирж, карт доороос/дотроос ургана */
+@keyframes mono-veil-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes mono-panel-in {
+  from { opacity: 0; transform: translateY(28px) scale(0.985); }
+  to { opacity: 1; transform: none; }
+}
+.mono-modal-veil {
+  animation: mono-veil-in 0.35s ease-out both;
+}
+.mono-modal-panel {
+  animation: mono-panel-in 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .mono-fade-up, .mono-float { animation: none; }
   .mono-word > span { animation: none; transform: none; }
+  .mono-modal-veil, .mono-modal-panel { animation: none; }
 }
 
 /* ============================================================

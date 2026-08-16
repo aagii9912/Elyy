@@ -92,7 +92,7 @@ export function MonoChatbot({ site }: { site: SiteContent }) {
               key={i}
               className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-[13.5px] leading-relaxed ${
                 m.from === "bot"
-                  ? "self-start rounded-bl-md bg-paper text-night"
+                  ? "self-start rounded-bl-md bg-night/5 text-night"
                   : "self-end rounded-br-md bg-night font-medium text-white"
               }`}
             >
@@ -100,7 +100,7 @@ export function MonoChatbot({ site }: { site: SiteContent }) {
             </div>
           ))}
           {typing && (
-            <div className="flex gap-1.5 self-start rounded-2xl rounded-bl-md bg-paper px-4 py-3">
+            <div className="flex gap-1.5 self-start rounded-2xl rounded-bl-md bg-night/5 px-4 py-3">
               {[0, 1, 2].map((d) => (
                 <span
                   key={d}
@@ -137,7 +137,7 @@ export function MonoChatbot({ site }: { site: SiteContent }) {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder={chatbot.placeholder}
-            className="flex-1 bg-transparent text-sm text-night placeholder:text-night/40 focus:outline-none"
+            className="min-h-11 flex-1 bg-transparent text-sm text-night placeholder:text-night/40 focus:outline-none"
           />
           <button
             type="submit"

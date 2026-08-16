@@ -35,11 +35,21 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
   // тогтвортой). Бусад бүх маркетингийн хуудсанд Lenis smooth scroll.
   if (pathname?.startsWith("/admin")) return <>{children}</>;
 
+  /* lerp 0.1 нь дугуй мэдрэмжтэй ч гүйлт хурдан “зогсдог”. 0.075 болгож,
+     дугуйн алхмыг бага зэрэг зөөлрүүлснээр урт scroll-story бүлгүүд
+     жигд гүйнэ. Touch дээр Lenis-ийг оруулахгүй (`syncTouch: false`) —
+     гар утсанд төрөлх гүйлт үргэлж илүү жигд, батарей ч хэмнэнэ. */
   return (
     <ReactLenis
       root
       autoRaf={false}
-      options={{ lerp: 0.1, duration: 1.2, smoothWheel: true, wheelMultiplier: 1 }}
+      options={{
+        lerp: 0.075,
+        smoothWheel: true,
+        wheelMultiplier: 0.9,
+        syncTouch: false,
+        touchMultiplier: 1.6,
+      }}
     >
       <LenisGsapBridge />
       {children}

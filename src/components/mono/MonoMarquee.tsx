@@ -7,7 +7,7 @@ export function MonoMarquee({ site }: { site: SiteContent }) {
   const slogans = site.marquee.slogans;
   const track = [...slogans, ...slogans, ...slogans];
   return (
-    <div aria-hidden data-reveal="up" className="overflow-hidden border-b border-night/10 bg-white py-5 md:py-7">
+    <div aria-hidden data-reveal="up" className="overflow-hidden border-b border-night/10 bg-ground py-5 md:py-7">
       <div className="green-marquee flex w-max items-center gap-10 whitespace-nowrap pr-10">
         {[0, 1].map((half) => (
           <div key={half} className="flex items-center gap-10">

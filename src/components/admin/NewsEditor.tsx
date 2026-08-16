@@ -8,7 +8,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { newsImageMarkup, parseNewsBody, type NewsDoc } from "@/lib/news";
+import { newsImageMarkup, parseNewsBody, type NewsDoc, type NewsImageSize } from "@/lib/news";
 import { Button, Card, Field, ImageField, TextArea, TextInput } from "./ui";
 import { uploadFile } from "./upload";
 
@@ -34,6 +34,8 @@ export function NewsEditor({ initial }: { initial: NewsDoc }) {
 
   const bodyRef = useRef<HTMLTextAreaElement>(null);
   const bodyFileRef = useRef<HTMLInputElement>(null);
+  /** Аль товчоор файл сонгож эхэлснийг санана (нэг л <input type=file>). */
+  const pendingSize = useRef<NewsImageSize>("normal");
   const [imgBusy, setImgBusy] = useState(false);
   const [imgErr, setImgErr] = useState<string | null>(null);
 
@@ -43,10 +45,12 @@ export function NewsEditor({ initial }: { initial: NewsDoc }) {
     setMsg(null);
   };
 
-  /** Зургийн тэмдэглэгээг курсорын байрлалд, өөрийн мөрөнд нь оруулна. */
-  const insertImage = (url: string) => {
+  /** Зургийн тэмдэглэгээг курсорын байрлалд, өөрийн мөрөнд нь оруулна.
+   *  `size` нь нийтлэл дээрх өргөнийг тодорхойлно (багана / өргөн /
+   *  дэлгэц дүүрэн) — тэмдэглэгээг гараар ч засаж болно. */
+  const insertImage = (url: string, size: NewsImageSize = "normal") => {
     const el = bodyRef.current;
-    const markup = newsImageMarkup(url);
+    const markup = newsImageMarkup(url, "", size);
     setDraft((d) => {
       const at = el ? el.selectionStart : d.body.length;
       const head = d.body.slice(0, at).replace(/\s+$/, "");
@@ -64,11 +68,11 @@ export function NewsEditor({ initial }: { initial: NewsDoc }) {
     setMsg(null);
   };
 
-  const addBodyImage = async (file: File) => {
+  const addBodyImage = async (file: File, size: NewsImageSize) => {
     setImgBusy(true);
     setImgErr(null);
     const res = await uploadFile(file);
-    if (res.ok) insertImage(res.url);
+    if (res.ok) insertImage(res.url, size);
     else setImgErr(res.error);
     setImgBusy(false);
   };
@@ -209,7 +213,7 @@ export function NewsEditor({ initial }: { initial: NewsDoc }) {
         <Card title="Агуулга">
           <Field
             label="Текст"
-            hint="Хоосон мөр = шинэ догол мөр · “## ” = дэд гарчиг · “- ” = жагсаалтын мөр · “![тайлбар](зургийн-хаяг)” = зураг."
+            hint="Хоосон мөр = шинэ догол мөр · “## ” = дэд гарчиг · “- ” = жагсаалтын мөр · “![тайлбар](зургийн-хаяг)” = зураг · араас нь “{wide}” эсвэл “{full}” бичвэл зураг өргөсөнө."
           >
             <TextArea
               ref={bodyRef}
@@ -227,20 +231,32 @@ export function NewsEditor({ initial }: { initial: NewsDoc }) {
               className="hidden"
               onChange={(e) => {
                 const f = e.target.files?.[0];
-                if (f) addBodyImage(f);
+                if (f) addBodyImage(f, pendingSize.current);
                 e.target.value = "";
               }}
             />
-            <Button
-              type="button"
-              variant="ghost"
-              disabled={imgBusy}
-              onClick={() => bodyFileRef.current?.click()}
-            >
-              {imgBusy ? "Байршуулж байна…" : "Зураг оруулах"}
-            </Button>
+            {(
+              [
+                ["normal", "Зураг оруулах"],
+                ["wide", "Өргөн зураг"],
+                ["full", "Дэлгэц дүүрэн"],
+              ] as const
+            ).map(([size, label]) => (
+              <Button
+                key={size}
+                type="button"
+                variant="ghost"
+                disabled={imgBusy}
+                onClick={() => {
+                  pendingSize.current = size;
+                  bodyFileRef.current?.click();
+                }}
+              >
+                {imgBusy ? "Байршуулж байна…" : label}
+              </Button>
+            ))}
             <span className="text-xs text-neutral-400">
-              Курсорын байрлалд нэмэгдэнэ. Тайлбарыг “![…]” дотор бичнэ.
+              Курсорын байрлалд — текстийн дурын хооронд — нэмэгдэнэ. Тайлбарыг “![…]” дотор бичнэ.
             </span>
           </div>
           {imgErr && <p className="mt-2 text-xs text-red-500">{imgErr}</p>}
