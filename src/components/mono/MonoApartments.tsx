@@ -114,7 +114,8 @@ export function MonoApartments({ site }: { site: SiteContent }) {
   const current = open === null ? null : slides[open];
 
   const tabClass = (on: boolean) =>
-    `min-h-10 rounded-full px-5 py-2 text-[12px] font-bold uppercase tracking-[0.1em] transition-colors duration-300 ${
+    /* min-h-11 — хүрэх талбайн 44px доод хязгаар (M8). */
+    `min-h-11 rounded-full px-5 py-2 text-[12px] font-bold uppercase tracking-[0.1em] transition-colors duration-300 ${
       on ? "bg-night text-white" : "text-night/55 hover:text-night"
     }`;
 
@@ -197,8 +198,16 @@ export function MonoApartments({ site }: { site: SiteContent }) {
                     <span className="rounded-full bg-night px-3 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-white">
                       {unit.title}
                     </span>
+                    {/* Блокийн шошго — өмнө нь дүүрэн `bg-moss` бөмбөлөг
+                        байсан. design-system §2-оор ногоон нь зөвхөн kicker
+                        зураас, курсор, зураг/тоног төхөөрөмжийн пин, timeline
+                        node дээр л гарна — дүүрэн шошго тэдний нэг ч биш, ба
+                        карт бүр дээр давхарлаад ногоон квот хэтэрдэг. Шошго
+                        хэвээр байна (B1/B2-ыг худалдан авагч уншина), зурагдах
+                        нь л өөрчлөгдөв: доор баруун талын "N өнцөг" шошготой
+                        нэг үг — цагаан гадаргуу + үсэн хил. */}
                     {showBlocks && unit.block?.trim() && (
-                      <span className="rounded-full bg-moss px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-white">
+                      <span className="rounded-full border border-night/15 bg-surface/85 px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-night backdrop-blur">
                         {unit.block}
                       </span>
                     )}
@@ -271,8 +280,10 @@ export function MonoApartments({ site }: { site: SiteContent }) {
               <p className="flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.28em] text-night/50">
                 <span aria-hidden className="h-px w-8 bg-moss" />
                 {current.unit.title}
+                {/* Блокийг ногоонгоор биш, бараанаар — §2-ын ногоон квот
+                    зөвхөн kicker зураас/курсор/пин/node дээр. */}
                 {showBlocks && current.unit.block?.trim() && (
-                  <span className="text-moss">· {current.unit.block}</span>
+                  <span className="text-night">· {current.unit.block}</span>
                 )}
               </p>
               <p className="mt-2 text-lg font-extrabold tracking-tight text-night">{meta(current.unit)}</p>
@@ -283,7 +294,7 @@ export function MonoApartments({ site }: { site: SiteContent }) {
               data-cursor-hover
               onClick={close}
               aria-label="Хаах"
-              className="min-h-11 rounded-full border border-night/25 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.08em] text-night transition-colors hover:bg-night hover:text-white"
+              className="min-h-11 rounded-full border border-night/25 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.08em] text-night transition-colors duration-300 hover:bg-night hover:text-white"
             >
               Хаах ✕
             </button>
@@ -306,7 +317,7 @@ export function MonoApartments({ site }: { site: SiteContent }) {
               data-cursor-hover
               onClick={() => step(-1)}
               aria-label="Өмнөх зураг"
-              className="flex h-11 w-11 items-center justify-center rounded-full border border-night/25 text-sm font-bold text-night transition-colors hover:bg-night hover:text-white"
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-night/25 text-sm font-bold text-night transition-colors duration-300 hover:bg-night hover:text-white"
             >
               ←
             </button>
@@ -318,7 +329,7 @@ export function MonoApartments({ site }: { site: SiteContent }) {
               data-cursor-hover
               onClick={() => step(1)}
               aria-label="Дараах зураг"
-              className="flex h-11 w-11 items-center justify-center rounded-full border border-night/25 text-sm font-bold text-night transition-colors hover:bg-night hover:text-white"
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-night/25 text-sm font-bold text-night transition-colors duration-300 hover:bg-night hover:text-white"
             >
               →
             </button>
@@ -417,7 +428,7 @@ function UnitInquiry({
                 name="name"
                 required
                 autoComplete="name"
-                className="w-full border-b border-night/20 bg-transparent pb-3 text-lg font-semibold text-night focus:border-night focus:outline-none"
+                className="w-full border-b border-night/20 bg-transparent pb-3 pt-2 text-lg font-semibold text-night focus:border-night focus:outline-none"
               />
             </label>
 
@@ -429,7 +440,7 @@ function UnitInquiry({
                 required
                 inputMode="tel"
                 autoComplete="tel"
-                className="w-full border-b border-night/20 bg-transparent pb-3 text-lg font-semibold text-night focus:border-night focus:outline-none"
+                className="w-full border-b border-night/20 bg-transparent pb-3 pt-2 text-lg font-semibold text-night focus:border-night focus:outline-none"
               />
             </label>
 

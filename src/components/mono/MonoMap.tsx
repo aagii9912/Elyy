@@ -44,7 +44,7 @@ export function MonoMap({ site }: { site: SiteContent }) {
             rel="noopener"
             data-cursor-hover
             data-reveal="up"
-            className="inline-flex min-h-11 items-center gap-2 self-start rounded-full border border-night/25 px-5 text-[11px] font-bold uppercase tracking-[0.08em] text-night transition-colors hover:bg-night hover:text-white md:self-auto"
+            className="inline-flex min-h-11 items-center gap-2 self-start rounded-full border border-night/25 px-5 text-[11px] font-bold uppercase tracking-[0.08em] text-night transition-colors duration-300 hover:bg-night hover:text-white md:self-auto"
           >
             {location.directionsLabel}
           </a>
@@ -66,7 +66,7 @@ export function MonoMap({ site }: { site: SiteContent }) {
               aria-controls={`map-panel-${id}`}
               onClick={() => setActive(id)}
               data-cursor-hover
-              className={`min-h-11 rounded-full px-5 text-[11px] font-bold uppercase tracking-[0.08em] transition-colors ${
+              className={`min-h-11 rounded-full px-5 text-[11px] font-bold uppercase tracking-[0.08em] transition-colors duration-300 ${
                 active === id
                   ? "bg-night text-white"
                   : "text-night/55 hover:text-night"
@@ -124,7 +124,7 @@ export function MonoMap({ site }: { site: SiteContent }) {
                       aria-controls={`nearby-${i}`}
                       onClick={() => setGroup(i)}
                       data-cursor-hover
-                      className={`min-h-11 rounded-full border px-4 text-[11px] font-bold uppercase tracking-[0.08em] transition-colors ${
+                      className={`min-h-11 rounded-full border px-4 text-[11px] font-bold uppercase tracking-[0.08em] transition-colors duration-300 ${
                         group === i
                           ? "border-night bg-night text-white"
                           : "border-night/15 bg-surface text-night/55 hover:border-night/40 hover:text-night"
@@ -146,7 +146,7 @@ export function MonoMap({ site }: { site: SiteContent }) {
                   {nearby.items.map((l, i) => (
                     <li
                       key={`${l.place}-${i}`}
-                      className="flex items-center gap-3 rounded-xl border border-night/10 bg-surface px-4 py-3 transition-colors hover:border-night/30"
+                      className="flex items-center gap-3 rounded-xl border border-night/10 bg-surface px-4 py-3 transition-colors duration-300 hover:border-night/30"
                     >
                       <span className="w-6 shrink-0 text-[11px] font-bold tabular-nums text-night/35">
                         {String(i + 1).padStart(2, "0")}
@@ -176,7 +176,7 @@ export function MonoMap({ site }: { site: SiteContent }) {
                   <a
                     href={`tel:+976${contact.phone.replace(/[^0-9]/g, "")}`}
                     data-cursor-hover
-                    className="mt-1.5 block text-xl font-extrabold text-night transition-opacity hover:opacity-70"
+                    className="mt-1.5 block text-xl font-extrabold text-night transition-opacity duration-300 hover:opacity-70"
                   >
                     {contact.phone}
                   </a>
@@ -194,7 +194,7 @@ export function MonoMap({ site }: { site: SiteContent }) {
                   <a
                     href={`mailto:${brand.email}`}
                     data-cursor-hover
-                    className="mt-1.5 block text-sm font-bold text-night underline-offset-4 transition-opacity hover:underline hover:opacity-70"
+                    className="mt-1.5 block text-sm font-bold text-night underline-offset-4 transition-opacity duration-300 hover:underline hover:opacity-70"
                   >
                     {brand.email}
                   </a>

@@ -1,30 +1,42 @@
 "use client";
 
 /* /mono — Төсөл хэрэгжүүлэгч. A true running timeline:
-   DESKTOP — pinned full-screen; scroll drives the track left→right while
-   a giant outlined YEAR counter runs 2006 → 2026 (piecewise-mapped so
-   the year always matches the station in focus). Stations are sorted
-   chronologically; the one nearest the viewport centre zooms up to
-   1.1x while the others collapse down to 0.3x, growing out of the lime
-   rail (years rise from it, cards hang off it). The rail itself stays
-   continuous — only the content scales.
+   DESKTOP — pinned full-screen; scroll drives the track left→right.
+   Stations are sorted chronologically; the one nearest the viewport
+   centre zooms up to 1.1x while the others collapse down to 0.3x,
+   growing out of the lime rail (years rise from it, cards hang off it).
+   The rail itself stays continuous — only the content scales.
    MOBILE  — vertical rail timeline: lime fill follows the scroll, dots
    pop as stations arrive, images zoom down into place.
    Project photos are Elysium render stand-ins until Монкон supplies
-   real project photography. */
+   real project photography.
+
+   Two things used to break the page's own type scale here: the running
+   year counter was set at 320px (headline:body 22.9:1 against a 14px
+   body — nothing else on the page is louder than ~5:1) and the station
+   years sat one tier above the section h2. Both are now set at the h2
+   tier, `clamp(1.8rem, 3.4vw, 2.8rem)`: the counter still runs from the
+   founding year to the last station as the track travels, still drifts
+   behind it, and is still outlined rather than filled — it is the same
+   mark, at the loudest size this page's own scale allows. Neither adds a
+   distinct rendered size to the section. */
 
 import { useEffect, useRef } from "react";
 import { gsap } from "@/lib/gsap";
 import type { SiteContent } from "@/lib/site-content";
 import { MonoKicker } from "./shared";
 
-const YEAR_START = 2006;
-const YEAR_END = 2026;
-
 /** "2014–2019" → 2014. Буруу бичсэн ч эрэмбэ унахгүй. */
 const startYear = (years: string) => {
   const n = parseInt(years, 10);
   return Number.isFinite(n) ? n : 0;
+};
+
+/** "2014–2019" → 2019 (эсвэл нэг он бичсэн бол тэр он). */
+const endYear = (years: string) => {
+  const parts = years.split(/[–—-]/);
+  const n = parseInt(parts[parts.length - 1], 10);
+  return Number.isFinite(n) ? n : startYear(years);
 };
 
 export function MonoDeveloper({ site }: { site: SiteContent }) {
@@ -38,6 +50,12 @@ export function MonoDeveloper({ site }: { site: SiteContent }) {
 
   /* chronological stations (sorted by start year) */
   const stations = [...d.projects].sort((a, b) => startYear(a.years) - startYear(b.years));
+
+  /* The counter's run-in and run-out come off the content, not off hardcoded
+     years: it starts at the founding year in the `since` stat and ends at the
+     last year any station names. */
+  const founded = startYear(d.since) || startYear(stations[0]?.years ?? "");
+  const lastYear = stations.reduce((y, p) => Math.max(y, endYear(p.years)), founded);
 
   useEffect(() => {
     const sec = root.current;
@@ -63,7 +81,7 @@ export function MonoDeveloper({ site }: { site: SiteContent }) {
         // the track travels through the MIDDLE 70% of the pin: the first
         // station is centred (and big) from the very start, the last one
         // is centred at the very end. The outer 15% margins are the year
-        // counter's 2006 → run-in and → 2026 run-out.
+        // counter's run-in from the founding year and run-out to the last.
         const T0 = 0.15;
         const T1 = 0.85;
         gsap.fromTo(
@@ -82,15 +100,15 @@ export function MonoDeveloper({ site }: { site: SiteContent }) {
           }
         );
 
-        // the running year: full-pin progress → year, anchored so the
-        // counter reads a station's start year exactly when it is centred
-        const years = d.projects.map((p) => startYear(p.years)).sort((a, b) => a - b);
+        // the running year: full-pin progress → year, anchored so the counter
+        // reads a station's start year exactly when that station is centred
+        const years = stations.map((p) => startYear(p.years));
         const anchors: [number, number][] = [
-          [0, YEAR_START],
+          [0, founded],
           ...years.map(
             (y, i) => [T0 + (i / Math.max(1, years.length - 1)) * (T1 - T0), y] as [number, number]
           ),
-          [1, YEAR_END],
+          [1, lastYear],
         ];
         const yearAt = (p: number) => {
           for (let i = 1; i < anchors.length; i++) {
@@ -100,7 +118,7 @@ export function MonoDeveloper({ site }: { site: SiteContent }) {
               return Math.round(y0 + ((p - p0) / (p1 - p0 || 1)) * (y1 - y0));
             }
           }
-          return YEAR_END;
+          return lastYear;
         };
         if (prog.current) {
           gsap.fromTo(
@@ -118,8 +136,8 @@ export function MonoDeveloper({ site }: { site: SiteContent }) {
             }
           );
         }
-        // the backdrop mark (year counter or company icon) drifts slower
-        // than the track → parallax depth
+        // the backdrop mark — running year, or the company icon when one is
+        // set — drifts slower than the track → parallax depth
         const drift = mark.current ?? logoMark.current;
         if (drift) {
           gsap.fromTo(drift, { xPercent: 6 }, { xPercent: -10, ease: "none", scrollTrigger: stBase });
@@ -191,14 +209,15 @@ export function MonoDeveloper({ site }: { site: SiteContent }) {
       });
     }, sec);
     return () => ctx.revert();
-  }, [d.projects, d.logo]);
+    // `stations`, `founded` and `lastYear` are derived from these three.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [d.projects, d.since, d.logo]);
 
   return (
     <section id="developer" ref={root} className="relative border-b border-night/10 bg-ground md:h-[380vh]">
       <div className="flex flex-col justify-center overflow-hidden py-20 md:sticky md:top-0 md:h-[100svh] md:py-0">
-        {/* backdrop mark — the company icon when one is set, otherwise the
-            giant year counter running 2006 → 2026 (desktop only) */}
-        {d.logo ? (
+        {/* backdrop mark — the company icon, when one is set (desktop only) */}
+        {d.logo && (
           <div
             aria-hidden
             className="pointer-events-none absolute bottom-[2vh] left-[4vw] hidden select-none md:block"
@@ -211,15 +230,6 @@ export function MonoDeveloper({ site }: { site: SiteContent }) {
               decoding="async"
               className="h-[clamp(9rem,22vw,18rem)] w-auto opacity-[0.13]"
             />
-          </div>
-        ) : (
-          <div
-            ref={mark}
-            aria-hidden
-            className="pointer-events-none absolute bottom-[2vh] left-[4vw] hidden select-none whitespace-nowrap font-bold uppercase leading-none tracking-tight text-transparent md:block md:text-[clamp(9rem,24vw,20rem)]"
-            style={{ WebkitTextStroke: "1.5px rgba(21,23,23,0.14)" }}
-          >
-            2006
           </div>
         )}
 
@@ -246,6 +256,22 @@ export function MonoDeveloper({ site }: { site: SiteContent }) {
           </div>
         </div>
 
+        {/* backdrop mark — the running year, when there is no company icon.
+            Same tier as the section h2 (and as the station years), outlined
+            rather than filled, drifting slower than the track. It sits after
+            the header in the DOM and behind it in paint order, so the h2 stays
+            the section's largest filled mark. */}
+        {!d.logo && (
+          <div
+            ref={mark}
+            aria-hidden
+            className="pointer-events-none absolute bottom-[6vh] left-[4vw] z-0 hidden select-none whitespace-nowrap text-[clamp(1.8rem,3.4vw,2.8rem)] font-extrabold uppercase leading-none tracking-tight text-transparent md:block"
+            style={{ WebkitTextStroke: "1.2px rgba(21,23,23,0.32)" }}
+          >
+            {founded}
+          </div>
+        )}
+
         {/* timeline */}
         <div className="relative z-10 mt-12 md:mt-14">
           <div
@@ -263,7 +289,9 @@ export function MonoDeveloper({ site }: { site: SiteContent }) {
               <div key={`${p.title}-${i}`} data-reveal="up" data-md-station className="relative md:w-[30vw] md:shrink-0 lg:w-[26vw]">
                 {/* year row — fixed height so the rail lines up across stations */}
                 <div data-md-year className="flex h-20 items-end justify-between pb-3">
-                  <p className="text-[clamp(2rem,3.6vw,3.2rem)] font-bold leading-none tracking-tight text-night/90">
+                  {/* same tier as the section h2 — the timeline is not louder
+                      than the heading it sits under */}
+                  <p className="text-[clamp(1.8rem,3.4vw,2.8rem)] font-extrabold leading-none tracking-tight text-night/90">
                     {p.years.split("–")[0]}
                     <span className="text-night/35">–{p.years.split("–")[1]}</span>
                   </p>
@@ -276,14 +304,17 @@ export function MonoDeveloper({ site }: { site: SiteContent }) {
                 </div>
                 <span aria-hidden data-md-dot className="absolute -left-[30px] top-[4.5rem] h-3 w-3 rounded-full bg-lime md:hidden" />
 
-                {/* image card — staggered heights for editorial rhythm */}
+                {/* image card — staggered heights for editorial rhythm.
+                    The title used to sit on the photo under a from-night/85
+                    gradient; the card now carries it on the white surface,
+                    the same way every other card on the page does. */}
                 <article
                   data-md-card
                   className={`group relative mt-5 overflow-hidden rounded-2xl border border-night/10 bg-surface ${
                     i % 2 === 0 ? "md:mt-7" : "md:mt-12"
                   }`}
                 >
-                  <div className={`w-full overflow-hidden ${i % 2 === 0 ? "h-[240px] md:h-[min(320px,36svh)]" : "h-[200px] md:h-[min(260px,30svh)]"}`}>
+                  <div className={`relative w-full overflow-hidden bg-night/5 ${i % 2 === 0 ? "h-[168px] md:h-[min(300px,34svh)]" : "h-[140px] md:h-[min(244px,28svh)]"}`}>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       data-md-img
@@ -293,15 +324,14 @@ export function MonoDeveloper({ site }: { site: SiteContent }) {
                       decoding="async"
                       className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                     />
+                    <span className="absolute right-4 top-4 rounded-full bg-surface/90 px-3 py-1 text-[11px] font-bold tracking-[0.08em] text-night backdrop-blur">
+                      {p.units}
+                    </span>
                   </div>
-                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-night/85 via-night/10 to-transparent" />
-                  <div className="absolute inset-x-0 bottom-0 p-5">
-                    <h3 className="text-lg font-extrabold tracking-tight text-white md:text-xl">{p.title}</h3>
-                    <p className="mt-1 text-[13px] text-white/65">{p.meta}</p>
+                  <div className="p-5">
+                    <h3 className="text-xl font-extrabold tracking-tight text-night">{p.title}</h3>
+                    <p className="mt-1.5 text-sm text-night/55">{p.meta}</p>
                   </div>
-                  <span className="absolute right-4 top-4 rounded-full bg-night/60 px-3 py-1 text-[11px] font-bold text-white/85 backdrop-blur">
-                    {p.units}
-                  </span>
                 </article>
               </div>
             ))}

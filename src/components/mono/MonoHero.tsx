@@ -1,17 +1,37 @@
 "use client";
 
-/* /mono — Intro. The client's Hero1 clip — the towers rising out of an
-   empty dusk sky — baked to 120 WebP frames and scrubbed frame-by-frame
-   by scroll (desktop only; mobile/reduced-motion gets a single still).
-   Rebuild with `node scripts/build-scroll-frames.mjs hero`. */
+/* / — Intro. The client's Hero1 clip — the towers rising out of the sky —
+   baked to 120 WebP frames and scrubbed frame-by-frame by scroll (desktop
+   only; mobile/reduced-motion gets a single still).
+   Rebuild with `node scripts/build-scroll-frames.mjs hero`.
+
+   The hero used to be a full-bleed dark plate: white type on the footage
+   behind a night gradient. It measured 0.37 mean luminance and 1.73:1
+   headline contrast, and it made the page open on two screens of black
+   before the light ground ever appeared. It is now the same ground as
+   every other section (design-system §1) with the footage held in a
+   raised window: the towers are still the first thing on the page, but
+   they arrive inside the page rather than underneath it. */
 
 import { Fragment, useEffect, useRef } from "react";
 import { useLenis } from "lenis/react";
 import { gsap } from "@/lib/gsap";
 import type { SiteContent } from "@/lib/site-content";
 import { BrochureButton } from "./MonoBrochure";
+import { MonoKicker } from "./shared";
 
-const FRAME_COUNT = 120;
+/* The sequence opens on bare sky and only tilts down onto the towers around
+   frame 55. Full-bleed that read as atmosphere; inside a window it reads as
+   an empty grey box, so the scrub starts where the towers are standing and
+   runs to the last frame. */
+const FRAME_FIRST = 58;
+const FRAME_LAST = 120;
+const FRAME_COUNT = FRAME_LAST - FRAME_FIRST + 1;
+/** Share of each frame's height trimmed off the top before the cover-fit — a
+    band of bare sky, so the window is filled by the towers rather than by
+    air. Every extra percent is paid for in cropped width, so it is set to the
+    least that keeps the sky a margin rather than the subject. */
+const FOCUS_TOP = 0.22;
 const framePath = (i: number) => `/hero-video-frames/frame_${String(i).padStart(3, "0")}.webp`;
 /** Still shown to mobile / reduced-motion: the towers fully risen. */
 const STILL_FRAME = 100;
@@ -54,20 +74,23 @@ export function MonoHero({ site }: { site: SiteContent }) {
       if (!img || !img.complete || !img.naturalWidth) return;
       const cw = cvs.width;
       const ch = cvs.height;
-      const scale = Math.max(cw / img.naturalWidth, ch / img.naturalHeight);
-      const w = img.naturalWidth * scale;
-      const h = img.naturalHeight * scale;
+      // Cover-fit the skyline band, not the whole frame, and anchor it to the
+      // bottom of the window: the towers fill the window, the sky is a margin.
+      const sy = Math.round(img.naturalHeight * FOCUS_TOP);
+      const sw = img.naturalWidth;
+      const sh = img.naturalHeight - sy;
+      const scale = Math.max(cw / sw, ch / sh);
+      const w = sw * scale;
+      const h = sh * scale;
       ctx2d.clearRect(0, 0, cw, ch);
-      ctx2d.drawImage(img, (cw - w) / 2, (ch - h) / 2, w, h);
+      ctx2d.drawImage(img, 0, sy, sw, sh, (cw - w) / 2, ch - h, w, h);
     };
 
     const framesToLoad = !reduce && !isMobile ? FRAME_COUNT : 1;
-    for (let i = 1; i <= framesToLoad; i++) {
+    for (let i = 0; i < framesToLoad; i++) {
       const im = new Image();
-      // Frame 1 is bare sky before the towers rise — the single-frame
-      // fallback needs a shot that actually shows the buildings.
-      im.src = framePath(framesToLoad === 1 ? STILL_FRAME : i);
-      if (i === 1) im.onload = () => { resize(); draw(); };
+      im.src = framePath(framesToLoad === 1 ? STILL_FRAME : FRAME_FIRST + i);
+      if (i === 0) im.onload = () => { resize(); draw(); };
       images.push(im);
     }
     resize();
@@ -100,17 +123,18 @@ export function MonoHero({ site }: { site: SiteContent }) {
   }, []);
 
   return (
-    <section id="top" ref={root} className="relative h-[100svh] w-full bg-night md:h-[210vh]">
-      <div className="sticky top-0 flex h-[100svh] min-h-[620px] w-full overflow-hidden">
-        <canvas ref={canvas} className="absolute inset-0 z-0 h-full w-full" />
-        <div className="pointer-events-none absolute inset-0 z-[5] bg-gradient-to-b from-night/45 via-night/5 to-night/60" />
+    <section id="top" ref={root} className="relative w-full bg-ground md:h-[210vh]">
+      <div className="sticky top-0 flex min-h-[100svh] w-full items-center overflow-hidden pb-[4vh] pt-[calc(var(--header-h)+2vh)] md:pb-[5vh] md:pt-[calc(var(--header-h)+3vh)]">
+        {/* The window takes its height from the viewport, not from its own
+            width: an aspect-ratio box left a quarter of the screen as bare
+            ground above and below the fold. */}
+        <div className="mx-auto grid w-full max-w-[1500px] items-center gap-8 px-5 md:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] md:gap-[4vw] md:px-10">
+          {/* the type clears as the pin runs out; the window keeps scrubbing
+              until the chapter takes the screen */}
+          <div data-mh-copy>
+            <MonoKicker className="mono-fade-up">{brand.tag}</MonoKicker>
 
-        <div data-mh-copy className="relative z-10 flex h-full w-full flex-col items-center px-6">
-          <div className="flex flex-1 flex-col items-center justify-center text-center">
-            <p className="mono-fade-up mb-5 text-[11px] font-semibold uppercase tracking-[0.42em] text-lime md:mb-6 md:text-[12px]" style={{ animationDelay: "0.4s" }}>
-              {brand.tag}
-            </p>
-            <h1 className="text-[clamp(2.6rem,7.5vw,4.6rem)] font-medium uppercase leading-[1.05] tracking-[-0.2px] text-white [text-wrap:balance] drop-shadow-[0_2px_30px_rgba(0,0,0,0.4)]">
+            <h1 className="mt-5 text-[clamp(2.6rem,7.5vw,4.6rem)] font-medium uppercase leading-[1.05] tracking-[-0.2px] text-night [text-wrap:balance]">
               {/* word-by-word mask rise */}
               {brand.line.split(" ").map((word, i) => (
                 <Fragment key={`${word}-${i}`}>
@@ -121,34 +145,43 @@ export function MonoHero({ site }: { site: SiteContent }) {
                 </Fragment>
               ))}
             </h1>
-            <p className="mono-fade-up mt-5 max-w-md text-[15px] font-medium leading-relaxed text-white/80 md:text-base" style={{ animationDelay: "0.7s" }}>
+
+            <p
+              className="mono-fade-up mt-5 max-w-md text-[15px] font-medium leading-relaxed text-night/60 md:text-base"
+              style={{ animationDelay: "0.7s" }}
+            >
               {hero.sub}
             </p>
+
+            <div className="mt-8 flex w-full flex-col gap-3.5 sm:w-auto sm:flex-row sm:items-center sm:gap-4">
+              <a
+                href="#contact"
+                onClick={(e) => go(e, "#contact")}
+                data-cursor-hover
+                className="mono-fade-up inline-flex w-full items-center justify-center gap-2 rounded-[50px] bg-night px-6 py-4 text-[14px] font-bold uppercase tracking-[-0.2px] text-white transition-transform duration-300 hover:-translate-y-0.5 sm:w-auto"
+                style={{ animationDelay: "0.85s" }}
+              >
+                {nav.ctaLabel}
+              </a>
+              <span className="mono-fade-up w-full sm:w-auto" style={{ animationDelay: "1s" }}>
+                <BrochureButton
+                  site={site}
+                  source="elysium/mono#hero"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-[50px] border border-night/25 px-6 py-4 text-[14px] font-bold uppercase tracking-[-0.2px] text-night transition-colors duration-300 hover:bg-night hover:text-white sm:w-auto"
+                >
+                  {nav.brochureLabel}
+                </BrochureButton>
+              </span>
+            </div>
           </div>
 
-          <div className="pointer-events-auto flex w-full flex-col items-center gap-3.5 pb-[8vh] sm:w-auto sm:flex-row sm:justify-center sm:gap-4">
-            <a
-              href="#contact"
-              onClick={(e) => go(e, "#contact")}
-              data-cursor-hover
-              className="mono-fade-up inline-flex w-full items-center justify-center gap-2 rounded-[50px] bg-white px-6 py-4 text-[14px] font-bold uppercase tracking-[-0.2px] text-night transition-transform duration-300 hover:-translate-y-0.5 sm:w-auto"
-              style={{ animationDelay: "0.85s" }}
-            >
-              {nav.ctaLabel}
-            </a>
-            <span className="mono-fade-up w-full sm:w-auto" style={{ animationDelay: "1s" }}>
-              <BrochureButton
-                site={site}
-                source="elysium/mono#hero"
-                className="inline-flex w-full items-center justify-center gap-2 rounded-[50px] border border-white/40 bg-white/[0.06] px-6 py-4 text-[14px] font-medium uppercase tracking-[-0.2px] text-white backdrop-blur-[16px] transition-colors duration-300 hover:bg-white/15 sm:w-auto"
-              >
-                {nav.brochureLabel}
-              </BrochureButton>
-            </span>
-          </div>
+          {/* the window: raised white surface, hairline, footage inside */}
+          <figure className="mono-fade-up relative m-0 aspect-[6/5] w-full overflow-hidden rounded-2xl border border-night/10 bg-surface shadow-[0_40px_120px_-40px_rgba(21,23,23,0.7)] md:aspect-auto md:h-[min(56vh,560px)]" style={{ animationDelay: "0.35s" }}>
+            <canvas ref={canvas} className="absolute inset-0 h-full w-full" />
+          </figure>
         </div>
 
-        <div className="mono-float absolute bottom-7 left-1/2 z-10 h-9 w-px -translate-x-1/2 bg-white/50" />
+        <div className="mono-float absolute bottom-5 left-1/2 z-10 h-9 w-px -translate-x-1/2 bg-night/25" />
       </div>
     </section>
   );

@@ -109,7 +109,7 @@ export function MonoModal({
           onClick={close}
           data-cursor-hover
           aria-label={closeLabel}
-          className="absolute right-3 top-3 z-10 flex h-11 w-11 items-center justify-center rounded-full border border-night/12 bg-surface/90 text-night backdrop-blur transition-colors hover:bg-night hover:text-white"
+          className="absolute right-3 top-3 z-10 flex h-11 w-11 items-center justify-center rounded-full border border-night/12 bg-surface/90 text-night backdrop-blur transition-colors duration-300 hover:bg-night hover:text-white"
         >
           <svg aria-hidden viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M6 6l12 12M18 6L6 18" strokeLinecap="round" />

@@ -251,14 +251,22 @@ export function ConnoisseurStackInteractor({
                     <span
                       className={`inline-block text-[clamp(1.5rem,3.3vw,2.6rem)] font-extrabold uppercase leading-[0.95] tracking-tight transition-all duration-700 ${
                         isActive
-                          ? `translate-x-1.5 md:translate-x-3 ${dark ? "text-white" : "text-night"}`
+                          ? `translate-x-1.5 md:translate-x-3 ${dark ? "text-white/60" : "text-night/55"}`
                           : dark
                             ? "translate-x-0 text-transparent opacity-60 [-webkit-text-stroke:1.5px_rgba(255,255,255,0.30)] group-hover:opacity-90 group-hover:[-webkit-text-stroke:1.5px_rgba(255,255,255,0.55)]"
                             : "translate-x-0 text-transparent opacity-70 [-webkit-text-stroke:1.5px_rgba(21,23,23,0.28)] group-hover:opacity-100 group-hover:[-webkit-text-stroke:1.5px_rgba(21,23,23,0.55)]"
                       }`}
                     >
-                      {/* first letter carries the acronym accent */}
-                      <span className={isActive ? "text-moss" : undefined}>{lineA.charAt(0)}</span>
+                      {/* First letter carries the acronym (E·L·Y·S). It used
+                          to carry it in moss: a 45px green glyph is ~0.034%
+                          of the viewport on its own, i.e. the page's whole
+                          green budget spent on one letter, and green type is
+                          not one of the four places green is allowed
+                          (rule / cursor / pin / node). The acronym now reads
+                          by weight — full ink against the dimmed remainder. */}
+                      <span className={isActive ? (dark ? "text-white" : "text-night") : undefined}>
+                        {lineA.charAt(0)}
+                      </span>
                       {lineA.slice(1)}
                       {lineB && (
                         <>

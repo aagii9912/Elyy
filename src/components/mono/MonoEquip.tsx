@@ -81,7 +81,10 @@ export function MonoEquip({ site }: { site: SiteContent }) {
                 aria-haspopup="dialog"
                 className="group flex h-full w-full flex-col overflow-hidden rounded-2xl border border-night/10 bg-surface text-left transition-[border-color,transform,box-shadow] duration-500 hover:-translate-y-1 hover:border-night/30 hover:shadow-[0_28px_60px_-40px_rgba(21,23,23,0.6)]"
               >
-                <span className="relative block aspect-[4/3] w-full overflow-hidden bg-night/5">
+                {/* Гар утсанд карт нэг баганаар зэрэгцэх тул 4:3 зураг дэлгэцийн
+                    талаас илүүг эзэлж, хуудсын цайвар суурийг дарж байсан.
+                    Гар утсанд өргөн банд, md-ээс дээш 4:3 хэвээр. */}
+                <span className="relative block aspect-[2/1] w-full overflow-hidden bg-night/5 md:aspect-[4/3]">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={imageFor(item.image, i)}
@@ -104,7 +107,7 @@ export function MonoEquip({ site }: { site: SiteContent }) {
                   </span>
                   <span className="mt-5 flex items-center justify-between border-t border-night/10 pt-4">
                     <BrandMark title={item.title} />
-                    <span className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-night/70 transition-colors group-hover:text-night">
+                    <span className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-night/70 transition-colors duration-300 group-hover:text-night">
                       {equip.moreLabel}
                       <span aria-hidden className="transition-transform duration-300 group-hover:translate-x-1">
                         →
