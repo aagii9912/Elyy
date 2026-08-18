@@ -1,7 +1,7 @@
 "use client";
 
-/* / — Ерөнхий төлөвлөлт. Chapter 01: the key figures roll in as giant
-   numerals beside the masterplan window.
+/* /mono — Ерөнхий төлөвлөлт. Chapter 01 of the scroll story: blueprint
+   HUD variant — key figures roll in as giant numerals.
 
    The backdrop is a dedicated 180-frame sequence built from four client
    clips, one per stat point and crossfaded on the quarter boundaries, so
@@ -9,10 +9,11 @@
    courtyard / parking street / finished elevation at dusk). Rebuild with
    `node scripts/build-scroll-frames.mjs plan`.
 
-   The chapter was a dark full-bleed plate; the footage sat behind a night
-   scrim and measured a tonal range of 0.048 — the masterplan was there and
-   could not be seen. It is now a light chapter on the page ground and the
-   footage is shown as footage. */
+   The section runs taller than the default chapter so the last point —
+   the 2027 handover date — gets the same dwell as the other three.
+   It was taller still (340/440vh); trimmed because it is now the ONLY
+   dark chapter and 4.4 screens of black before any light section read as
+   the page being unrelievedly dark. */
 
 import type { SiteContent } from "@/lib/site-content";
 import { MonoScrollStory } from "./MonoScrollStory";
@@ -38,6 +39,7 @@ export function MonoStats({ site }: { site: SiteContent }) {
       frameExt="webp"
       stillAt={0.12}
       heightClass="h-[280vh] md:h-[340vh]"
+      variant="numbers"
     />
   );
 }

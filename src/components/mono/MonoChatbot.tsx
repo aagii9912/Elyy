@@ -119,7 +119,7 @@ export function MonoChatbot({ site }: { site: SiteContent }) {
               type="button"
               onClick={() => send(q)}
               data-cursor-hover
-              className="rounded-full border border-night/20 px-3 py-1.5 text-[12px] font-medium text-night/70 transition-colors duration-300 hover:border-night hover:text-night"
+              className="rounded-full border border-night/20 px-3 py-1.5 text-[12px] font-medium text-night/70 transition-colors hover:border-night hover:text-night"
             >
               {q}
             </button>
@@ -143,7 +143,7 @@ export function MonoChatbot({ site }: { site: SiteContent }) {
             type="submit"
             aria-label="Илгээх"
             data-cursor-hover
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-night text-white transition-transform duration-300 hover:scale-105"
+            className="flex h-9 w-9 items-center justify-center rounded-full bg-night text-white transition-transform hover:scale-105"
           >
             <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.4">
               <path d="M4 12h15M13 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />

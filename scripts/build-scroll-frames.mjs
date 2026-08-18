@@ -15,7 +15,6 @@ import { mkdirSync, rmSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import ffmpeg from "ffmpeg-static";
-import { GRADES, gradeWebp } from "./frame-grade.mjs";
 
 const SRC = "/Users/aagii/Downloads";
 const PUBLIC = fileURLToPath(new URL("../public/", import.meta.url));
@@ -29,9 +28,7 @@ const SEQUENCES = {
     xfade: 0.6,
     frames: 120,
     scale: "1280:720",
-    // Shown in a light inset panel on the page ground: the frames carry the
-    // high-key grade keyed on `out` — see frame-grade.mjs.
-    grade: true,
+    quality: 62,
   },
   /* Ерөнхий төлөвлөлт — one clip per stat point, in POINTS order:
      506 айл · 4 блок / 85% ногоон / 513 зогсоол / 2027 II улирал. */
@@ -41,7 +38,7 @@ const SEQUENCES = {
     xfade: 0.5,
     frames: 180,
     scale: "1152:648",
-    grade: true,
+    quality: 60,
   },
   /* Барилгын бүтэц — single 15s clip: bare monolithic frame → windows →
      finished facade. Drives chapter 03's scrub in that same order. */
@@ -110,9 +107,7 @@ function build(name) {
     "-vsync", "0",
     "-frames:v", String(seq.frames),
     "-c:v", "libwebp",
-    // Graded sequences are re-encoded by the grade pass below, so the
-    // extraction pass is near-lossless — no point compressing twice.
-    "-quality", String(seq.grade ? 92 : seq.quality),
+    "-quality", String(seq.quality),
     "-compression_level", "6",
     "-preset", "picture",
     // Force the image2 muxer — matching on the .webp extension alone would
@@ -125,18 +120,6 @@ function build(name) {
   execFileSync(ffmpeg, args, { stdio: ["ignore", "inherit", "inherit"] });
 
   const files = readdirSync(outDir).filter((f) => f.endsWith(".webp"));
-
-  // Sequences shown in a light inset panel on the page ground get the
-  // high-key grade — the same code path `grade-scroll-frames.mjs` uses on the
-  // committed frames, so a rebuild and a re-grade cannot drift apart.
-  if (seq.grade) {
-    for (const f of files) {
-      const p = join(outDir, f);
-      gradeWebp(p, p, GRADES[seq.out]);
-    }
-    console.log(`[${name}] graded ${files.length} frames (see frame-grade.mjs)`);
-  }
-
   const bytes = files.reduce((n, f) => n + statSync(join(outDir, f)).size, 0);
   console.log(
     `[${name}] wrote ${files.length} frames, ${(bytes / 1024 / 1024).toFixed(1)} MB ` +

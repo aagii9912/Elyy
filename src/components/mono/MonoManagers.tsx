@@ -13,15 +13,6 @@ const digits = (phone: string) => `976${phone.replace(/[^0-9]/g, "")}`;
 export function MonoManagers({ site }: { site: SiteContent }) {
   const { managers } = site;
 
-  /* Цагийн хуваарь нь #location, #contact, footer гурав дээр аль хэдийн
-     гарсан байдаг. Гар утсан дээр #contact (11209) ба #managers (12350)
-     хоёр дараалан ижил "Даваа – Ням · 09:00 – 18:00" мөрийг давтаж байв —
-     дөрөв дэх удаа. Админд өөр хуваарь (жишээ нь борлуулалтын албаны
-     тусдаа цаг) бичвэл мөр хэвээр гарна; ижил байвал л хасагдана. */
-  const sameHours =
-    managers.hours.trim() !== "" && managers.hours.trim() === site.contact.hours.trim();
-  const showHours = !sameHours && Boolean(managers.hoursLabel || managers.hours);
-
   return (
     <section id="managers" className="border-b border-night/10 bg-ground py-20 md:py-28">
       <div className="mx-auto max-w-[1500px] px-5 md:px-10">
@@ -34,7 +25,7 @@ export function MonoManagers({ site }: { site: SiteContent }) {
           </div>
           <div data-reveal="up" data-reveal-delay="0.15" className="max-w-sm">
             <p className="text-sm leading-relaxed text-night/60">{managers.body}</p>
-            {showHours && (
+            {(managers.hoursLabel || managers.hours) && (
               <div className="mt-4 border-t border-night/10 pt-4">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-night/45">
                   {managers.hoursLabel}
@@ -89,7 +80,7 @@ export function MonoManagers({ site }: { site: SiteContent }) {
               <a
                 href={`tel:+${digits(m.phone)}`}
                 data-cursor-hover
-                className="mt-auto pt-6 text-2xl font-extrabold tracking-tight text-night transition-opacity duration-300 hover:opacity-60"
+                className="mt-auto pt-6 text-2xl font-extrabold tracking-tight text-night transition-opacity hover:opacity-60"
               >
                 {m.phone}
               </a>

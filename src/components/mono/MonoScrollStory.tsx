@@ -1,33 +1,44 @@
 "use client";
 
-/* / — the scroll chapter: a pinned section whose frame sequence scrubs with
-   the scroll while the chapter's points crossfade one after another.
+/* /mono — shared full-screen scroll story (three distinct chapters).
+   Pinned viewport; frame-by-frame video placeholder (hero-frame segment)
+   scrubs behind; points activate per scroll quarter with a GSAP
+   crossfade (no hard remounts). Every chapter opens with a centred
+   intro title that gives way to the persistent corner header.
 
-   It used to be a full-bleed dark plate — footage behind a night scrim,
-   white type on top. Measured, that chapter was the worst thing on the
-   page: 0.13 mean luminance, 0.0002 bare-ground share, and a masterplan
-   render whose tonal range collapsed to 0.048 — present and invisible.
+   Variants give each chapter its own visual language:
+     numbers  — blueprint HUD: giant char-rolled figures, drafting
+                chrome (corner brackets, dashed cross, progress rule)
+     letters  — editorial typography: an oversized outlined letter
+                (E·L·Y·S) bleeding off the left edge
+     callouts — engineering annotation: lime ping pinned on the facade,
+                a connector line drawing toward a sharp spec card
 
-   It is now a light chapter on the page ground (design-system §1): the
-   footage sits in a raised window, sized so the ground still owns most of
-   the frame, and the chapter's type is ink beside it rather than white on
-   top of it. The two veils that used to bridge dark→dark and dark→light
-   are gone; there is nothing to bridge.
-
-   The bottom rail is clickable — picking an entry jumps the scroll to that
-   point. Frames start loading only when the section nears the viewport. */
+   The bottom-right rail is clickable — picking an entry jumps the
+   scroll to that point. Frames start loading only when the section
+   nears the viewport. */
 
 import { Fragment, useEffect, useRef, useState } from "react";
 import { useLenis } from "lenis/react";
 import { gsap, type ScrollTrigger as ScrollTriggerType } from "@/lib/gsap";
+import { LogoMark } from "@/components/Logo";
 import { MonoKicker } from "./shared";
 
 export type StoryPoint = {
   n: string;
   heading: string;
-  accent?: string; // rendered right after the heading in lighter ink (e.g. "%")
+  accent?: string; // rendered in lime right after the heading (e.g. "%")
   text: string;
+  /** Optional source link (callouts variant) — e.g. the maker's product page. */
+  link?: string;
+  /** Brand mark under the spec-card text (callouts variant) — a white
+      logo image, or the Elysium diamond when `mark` is set. */
+  logo?: { src?: string; alt: string; mark?: boolean };
+  /** Where the callout pin sits on the footage (viewport %). */
+  anchor?: { x: number; y: number };
 };
+
+export type StoryVariant = "numbers" | "letters" | "callouts";
 
 const framePathIn = (dir: string, ext: string) => (i: number) =>
   `${dir}/frame_${String(i).padStart(3, "0")}.${ext}`;
@@ -39,20 +50,13 @@ const framePathIn = (dir: string, ext: string) => (i: number) =>
 const INTRO_OUT = 0.55;
 const EXIT_IN = 0.22;
 
-/* The intro → (header + points) handoff, in screens of scroll.
-
-   These three used to butt-joint: the intro faded to 0 over exactly INTRO_OUT
-   and the header and the point layers both started at INTRO_OUT. On the scroll
-   frame in between, every mark in the type column was at or near zero — at
-   390×844, scrollY 1294 measured a 272px blank run (intro 0.03, header 0,
-   points 0), and 360×640 the same 270px. All three marks share one place by
-   design, so the handoff is now an overlapping dissolve: the header and the
-   first point are already coming up while the intro title is still going. */
-const INTRO_FADE = 0.44;   // the big intro headline is gone by here
-const LAYERS_IN = 0.4;     // …point 01 is already coming up under it
-const LAYERS_SPAN = 0.18;
-const HEAD_IN = 0.44;      // …and the small persistent headline takes over
-const HEAD_SPAN = 0.22;
+/* facade anchor positions (viewport %) for the callouts variant */
+const CALLOUT_ANCHORS = [
+  { x: 30, y: 40 },
+  { x: 58, y: 30 },
+  { x: 36, y: 64 },
+  { x: 52, y: 55 },
+];
 
 export function MonoScrollStory({
   id,
@@ -66,6 +70,8 @@ export function MonoScrollStory({
   frameExt = "jpg",
   stillAt = 0.6,
   heightClass = "h-[300vh] md:h-[380vh]",
+  exitVeilClass = "bg-ground",
+  variant,
 }: {
   id?: string;
   /** Chapter index label, e.g. "01". */
@@ -82,6 +88,9 @@ export function MonoScrollStory({
   stillAt?: number;
   /** Section height — controls how much scroll each point gets. */
   heightClass?: string;
+  /** Colour the chapter dips to on the way out — match the next section. */
+  exitVeilClass?: string;
+  variant: StoryVariant;
 }) {
   const lenis = useLenis();
   const root = useRef<HTMLElement>(null);
@@ -90,8 +99,6 @@ export function MonoScrollStory({
   const progFill = useRef<HTMLDivElement>(null);
   const st = useRef<ScrollTriggerType | null>(null);
   const prevActive = useRef(0);
-  /** Гар утасны зам: цэг бүрд өөр зураг. Desktop дээр `null` (scrub эзэмшинэ). */
-  const swapStill = useRef<((i: number) => void) | null>(null);
   /** Progress window the points share, minus the intro / exit run-outs. */
   const slot = useRef({ lead: 0, span: 1 });
   const [active, setActive] = useState(0);
@@ -119,26 +126,9 @@ export function MonoScrollStory({
     const isMobile = window.matchMedia("(max-width: 767px)").matches;
     const framePath = framePathIn(frameDir, frameExt);
     const count = frameEnd - frameStart + 1;
-
-    /* Гар утас / reduced-motion дээр frame-scrub байхгүй — зөвхөн ЗУРАГ
-       (design-system §7). Гэвч ЦОРЫН ГАНЦ зураг байх нь бүлгийн дөрвөн
-       тоог нэг л хөдөлгөөнгүй кадр дээр уншуулж байв: "506 / 513 / 2027·II"
-       гурвуулаа ижил төлөвлөгөөн дээр. Дараалал нь дөрвөн клипээс, цэг тус
-       бүрд нэг, дөрөвний нэгийн хил дээр crossfade-тайгаар барьсан тул цэг
-       бүрийн ДУНД цэгээс нэг зураг авбал тоо тус бүр өөрийг нь батлах
-       кадрын дээр гарна. Reduced-motion дээр яг нэг зураг хэвээр. */
-    const stillMode = reduce || isMobile;
-    const stillFrames = reduce
-      ? [Math.floor(count * stillAt)]
-      : points.map((_, i) => Math.floor(count * ((i + 0.5) / points.length)));
-    const framesToLoad = stillMode ? stillFrames.length : count;
+    const framesToLoad = !reduce && !isMobile ? count : 1;
     const images: HTMLImageElement[] = [];
-    /** `f` = одоогийн кадр, `from` = гарч байгаа кадр. Скроллын tween-ий бай. */
-    const state = { f: 0, from: 0, scrub: 0 };
-    /* Дискийн зэрэг ӨӨР объект дээр байх ёстой: `state` нь скроллын tween-ий
-       бай учраас түүн дээр `overwrite`-тай tween тавибал скролл tween нь
-       (progFill ба цэгийн индекс) устана. */
-    const dis = { mix: 1 };
+    const state = { f: 0 };
     let loading = false;
 
     const resize = () => {
@@ -146,48 +136,27 @@ export function MonoScrollStory({
       cvs.width = Math.round(cvs.clientWidth * dpr);
       cvs.height = Math.round(cvs.clientHeight * dpr);
     };
-    const at = (i: number) => images[Math.min(images.length - 1, Math.max(0, Math.round(i)))];
-    const cover = (img: HTMLImageElement, alpha: number) => {
+    const draw = () => {
+      const img = images[Math.min(count - 1, Math.max(0, Math.round(state.f)))];
       if (!img || !img.complete || !img.naturalWidth) return;
       const cw = cvs.width;
       const ch = cvs.height;
       const scale = Math.max(cw / img.naturalWidth, ch / img.naturalHeight);
       const w = img.naturalWidth * scale;
       const h = img.naturalHeight * scale;
-      ctx2d.globalAlpha = alpha;
+      ctx2d.clearRect(0, 0, cw, ch);
       ctx2d.drawImage(img, (cw - w) / 2, (ch - h) / 2, w, h);
-      ctx2d.globalAlpha = 1;
-    };
-    const draw = () => {
-      const cur = at(state.f);
-      if (!cur || !cur.complete || !cur.naturalWidth) return;
-      ctx2d.clearRect(0, 0, cvs.width, cvs.height);
-      if (dis.mix < 1) cover(at(state.from), 1);
-      cover(cur, dis.mix);
     };
     const load = () => {
       if (loading) return;
       loading = true;
       for (let i = 0; i < framesToLoad; i++) {
         const im = new Image();
-        im.src = framePath(frameStart + (stillMode ? stillFrames[i] : i));
+        im.src = framePath(frameStart + (framesToLoad === 1 ? Math.floor(count * stillAt) : i));
         if (i === 0) im.onload = () => { resize(); draw(); };
         images.push(im);
       }
     };
-
-    /* Цэг сольсон үед зургийг цайруулж дүрсэлнэ (гар утасны зам). Layer-ийн
-       crossfade 0.5s тул зураг ч 0.5s — тоо, зураг хамт солигдоно. */
-    swapStill.current = stillMode && stillFrames.length > 1
-      ? (i: number) => {
-          const next = Math.min(stillFrames.length - 1, Math.max(0, i));
-          if (next === Math.round(state.f)) return;
-          state.from = state.f;
-          state.f = next;
-          dis.mix = 0;
-          gsap.to(dis, { mix: 1, duration: 0.5, ease: "power2.out", overwrite: true, onUpdate: draw });
-        }
-      : null;
 
     // defer frame downloads until the section is near the viewport
     const io = new IntersectionObserver(
@@ -217,8 +186,7 @@ export function MonoScrollStory({
 
     const ctx = gsap.context(() => {
       const tween = gsap.to(state, {
-        // гар утсан дээр кадр нь ахицаас биш, цэгээс хамаарна (swapStill)
-        ...(stillMode ? { scrub: 1 } : { f: count - 1 }),
+        f: count - 1,
         ease: "none",
         scrollTrigger: {
           trigger: sec,
@@ -234,18 +202,25 @@ export function MonoScrollStory({
             setActive((prev) => (prev === idx ? prev : idx));
           },
         },
-        onUpdate: stillMode ? undefined : draw,
+        onUpdate: draw,
       });
       st.current = tween.scrollTrigger ?? null;
 
-      // chapter intro: the title owns the type column, then hands off to the
-      // persistent header and lets the points take the column.
+      // chapter intro: big centred title → hands off to the corner header
       const introEl = sec.querySelector("[data-intro]");
       const headEl = sec.querySelector("[data-head]");
       const layersEl = sec.querySelector("[data-layers]");
       const railEl = sec.querySelector("[data-rail]");
+      const chromeEl = sec.querySelector("[data-chrome]");
+      /* Two veils: the chapter is entered out of the dark hero, but it
+         exits into the light page ground — one shared black veil would
+         flash to black right before a near-white section. */
+      const veilInEl = sec.querySelector("[data-veil-in]");
+      const veilOutEl = sec.querySelector("[data-veil-out]");
       if (reduce) {
         if (introEl) gsap.set(introEl, { autoAlpha: 0 });
+        if (veilInEl) gsap.set(veilInEl, { autoAlpha: 0 });
+        if (veilOutEl) gsap.set(veilOutEl, { autoAlpha: 0 });
       } else {
         if (introEl) {
           gsap.fromTo(
@@ -253,18 +228,13 @@ export function MonoScrollStory({
             { autoAlpha: 1, yPercent: 0, scale: 1 },
             {
               autoAlpha: 0,
-              /* Дээш өргөх нь -16% байсан: 111px-ийн гарчгийг ~18px дээш
-                 зөөж, доор нь цонх хүртэл 104px хоосон суурь онгойлгодог
-                 байв (M11-ийн хамгийн урт зурвас интро дамжуулалтын үед).
-                 -8% дээр гарчиг мөн л ухарч байгаа мэт уншигдана, харин
-                 доод зай нь торны 20px зайнаас хэтрэхгүй. */
-              yPercent: -5,
-              scale: 0.97,
+              yPercent: -16,
+              scale: 0.94,
               ease: "none",
               scrollTrigger: {
                 trigger: sec,
                 start: "top top",
-                end: () => "+=" + window.innerHeight * INTRO_FADE,
+                end: () => "+=" + window.innerHeight * 0.55,
                 scrub: true,
                 invalidateOnRefresh: true,
               },
@@ -274,24 +244,22 @@ export function MonoScrollStory({
         if (headEl) {
           gsap.fromTo(
             headEl,
-            /* Хөдөлгөөнгүй, зөвхөн бүдгэрэлт: гарчиг нь интрогийн гарчигтай
-               ЯГ ижил байрлалд сууж байгаа тул 8-16px зөрөх нь зөвхөн үсгийг
-               "хоёр давхар" харагдуулна. Дээрх kicker нь тогтмол хэвээр. */
-            { autoAlpha: 0 },
+            { autoAlpha: 0, y: 16 },
             {
               autoAlpha: 1,
+              y: 0,
               ease: "none",
               scrollTrigger: {
                 trigger: sec,
-                start: () => "top+=" + window.innerHeight * HEAD_IN + " top",
-                end: () => "+=" + window.innerHeight * HEAD_SPAN,
+                start: () => "top+=" + window.innerHeight * INTRO_OUT + " top",
+                end: () => "+=" + window.innerHeight * 0.25,
                 scrub: true,
                 invalidateOnRefresh: true,
               },
             }
           );
         }
-        const enterEls = [layersEl, railEl].filter(Boolean) as Element[];
+        const enterEls = [layersEl, railEl, chromeEl].filter(Boolean) as Element[];
         if (enterEls.length) {
           gsap.fromTo(
             enterEls,
@@ -301,8 +269,8 @@ export function MonoScrollStory({
               ease: "none",
               scrollTrigger: {
                 trigger: sec,
-                start: () => "top+=" + window.innerHeight * LAYERS_IN + " top",
-                end: () => "+=" + window.innerHeight * LAYERS_SPAN,
+                start: () => "top+=" + window.innerHeight * INTRO_OUT + " top",
+                end: () => "+=" + window.innerHeight * 0.2,
                 scrub: true,
                 invalidateOnRefresh: true,
               },
@@ -310,16 +278,66 @@ export function MonoScrollStory({
           );
         }
 
-        /* Бүлгийн гарц — ХӨНДӨГДӨХГҮЙ, зориудаар.
-           Урьд нь `layers` / `rail` / `head` нь `bottom 122%`→`106%` дээр
-           бүдгэрч, төлөвлөгөөний цонх ЗУУРАЛТААС САЛААГҮЙ байхад л текст
-           алга болдог байв. 390×844 дээр scrollY 2312-аас хойш kicker,
-           гарчиг, тоо, тайлбар, 01-04 цэгүүд бүгд байхгүй, зураг л дэлгэц
-           дээр — хүрээний дээд талд 272px-ийн хоосон зурвас (хуудсаар
-           хамгийн урт). Одоо гарц гэж байхгүй: `sticky` салах мөчид
-           текстийн багана ба цонх ХАМТ дээшээ гулсаж явна, тэгээд дараагийн
-           хэсэг доороос ирнэ. Хоосон зурвас нь торны дотоод зайнаас (28px /
-           24px) хэтрэхгүй. */
+        // chapter exit: content clears first, then the veil dips to black,
+        // so the handoff to the next chapter is a seamless dark bridge.
+        // The exit has to stay inside the last ~22% of the pin — start it
+        // any earlier and the final point is wiped off screen almost as
+        // soon as it becomes active.
+        const exitEls = [layersEl, railEl, chromeEl, headEl].filter(Boolean) as Element[];
+        if (exitEls.length) {
+          gsap.fromTo(
+            exitEls,
+            { autoAlpha: 1, y: 0 },
+            {
+              autoAlpha: 0,
+              y: -24,
+              ease: "none",
+              immediateRender: false,
+              scrollTrigger: {
+                trigger: sec,
+                start: "bottom 122%",
+                end: "bottom 106%",
+                scrub: true,
+                invalidateOnRefresh: true,
+              },
+            }
+          );
+        }
+        if (veilInEl) {
+          gsap.fromTo(
+            veilInEl,
+            { autoAlpha: 1 },
+            {
+              autoAlpha: 0,
+              ease: "none",
+              scrollTrigger: {
+                trigger: sec,
+                start: "top top",
+                end: () => "+=" + window.innerHeight * 0.45,
+                scrub: true,
+                invalidateOnRefresh: true,
+              },
+            }
+          );
+        }
+        if (veilOutEl) {
+          gsap.fromTo(
+            veilOutEl,
+            { autoAlpha: 0 },
+            {
+              autoAlpha: 1,
+              ease: "none",
+              immediateRender: false,
+              scrollTrigger: {
+                trigger: sec,
+                start: "bottom 116%",
+                end: "bottom 103%",
+                scrub: true,
+                invalidateOnRefresh: true,
+              },
+            }
+          );
+        }
       }
     }, sec);
 
@@ -327,7 +345,6 @@ export function MonoScrollStory({
       io.disconnect();
       window.removeEventListener("resize", onResize);
       st.current = null;
-      swapStill.current = null;
       ctx.revert();
     };
   }, [frameStart, frameEnd, frameDir, frameExt, stillAt, points.length]);
@@ -342,9 +359,6 @@ export function MonoScrollStory({
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const prev = prevActive.current;
     prevActive.current = active;
-
-    // гар утсан дээр цэгийн зураг нь тоотой ХАМТ солигдоно
-    swapStill.current?.(active);
 
     layers.forEach((l, i) => {
       if (i !== active && i !== prev) gsap.set(l, { autoAlpha: 0 });
@@ -373,7 +387,7 @@ export function MonoScrollStory({
         { autoAlpha: 1, y: 0, duration: 0.7, ease: "power3.out", stagger: 0.06, delay: 0.08, overwrite: true }
       );
     }
-    // char roll
+    // char roll (numbers variant)
     const chars = incoming.querySelectorAll("[data-ch]");
     if (chars.length) {
       gsap.fromTo(
@@ -382,154 +396,243 @@ export function MonoScrollStory({
         { yPercent: 0, duration: 0.65, ease: "power4.out", stagger: 0.05, overwrite: true }
       );
     }
+    // connector line draw (callouts variant)
+    const line = incoming.querySelector<SVGPathElement>("[data-line]");
+    if (line) {
+      const len = line.getTotalLength();
+      gsap.fromTo(
+        line,
+        { strokeDasharray: len, strokeDashoffset: len },
+        { strokeDashoffset: 0, duration: 0.6, ease: "power2.out", delay: 0.15, overwrite: true }
+      );
+    }
   }, [active]);
 
+  const railLabel = (p: StoryPoint) =>
+    variant === "letters" ? p.heading.charAt(0).toUpperCase() : p.n;
+
   return (
-    <section id={id} ref={root} className={`relative border-b border-night/10 bg-ground ${heightClass}`}>
-      {/* pb-20 гар утсанд: агуулга дэлгэцийн бүтэн өндрийг эзэлдэг болсон
-          тул доод захын цэгүүдийн зурвас чатын хөвөгч товчтой (bottom-5 +
-          52px) давхцаж байв. 80px нь түүнийг цэвэр гаргана. */}
-      <div className="sticky top-0 flex h-[100svh] min-h-[560px] w-full items-center overflow-hidden pb-20 pt-[calc(var(--header-h)+1vh)] md:pb-[5vh] md:pt-[calc(var(--header-h)+3vh)]">
-        {/* The window is sized off the viewport rather than off its own width:
-            at 1440×900 an aspect-ratio window left ~180px of bare ground under
-            the chapter and ~230px over it — more empty ground than any section
-            on the page. Both columns are now the same height as the window, so
-            the intro title starts level with its top edge and the point layers
-            finish level with its bottom. */}
-        {/* Гар утсан дээр багана босоогоор ТӨВЛӨРДӨГ байсан: 390×844 дээр
-            kicker-ийн дээр 197px хоосон суурь үлдэж, ижил хэмжээний зай доор
-            ч байв (M11-ийн хамгийн урт хоосон зурвас бүх хуудсаар).
-            Одоо тор нь бэхлэгдсэн дэлгэцийг БҮТЭН эзэлж, илүү өндрийг
-            төлөвлөгөөний цонх авна — хоосон зай биш. `md:` дээр бүх зүйл
-            өмнөх шигээ. */}
-        <div className="mx-auto grid h-full w-full max-w-[1500px] grid-rows-[auto_minmax(0,1fr)] items-stretch gap-5 px-5 md:h-auto md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] md:grid-rows-none md:gap-[4vw] md:px-10">
-          {/* type column — intro title, then the persistent header + points */}
-          <div className="relative min-h-[184px] md:min-h-[min(58vh,570px)]">
-            {/* ONE kicker for the whole chapter, and it never fades.
-                The intro block and the persistent header each used to carry
-                their own copy of it. They sit at the same place by design, so
-                during the handoff the reader saw two kickers a few px apart
-                and two headlines of different sizes ghosting through each
-                other. Now the mark is rendered once and only the HEADLINE
-                changes size — and because the kicker is always ink, the top of
-                the type column is never bare, which is what let the headline
-                swap stop overlapping at all (M11: the column no longer has a
-                scroll frame with nothing in it). */}
-            <div className="absolute inset-x-0 top-0">
-              <MonoKicker>
-                {chapter} — {kicker}
-              </MonoKicker>
+    <section id={id} ref={root} className={`relative bg-night ${heightClass}`}>
+      <div className="sticky top-0 flex h-[100svh] min-h-[560px] w-full overflow-hidden">
+        <canvas ref={canvas} className="absolute inset-0 z-0 h-full w-full" />
+        {/* Scrim carries just enough weight for white type over the footage —
+            it used to sit at 75/40/85 and made the whole chapter read black. */}
+        <div className="pointer-events-none absolute inset-0 z-[5] bg-gradient-to-b from-night/55 via-night/15 to-night/70" />
+        {/* letters chapter reads on the left — extra side scrim for contrast */}
+        {variant === "letters" && (
+          <div className="pointer-events-none absolute inset-0 z-[5] bg-gradient-to-r from-night/60 via-night/20 to-transparent" />
+        )}
 
-              {/* both headlines share one slot: same top, same left edge, one
-                  visible at a time */}
-              <div className="relative mt-4">
-                {/* Гар утсан дээрх доод хэмжээ 2rem → 2.5rem. 2rem дээр
-                    бүлгийн гарчиг 390px-д ЯГ нэг мөрд шахагдаж, доор нь
-                    120px хоосон суурь үлдээдэг байв; 2.5rem дээр [text-wrap:
-                    balance]-тай хоёр мөр болж, гарчгийн карт шиг уншигдана.
-                    5.4vw ба 4.2rem-ийн хязгаар хөндөгдөөгүй — ≥741px дээр
-                    хэмжээ өмнөхтэй яг адил. */}
-                <h2
-                  data-intro
-                  className="max-w-xl text-[clamp(2.5rem,5.4vw,4.2rem)] font-extrabold leading-[1.04] tracking-tight text-night [text-wrap:balance]"
-                >
-                  {title}
-                </h2>
-                <h2
-                  data-head
-                  className="absolute inset-x-0 top-0 text-[clamp(1.3rem,2.2vw,1.9rem)] font-extrabold leading-tight tracking-tight text-night"
-                >
-                  {title}
-                </h2>
+        {/* entry veil — dark bridge in from the hero */}
+        <div data-veil-in aria-hidden className="pointer-events-none absolute inset-0 z-[7] bg-night" />
+        {/* exit veil — hands off to the light page ground */}
+        <div data-veil-out aria-hidden className={`pointer-events-none absolute inset-0 z-[7] opacity-0 ${exitVeilClass}`} />
+
+        {/* blueprint HUD chrome — numbers chapter only */}
+        {variant === "numbers" && (
+          <div data-chrome aria-hidden className="pointer-events-none absolute inset-0 z-[6]">
+            <span className="absolute left-5 top-20 h-6 w-6 border-l border-t border-white/25 md:left-8" />
+            <span className="absolute right-5 top-20 h-6 w-6 border-r border-t border-white/25 md:right-8" />
+            <span className="absolute bottom-6 left-5 h-6 w-6 border-b border-l border-white/25 md:left-8" />
+            <span className="absolute bottom-6 right-5 h-6 w-6 border-b border-r border-white/25 md:right-8" />
+            <span className="absolute left-1/2 top-0 h-full border-l border-dashed border-white/[0.07]" />
+            <span className="absolute left-0 top-1/2 w-full border-t border-dashed border-white/[0.07]" />
+            <div className="absolute bottom-[7vh] left-5 hidden w-[24%] md:left-10 md:block">
+              <div className="h-px w-full bg-white/15">
+                <div ref={progFill} className="h-px w-full origin-left scale-x-0 bg-lime" />
               </div>
-            </div>
-
-            <div ref={layersWrap} data-layers className="pointer-events-none absolute inset-x-0 bottom-0">
-              {points.map((p, i) => (
-                <div
-                  key={p.n}
-                  data-layer
-                  className={`absolute inset-x-0 bottom-0 ${i === 0 ? "" : "opacity-0"}`}
-                >
-                  <h3
-                    className={`flex items-end font-extrabold leading-none tracking-tight text-night ${
-                      p.heading.length > 4
-                        ? "text-[clamp(2.6rem,7.4vw,5.6rem)]"
-                        : "text-[clamp(4rem,11vw,8.5rem)]"
-                    }`}
-                  >
-                    {p.heading.split("").map((c, ci) => (
-                      <span key={ci} className="inline-block overflow-hidden">
-                        <span data-ch className="inline-block">
-                          {c === " " ? " " : c}
-                        </span>
-                      </span>
-                    ))}
-                    {p.accent && (
-                      <span data-sw className="mb-[0.06em] text-[0.34em] font-bold text-night/35">
-                        {p.accent}
-                      </span>
-                    )}
-                  </h3>
-                  <p
-                    data-sw
-                    className="mt-5 max-w-sm text-[13px] font-semibold uppercase leading-relaxed tracking-[0.22em] text-night/55"
-                  >
-                    {p.text}
-                  </p>
-                </div>
-              ))}
+              <p className="mt-2 text-[10px] font-semibold uppercase tracking-[0.3em] text-white/40">
+                Мастер төлөвлөгөө · явц
+              </p>
             </div>
           </div>
+        )}
 
-          {/* the window: the footage, finally legible, on a raised surface.
-              Гар утсан дээр өндрөө торны сүүлийн эгнээнээс авна (flex-1) —
-              ингэснээр хоосон зай гарахгүй, төлөвлөгөө нь том харагдана.
-              `md:` дээр өмнөх шигээ 58vh-ийн тогтмол цонх. */}
-          <div className="flex min-h-0 flex-col">
-            <figure className="relative m-0 min-h-0 w-full flex-1 overflow-hidden rounded-2xl border border-night/10 bg-surface shadow-[0_40px_120px_-40px_rgba(21,23,23,0.7)] md:h-[min(58vh,570px)] md:flex-none">
-              <canvas ref={canvas} className="absolute inset-0 h-full w-full" />
-            </figure>
+        {/* chapter intro — centred, scrubs away over the first half-screen */}
+        <div
+          data-intro
+          aria-hidden
+          className="pointer-events-none absolute inset-0 z-[9] flex flex-col items-center justify-center px-6 text-center"
+        >
+          <p className="text-[12px] font-bold uppercase tracking-[0.42em] text-lime">{chapter}</p>
+          <p className="mt-4 text-[11px] font-semibold uppercase tracking-[0.3em] text-white/55">{kicker}</p>
+          <h2 className="mt-4 max-w-3xl text-[clamp(2rem,5.4vw,4.2rem)] font-extrabold leading-[1.04] tracking-tight text-white [text-wrap:balance]">
+            {title}
+          </h2>
+        </div>
 
-            {/* progress rule + clickable point rail */}
-            <div className="mt-6 flex items-center gap-6">
-              <div className="h-px flex-1 bg-night/15">
-                <div ref={progFill} className="h-px w-full origin-left scale-x-0 bg-moss" />
-              </div>
-              {/* Цэгүүдийн зурвас — тоо нь 11px хэвээр, харин ХҮРЭХ хайрцаг
-                  хуруугаар оролддог өргөнд 44×44 (M8-ын платформын доод
-                  хязгаар). Урьд нь 13×17px байсан: rail нь хэмжигдэх агшинд
-                  бүдэг байдаг тул анхны шалгалтад тороогүй. `lg:`-ээс дээш
-                  (хулгана) хайрцаг өмнөх хэмжээндээ буцаж, ахиц хэмжигчийн
-                  урт desktop дээр өмнөхтэй яг адил хэвээр байна. */}
-              <div data-rail className="flex items-center gap-0.5 lg:gap-3">
-                {points.map((p, i) => (
-                  <Fragment key={p.n}>
-                    {i > 0 && (
-                      <span
-                        aria-hidden
-                        className={`h-px w-3 transition-colors duration-500 lg:w-7 ${
-                          i <= active ? "bg-night/40" : "bg-night/15"
-                        }`}
-                      />
-                    )}
-                    <button
-                      type="button"
-                      onClick={() => goTo(i)}
-                      data-cursor-hover
-                      aria-label={`${p.n} — ${p.heading}`}
-                      aria-current={active === i}
-                      className={`inline-flex min-h-11 min-w-11 items-center justify-center text-[11px] font-bold tracking-[0.08em] transition-all duration-300 lg:min-h-0 lg:min-w-0 ${
-                        active === i ? "scale-125 text-night" : "text-night/40 hover:text-night/80"
+        {/* persistent corner header — fades in as the intro leaves */}
+        <div data-head className="absolute left-5 top-24 z-10 md:left-10 md:top-28">
+          <MonoKicker tone="dark">
+            {chapter} — {kicker}
+          </MonoKicker>
+          <h2 className="mt-3 text-[clamp(1.3rem,2.2vw,1.9rem)] font-extrabold leading-tight tracking-tight text-white">
+            {title}
+          </h2>
+        </div>
+
+        {/* point layers — GSAP crossfade between quarters */}
+        <div ref={layersWrap} data-layers className="pointer-events-none absolute inset-0 z-[8]">
+          {points.map((p, i) => (
+            <div key={p.n} data-layer className={`absolute inset-0 ${i === 0 ? "" : "opacity-0"}`}>
+              {variant === "numbers" && (
+                <div className="flex h-full items-center justify-center px-6">
+                  <div className="text-center">
+                    <h3
+                      className={`flex items-end justify-center font-extrabold leading-none tracking-tight text-white drop-shadow-[0_4px_36px_rgba(0,0,0,0.55)] ${
+                        p.heading.length > 4
+                          ? "text-[clamp(2.8rem,9vw,7rem)]"
+                          : "text-[clamp(4.6rem,15vw,11rem)]"
                       }`}
                     >
-                      {p.n}
-                    </button>
-                  </Fragment>
-                ))}
-              </div>
+                      {p.heading.split("").map((c, ci) => (
+                        <span key={ci} className="inline-block overflow-hidden">
+                          <span data-ch className="inline-block">
+                            {c === " " ? " " : c}
+                          </span>
+                        </span>
+                      ))}
+                      {p.accent && (
+                        <span data-sw className="mb-[0.9em] text-[0.28em] font-bold text-lime">
+                          {p.accent}
+                        </span>
+                      )}
+                    </h3>
+                    <p
+                      data-sw
+                      className="mx-auto mt-6 max-w-md text-[12px] font-semibold uppercase tracking-[0.26em] text-white/80 drop-shadow-[0_1px_12px_rgba(0,0,0,0.6)] md:text-[13px]"
+                    >
+                      {p.text}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {variant === "letters" && (
+                <div className="relative h-full">
+                  <span
+                    data-sw
+                    aria-hidden
+                    className="absolute -left-[2vw] top-1/2 -translate-y-1/2 select-none font-extrabold uppercase leading-none [font-size:clamp(13rem,38vw,30rem)]"
+                    style={{ WebkitTextStroke: "2.5px rgba(255,255,255,0.5)", color: "rgba(21,23,23,0.35)" }}
+                  >
+                    {p.heading.charAt(0)}
+                  </span>
+                  <div className="absolute bottom-[13vh] left-5 right-5 md:bottom-auto md:left-[34vw] md:right-auto md:top-1/2 md:w-[min(420px,34vw)] md:-translate-y-1/2">
+                    <p data-sw className="text-[11px] font-bold uppercase tracking-[0.32em] text-lime">
+                      {p.n} / {String(points.length).padStart(2, "0")}
+                    </p>
+                    <h3 data-sw className="mt-3 text-[clamp(1.9rem,3.4vw,2.9rem)] font-extrabold leading-[1.05] tracking-tight text-white drop-shadow-[0_2px_24px_rgba(0,0,0,0.55)]">
+                      {p.heading}
+                    </h3>
+                    <p data-sw className="mt-4 text-[15px] leading-relaxed text-white/85 drop-shadow-[0_1px_12px_rgba(0,0,0,0.6)]">
+                      {p.text}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {variant === "callouts" && (() => {
+                const anchor = p.anchor ?? CALLOUT_ANCHORS[i % CALLOUT_ANCHORS.length];
+                return (
+                <div className="relative h-full">
+                  <span
+                    data-sw
+                    aria-hidden
+                    className="green-ping absolute hidden h-3 w-3 rounded-full bg-lime text-lime md:block"
+                    style={{ left: `${anchor.x}%`, top: `${anchor.y}%` }}
+                  />
+                  <svg
+                    aria-hidden
+                    className="absolute inset-0 hidden h-full w-full md:block"
+                    viewBox="0 0 100 100"
+                    preserveAspectRatio="none"
+                  >
+                    <path
+                      data-line
+                      d={`M ${anchor.x} ${anchor.y} L ${anchor.x + 6} ${anchor.y} L 67 66`}
+                      fill="none"
+                      stroke="rgba(180,214,86,0.75)"
+                      strokeWidth="1.25"
+                      vectorEffect="non-scaling-stroke"
+                    />
+                  </svg>
+                  <div className="absolute bottom-[10vh] left-4 right-4 border border-white/25 bg-night/60 p-6 backdrop-blur-xl md:bottom-[13vh] md:left-auto md:right-[6%] md:w-[340px] md:p-7">
+                    <span aria-hidden className="absolute left-0 top-0 h-3 w-3 border-l-2 border-t-2 border-lime" />
+                    <span aria-hidden className="absolute bottom-0 right-0 h-3 w-3 border-b-2 border-r-2 border-lime" />
+                    <p data-sw className="text-[10px] font-bold uppercase tracking-[0.32em] text-lime">
+                      Spec / {p.n}
+                    </p>
+                    <h3 data-sw className="mt-3 text-xl font-extrabold leading-snug tracking-tight text-white md:text-2xl">
+                      {p.heading}
+                    </h3>
+                    <p data-sw className="mt-3 text-[14px] leading-relaxed text-white/75">
+                      {p.text}
+                    </p>
+                    {p.link && (
+                      /* the layer stack is pointer-events-none — opt this back in */
+                      <a
+                        data-sw
+                        data-cursor-hover
+                        href={p.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="pointer-events-auto mt-4 inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-lime transition-opacity hover:opacity-70"
+                      >
+                        Дэлгэрэнгүй <span aria-hidden>↗</span>
+                      </a>
+                    )}
+                    {p.logo && (
+                      <div data-sw className="mt-5 flex items-center border-t border-white/15 pt-4">
+                        {p.logo.mark ? (
+                          <LogoMark className="h-6 w-auto text-white" />
+                        ) : (
+                          /* eslint-disable-next-line @next/next/no-img-element */
+                          <img src={p.logo.src} alt={p.logo.alt} className="h-6 w-auto" />
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+                );
+              })()}
             </div>
-          </div>
+          ))}
+        </div>
+
+        {/* clickable point rail — jump to any point (desktop) */}
+        <div data-rail className="absolute bottom-[7vh] right-10 z-10 hidden items-center gap-3 md:flex">
+          {points.map((p, i) => {
+            const lit = variant === "letters" ? i <= active : i === active;
+            return (
+              <Fragment key={p.n}>
+                {i > 0 && (
+                  <span
+                    aria-hidden
+                    className={`h-px w-7 transition-colors duration-500 ${
+                      i <= active ? "bg-lime/70" : "bg-white/20"
+                    }`}
+                  />
+                )}
+                <button
+                  type="button"
+                  onClick={() => goTo(i)}
+                  data-cursor-hover
+                  aria-label={`${p.n} — ${p.heading}`}
+                  aria-current={active === i}
+                  className={`font-bold tracking-[0.08em] transition-all duration-300 ${
+                    variant === "letters" ? "text-sm" : "text-[11px]"
+                  } ${
+                    lit
+                      ? `text-lime ${active === i ? "scale-125" : ""}`
+                      : "text-white/40 hover:text-white/80"
+                  }`}
+                >
+                  {railLabel(p)}
+                </button>
+              </Fragment>
+            );
+          })}
         </div>
       </div>
     </section>

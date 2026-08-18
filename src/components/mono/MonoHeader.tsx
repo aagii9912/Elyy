@@ -1,9 +1,7 @@
 "use client";
 
-/* /mono — sticky header. Ink on the page ground at the top of the hero →
-   frosted white once the page is scrolled. (It used to invert to white
-   type over a dark hero; the hero is now the same light ground as the
-   rest of the page, so there is nothing to invert against.) Hides on
+/* /mono — sticky header. Transparent (white text) over the dark hero →
+   frosted white with black text once the light page begins. Hides on
    scroll-down, returns on scroll-up. The mobile menu is a SIBLING of
    <header> (not a child) because the header's transform/backdrop-filter
    would otherwise become the containing block for its fixed panel.
@@ -35,8 +33,7 @@ export function MonoHeader({
   const [hidden, setHidden] = useState(false);
 
   const isHome = variant === "home";
-  /* Толгой хэсэг гүйлгэсний дараа л мөстсөн цагаан болно; хуудасны эхэнд
-     цайвар суурин дээр тунгалаг байна. Текст үргэлж бараан (`night`). */
+  /* Дотоод хуудсанд толгой хэсэг үргэлж цагаан (ард нь dark hero байхгүй). */
   const solid = scrolled || !isHome;
 
   useEffect(() => {
@@ -103,7 +100,7 @@ export function MonoHeader({
             ? "bg-white text-night"
             : solid
               ? "bg-white/90 text-night shadow-[0_1px_0_rgba(21,23,23,0.08)] backdrop-blur-xl"
-              : "bg-transparent text-night"
+              : "bg-transparent text-white"
         }`}
       >
         <div
@@ -115,7 +112,6 @@ export function MonoHeader({
             href={isHome ? "#top" : "/"}
             onClick={(e) => go(e, "#top")}
             aria-label="Elysium"
-            data-cursor-hover
             className="flex min-h-11 items-center gap-2.5"
           >
             <LogoMark className="h-[18px] w-auto" />
@@ -129,7 +125,9 @@ export function MonoHeader({
                 href={resolve(item.href)}
                 onClick={(e) => go(e, item.href)}
                 data-cursor-hover
-                className="text-[11px] font-medium uppercase tracking-[0.08em] text-night/60 transition-colors duration-300 hover:text-night"
+                className={`text-[11px] font-medium uppercase tracking-[0.08em] transition-colors ${
+                  solid ? "text-night/60 hover:text-night" : "text-white/70 hover:text-white"
+                }`}
               >
                 {item.label}
               </Link>
@@ -140,7 +138,11 @@ export function MonoHeader({
             <BrochureButton
               site={site}
               source="elysium/mono#header"
-              className="hidden items-center gap-2 rounded-full border border-night/25 px-5 py-2 text-[11px] font-medium uppercase tracking-[0.08em] text-night transition-colors duration-300 hover:bg-night hover:text-white sm:inline-flex"
+              className={`hidden items-center gap-2 rounded-full border px-5 py-2 text-[11px] font-medium uppercase tracking-[0.08em] transition-colors duration-300 sm:inline-flex ${
+                solid
+                  ? "border-night/25 text-night hover:bg-night hover:text-white"
+                  : "border-white/40 text-white hover:bg-white/10"
+              }`}
             >
               {nav.brochureLabel} ↓
             </BrochureButton>
@@ -148,7 +150,9 @@ export function MonoHeader({
               href={resolve("#contact")}
               onClick={(e) => go(e, "#contact")}
               data-cursor-hover
-              className="hidden items-center gap-2 rounded-full bg-night px-5 py-2 text-[11px] font-bold uppercase tracking-[0.08em] text-white transition-transform duration-300 hover:-translate-y-0.5 md:inline-flex"
+              className={`hidden items-center gap-2 rounded-full px-5 py-2 text-[11px] font-bold uppercase tracking-[0.08em] transition-transform duration-300 hover:-translate-y-0.5 md:inline-flex ${
+                solid ? "bg-night text-white" : "bg-white text-night"
+              }`}
             >
               {nav.ctaLabel}
             </Link>
@@ -157,11 +161,7 @@ export function MonoHeader({
               aria-label={nav.menuAria}
               aria-expanded={open}
               onClick={() => setOpen((v) => !v)}
-              /* Хүрэх талбай 44×44 (iOS/Android-ын доод хязгаар); зураас
-                 нь өмнөх шигээ 24px хэвээр — товч томорсон, тэмдэг нь биш.
-                 -mr-0.5 нь өргөссөн 2px-ыг нөхөж, тэмдгийн оптик байрлал
-                 өмнөхтэй яг адил хэвээр. */
-              className={`relative z-50 -mr-0.5 flex h-11 w-11 flex-col items-center justify-center gap-[5px] lg:hidden ${open ? "text-night" : ""}`}
+              className={`relative z-50 flex h-10 w-10 flex-col items-center justify-center gap-[5px] lg:hidden ${open ? "text-night" : ""}`}
             >
               <span className={`h-0.5 w-6 bg-current transition-transform duration-300 ${open ? "translate-y-[3px] rotate-45" : ""}`} />
               <span className={`h-0.5 w-6 bg-current transition-transform duration-300 ${open ? "-translate-y-[3px] -rotate-45" : ""}`} />

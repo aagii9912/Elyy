@@ -63,7 +63,7 @@ export function MonoContact({ site }: { site: SiteContent }) {
                   <a
                     href={`tel:+976${contact.phone.replace(/[^0-9]/g, "")}`}
                     data-cursor-hover
-                    className="inline-flex min-h-11 items-center text-2xl font-extrabold text-night transition-opacity duration-300 hover:opacity-70"
+                    className="inline-flex min-h-11 items-center text-2xl font-extrabold text-night transition-opacity hover:opacity-70"
                   >
                     {contact.phone}
                   </a>
@@ -83,7 +83,7 @@ export function MonoContact({ site }: { site: SiteContent }) {
                   <a
                     href={`mailto:${brand.email}`}
                     data-cursor-hover
-                    className="inline-flex min-h-11 items-center text-lg font-semibold underline-offset-4 transition-opacity duration-300 hover:underline hover:opacity-70"
+                    className="inline-flex min-h-11 items-center text-lg font-semibold underline-offset-4 transition-opacity hover:underline hover:opacity-70"
                   >
                     {brand.email}
                   </a>
@@ -119,14 +119,14 @@ export function MonoContact({ site }: { site: SiteContent }) {
                   name="name"
                   required
                   placeholder={f.name}
-                  className="border-b border-night/20 bg-transparent pb-3 pt-2 text-lg font-semibold text-night placeholder:text-night/35 focus:border-night focus:outline-none"
+                  className="border-b border-night/20 bg-transparent pb-3 text-lg font-semibold text-night placeholder:text-night/35 focus:border-night focus:outline-none"
                 />
                 <input
                   type="tel"
                   name="phone"
                   required
                   placeholder={f.phone}
-                  className="border-b border-night/20 bg-transparent pb-3 pt-2 text-lg font-semibold text-night placeholder:text-night/35 focus:border-night focus:outline-none"
+                  className="border-b border-night/20 bg-transparent pb-3 text-lg font-semibold text-night placeholder:text-night/35 focus:border-night focus:outline-none"
                 />
                 <label className="block">
                   <span className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.18em] text-night/45">
@@ -135,7 +135,7 @@ export function MonoContact({ site }: { site: SiteContent }) {
                   <input
                     type="date"
                     name="date"
-                    className="w-full border-b border-night/20 bg-transparent pb-3 pt-2 text-lg font-semibold text-night focus:border-night focus:outline-none"
+                    className="w-full border-b border-night/20 bg-transparent pb-3 text-lg font-semibold text-night focus:border-night focus:outline-none"
                   />
                 </label>
                 {error && (

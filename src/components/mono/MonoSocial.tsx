@@ -85,13 +85,13 @@ export function SocialRow({
   );
 }
 
-/** Нэр + icon бүхий босоо жагсаалт — хөл хэсэгт (цайвар суурь). */
+/** Нэр + icon бүхий босоо жагсаалт — хөл хэсэгт. */
 export function SocialList({ items }: { items: SocialLink[] }) {
   const live = liveSocials(items);
   if (!live.length) return null;
 
   return (
-    <ul className="mt-4 space-y-2.5 text-sm text-night/70">
+    <ul className="mt-4 space-y-2.5 text-sm text-white/80">
       {live.map((item, i) => (
         <li key={`${item.href}-${i}`}>
           <a
@@ -99,11 +99,11 @@ export function SocialList({ items }: { items: SocialLink[] }) {
             target="_blank"
             rel="noopener noreferrer"
             data-cursor-hover
-            className="inline-flex items-center gap-2.5 py-1 transition-colors duration-300 hover:text-night"
+            className="inline-flex items-center gap-2.5 py-1 transition-colors hover:text-white"
           >
             <SocialIcon item={item} />
             {item.label}
-            <span aria-hidden className="text-night/50">↗</span>
+            <span aria-hidden className="text-white/35">↗</span>
           </a>
         </li>
       ))}
