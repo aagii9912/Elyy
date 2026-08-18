@@ -140,7 +140,7 @@ export function BrochureButton({
                   name="name"
                   required
                   autoComplete="name"
-                  className="w-full border-b border-night/20 bg-transparent pb-3 text-lg font-semibold text-night placeholder:text-night/35 focus:border-night focus:outline-none"
+                  className="w-full border-b border-night/20 bg-transparent pb-3 pt-2 text-lg font-semibold text-night placeholder:text-night/35 focus:border-night focus:outline-none"
                 />
               </label>
 
@@ -154,7 +154,7 @@ export function BrochureButton({
                   required
                   inputMode="tel"
                   autoComplete="tel"
-                  className="w-full border-b border-night/20 bg-transparent pb-3 text-lg font-semibold text-night placeholder:text-night/35 focus:border-night focus:outline-none"
+                  className="w-full border-b border-night/20 bg-transparent pb-3 pt-2 text-lg font-semibold text-night placeholder:text-night/35 focus:border-night focus:outline-none"
                 />
               </label>
 
@@ -168,7 +168,7 @@ export function BrochureButton({
                   required
                   inputMode="email"
                   autoComplete="email"
-                  className="w-full border-b border-night/20 bg-transparent pb-3 text-lg font-semibold text-night placeholder:text-night/35 focus:border-night focus:outline-none"
+                  className="w-full border-b border-night/20 bg-transparent pb-3 pt-2 text-lg font-semibold text-night placeholder:text-night/35 focus:border-night focus:outline-none"
                 />
               </label>
 

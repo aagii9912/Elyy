@@ -13,6 +13,12 @@ const digits = (phone: string) => `976${phone.replace(/[^0-9]/g, "")}`;
 export function MonoManagers({ site }: { site: SiteContent }) {
   const { managers } = site;
 
+  /* Цагийн хуваарь #contact дээр аль хэдийн гарсан — дараалсан хоёр секц
+     ижил мөрийг давтахгүй. Админд өөр хуваарь бичвэл мөр хэвээр гарна. */
+  const sameHours =
+    managers.hours.trim() !== "" && managers.hours.trim() === site.contact.hours.trim();
+  const showHours = !sameHours && Boolean(managers.hoursLabel || managers.hours);
+
   return (
     <section id="managers" className="border-b border-night/10 bg-ground py-20 md:py-28">
       <div className="mx-auto max-w-[1500px] px-5 md:px-10">
@@ -25,7 +31,7 @@ export function MonoManagers({ site }: { site: SiteContent }) {
           </div>
           <div data-reveal="up" data-reveal-delay="0.15" className="max-w-sm">
             <p className="text-sm leading-relaxed text-night/60">{managers.body}</p>
-            {(managers.hoursLabel || managers.hours) && (
+            {showHours && (
               <div className="mt-4 border-t border-night/10 pt-4">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-night/45">
                   {managers.hoursLabel}
@@ -80,7 +86,7 @@ export function MonoManagers({ site }: { site: SiteContent }) {
               <a
                 href={`tel:+${digits(m.phone)}`}
                 data-cursor-hover
-                className="mt-auto pt-6 text-2xl font-extrabold tracking-tight text-night transition-opacity hover:opacity-60"
+                className="mt-auto pt-6 text-2xl font-extrabold tracking-tight text-night transition-opacity duration-300 hover:opacity-60"
               >
                 {m.phone}
               </a>

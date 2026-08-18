@@ -18,6 +18,7 @@ import { Logo, LogoMark } from "@/components/Logo";
 import type { SiteContent } from "@/lib/site-content";
 import { NEWS_PATH } from "@/lib/news-links";
 import { BrochureButton } from "./MonoBrochure";
+import { SocialRow } from "./MonoSocial";
 
 export function MonoHeader({
   site,
@@ -112,6 +113,7 @@ export function MonoHeader({
             href={isHome ? "#top" : "/"}
             onClick={(e) => go(e, "#top")}
             aria-label="Elysium"
+            data-cursor-hover
             className="flex min-h-11 items-center gap-2.5"
           >
             <LogoMark className="h-[18px] w-auto" />
@@ -125,7 +127,7 @@ export function MonoHeader({
                 href={resolve(item.href)}
                 onClick={(e) => go(e, item.href)}
                 data-cursor-hover
-                className={`text-[11px] font-medium uppercase tracking-[0.08em] transition-colors ${
+                className={`text-[11px] font-medium uppercase tracking-[0.08em] transition-colors duration-300 ${
                   solid ? "text-night/60 hover:text-night" : "text-white/70 hover:text-white"
                 }`}
               >
@@ -161,7 +163,9 @@ export function MonoHeader({
               aria-label={nav.menuAria}
               aria-expanded={open}
               onClick={() => setOpen((v) => !v)}
-              className={`relative z-50 flex h-10 w-10 flex-col items-center justify-center gap-[5px] lg:hidden ${open ? "text-night" : ""}`}
+              /* 44×44 — хүрэх талбайн доод хязгаар; зураас 24px хэвээр тул
+                 товч томорсон ч тэмдэг нь өмнөхтэй адил харагдана. */
+              className={`relative z-50 -mr-0.5 flex h-11 w-11 flex-col items-center justify-center gap-[5px] lg:hidden ${open ? "text-night" : ""}`}
             >
               <span className={`h-0.5 w-6 bg-current transition-transform duration-300 ${open ? "translate-y-[3px] rotate-45" : ""}`} />
               <span className={`h-0.5 w-6 bg-current transition-transform duration-300 ${open ? "-translate-y-[3px] -rotate-45" : ""}`} />
@@ -190,6 +194,9 @@ export function MonoHeader({
           ))}
         </nav>
         <div className="mt-auto flex flex-col gap-3 border-t border-night/10 px-7 py-7">
+          {/* Сошиал хаягууд — гар утасны цэснээс шууд хүрдэг байх
+             (клиентийн 7-р санал). Тохируулаагүй бол мөр өөрөө гарахгүй. */}
+          <SocialRow items={site.footer.social} className="pb-1" />
           <Link
             href={resolve("#contact")}
             onClick={(e) => go(e, "#contact")}

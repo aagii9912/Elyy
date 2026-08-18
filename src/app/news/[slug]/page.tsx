@@ -99,7 +99,7 @@ export default async function NewsDetailPage({ params, searchParams }: Props) {
                 <Link
                   href={NEWS_PATH}
                   data-cursor-hover
-                  className="inline-flex min-h-11 items-center gap-2 text-[11px] font-bold uppercase tracking-[0.14em] text-white/70 transition-colors hover:text-white"
+                  className="inline-flex min-h-11 items-center gap-2 text-[11px] font-bold uppercase tracking-[0.14em] text-white/70 transition-colors duration-300 hover:text-white"
                 >
                   <span aria-hidden>←</span> {site.news.backLabel}
                 </Link>
@@ -124,7 +124,7 @@ export default async function NewsDetailPage({ params, searchParams }: Props) {
                 <Link
                   href={NEWS_PATH}
                   data-cursor-hover
-                  className="inline-flex min-h-11 items-center gap-2 text-[11px] font-bold uppercase tracking-[0.14em] text-night/50 transition-colors hover:text-night"
+                  className="inline-flex min-h-11 items-center gap-2 text-[11px] font-bold uppercase tracking-[0.14em] text-night/50 transition-colors duration-300 hover:text-night"
                 >
                   <span aria-hidden>←</span> {site.news.backLabel}
                 </Link>
@@ -218,7 +218,7 @@ export default async function NewsDetailPage({ params, searchParams }: Props) {
               <Link
                 href={NEWS_PATH}
                 data-cursor-hover
-                className="inline-flex items-center gap-2 rounded-full border border-night/25 px-6 py-3.5 text-sm font-bold text-night transition-colors hover:bg-night hover:text-white"
+                className="inline-flex items-center gap-2 rounded-full border border-night/25 px-6 py-3.5 text-sm font-bold text-night transition-colors duration-300 hover:bg-night hover:text-white"
               >
                 {site.news.backLabel}
               </Link>

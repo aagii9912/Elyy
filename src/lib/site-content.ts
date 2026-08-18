@@ -82,7 +82,11 @@ export type SiteContent = {
     items: (LinkedItem & { image: string })[];
   };
 
-  /** VR / 360° аялал. `embedUrl` хоосон бол секц харагдахгүй. */
+  /** VR / 360° аялал. `embedUrl` тохируулсан үед постер дээр дарахад
+   *  бүтэн дэлгэцийн pop-up дотор аялал нээгдэнэ. Хоосон үед секц
+   *  "тун удахгүй" төлөвтэй харагдаж, CTA нь уулзалт руу хөтөлнө —
+   *  ингэснээр VR хэсэг сайт дээр үргэлж байна. Постер ч хоосон бол
+   *  секц огт рендерлэгдэхгүй. */
   vr: {
     kicker: string;
     title: string;
@@ -93,6 +97,9 @@ export type SiteContent = {
     poster: string;
     ctaLabel: string;
     note: string;
+    /** Аялал бэлэн болоогүй үеийн шошго ба CTA. */
+    soonLabel: string;
+    soonCta: string;
   };
 
   /** Гурван бүлгийн баруун талын навигацийн шошго. */
@@ -365,11 +372,13 @@ export const DEFAULT_SITE_CONTENT: SiteContent = {
     title: "Elysium-ийг 360°-аар үзэх",
     body: "Байрандаа биечлэн ирэхээсээ өмнө өрөө бүрийг виртуалаар тойрон үзэж, орон зайн мэдрэмжийг аваарай.",
     /* Админаас (`/admin/site` → VR аялал) Matterport / Kuula / YouTube 360
-       embed URL оруулна. Хоосон бол секц огт харагдахгүй. */
+       embed URL оруулна. Хоосон үед "тун удахгүй" төлөв харагдана. */
     embedUrl: "",
     poster: "/images/interior/living-01.jpg",
     ctaLabel: "Аялал эхлүүлэх",
     note: "Хамгийн сайн үзэгдэл — бүтэн дэлгэц эсвэл VR төхөөрөмж дээр.",
+    soonLabel: "360° аялал — тун удахгүй",
+    soonCta: "Биечлэн үзэх цаг товлох",
   },
 
   storyNav: {

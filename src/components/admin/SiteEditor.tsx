@@ -774,7 +774,7 @@ function renderSection(
           <Card title="360° холбоос">
             <Field
               label="Embed URL"
-              hint="Matterport / Kuula / YouTube 360-ийн embed холбоос. Хоосон бол VR хэсэг сайт дээр огт харагдахгүй."
+              hint="Matterport / Kuula / YouTube 360-ийн embed холбоос. Хоосон үед секц “тун удахгүй” төлөвтэй харагдаж, товч нь уулзалт руу хөтөлнө."
             >
               <TextInput
                 value={c.vr.embedUrl}
@@ -823,6 +823,20 @@ function renderSection(
                 <TextInput
                   value={c.vr.note}
                   onChange={(e) => edit((d) => void (d.vr.note = e.target.value))}
+                />
+              </Field>
+            </div>
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              <Field label="“Тун удахгүй” шошго" hint="Embed URL хоосон үед постер дээр гарна.">
+                <TextInput
+                  value={c.vr.soonLabel}
+                  onChange={(e) => edit((d) => void (d.vr.soonLabel = e.target.value))}
+                />
+              </Field>
+              <Field label="“Тун удахгүй” товч" hint="Уулзалт товлох хэсэг рүү хөтөлнө.">
+                <TextInput
+                  value={c.vr.soonCta}
+                  onChange={(e) => edit((d) => void (d.vr.soonCta = e.target.value))}
                 />
               </Field>
             </div>

@@ -40,6 +40,13 @@ export type StoryPoint = {
 
 export type StoryVariant = "numbers" | "letters" | "callouts";
 
+/** Бүлгийн өнгөний горим. `dark` — бараан кадран дээр цагаан бичиг
+ *  (анхны загвар). `light` — цайвар кадран дээр бараан бичиг: бүлэг 01-ийн
+ *  мастер төлөвлөгөөний кадрууд өөрөө цайвар тул хуудасны цайвар суурьтай
+ *  нэг өнгөнд уншигдана. Кадруудад НЭГ ч градаци хийхгүй — зөвхөн scrim,
+ *  бичгийн өнгө солигдоно. */
+export type StoryTone = "dark" | "light";
+
 const framePathIn = (dir: string, ext: string) => (i: number) =>
   `${dir}/frame_${String(i).padStart(3, "0")}.${ext}`;
 
@@ -72,6 +79,7 @@ export function MonoScrollStory({
   heightClass = "h-[300vh] md:h-[380vh]",
   exitVeilClass = "bg-ground",
   variant,
+  tone = "dark",
 }: {
   id?: string;
   /** Chapter index label, e.g. "01". */
@@ -91,6 +99,7 @@ export function MonoScrollStory({
   /** Colour the chapter dips to on the way out — match the next section. */
   exitVeilClass?: string;
   variant: StoryVariant;
+  tone?: StoryTone;
 }) {
   const lenis = useLenis();
   const root = useRef<HTMLElement>(null);
@@ -411,37 +420,55 @@ export function MonoScrollStory({
   const railLabel = (p: StoryPoint) =>
     variant === "letters" ? p.heading.charAt(0).toUpperCase() : p.n;
 
+  /* Цайвар горимд зөвхөн scrim + бичгийн өнгө өөр: кадрууд хэвээрээ.
+     (letters/callouts хувилбарууд одоогоор бараан бүлэгт л ашиглагдана.) */
+  const light = tone === "light";
+
   return (
-    <section id={id} ref={root} className={`relative bg-night ${heightClass}`}>
+    <section id={id} ref={root} className={`relative ${light ? "bg-ground" : "bg-night"} ${heightClass}`}>
       <div className="sticky top-0 flex h-[100svh] min-h-[560px] w-full overflow-hidden">
         <canvas ref={canvas} className="absolute inset-0 z-0 h-full w-full" />
-        {/* Scrim carries just enough weight for white type over the footage —
-            it used to sit at 75/40/85 and made the whole chapter read black. */}
-        <div className="pointer-events-none absolute inset-0 z-[5] bg-gradient-to-b from-night/55 via-night/15 to-night/70" />
+        {/* Scrim carries just enough weight for the type over the footage —
+            the dark chapter used to sit at 75/40/85 and read black; the light
+            chapter uses a white wash so the page never dips dark at all. */}
+        <div
+          className={`pointer-events-none absolute inset-0 z-[5] bg-gradient-to-b ${
+            light
+              ? "from-white/70 via-white/30 to-white/75"
+              : "from-night/55 via-night/15 to-night/70"
+          }`}
+        />
         {/* letters chapter reads on the left — extra side scrim for contrast */}
         {variant === "letters" && (
           <div className="pointer-events-none absolute inset-0 z-[5] bg-gradient-to-r from-night/60 via-night/20 to-transparent" />
         )}
 
-        {/* entry veil — dark bridge in from the hero */}
-        <div data-veil-in aria-hidden className="pointer-events-none absolute inset-0 z-[7] bg-night" />
+        {/* entry veil — bridge in from the hero. Цайвар бүлэгт veil нь мөн
+            цайвар: бараан hero-гоос цагаан руу нэг алхамд шилжинэ, эс бөгөөс
+            бараан бичигтэй intro гарчиг хар veil дор уншигдахгүй. */}
+        <div
+          data-veil-in
+          aria-hidden
+          className={`pointer-events-none absolute inset-0 z-[7] ${light ? "bg-ground" : "bg-night"}`}
+        />
         {/* exit veil — hands off to the light page ground */}
         <div data-veil-out aria-hidden className={`pointer-events-none absolute inset-0 z-[7] opacity-0 ${exitVeilClass}`} />
 
         {/* blueprint HUD chrome — numbers chapter only */}
         {variant === "numbers" && (
           <div data-chrome aria-hidden className="pointer-events-none absolute inset-0 z-[6]">
-            <span className="absolute left-5 top-20 h-6 w-6 border-l border-t border-white/25 md:left-8" />
-            <span className="absolute right-5 top-20 h-6 w-6 border-r border-t border-white/25 md:right-8" />
-            <span className="absolute bottom-6 left-5 h-6 w-6 border-b border-l border-white/25 md:left-8" />
-            <span className="absolute bottom-6 right-5 h-6 w-6 border-b border-r border-white/25 md:right-8" />
-            <span className="absolute left-1/2 top-0 h-full border-l border-dashed border-white/[0.07]" />
-            <span className="absolute left-0 top-1/2 w-full border-t border-dashed border-white/[0.07]" />
+            <span className={`absolute left-5 top-20 h-6 w-6 border-l border-t md:left-8 ${light ? "border-night/25" : "border-white/25"}`} />
+            <span className={`absolute right-5 top-20 h-6 w-6 border-r border-t md:right-8 ${light ? "border-night/25" : "border-white/25"}`} />
+            <span className={`absolute bottom-6 left-5 h-6 w-6 border-b border-l md:left-8 ${light ? "border-night/25" : "border-white/25"}`} />
+            <span className={`absolute bottom-6 right-5 h-6 w-6 border-b border-r md:right-8 ${light ? "border-night/25" : "border-white/25"}`} />
+            <span className={`absolute left-1/2 top-0 h-full border-l border-dashed ${light ? "border-night/[0.08]" : "border-white/[0.07]"}`} />
+            <span className={`absolute left-0 top-1/2 w-full border-t border-dashed ${light ? "border-night/[0.08]" : "border-white/[0.07]"}`} />
             <div className="absolute bottom-[7vh] left-5 hidden w-[24%] md:left-10 md:block">
-              <div className="h-px w-full bg-white/15">
-                <div ref={progFill} className="h-px w-full origin-left scale-x-0 bg-lime" />
+              <div className={`h-px w-full ${light ? "bg-night/15" : "bg-white/15"}`}>
+                {/* цайвар суурьт lime уусдаг — гүн ногооноор */}
+                <div ref={progFill} className={`h-px w-full origin-left scale-x-0 ${light ? "bg-moss" : "bg-lime"}`} />
               </div>
-              <p className="mt-2 text-[10px] font-semibold uppercase tracking-[0.3em] text-white/40">
+              <p className={`mt-2 text-[10px] font-semibold uppercase tracking-[0.3em] ${light ? "text-night/45" : "text-white/40"}`}>
                 Мастер төлөвлөгөө · явц
               </p>
             </div>
@@ -454,19 +481,27 @@ export function MonoScrollStory({
           aria-hidden
           className="pointer-events-none absolute inset-0 z-[9] flex flex-col items-center justify-center px-6 text-center"
         >
-          <p className="text-[12px] font-bold uppercase tracking-[0.42em] text-lime">{chapter}</p>
-          <p className="mt-4 text-[11px] font-semibold uppercase tracking-[0.3em] text-white/55">{kicker}</p>
-          <h2 className="mt-4 max-w-3xl text-[clamp(2rem,5.4vw,4.2rem)] font-extrabold leading-[1.04] tracking-tight text-white [text-wrap:balance]">
+          <p className={`text-[12px] font-bold uppercase tracking-[0.42em] ${light ? "text-moss" : "text-lime"}`}>{chapter}</p>
+          <p className={`mt-4 text-[11px] font-semibold uppercase tracking-[0.3em] ${light ? "text-night/55" : "text-white/55"}`}>{kicker}</p>
+          <h2
+            className={`mt-4 max-w-3xl text-[clamp(2rem,5.4vw,4.2rem)] font-extrabold leading-[1.04] tracking-tight [text-wrap:balance] ${
+              light ? "text-night" : "text-white"
+            }`}
+          >
             {title}
           </h2>
         </div>
 
         {/* persistent corner header — fades in as the intro leaves */}
         <div data-head className="absolute left-5 top-24 z-10 md:left-10 md:top-28">
-          <MonoKicker tone="dark">
+          <MonoKicker tone={light ? "light" : "dark"}>
             {chapter} — {kicker}
           </MonoKicker>
-          <h2 className="mt-3 text-[clamp(1.3rem,2.2vw,1.9rem)] font-extrabold leading-tight tracking-tight text-white">
+          <h2
+            className={`mt-3 text-[clamp(1.3rem,2.2vw,1.9rem)] font-extrabold leading-tight tracking-tight ${
+              light ? "text-night" : "text-white"
+            }`}
+          >
             {title}
           </h2>
         </div>
@@ -479,7 +514,11 @@ export function MonoScrollStory({
                 <div className="flex h-full items-center justify-center px-6">
                   <div className="text-center">
                     <h3
-                      className={`flex items-end justify-center font-extrabold leading-none tracking-tight text-white drop-shadow-[0_4px_36px_rgba(0,0,0,0.55)] ${
+                      className={`flex items-end justify-center font-extrabold leading-none tracking-tight ${
+                        light
+                          ? "text-night [text-shadow:0_2px_28px_rgba(255,255,255,0.85)]"
+                          : "text-white drop-shadow-[0_4px_36px_rgba(0,0,0,0.55)]"
+                      } ${
                         p.heading.length > 4
                           ? "text-[clamp(2.8rem,9vw,7rem)]"
                           : "text-[clamp(4.6rem,15vw,11rem)]"
@@ -493,14 +532,18 @@ export function MonoScrollStory({
                         </span>
                       ))}
                       {p.accent && (
-                        <span data-sw className="mb-[0.9em] text-[0.28em] font-bold text-lime">
+                        <span data-sw className={`mb-[0.9em] text-[0.28em] font-bold ${light ? "text-moss" : "text-lime"}`}>
                           {p.accent}
                         </span>
                       )}
                     </h3>
                     <p
                       data-sw
-                      className="mx-auto mt-6 max-w-md text-[12px] font-semibold uppercase tracking-[0.26em] text-white/80 drop-shadow-[0_1px_12px_rgba(0,0,0,0.6)] md:text-[13px]"
+                      className={`mx-auto mt-6 max-w-md text-[12px] font-semibold uppercase tracking-[0.26em] md:text-[13px] ${
+                        light
+                          ? "text-night/75 [text-shadow:0_1px_14px_rgba(255,255,255,0.85)]"
+                          : "text-white/80 drop-shadow-[0_1px_12px_rgba(0,0,0,0.6)]"
+                      }`}
                     >
                       {p.text}
                     </p>
@@ -577,7 +620,7 @@ export function MonoScrollStory({
                         href={p.link}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="pointer-events-auto mt-4 inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-lime transition-opacity hover:opacity-70"
+                        className="pointer-events-auto mt-4 inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-lime transition-opacity duration-300 hover:opacity-70"
                       >
                         Дэлгэрэнгүй <span aria-hidden>↗</span>
                       </a>
@@ -601,7 +644,7 @@ export function MonoScrollStory({
         </div>
 
         {/* clickable point rail — jump to any point (desktop) */}
-        <div data-rail className="absolute bottom-[7vh] right-10 z-10 hidden items-center gap-3 md:flex">
+        <div data-rail className="absolute bottom-[7vh] right-10 z-10 hidden items-center gap-1.5 md:flex">
           {points.map((p, i) => {
             const lit = variant === "letters" ? i <= active : i === active;
             return (
@@ -609,23 +652,29 @@ export function MonoScrollStory({
                 {i > 0 && (
                   <span
                     aria-hidden
-                    className={`h-px w-7 transition-colors duration-500 ${
-                      i <= active ? "bg-lime/70" : "bg-white/20"
+                    className={`h-px w-6 transition-colors duration-500 ${
+                      i <= active
+                        ? light ? "bg-moss/60" : "bg-lime/70"
+                        : light ? "bg-night/20" : "bg-white/20"
                     }`}
                   />
                 )}
+                {/* min-h/w-11 — 44px хүрэх талбай (таблет дээр ч хуруугаар
+                    дарагдана); харагдах тэмдэг нь жижигхэн хэвээр. */}
                 <button
                   type="button"
                   onClick={() => goTo(i)}
                   data-cursor-hover
                   aria-label={`${p.n} — ${p.heading}`}
                   aria-current={active === i}
-                  className={`font-bold tracking-[0.08em] transition-all duration-300 ${
+                  className={`inline-flex min-h-11 min-w-8 items-center justify-center font-bold tracking-[0.08em] transition-all duration-300 ${
                     variant === "letters" ? "text-sm" : "text-[11px]"
                   } ${
                     lit
-                      ? `text-lime ${active === i ? "scale-125" : ""}`
-                      : "text-white/40 hover:text-white/80"
+                      ? `${light ? "text-moss" : "text-lime"} ${active === i ? "scale-125" : ""}`
+                      : light
+                        ? "text-night/35 hover:text-night/75"
+                        : "text-white/40 hover:text-white/80"
                   }`}
                 >
                   {railLabel(p)}

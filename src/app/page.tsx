@@ -50,7 +50,7 @@ export default async function Home() {
         <MonoApartments site={site} />
         <MonoDeveloper site={site} />
         <MonoGallery site={site} />
-        {/* VR аялал — `vr.embedUrl` тохируулаагүй бол өөрөө рендерлэгдэхгүй */}
+        {/* VR аялал — `vr.embedUrl` хоосон үед "тун удахгүй" төлөвтэй гарна */}
         <MonoVr site={site} />
         <MonoMap site={site} />
         <MonoContact site={site} />

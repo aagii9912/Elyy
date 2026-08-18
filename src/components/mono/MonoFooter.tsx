@@ -54,7 +54,7 @@ export function MonoFooter({
                 <a
                   href={`tel:+976${contact.phone.replace(/[^0-9]/g, "")}`}
                   data-cursor-hover
-                  className="inline-flex min-h-9 items-center transition-colors hover:text-white"
+                  className="inline-flex min-h-9 items-center transition-colors duration-300 hover:text-white"
                 >
                   {contact.phone}
                 </a>
@@ -63,7 +63,7 @@ export function MonoFooter({
                 <a
                   href={`mailto:${brand.email}`}
                   data-cursor-hover
-                  className="inline-flex min-h-9 items-center transition-colors hover:text-white"
+                  className="inline-flex min-h-9 items-center transition-colors duration-300 hover:text-white"
                 >
                   {brand.email}
                 </a>
@@ -82,7 +82,7 @@ export function MonoFooter({
                     <BrochureButton
                       site={site}
                       source="elysium/mono#footer"
-                      className="inline-flex min-h-9 items-center text-left transition-colors hover:text-white"
+                      className="inline-flex min-h-9 items-center text-left transition-colors duration-300 hover:text-white"
                     >
                       {item.label}
                     </BrochureButton>
@@ -92,7 +92,7 @@ export function MonoFooter({
                       target="_blank"
                       rel="noopener"
                       data-cursor-hover
-                      className="inline-flex min-h-9 items-center transition-colors hover:text-white"
+                      className="inline-flex min-h-9 items-center transition-colors duration-300 hover:text-white"
                     >
                       {item.label}
                     </a>
@@ -100,7 +100,7 @@ export function MonoFooter({
                     <Link
                       href={resolve(item.href)}
                       data-cursor-hover
-                      className="inline-flex min-h-9 items-center transition-colors hover:text-white"
+                      className="inline-flex min-h-9 items-center transition-colors duration-300 hover:text-white"
                     >
                       {item.label}
                     </Link>

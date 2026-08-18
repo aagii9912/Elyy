@@ -99,7 +99,7 @@ export function SocialList({ items }: { items: SocialLink[] }) {
             target="_blank"
             rel="noopener noreferrer"
             data-cursor-hover
-            className="inline-flex items-center gap-2.5 py-1 transition-colors hover:text-white"
+            className="inline-flex items-center gap-2.5 py-1 transition-colors duration-300 hover:text-white"
           >
             <SocialIcon item={item} />
             {item.label}
