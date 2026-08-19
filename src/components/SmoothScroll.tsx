@@ -38,7 +38,15 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
   /* lerp 0.1 нь дугуй мэдрэмжтэй ч гүйлт хурдан “зогсдог”. 0.075 болгож,
      дугуйн алхмыг бага зэрэг зөөлрүүлснээр урт scroll-story бүлгүүд
      жигд гүйнэ. Touch дээр Lenis-ийг оруулахгүй (`syncTouch: false`) —
-     гар утсанд төрөлх гүйлт үргэлж илүү жигд, батарей ч хэмнэнэ. */
+     гар утсанд төрөлх гүйлт үргэлж илүү жигд, батарей ч хэмнэнэ.
+
+     `allowNestedScroll` — Lenis нь модал нээгдэхэд `stop()`-д ордог ба
+     зогссон үедээ wheel/touchmove бүрийг `preventDefault` хийдэг. Улмаас
+     pop-up доторх `overflow-y-auto` хэсэг (аксонометрийн төлөвлөгөөний
+     самбар, чатны түүх, урт маягт) гар утсанд ч, дугуйгаар ч ГҮЙХГҮЙ
+     болно. Энэ тохиргоо асаалттай үед Lenis дотоод гүйдэг хэсгийг
+     таниад гараа хүрэхгүй — төрөлх гүйлт ажиллана. Хэвтээ carousel-д
+     нөлөөгүй: босоо дохионд `overflow-y` шалгагддаг. */
   return (
     <ReactLenis
       root
@@ -49,6 +57,7 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
         wheelMultiplier: 0.9,
         syncTouch: false,
         touchMultiplier: 1.6,
+        allowNestedScroll: true,
       }}
     >
       <LenisGsapBridge />
