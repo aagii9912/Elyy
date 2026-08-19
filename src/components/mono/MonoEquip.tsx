@@ -15,8 +15,10 @@
        брэндийн тэмдэг, үйлдвэрлэгчийн холбоос.
 
    Барилгын бичлэгийн кадрууд (public/structure-frames) зураг
-   тохируулаагүй материалын арын дэвсгэр болно; текст, зураг, холбоос
-   бүгд `/admin/site` → Барилгын бүтэц хэсгээс удирдагдана.
+   тохируулаагүй материалын арын дэвсгэр болно; түүн дээр нь тухайн
+   үе шатны давтагдах клип (public/video/structure-*.mp4) тоглоно —
+   идэвхтэй слайдынх нь л. Текст, зураг, холбоос бүгд `/admin/site` →
+   Барилгын бүтэц хэсгээс удирдагдана.
 
    Агаар сэлгэлтийн систем гурван үндсэн СЛАЙДААС хасагдсан (`HIDDEN`) —
    гэхдээ тоноглолын жагсаалтад хэвээр байна. */
@@ -59,6 +61,20 @@ const FALLBACK_FRAMES = [
 const imageFor = (image: string, i: number) =>
   image?.trim() || FALLBACK_FRAMES[i % FALLBACK_FRAMES.length];
 
+/* Слайд бүрийн ард давтагдан тоглох клип — кадруудтай ЯГ ижил дараалал
+   (цутгамал каркас → цонх → фасад), учир нь эх бичлэг нь нэг ижил.
+   Хөрвүүлэх: `node scripts/build-section-videos.mjs structure`.
+
+   Клипийг ЗӨВХӨН зураг тохируулаагүй слайдад өгнө: админ тодорхой
+   зураг сонгосон бол түүнийг нь клипээр далдлах нь буруу байх болно. */
+const FALLBACK_VIDEOS = [
+  "/video/structure-frame.mp4",
+  "/video/structure-windows.mp4",
+  "/video/structure-facade.mp4",
+];
+const videoFor = (image: string, i: number) =>
+  image?.trim() ? undefined : FALLBACK_VIDEOS[i % FALLBACK_VIDEOS.length];
+
 function BrandMark({ title, className = "" }: { title: string; className?: string }) {
   const brand = markFor(title);
   if (!brand) return null;
@@ -97,6 +113,7 @@ export function MonoEquip({ site }: { site: SiteContent }) {
   const slides: ShowcaseSlide[] = items.map((item, i) => ({
     id: `${item.title}-${i}`,
     image: imageFor(item.image, i),
+    video: videoFor(item.image, i),
     alt: item.title,
     name: item.title,
     role: markFor(item.title)?.alt,

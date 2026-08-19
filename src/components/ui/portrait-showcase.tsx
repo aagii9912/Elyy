@@ -6,6 +6,8 @@
    Бүтэц:
      • арын зургууд бүгд DOM-д зэрэг сууж, зөвхөн идэвхтэй нь opacity: 1
        (700ms crossfade) — солигдоход зураг дахин ачаалагдахгүй,
+     • слайд `video`-той бол зургийн ДЭЭР давтагдан тоглох клип нэмэгдэнэ
+       (доорх §Видео),
      • дээгүүр нь зөөлөн харанхуй градиент (текстийн уншигдац),
      • контент давхарга: дээд бүсэд гарчиг + идэвхтэй зүйлийн тайлбар,
        доод бүсэд thumbnail мөр ба мета зурвас (нэр · дэд гарчиг · CTA).
@@ -14,19 +16,33 @@
    дуудагч тухайн зүйлээр pop-up нээх, дүрс тэмдэг харуулах зэрэгт мөн
    ашиглана.
 
+   §Видео. Слайд бүр өөрийн клиптэй, ЗӨВХӨН идэвхтэй нь тоглоно —
+   бусад нь зогсоно, тиймээс нэг зэрэг нэг л клип декодлогдоно. Клип
+   бүр `preload="none"`-той төрж, тухайн слайд идэвхжиж, хэсэг нь
+   дэлгэцэнд ойртсон үед л `src` авна: гурван клипийг урьдчилж татахгүй.
+   Эхний кадраа зурах хүртэл тунгалаг — доор нь зураг байгаа тул хар
+   нүх үүсэхгүй. Слайд дахин идэвхжихэд клип эхнээсээ эхэлнэ (барилга
+   дахин босно). prefers-reduced-motion үед клип огт татагдахгүй, зураг
+   хэвээр үлдэнэ.
+
    Хөдөлгөөн: тайлбар ба нэр нь `key`-ээр дахин mount хийгдэж
    `.ui-fade-in` (0.5s) авна; идэвхтэй цэг зөвхөн opacity-гаар асна —
    thumbnail хооронд гүйдэггүй. prefers-reduced-motion үед globals.css
    доторх дүрэм хөдөлгөөнийг унтраана. */
 
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
 export type ShowcaseSlide = {
   /** React key — дуудагч давхцахгүйг баталгаажуулна. */
   id: string;
-  /** Арын зураг ба thumbnail — нэг ижил эх сурвалж. */
+  /** Арын зураг ба thumbnail — нэг ижил эх сурвалж. Клиптэй үед ч
+   *  хэрэгтэй: thumbnail, клип ачаалагдах хүртэлх дэвсгэр, мөн
+   *  reduced-motion-ийн хувилбар болно. */
   image: string;
+  /** Зургийн дээр давтагдан тоглох дэвсгэр клип (mp4, дуугүй).
+   *  Байхгүй үед слайд зөвхөн зурагтай үлдэнэ. */
+  video?: string;
   /** Дэлгэц уншигчид зориулсан зургийн тайлбар. */
   alt?: string;
   /** Мета зурвасын нэр (ж: материалын нэр). */
@@ -71,8 +87,51 @@ export function PortraitShowcase({
   className?: string;
 }) {
   const row = useRef<HTMLDivElement>(null);
+  const root = useRef<HTMLDivElement>(null);
+  const videos = useRef<(HTMLVideoElement | null)[]>([]);
+  /** Хэсэг дэлгэцэнд ойртсон уу — гадуур байхад клип татахгүй, тоглуулахгүй. */
+  const [near, setNear] = useState(false);
+  /** Эхний кадраа зурсан слайдууд — тэр үед л зургийн дээр гарна. */
+  const [ready, setReady] = useState<Record<number, true>>({});
+
   const index = slides.length ? ((active % slides.length) + slides.length) % slides.length : 0;
   const slide = slides[index];
+
+  /* Клипүүд зөвхөн хэсэг дөхөхөд амьдарна. reduced-motion үед огт биш —
+     `near` худал хэвээр үлдэж, слайдууд зурган хэвээр ажиллана. */
+  useEffect(() => {
+    const el = root.current;
+    if (!el) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const io = new IntersectionObserver(
+      (entries) => setNear(entries.some((e) => e.isIntersecting)),
+      { rootMargin: "50% 0px" }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  /* Нэг зэрэг ганц клип. `src`-ыг JSX биш ЭНД тавина: элемент төрөхдөө
+     хаягтай бол `preload="none"` ч гэсэн зарим хөтөч мета өгөгдөл татна,
+     мөн React-ийн төлөвөөр дамжуулбал эффект дотор setState хийх болно.
+     Клип нь гадаад систем — түүнийг шууд удирдах нь эффектийн зөв хэрэглээ. */
+  useEffect(() => {
+    videos.current.forEach((el, i) => {
+      if (!el) return;
+      if (i === index && near) {
+        const src = slides[i]?.video;
+        if (!src) return;
+        if (!el.getAttribute("src")) el.setAttribute("src", src);
+        // React `muted`-ыг үргэлж шинжид тавьдаггүй; авто-тоглолт үүнээс хамаарна.
+        el.muted = true;
+        // Дахин идэвхжсэн слайд эхнээсээ — барилга дахин босно.
+        if (el.paused && el.currentTime > 0) el.currentTime = 0;
+        void el.play().catch(() => {});
+      } else if (!el.paused) {
+        el.pause();
+      }
+    });
+  }, [index, near, slides]);
 
   /* Сум / Home / End — thumbnail мөрөнд фокус зөөж, зөөсөн зүйлээ
      шууд идэвхжүүлнэ (tablist-ийн зан төлөв). */
@@ -96,18 +155,48 @@ export function PortraitShowcase({
   if (!slide) return null;
 
   return (
-    <div className={cn("relative h-[100svh] min-h-[620px] w-full overflow-hidden text-white", className)}>
-      {/* Арын зургууд — зөвхөн идэвхтэй нь харагдана */}
+    <div
+      ref={root}
+      className={cn("relative h-[100svh] min-h-[620px] w-full overflow-hidden text-white", className)}
+    >
+      {/* Арын давхаргууд — зөвхөн идэвхтэй нь харагдана. Зураг доор,
+          клип (байвал) дээр нь: клип ачаалагдтал зураг л харагдана. */}
       {slides.map((s, i) => (
         <div
           key={s.id}
           aria-hidden
           className={cn(
-            "absolute inset-0 bg-cover bg-center transition-opacity duration-700 ease-out",
+            "absolute inset-0 transition-opacity duration-700 ease-out",
             i === index ? "opacity-100" : "opacity-0"
           )}
-          style={{ backgroundImage: `url("${s.image}")` }}
-        />
+        >
+          <div
+            className="absolute inset-0 bg-cover bg-center"
+            style={{ backgroundImage: `url("${s.image}")` }}
+          />
+          {s.video && (
+            <video
+              ref={(el) => {
+                videos.current[i] = el;
+              }}
+              muted
+              loop
+              playsInline
+              preload="none"
+              onCanPlay={(e) => {
+                setReady((m) => (m[i] ? m : { ...m, [i]: true }));
+                /* Хөтөч нуугдсан таб дээр авто-тоглолтыг хойшлуулдаг —
+                   src тавихад дуудсан `play()` няцаагдсан байж болно.
+                   Бэлэн болмогц дахин оролдоно. */
+                if (i === index && near) void e.currentTarget.play().catch(() => {});
+              }}
+              className={cn(
+                "absolute inset-0 h-full w-full object-cover transition-opacity duration-500 ease-out",
+                ready[i] ? "opacity-100" : "opacity-0"
+              )}
+            />
+          )}
+        </div>
       ))}
 
       {/* Зөөлөн харанхуйлалт — доод бүсэд илүү гүн (мета зурвас), мөн
