@@ -93,28 +93,35 @@ export function MonoElys({ site }: { site: SiteContent }) {
   return (
     <section id="elys" className="border-b border-night/10 bg-ground text-night">
       <div className="mx-auto max-w-[1500px] px-5 pb-20 pt-20 md:px-10 md:pb-28 md:pt-32">
-        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          <div>
-            <MonoKicker reveal>02 — {elys.kicker}</MonoKicker>
-            <h2
-              data-reveal="heading"
-              className="mt-4 max-w-xl text-[clamp(1.8rem,3.4vw,2.8rem)] font-extrabold leading-tight tracking-tight text-night"
-            >
-              {elys.title}
-            </h2>
-          </div>
-
-          <div data-reveal="up" data-reveal-delay="0.15" className="max-w-sm">
-            <p className="text-sm leading-relaxed text-night/60">{elys.body}</p>
-            {/* "E · L · Y · S" — дэлгэц уншигчид "И цэг Эл цэг…" гэж
-                уншигдахгүйн тулд aria-hidden. */}
-            <p
-              aria-hidden
-              className="mt-3 text-[11px] font-bold uppercase tracking-[0.4em] text-night/40"
-            >
-              {acronym}
-            </p>
-          </div>
+        {/* Гарчгийн блок — тайлбар нь баруун талын багана биш, гарчгийн ЯГ
+            доор. Баруун талд байхад bottom-align-аас болж гарчгаас дээш
+            гарч, хэсгийн навигацитай мөргөлддөг байв (MonoDeveloper-ийг
+            яг ийм шалтгаанаар өмнө нь зассан). */}
+        <div className="max-w-2xl">
+          <MonoKicker reveal>02 — {elys.kicker}</MonoKicker>
+          <h2
+            data-reveal="heading"
+            className="mt-4 text-[clamp(1.8rem,3.4vw,2.8rem)] font-extrabold leading-tight tracking-tight text-night"
+          >
+            {elys.title}
+          </h2>
+          <p
+            data-reveal="up"
+            data-reveal-delay="0.15"
+            className="mt-5 text-sm leading-relaxed text-night/60"
+          >
+            {elys.body}
+          </p>
+          {/* "E · L · Y · S" — дэлгэц уншигчид "И цэг Эл цэг…" гэж
+              уншигдахгүйн тулд aria-hidden. */}
+          <p
+            aria-hidden
+            data-reveal="up"
+            data-reveal-delay="0.2"
+            className="mt-4 text-[11px] font-bold uppercase tracking-[0.4em] text-night/40"
+          >
+            {acronym}
+          </p>
         </div>
 
         {/* data-reveal нь ЗӨВХӨН энэ бүрхүүл дээр. `autoAlpha: 0` нь

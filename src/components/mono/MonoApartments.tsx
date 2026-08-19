@@ -126,14 +126,14 @@ export function MonoApartments({ site }: { site: SiteContent }) {
   return (
     <section id="apartments" className="border-b border-night/10 bg-ground py-20 md:py-28">
       <div className="mx-auto max-w-[1500px] px-5 md:px-10">
-        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          <div>
-            <MonoKicker reveal>{apartments.kicker}</MonoKicker>
-            <h2 data-reveal="heading" className="mt-4 max-w-xl text-[clamp(1.8rem,3.4vw,2.8rem)] font-extrabold leading-tight tracking-tight text-night">
-              {apartments.title}
-            </h2>
-          </div>
-          <p data-reveal="up" data-reveal-delay="0.15" className="max-w-sm text-sm leading-relaxed text-night/60">{apartments.body}</p>
+        {/* тайлбар нь гарчгийн доор — баруун талын багана нь гарчгаас дээш
+            гарч, хэсгийн навигацитай мөргөлддөг байв */}
+        <div className="max-w-2xl">
+          <MonoKicker reveal>{apartments.kicker}</MonoKicker>
+          <h2 data-reveal="heading" className="mt-4 text-[clamp(1.8rem,3.4vw,2.8rem)] font-extrabold leading-tight tracking-tight text-night">
+            {apartments.title}
+          </h2>
+          <p data-reveal="up" data-reveal-delay="0.15" className="mt-5 text-sm leading-relaxed text-night/60">{apartments.body}</p>
         </div>
 
         {/* B1 / B2 шүүлтүүр — нэгээс олон блок тохируулсан үед л гарна */}

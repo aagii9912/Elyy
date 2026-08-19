@@ -22,24 +22,24 @@ export function MonoManagers({ site }: { site: SiteContent }) {
   return (
     <section id="managers" className="border-b border-night/10 bg-ground py-20 md:py-28">
       <div className="mx-auto max-w-[1500px] px-5 md:px-10">
-        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          <div>
-            <MonoKicker reveal>{managers.kicker}</MonoKicker>
-            <h2 data-reveal="heading" className="mt-4 max-w-xl text-[clamp(1.8rem,3.4vw,2.8rem)] font-extrabold leading-tight tracking-tight text-night">
-              {managers.title}
-            </h2>
-          </div>
-          <div data-reveal="up" data-reveal-delay="0.15" className="max-w-sm">
-            <p className="text-sm leading-relaxed text-night/60">{managers.body}</p>
-            {showHours && (
-              <div className="mt-4 border-t border-night/10 pt-4">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-night/45">
-                  {managers.hoursLabel}
-                </p>
-                <p className="mt-1 text-sm font-bold text-night">{managers.hours}</p>
-              </div>
-            )}
-          </div>
+        {/* тайлбар нь гарчгийн доор — баруун талын багана нь гарчгаас дээш
+            гарч, хэсгийн навигацитай мөргөлддөг байв */}
+        <div className="max-w-2xl">
+          <MonoKicker reveal>{managers.kicker}</MonoKicker>
+          <h2 data-reveal="heading" className="mt-4 text-[clamp(1.8rem,3.4vw,2.8rem)] font-extrabold leading-tight tracking-tight text-night">
+            {managers.title}
+          </h2>
+          <p data-reveal="up" data-reveal-delay="0.15" className="mt-5 text-sm leading-relaxed text-night/60">
+            {managers.body}
+          </p>
+          {showHours && (
+            <div data-reveal="up" data-reveal-delay="0.2" className="mt-5 border-t border-night/10 pt-4">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-night/45">
+                {managers.hoursLabel}
+              </p>
+              <p className="mt-1 text-sm font-bold text-night">{managers.hours}</p>
+            </div>
+          )}
         </div>
 
         <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
