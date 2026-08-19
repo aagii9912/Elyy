@@ -103,8 +103,10 @@ export function PortraitShowcase({
         />
       ))}
 
-      {/* Зөөлөн харанхуйлалт — доод бүсэд илүү гүн, мета зурвас уншигдана */}
-      <div aria-hidden className="absolute inset-0 bg-gradient-to-b from-night/55 via-night/25 to-night/85" />
+      {/* Зөөлөн харанхуйлалт — доод бүсэд илүү гүн (мета зурвас), мөн
+          зүүн талд нэмэлт хөшиг (гарчиг ихэвчлэн барилга дээр буудаг). */}
+      <div aria-hidden className="absolute inset-0 bg-gradient-to-b from-night/60 via-night/30 to-night/85" />
+      <div aria-hidden className="absolute inset-0 bg-gradient-to-r from-night/70 via-night/10 to-transparent" />
 
       <div className="relative z-10 flex h-full flex-col justify-between px-5 pb-7 pt-24 sm:px-8 sm:pb-9 md:px-10 md:pt-28 lg:px-14">
         {/* Дээд бүс — гарчиг + идэвхтэй зүйлийн тайлбар */}

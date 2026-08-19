@@ -41,10 +41,13 @@ const HIDDEN = /агаар\s*сэлг|сэлгэлт|ventilat/i;
    Өгөгдмөл контентод `image` нь ЗОРИУДААР хоосон: `mergeSiteContent` нь
    хадгалсан массивын дутуу талбарыг эхний өгөгдмөл элементээс нөхдөг тул
    тэнд зураг бичсэн бол хадгалсан бүх материал НЭГ ижил зурагтай болно. */
+/* Барилгын үе шатыг дагасан кадрууд: цутгамал каркас → цонх сууж
+   эхэлсэн → бэлэн фасад. Бүтэн дэлгэцийн дэвсгэр болдог тул зөвхөн
+   тэнгэр давамгайлсан эхний кадруудыг сонгохоос зайлсхийсэн. */
 const FALLBACK_FRAMES = [
-  "/structure-frames/frame_012.webp",
-  "/structure-frames/frame_066.webp",
-  "/structure-frames/frame_112.webp",
+  "/structure-frames/frame_040.webp",
+  "/structure-frames/frame_075.webp",
+  "/structure-frames/frame_119.webp",
 ];
 const imageFor = (image: string, i: number) =>
   image?.trim() || FALLBACK_FRAMES[i % FALLBACK_FRAMES.length];
