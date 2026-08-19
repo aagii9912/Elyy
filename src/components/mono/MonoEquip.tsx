@@ -15,16 +15,17 @@
        брэндийн тэмдэг, үйлдвэрлэгчийн холбоос.
 
    Барилгын бичлэгийн кадрууд (public/structure-frames) зураг
-   тохируулаагүй материалын арын дэвсгэр болно; түүн дээр нь тухайн
-   үе шатны давтагдах клип (public/video/structure-*.mp4) тоглоно —
-   идэвхтэй слайдынх нь л. Текст, зураг, холбоос бүгд `/admin/site` →
-   Барилгын бүтэц хэсгээс удирдагдана.
+   тохируулаагүй материалын арын дэвсгэр болно; түүн дээр нь давтагдах
+   клип (public/video/structure-*.mp4) тоглоно — идэвхтэй слайдынх нь л.
+   Клипээ админ слайд бүрт өөрөө сонгоно, сонгоогүй үед үе шатны
+   дарааллаар оногдоно. Текст, зураг, лого, клип, холбоос бүгд
+   `/admin/site` → Барилгын бүтэц хэсгээс удирдагдана.
 
    Агаар сэлгэлтийн систем гурван үндсэн СЛАЙДААС хасагдсан (`HIDDEN`) —
    гэхдээ тоноглолын жагсаалтад хэвээр байна. */
 
 import { useState } from "react";
-import type { SiteContent } from "@/lib/site-content";
+import { CLIP_NONE, STRUCTURE_CLIPS, type SiteContent } from "@/lib/site-content";
 import { LogoMark } from "@/components/Logo";
 import { MonoKicker } from "./shared";
 import { MonoModal } from "./MonoModal";
@@ -61,27 +62,51 @@ const FALLBACK_FRAMES = [
 const imageFor = (image: string, i: number) =>
   image?.trim() || FALLBACK_FRAMES[i % FALLBACK_FRAMES.length];
 
-/* Слайд бүрийн ард давтагдан тоглох клип — кадруудтай ЯГ ижил дараалал
-   (цутгамал каркас → цонх → фасад), учир нь эх бичлэг нь нэг ижил.
-   Хөрвүүлэх: `node scripts/build-section-videos.mjs structure`.
+/* Слайдын ард давтагдан тоглох клип. Админ өөрөө сонгоно
+   (`/admin/site` → Барилгын бүтэц → зүйл → «Дэвсгэр клип»):
 
-   Клипийг ЗӨВХӨН зураг тохируулаагүй слайдад өгнө: админ тодорхой
-   зураг сонгосон бол түүнийг нь клипээр далдлах нь буруу байх болно. */
-const FALLBACK_VIDEOS = [
-  "/video/structure-frame.mp4",
-  "/video/structure-windows.mp4",
-  "/video/structure-facade.mp4",
-];
-const videoFor = (image: string, i: number) =>
-  image?.trim() ? undefined : FALLBACK_VIDEOS[i % FALLBACK_VIDEOS.length];
+     заасан хаяг  → түүнийг тоглуулна (зурагтай эсэхээс үл хамааран),
+     `CLIP_NONE`  → клипгүй, зөвхөн зураг,
+     хоосон       → АВТОМАТ: кадруудтай ижил дараалалаар (цутгамал
+                    каркас → цонх → фасад), гэхдээ админ тухайн слайдад
+                    зураг сонгосон бол түүнийг клипээр далдлахгүй.
 
-function BrandMark({ title, className = "" }: { title: string; className?: string }) {
+   Хөрвүүлэх: `node scripts/build-section-videos.mjs structure`. */
+const FALLBACK_VIDEOS = STRUCTURE_CLIPS.map((clip) => clip.value);
+const videoFor = (item: { image: string; video: string }, i: number) => {
+  const chosen = item.video?.trim();
+  if (chosen === CLIP_NONE) return undefined;
+  if (chosen) return chosen;
+  return item.image?.trim() ? undefined : FALLBACK_VIDEOS[i % FALLBACK_VIDEOS.length];
+};
+
+function BrandMark({
+  title,
+  logo,
+  className = "",
+}: {
+  title: string;
+  /** Админы оруулсан лого — байвал дотоод `MARKS`-аас давуу. */
+  logo?: string;
+  className?: string;
+}) {
+  /* Админы лого — pop-up цагаан суурьтай, брэндийн стандарт лого
+     ихэвчлэн бараан/өнгөт тул шууд тавина. */
+  if (logo?.trim()) {
+    // eslint-disable-next-line @next/next/no-img-element
+    return <img src={logo} alt={title} loading="lazy" className={`h-6 w-auto ${className}`} />;
+  }
   const brand = markFor(title);
   if (!brand) return null;
   if (brand.mark) return <LogoMark className={`h-6 w-auto text-night ${className}`} />;
   return (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img src={brand.src} alt={brand.alt} loading="lazy" className={`h-6 w-auto opacity-80 ${className}`} />
+    /* `/brand/*-mark.png` нь ЦАГААН лого (бараан дэвсгэрт зориулж
+       бэлдсэн) — цагаан pop-up дээр шууд тавибал огт харагдахгүй тул
+       бараан тавцан дээр суулгана. */
+    <span className="inline-flex items-center rounded-md bg-night px-3 py-2">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={brand.src} alt={brand.alt} loading="lazy" className={`h-6 w-auto ${className}`} />
+    </span>
   );
 }
 
@@ -113,9 +138,10 @@ export function MonoEquip({ site }: { site: SiteContent }) {
   const slides: ShowcaseSlide[] = items.map((item, i) => ({
     id: `${item.title}-${i}`,
     image: imageFor(item.image, i),
-    video: videoFor(item.image, i),
+    video: videoFor(item, i),
     alt: item.title,
     name: item.title,
+    logo: item.logo?.trim() ? { src: item.logo, alt: item.title } : undefined,
     role: markFor(item.title)?.alt,
     description: item.body,
   }));
@@ -202,7 +228,7 @@ export function MonoEquip({ site }: { site: SiteContent }) {
               <p className="mt-4 text-[15px] leading-relaxed text-night/70">{detail.body}</p>
 
               <div className="mt-7 flex flex-wrap items-center justify-between gap-4 border-t border-night/10 pt-6">
-                <BrandMark title={detail.title} className="h-7" />
+                <BrandMark title={detail.title} logo={detail.logo} className="h-7" />
                 {detail.link && (
                   <a
                     href={detail.link}

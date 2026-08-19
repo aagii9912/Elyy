@@ -47,7 +47,12 @@ export type ShowcaseSlide = {
   alt?: string;
   /** Мета зурвасын нэр (ж: материалын нэр). */
   name: string;
-  /** Нэрийн доор/хажууд гарах дэд гарчиг (ж: брэнд). */
+  /** Брэндийн лого — мета зурваст `role`-ийн ОРОНД цагаан тавцан дээр
+   *  гарна. Тавцан хэрэгтэй: дурын логоны өнгө бараан зурвас дээр
+   *  уншигдана гэсэн баталгаа байхгүй. */
+  logo?: { src: string; alt: string };
+  /** Нэрийн доор/хажууд гарах дэд гарчиг (ж: брэнд). Лого өгсөн үед
+   *  түүнийг давхардуулахгүйн тулд харагдахгүй. */
   role?: string;
   /** Баруун дээд буланд гарах тайлбар. */
   description: string;
@@ -306,10 +311,26 @@ export function PortraitShowcase({
                 {slide.name}
               </span>
             )}
-            {slide.role && (
-              <span key={slide.role} className="hidden text-white/70 sm:inline">
-                {slide.role}
+            {slide.logo ? (
+              <span
+                key={slide.logo.src}
+                className="hidden shrink-0 items-center rounded-md bg-white/95 px-2.5 py-1.5 sm:inline-flex"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={slide.logo.src}
+                  alt={slide.logo.alt}
+                  loading="lazy"
+                  decoding="async"
+                  className="h-6 w-auto max-w-[160px] object-contain"
+                />
               </span>
+            ) : (
+              slide.role && (
+                <span key={slide.role} className="hidden text-white/70 sm:inline">
+                  {slide.role}
+                </span>
+              )
             )}
             {meta && <span className="hidden text-white/70 md:inline">{meta}</span>}
             {action}

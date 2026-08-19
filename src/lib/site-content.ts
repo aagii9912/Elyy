@@ -23,6 +23,19 @@ export type LinkedItem = TitledItem & { link: string };
  *  linkedin | twitter | link. `href` хоосон/"#" бол харагдахгүй. */
 export type SocialLink = NavLink & { icon: string };
 
+/** Барилгын бүтэц (03) — слайдын ард тоглох бэлэн клипүүд. Админ слайд
+ *  бүрт өөрөө сонгоно. Хөрвүүлэх:
+ *  `node scripts/build-section-videos.mjs structure`. */
+export const STRUCTURE_CLIPS = [
+  { value: "/video/structure-frame.mp4", label: "Цутгамал каркас босох" },
+  { value: "/video/structure-windows.mp4", label: "Цонх суух" },
+  { value: "/video/structure-facade.mp4", label: "Фасад бүрэх" },
+];
+
+/** `equip.items[].video`-гийн тусгай утгууд. */
+export const CLIP_AUTO = "";
+export const CLIP_NONE = "none";
+
 export type SiteContent = {
   seo: { title: string; description: string };
 
@@ -109,7 +122,19 @@ export type SiteContent = {
         note: string;
       }[];
     };
-    items: (LinkedItem & { image: string })[];
+    items: (LinkedItem & {
+      /** Бүтэн дэлгэцийн дэвсгэр, thumbnail болон pop-up-ын зураг. */
+      image: string;
+      /** Брэндийн лого — слайдын доод зурваст цагаан тавцан дээр, мөн
+       *  дэлгэрэнгүй pop-up дотор гарна. Хоосон үед гарчгаар нь таарсан
+       *  дотоод тэмдэг хэрэглэгдэнэ. Дэвсгэр зурагтай ХОЛБООГҮЙ. */
+      logo: string;
+      /** Слайдын ард давтагдан тоглох клип.
+       *    `CLIP_AUTO` ("")   — барилгын үе шатны дарааллаар автоматаар,
+       *    `CLIP_NONE`        — клипгүй, зөвхөн зураг,
+       *    бусад              — заасан клипийн хаяг (`STRUCTURE_CLIPS`). */
+      video: string;
+    })[];
   };
 
   /** VR / 360° аялал. `embedUrl` тохируулсан үед постер дээр дарахад
@@ -419,18 +444,24 @@ export const DEFAULT_SITE_CONTENT: SiteContent = {
         body: "Газар хөдлөлтийн 8 баллд тэсвэртэй, айл хоорондын дуу тусгаарлалт сайтай бүрэн цутгамал хийцлэл.",
         link: "",
         image: "",
+        logo: "",
+        video: "",
       },
       {
         title: "Veka Softline",
         body: "E-Low түрхлэгтэй, гурван давхар шилтэй вакум цонх нь гэрт буй дулааныг гадагшлуулахгүй байхаас гадна хэт халалтаас хамгаална.",
         link: "https://www.veka.de/window-fabricators/products-services/front-doors/softline-82/",
         image: "",
+        logo: "",
+        video: "",
       },
       {
         title: "Yaret aluminum composite panels",
         body: "Гурван давхар дулаалга бүхий гал дэмжихгүй метал фасад.",
         link: "https://www.yaretacp.com/",
         image: "",
+        logo: "",
+        video: "",
       },
     ],
   },

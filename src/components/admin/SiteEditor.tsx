@@ -7,7 +7,13 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { cloneDefaultSiteContent, type SiteContent } from "@/lib/site-content";
+import {
+  CLIP_AUTO,
+  CLIP_NONE,
+  STRUCTURE_CLIPS,
+  cloneDefaultSiteContent,
+  type SiteContent,
+} from "@/lib/site-content";
 import { Button, Card, Field, FileField, ImageField, Select, TextArea, TextInput, Toggle } from "./ui";
 
 type SectionId =
@@ -609,7 +615,7 @@ function renderSection(
               <ListEditor
                 items={c.equip.items}
                 onChange={(next) => edit((d) => void (d.equip.items = next))}
-                blank={() => ({ title: "Гарчиг", body: "Тайлбар.", link: "", image: "" })}
+                blank={() => ({ title: "Гарчиг", body: "Тайлбар.", link: "", image: "", logo: "", video: "" })}
                 title={(item) => item.title}
                 addLabel="Зүйл нэмэх"
               >
@@ -632,8 +638,44 @@ function renderSection(
                       }
                       ratio="16/9"
                       maxEdge={2000}
-                      hint="Бүтэн дэлгэцийн дэвсгэр, thumbnail болон pop-up-ын зураг. Өргөн хэвтээ зураг тохиромжтой."
+                      hint="Бүтэн дэлгэцийн дэвсгэр, thumbnail болон pop-up-ын зураг. Өргөн хэвтээ зураг тохиромжтой. Брэндийн логог ЭНД БҮҮ оруул — доор нь тусдаа талбар бий."
                     />
+                    <ImageField
+                      label="Брэндийн лого (заавал биш)"
+                      value={item.logo}
+                      onChange={(url) =>
+                        edit((d) => {
+                          const it = d.equip.items[itemIndex];
+                          if (it) it.logo = url;
+                        })
+                      }
+                      ratio="16/9"
+                      maxEdge={600}
+                      hint="Слайдын доод зурваст ЦАГААН тавцан дээр, мөн дэлгэрэнгүй pop-up дотор гарна — тиймээс бараан/өнгөт лого тохиромжтой (цагаан лого харагдахгүй). Тунгалаг дэвсгэртэй PNG/SVG хамгийн зөв."
+                    />
+                    <Field
+                      label="Дэвсгэр клип"
+                      hint="Слайдын ард дуугүй давтагдана. «Автомат» үед барилгын үе шатны дарааллаар өөрөө оногдоно — гэхдээ дээрх «Зураг»-ийг тохируулсан слайдад клип тоглохгүй."
+                    >
+                      <Select
+                        value={item.video}
+                        onChange={(e) => set({ video: e.target.value })}
+                      >
+                        <option value={CLIP_AUTO}>Автомат (үе шатны дарааллаар)</option>
+                        <option value={CLIP_NONE}>Клипгүй — зөвхөн зураг</option>
+                        {STRUCTURE_CLIPS.map((clip) => (
+                          <option key={clip.value} value={clip.value}>
+                            {clip.label}
+                          </option>
+                        ))}
+                        {/* Гараар бичсэн танихгүй хаяг байвал алдагдуулахгүй. */}
+                        {item.video &&
+                          item.video !== CLIP_NONE &&
+                          !STRUCTURE_CLIPS.some((clip) => clip.value === item.video) && (
+                            <option value={item.video}>{item.video}</option>
+                          )}
+                      </Select>
+                    </Field>
                     <Field label="Холбоос" hint="Үйлдвэрлэгчийн хуудас. Хоосон бол линк харагдахгүй.">
                       <TextInput
                         value={item.link}
