@@ -660,9 +660,15 @@ body:has(.mono-page) .ely-cursor {
   from { opacity: 0; }
   to { opacity: 1; }
 }
+/* Картын харагдах эсэх нь анимациас ХАМААРАХГҮЙ байх ёстой: `both` fill
+   нь анимаци эхлээгүй/зогссон үед 0%-ийн кадрыг барьдаг тул opacity-г
+   энд оруулбал цаг зогсоход (нуугдсан/тоормослогдсон таб, зарим in-app
+   browser) pop-up мount хийгдсэн, гүйлт түгжигдсэн атлаа ХАРАГДАХГҮЙ
+   үлддэг. Тиймээс зөвхөн шилжилтийг хөдөлгөнө — хамгийн муудаа 28px
+   доогуур зогссон ч уншигдана. */
 @keyframes mono-panel-in {
-  from { opacity: 0; transform: translateY(28px) scale(0.985); }
-  to { opacity: 1; transform: none; }
+  from { transform: translateY(28px) scale(0.985); }
+  to { transform: none; }
 }
 .mono-modal-veil {
   animation: mono-veil-in 0.35s ease-out both;
