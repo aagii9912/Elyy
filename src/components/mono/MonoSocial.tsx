@@ -112,7 +112,7 @@ export function SocialList({ items }: { items: SocialLink[] }) {
               strokeWidth="1.6"
               strokeLinecap="round"
               strokeLinejoin="round"
-              className="h-3.5 w-3.5 text-white/30 transition-all duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-lime"
+              className="h-3.5 w-3.5 shrink-0 text-white/30 transition-all duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-lime"
             >
               <path d="M8 16.2 16.2 8m0 0H9.9m6.3 0v6.3" />
             </svg>

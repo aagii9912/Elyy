@@ -300,14 +300,23 @@ export function MonoApartments({ site }: { site: SiteContent }) {
             className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto px-5 pb-2 md:px-10 lg:flex-row lg:gap-10 lg:overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex min-h-0 shrink-0 items-center justify-center lg:flex-1 lg:shrink">
+            {/* Самбартай үед зураг гар утсанд 46vh-д багтаж, доогуур нь
+                тайлбар гүйнэ. Самбаргүй (танихгүй зураг) үед хуучин
+                байдлаараа бүтэн зайг эзэлж төвлөрнө. */}
+            <div
+              className={`flex min-h-0 items-center justify-center ${
+                plan ? "shrink-0 lg:flex-1 lg:shrink" : "flex-1"
+              }`}
+            >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 key={current.view}
                 src={current.view}
                 alt={alt(current.unit, current.viewIndex)}
                 decoding="async"
-                className="max-h-[46vh] max-w-full rounded-2xl object-contain lg:max-h-full"
+                className={`max-w-full rounded-2xl object-contain lg:max-h-full ${
+                  plan ? "max-h-[46vh]" : "max-h-full"
+                }`}
               />
             </div>
 

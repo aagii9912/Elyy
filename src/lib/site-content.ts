@@ -432,7 +432,7 @@ export const DEFAULT_SITE_CONTENT: SiteContent = {
       {
         title: "A тип",
         rooms: "3 өрөө",
-        area: "79.70 м²",
+        area: "84.66 м²",
         block: "B1",
         thumb: "/images/axono/a-01-sm.jpg",
         views: ["/images/axono/a-01.jpg", "/images/axono/a-02.jpg"],
@@ -440,7 +440,7 @@ export const DEFAULT_SITE_CONTENT: SiteContent = {
       {
         title: "B тип",
         rooms: "4 өрөө",
-        area: "137.59 м²",
+        area: "133.61 м²",
         block: "B1",
         thumb: "/images/axono/b-01-sm.jpg",
         views: ["/images/axono/b-01.jpg", "/images/axono/b-02.jpg"],
@@ -448,7 +448,7 @@ export const DEFAULT_SITE_CONTENT: SiteContent = {
       {
         title: "C тип",
         rooms: "3 өрөө",
-        area: "78.67 м²",
+        area: "80.32 м²",
         block: "B1",
         thumb: "/images/axono/c-01-sm.jpg",
         views: ["/images/axono/c-01.jpg", "/images/axono/c-02.jpg"],
@@ -456,7 +456,7 @@ export const DEFAULT_SITE_CONTENT: SiteContent = {
       {
         title: "D тип",
         rooms: "2 өрөө",
-        area: "50.15 м²",
+        area: "51.72 м²",
         block: "B1",
         thumb: "/images/axono/d-01-sm.jpg",
         views: ["/images/axono/d-01.jpg", "/images/axono/d-02.jpg"],
@@ -464,7 +464,7 @@ export const DEFAULT_SITE_CONTENT: SiteContent = {
       {
         title: "D тип · 2 давхар",
         rooms: "2 өрөө",
-        area: "2-р давхрын төлөвлөлт",
+        area: "49.19 м²",
         block: "B1",
         thumb: "/images/axono/d2f-01-sm.jpg",
         views: ["/images/axono/d2f-01.jpg", "/images/axono/d2f-02.jpg"],
@@ -472,7 +472,7 @@ export const DEFAULT_SITE_CONTENT: SiteContent = {
       {
         title: "E тип",
         rooms: "3 өрөө",
-        area: "88.08 м²",
+        area: "89.73 м²",
         block: "B2",
         thumb: "/images/axono/e-01-sm.jpg",
         views: ["/images/axono/e-01.jpg", "/images/axono/e-02.jpg"],
@@ -480,7 +480,7 @@ export const DEFAULT_SITE_CONTENT: SiteContent = {
       {
         title: "E тип · 2 давхар",
         rooms: "2 өрөө",
-        area: "2-р давхрын төлөвлөлт",
+        area: "64.16 м²",
         block: "B2",
         thumb: "/images/axono/e2f-01-sm.jpg",
         views: ["/images/axono/e2f-01.jpg", "/images/axono/e2f-02.jpg"],
@@ -731,7 +731,7 @@ export const DEFAULT_SITE_CONTENT: SiteContent = {
       },
       {
         keys: "өрөө, мкв, м², талбай, сонголт, загвар",
-        a: "1 өрөө 38–52 м², 2 өрөө 58–74 м², 3 өрөө 82–104 м², 4 өрөө 110 м²-аас дээш талбайтай. “Өрөөний сонголт” хэсгээс дэлгэрэнгүйг үзнэ үү.",
+        a: "2 өрөө 49.19–64.16 м², 3 өрөө 80.32–89.73 м², 4 өрөө 133.61 м². “Өрөөний сонголт” хэсгээс тип бүрийн төлөвлөгөө, өрөөний задаргааг үзнэ үү.",
       },
       {
         keys: "үнэ, ханш, зээл, төлбөр, өртөг, хөнгөлөлт",

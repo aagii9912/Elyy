@@ -93,7 +93,11 @@ function FooterIcon({ name, className = "" }: { name: IconName; className?: stri
 
 /** Цэсний мөрийн icon — админаас href өөрчилвөл сум руу буцаж уналгүй ажиллана. */
 const menuIcon = (href: string, brochureUrl: string): IconName => {
-  if (href === brochureUrl || /\.[a-z0-9]{2,4}$/i.test(href)) return "download";
+  /* Файл эсэхийг ЗӨВХӨН замын хэсгээр шийднэ — эс тэгвэл гадаад
+     холбоосын ".com" өргөтгөл мэт уншигдаж, external биш download
+     icon авна (ж: https://facebook.com). */
+  const path = href.replace(/^https?:\/\/[^/]+/i, "");
+  if (href === brochureUrl || /\.[a-z0-9]{2,4}$/i.test(path)) return "download";
   if (href === NEWS_PATH || href.startsWith(`${NEWS_PATH}/`)) return "news";
   if (/^https?:\/\//.test(href)) return "external";
   if (href.includes("apartment")) return "plan";
@@ -107,7 +111,7 @@ const menuIcon = (href: string, brochureUrl: string): IconName => {
 function ColumnTitle({ icon, children }: { icon: IconName; children: React.ReactNode }) {
   return (
     <p className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/45">
-      <FooterIcon name={icon} className="h-3.5 w-3.5 text-lime/80" />
+      <FooterIcon name={icon} className="h-3.5 w-3.5 shrink-0 text-lime/80" />
       {children}
     </p>
   );
