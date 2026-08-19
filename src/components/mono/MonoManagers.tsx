@@ -50,16 +50,17 @@ export function MonoManagers({ site }: { site: SiteContent }) {
               className="group flex flex-col rounded-2xl border border-night/10 bg-surface p-7 transition-colors duration-300 hover:border-night/30"
             >
               {m.photo && (
-                /* Хөрөг нь тунгалаг дэвсгэртэй тайрсан зураг байх тул
-                   `contain` + доод захад нааж бүтэн биеийг харуулна. */
-                <div className="relative mb-5 aspect-[3/4] overflow-hidden rounded-xl bg-night/5">
+                /* Хөрөг бүр өөр өндөртэй тул зургийн харьцаагаар биш,
+                   тогтмол 1:1 хайрцагт `cover`-оор тайрна. Дээд захаас нь
+                   авбал нүүр/бие багтаж, хөл нь хасагдана. */
+                <div className="relative mb-5 aspect-square w-40 overflow-hidden rounded-xl bg-night/5 sm:w-44">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={m.photo}
                     alt={m.name}
                     loading="lazy"
                     decoding="async"
-                    className="absolute inset-x-0 bottom-0 mx-auto h-full w-full object-contain object-bottom transition-transform duration-700 group-hover:scale-[1.03]"
+                    className="absolute inset-0 h-full w-full origin-top object-cover object-top transition-transform duration-700 group-hover:scale-[1.03]"
                   />
                 </div>
               )}
