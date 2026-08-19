@@ -35,27 +35,45 @@ export function MonoKicker({
 
 /** Pointer-drag horizontal scrolling for carousel strips (mouse).
  *  Pass your own ref when the element already needs one. */
+/** Энэ хэмжээнээс бага хөдөлгөөнийг чирэлт биш, даралт гэж үзнэ (px). */
+const DRAG_THRESHOLD = 5;
+
 export function useDragScroll<T extends HTMLElement>(externalRef?: React.RefObject<T | null>) {
   const internal = useRef<T>(null);
   const ref = externalRef ?? internal;
-  const state = useRef({ active: false, startX: 0, startLeft: 0 });
+  const state = useRef({ down: false, dragging: false, startX: 0, startLeft: 0, pointerId: -1 });
 
   const onPointerDown = useCallback((e: React.PointerEvent<T>) => {
     const el = ref.current;
     if (!el || e.pointerType === "touch") return;
-    state.current = { active: true, startX: e.clientX, startLeft: el.scrollLeft };
-    el.setPointerCapture(e.pointerId);
+    /* pointerdown дээр setPointerCapture ХИЙХГҮЙ. Capture тавимагц
+       дараагийн бүх pointer эвент БОЛОН click нь контейнер руу
+       шилждэг (Chrome, Pointer Events тодорхойлолтын дагуу) — улмаас
+       доторх товчнууд (ж: "Сонирхох", аксонометрийг томруулах) огт
+       дарагдахгүй болно. Зөвхөн үнэхээр чирч эхэлсэн үед capture-г
+       DRAG_THRESHOLD давсны дараа тавина. */
+    state.current = { down: true, dragging: false, startX: e.clientX, startLeft: el.scrollLeft, pointerId: e.pointerId };
   }, [ref]);
 
   const onPointerMove = useCallback((e: React.PointerEvent<T>) => {
     const el = ref.current;
-    if (!el || !state.current.active) return;
-    el.scrollLeft = state.current.startLeft - (e.clientX - state.current.startX);
+    const s = state.current;
+    if (!el || !s.down) return;
+    const dx = e.clientX - s.startX;
+    if (!s.dragging) {
+      if (Math.abs(dx) < DRAG_THRESHOLD) return;
+      s.dragging = true;
+      el.setPointerCapture(s.pointerId);
+    }
+    el.scrollLeft = s.startLeft - dx;
   }, [ref]);
 
   const end = useCallback((e: React.PointerEvent<T>) => {
-    state.current.active = false;
-    ref.current?.releasePointerCapture?.(e.pointerId);
+    const el = ref.current;
+    const s = state.current;
+    if (s.dragging && el?.hasPointerCapture?.(e.pointerId)) el.releasePointerCapture(e.pointerId);
+    s.down = false;
+    s.dragging = false;
   }, [ref]);
 
   return { ref, onPointerDown, onPointerMove, onPointerUp: end, onPointerCancel: end };
