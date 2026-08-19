@@ -14,6 +14,7 @@ import {
   cloneDefaultSiteContent,
   type SiteContent,
 } from "@/lib/site-content";
+import { externalHref } from "@/lib/links";
 import { Button, Card, Field, FileField, ImageField, Select, TextArea, TextInput, Toggle } from "./ui";
 
 type SectionId =
@@ -60,6 +61,55 @@ const SECTIONS: { id: SectionId; label: string; hint: string }[] = [
   { id: "chatbot", label: "Чатбот", hint: "Мэндчилгээ, хариултууд" },
   { id: "seo", label: "SEO / мета", hint: "Хайлтын гарчиг, тайлбар" },
 ];
+
+/* ------------------------------------------------------------------ */
+/* Гадаад холбоосын талбар — сошиал, үйлдвэрлэгчийн хуудас             */
+/* ------------------------------------------------------------------ */
+
+/* Сошиал мөрүүдийн өгөгдмөл утга нэгэн үе "#" байсан тул хаягаа түүний
+   АРД наахад "#https://www.facebook.com/…" болж, сайт дээр дарахад
+   Facebook руу очихгүй зөвхөн хуудасны hash солигддог байв. Иймд:
+     • фокус алдахад утгыг автоматаар цэвэрлэнэ (тэргүүн "#"-ийг авч,
+       дутуу "https://"-ийг нөхнө),
+     • доор нь ямар хаяг руу очихыг шууд харуулна. */
+
+function linkHint(raw: string, empty: string): React.ReactNode {
+  const value = (raw ?? "").trim();
+  if (!value) return empty;
+  const href = externalHref(value);
+  if (!href)
+    return (
+      <span className="text-amber-600">
+        Холбоос танигдахгүй байна — бүтэн хаягаа (https://…) оруулна уу. Ийм утга сайт дээр
+        харагдахгүй.
+      </span>
+    );
+  if (href !== value) return <span className="text-amber-600">Хадгалахад: {href}</span>;
+  return "Шинэ табд нээгдэнэ.";
+}
+
+function LinkInput({
+  value,
+  onChange,
+  placeholder = "https://…",
+}: {
+  value: string;
+  onChange: (next: string) => void;
+  placeholder?: string;
+}) {
+  return (
+    <TextInput
+      value={value}
+      placeholder={placeholder}
+      onChange={(e) => onChange(e.target.value)}
+      /* Бичиж байх үед бус, дуусахад л засна — курсор үсэрхгүй. */
+      onBlur={(e) => {
+        const fixed = externalHref(e.target.value);
+        if (fixed && fixed !== e.target.value) onChange(fixed);
+      }}
+    />
+  );
+}
 
 /* ------------------------------------------------------------------ */
 /* Жагсаалт засварлагч — нэмэх / зөөх / устгах                         */
@@ -676,12 +726,11 @@ function renderSection(
                           )}
                       </Select>
                     </Field>
-                    <Field label="Холбоос" hint="Үйлдвэрлэгчийн хуудас. Хоосон бол линк харагдахгүй.">
-                      <TextInput
-                        value={item.link}
-                        placeholder="https://…"
-                        onChange={(e) => set({ link: e.target.value })}
-                      />
+                    <Field
+                      label="Холбоос"
+                      hint={linkHint(item.link, "Үйлдвэрлэгчийн хуудас. Хоосон бол линк харагдахгүй.")}
+                    >
+                      <LinkInput value={item.link} onChange={(link) => set({ link })} />
                     </Field>
                   </>
                 )}
@@ -2016,11 +2065,14 @@ function renderSection(
                       <option value="link">Ерөнхий холбоос</option>
                     </Select>
                   </Field>
-                  <Field label="Холбоос" hint="https://…">
-                    <TextInput
+                  <Field
+                    label="Холбоос"
+                    hint={linkHint(item.href, "https://… — хоосон бол сайт дээр харагдахгүй.")}
+                  >
+                    <LinkInput
                       value={item.href}
                       placeholder="https://www.facebook.com/…"
-                      onChange={(e) => set({ href: e.target.value })}
+                      onChange={(href) => set({ href })}
                     />
                   </Field>
                 </div>

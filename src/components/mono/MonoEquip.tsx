@@ -28,6 +28,7 @@
 
 import { useState } from "react";
 import { CLIP_NONE, STRUCTURE_CLIPS, type SiteContent } from "@/lib/site-content";
+import { externalHref } from "@/lib/links";
 import { LogoMark } from "@/components/Logo";
 import { MonoKicker } from "./shared";
 import { MonoModal } from "./MonoModal";
@@ -127,6 +128,9 @@ export function MonoEquip({ site }: { site: SiteContent }) {
   /* Дэлгэрэнгүй pop-up нь нээгдсэн үеийн слайдыг барина — ард нь
      thumbnail солигдсон ч агуулга үсрэхгүй. */
   const detail = typeof open === "number" ? items[open] : null;
+  /* Үйлдвэрлэгчийн холбоос — админ схемгүй ("veka.de/…") эсвэл "#"-ийн
+     ард бичсэн ч зөв газар очно. Цэвэрлэхэд хоосон бол товч гарахгүй. */
+  const detailHref = externalHref(detail?.link);
 
   const equipment: IntegrationItem[] = equip.equipment.items.map((item, i) => ({
     id: `${item.category}-${i}`,
@@ -232,9 +236,9 @@ export function MonoEquip({ site }: { site: SiteContent }) {
 
               <div className="mt-7 flex flex-wrap items-center justify-between gap-4 border-t border-night/10 pt-6">
                 <BrandMark title={detail.title} logo={detail.logo} className="h-7" />
-                {detail.link && (
+                {detailHref && (
                   <a
-                    href={detail.link}
+                    href={detailHref}
                     target="_blank"
                     rel="noopener noreferrer"
                     data-cursor-hover

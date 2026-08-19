@@ -1,15 +1,21 @@
 /* /mono — сошиал холбоос. Админаас (`/admin/site` → Хөл хэсэг) нэр,
-   холбоос, icon-ыг сонгоно. `href` хоосон эсвэл "#" бол тухайн мөр
-   харагдахгүй — ингэснээр тохируулаагүй холбоос хэрэглэгчид гарахгүй. */
+   холбоос, icon-ыг сонгоно. `href` холбоос болж чадахгүй (хоосон, "#")
+   бол тухайн мөр харагдахгүй — ингэснээр тохируулаагүй холбоос
+   хэрэглэгчид гарахгүй. */
 
+import { externalHref } from "@/lib/links";
 import type { SocialLink } from "@/lib/site-content";
 
-/** Тохируулсан (жинхэнэ URL-тэй) холбоосууд. */
-export const liveSocials = (items: SocialLink[]) =>
-  items.filter((i) => {
-    const href = i.href?.trim();
-    return Boolean(href) && href !== "#" && i.label?.trim();
-  });
+/** Тохируулсан (жинхэнэ URL-тэй) холбоосууд — `href` нь цэвэрлэгдсэн
+ *  хэлбэрээр буцна. Сошиал талбарын өгөгдмөл утга нэгэн үе "#" байсан
+ *  тул админ хаягаа түүний АРД наачихвал "#https://facebook.com/…"
+ *  болж, дарахад Facebook руу очихгүй зөвхөн сайтын hash солигддог
+ *  байв. `externalHref` тэргүүн "#"-ийг авч, дутуу "https://"-ийг
+ *  нөхнө. */
+export const liveSocials = (items: SocialLink[]): SocialLink[] =>
+  items
+    .map((i) => ({ ...i, href: externalHref(i.href) }))
+    .filter((i) => Boolean(i.href) && Boolean(i.label?.trim()));
 
 /* 24×24 viewBox, currentColor-оор будагдана. */
 const PATHS: Record<string, string> = {

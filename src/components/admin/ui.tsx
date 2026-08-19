@@ -35,7 +35,9 @@ export function Field({
   children,
 }: {
   label: string;
-  hint?: string;
+  /* ReactNode — зөвхөн текст биш, өнгөт сануулга ч байж болно
+     (ж: холбоос буруу оруулсан үеийн шар анхааруулга). */
+  hint?: React.ReactNode;
   children: React.ReactNode;
 }) {
   return (
