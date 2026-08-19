@@ -22,6 +22,7 @@
    phrasing content тул <div>/<p> хүчингүй). */
 
 import { useId, useRef, useState } from "react";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 export type AccordionPanel = {
@@ -54,6 +55,10 @@ export type InteractiveImageAccordionProps = {
 };
 
 const EASE = "ease-[cubic-bezier(0.16,1,0.3,1)]";
+
+/** Самбарын хамгийн ТОМ хэмжээ: утсан дээр бүтэн өргөн, ширээн дээр
+ *  дэлгэгдсэн үеийн ~67% (дуудагчийн багтаамж 1500px-ээр хязгаарлагдана). */
+const PANEL_SIZES = "(max-width: 767px) calc(100vw - 40px), (max-width: 1500px) 67vw, 1000px";
 
 /* Хоёр давхар scrim, opacity-гоор солигдоно. Градиентээс градиент руу
    шилжих нь найдваргүй тул хоёуланг нь үргэлж зурж, зөвхөн ил тодыг
@@ -103,15 +108,19 @@ function PanelBody({
 
   return (
     <>
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
+      {/* Эх рендерүүд ширээний хэмжээтэй (4 файл ≈ 1.6 МБ) — `next/image`
+          нь `sizes`-ийн дагуу AVIF/WebP хувилбар өгнө. Дэлгэгдсэн самбар
+          нь ширээн дээр багтаамжийн ~67% (`activeRatio` 6 ба 3 хураангуй),
+          утсан дээр бүтэн өргөн. Хураангуй самбар нарийхан ч ижил зураг
+          авна: аль ч самбар дэлгэгдэж болно. */}
+      <Image
         src={item.image}
         alt=""
         draggable={false}
-        loading="lazy"
-        decoding="async"
+        fill
+        sizes={PANEL_SIZES}
         className={cn(
-          "absolute inset-0 h-full w-full object-cover transition-[filter,transform] duration-700",
+          "object-cover transition-[filter,transform] duration-700",
           EASE,
           isActive
             ? "scale-100 brightness-100 grayscale-0"

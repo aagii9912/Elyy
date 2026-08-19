@@ -2,8 +2,15 @@
 
 /* /mono — Intro. The client's clip — the towers rising into a clear
    daylight sky — baked to 160 WebP frames and scrubbed frame-by-frame
-   by scroll (desktop only; mobile/reduced-motion gets a single still).
+   by scroll (DESKTOP ONLY; reduced-motion gets the closing frame).
    Rebuild with `node scripts/build-scroll-frames.mjs hero`.
+
+   Утсан дээр кадар ОГТ татахгүй: 1280×720 кадар нь 375pt × 3 нягтралын
+   дэлгэцэд ~3 дахин томсож бүдгэрдэг. Оронд нь тэр дэлгэцэд зориулж
+   тайрсан хөрөг зураг CSS дэвсгэрээр сууна (`build-mobile-stills.mjs`).
+   `md:hidden` давхаргын дэвсгэрийг ширээний хөтөч ТАТДАГГҮЙ тул энэ нь
+   ширээнд нэг ч байт нэмэхгүй, харин утсанд SSR-ийн эхний HTML-ээс
+   шууд ачаалагдаж LCP-г түргэсгэнэ.
 
    Хэрэглэгч эхний удаа гүйлгэмэгц үлдсэн замыг нь `useScrollAutoplay`
    өөрөө гүйлгэж, клипийг кино шиг эцэс хүртэл тоглуулна. */
@@ -17,8 +24,8 @@ import { useScrollAutoplay } from "./shared";
 
 const FRAME_COUNT = 160;
 const framePath = (i: number) => `/hero-video-frames/frame_${String(i).padStart(3, "0")}.webp`;
-/** Still shown to mobile / reduced-motion: the towers fully risen. */
-const STILL_FRAME = 132;
+/** Утасны хөрөг зураг — 768×1536 зүсэм, ELYSIUM тэмдэгт цамхаг дээр голлосон. */
+const MOBILE_STILL = "/images/mobile/hero.webp";
 /** Бүлгийг эхнээс нь дуустал автоматаар гүйлгэх хугацаа (сек) —
     160 кадр / 7сек ≈ 23fps, эх клипийн 24fps-тэй ойрхон. */
 const AUTOPLAY_SECONDS = 7;
@@ -49,6 +56,9 @@ export function MonoHero({ site }: { site: SiteContent }) {
 
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const isMobile = window.matchMedia("(max-width: 767px)").matches;
+    // Утсан дээр canvas нь `hidden` — clientWidth нь 0, зурах юм ч байхгүй.
+    // Кадар татахаас өмнө буцна: энэ хэсэг утсанд 0 хүсэлт үүсгэнэ.
+    if (isMobile) return;
 
     const images: HTMLImageElement[] = [];
     const state = { frame: 0 };
@@ -71,12 +81,12 @@ export function MonoHero({ site }: { site: SiteContent }) {
       ctx2d.drawImage(img, (cw - w) / 2, (ch - h) / 2, w, h);
     };
 
-    const framesToLoad = !reduce && !isMobile ? FRAME_COUNT : 1;
+    const framesToLoad = reduce ? 1 : FRAME_COUNT;
     for (let i = 1; i <= framesToLoad; i++) {
       const im = new Image();
       // Frame 1 is bare sky before the towers rise — the single-frame
-      // fallback needs a shot that actually shows the buildings.
-      im.src = framePath(framesToLoad === 1 ? STILL_FRAME : i);
+      // fallback takes the closing frame, where the towers are fully up.
+      im.src = framePath(framesToLoad === 1 ? FRAME_COUNT : i);
       if (i === 1) im.onload = () => { resize(); draw(); };
       images.push(im);
     }
@@ -87,7 +97,7 @@ export function MonoHero({ site }: { site: SiteContent }) {
     const ctx = gsap.context(() => {
       // Entrance animations are pure CSS (mono-fade-up / mono-float) so
       // they can't get stuck mid-tween on StrictMode/HMR remounts.
-      if (!reduce && !isMobile) {
+      if (!reduce) {
         const tween = gsap.to(state, {
           frame: FRAME_COUNT - 1,
           ease: "none",
@@ -114,7 +124,15 @@ export function MonoHero({ site }: { site: SiteContent }) {
   return (
     <section id="top" ref={root} className="relative h-[100svh] w-full bg-night md:h-[210vh]">
       <div className="sticky top-0 flex h-[100svh] min-h-[620px] w-full overflow-hidden">
-        <canvas ref={canvas} className="absolute inset-0 z-0 h-full w-full" />
+        {/* Утасны дэвсгэр — `<img>` биш CSS дэвсгэр: `display:none` дэд
+            модны дэвсгэр зургийг хөтөч татдаггүй тул ширээнд энэ мөр
+            нэг ч хүсэлт үүсгэхгүй. */}
+        <div
+          aria-hidden
+          className="absolute inset-0 z-0 bg-cover bg-center md:hidden"
+          style={{ backgroundImage: `url("${MOBILE_STILL}")` }}
+        />
+        <canvas ref={canvas} className="absolute inset-0 z-0 hidden h-full w-full md:block" />
         {/* Шинэ кадрууд өдрийн цэлмэг тэнгэртэй — өмнөх нар жаргах клипээс
             хамаагүй цайвар тул цагаан бичиг дан дээр нь уншигдахгүй. Хоёр
             давхар хөшиг: дээд/доод шугаман (толгой ба товчнуудад) + бичгийн

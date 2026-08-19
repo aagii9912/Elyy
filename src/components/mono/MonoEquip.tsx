@@ -22,7 +22,10 @@
    `/admin/site` → Барилгын бүтэц хэсгээс удирдагдана.
 
    Агаар сэлгэлтийн систем гурван үндсэн СЛАЙДААС хасагдсан (`HIDDEN`) —
-   гэхдээ тоноглолын жагсаалтад хэвээр байна. */
+   гэхдээ тоноглолын жагсаалтад хэвээр байна.
+
+   Утсан дээр клип огт татагдахгүй; дэвсгэр нь хэвтээ кадар биш, тэр
+   дэлгэцэд зориулж тайрсан хөрөг зураг болно (`imageMobileFor`). */
 
 import { useState } from "react";
 import { CLIP_NONE, STRUCTURE_CLIPS, type SiteContent } from "@/lib/site-content";
@@ -61,6 +64,19 @@ const FALLBACK_FRAMES = [
 ];
 const imageFor = (image: string, i: number) =>
   image?.trim() || FALLBACK_FRAMES[i % FALLBACK_FRAMES.length];
+
+/* Утасны хөрөг дэвсгэр — кадруудтай ЯГ ижил дараалалаар (цутгамал
+   каркас → цонх → фасад), `node scripts/build-mobile-stills.mjs
+   structure`. Дүрэм нь `videoFor`-тэй ижил: админ тухайн слайдад зураг
+   өөрөө сонгосон бол түүнийг дарж бичихгүй — сонгосон зураг нь хоёр
+   урсгалд ажиллана. */
+const FALLBACK_MOBILE = [
+  "/images/mobile/structure-01-frame.webp",
+  "/images/mobile/structure-02-windows.webp",
+  "/images/mobile/structure-03-facade.webp",
+];
+const imageMobileFor = (image: string, i: number) =>
+  image?.trim() ? undefined : FALLBACK_MOBILE[i % FALLBACK_MOBILE.length];
 
 /* Слайдын ард давтагдан тоглох клип. Админ өөрөө сонгоно
    (`/admin/site` → Барилгын бүтэц → зүйл → «Дэвсгэр клип»):
@@ -138,6 +154,7 @@ export function MonoEquip({ site }: { site: SiteContent }) {
   const slides: ShowcaseSlide[] = items.map((item, i) => ({
     id: `${item.title}-${i}`,
     image: imageFor(item.image, i),
+    imageMobile: imageMobileFor(item.image, i),
     video: videoFor(item, i),
     alt: item.title,
     name: item.title,

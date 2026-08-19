@@ -16,14 +16,21 @@
    дуудагч тухайн зүйлээр pop-up нээх, дүрс тэмдэг харуулах зэрэгт мөн
    ашиглана.
 
-   §Видео. Слайд бүр өөрийн клиптэй, ЗӨВХӨН идэвхтэй нь тоглоно —
-   бусад нь зогсоно, тиймээс нэг зэрэг нэг л клип декодлогдоно. Клип
-   бүр `preload="none"`-той төрж, тухайн слайд идэвхжиж, хэсэг нь
-   дэлгэцэнд ойртсон үед л `src` авна: гурван клипийг урьдчилж татахгүй.
-   Эхний кадраа зурах хүртэл тунгалаг — доор нь зураг байгаа тул хар
-   нүх үүсэхгүй. Слайд дахин идэвхжихэд клип эхнээсээ эхэлнэ (барилга
-   дахин босно). prefers-reduced-motion үед клип огт татагдахгүй, зураг
-   хэвээр үлдэнэ.
+   §Видео. ЗӨВХӨН `md`-ээс дээш. Слайд бүр өөрийн клиптэй, ЗӨВХӨН
+   идэвхтэй нь тоглоно — бусад нь зогсоно, тиймээс нэг зэрэг нэг л клип
+   декодлогдоно. Клип бүр `preload="none"`-той төрж, тухайн слайд
+   идэвхжиж, хэсэг нь дэлгэцэнд ойртсон үед л `src` авна: гурван клипийг
+   урьдчилж татахгүй. Эхний кадраа зурах хүртэл тунгалаг — доор нь зураг
+   байгаа тул хар нүх үүсэхгүй. Слайд дахин идэвхжихэд клип эхнээсээ
+   эхэлнэ (барилга дахин босно). prefers-reduced-motion үед, мөн УТСАН
+   дээр `near` худал хэвээр үлдэж клип огт `src` авахгүй — 1 МБ бичлэг
+   нь дэвсгэрийн хөдөлгөөнд гар утасны датагаар төлөх үнэ биш.
+
+   §Утас. Дэвсгэр нь тэр дэлгэцэд зориулж тайрсан ХӨРӨГ зураг
+   (`imageMobile`): хэвтээ кадар 375pt × 3 нягтралын дэлгэцэд ~3 дахин
+   томсож бүдгэрдэг. Хоёр давхарга CSS-ээр солигдоно — `display:none`
+   дэд модны дэвсгэр зургийг хөтөч ТАТДАГГҮЙ тул хэрэглэгч зөвхөн
+   өөрийн хувилбарын байтыг татна.
 
    Хөдөлгөөн: тайлбар ба нэр нь `key`-ээр дахин mount хийгдэж
    `.ui-fade-in` (0.5s) авна; идэвхтэй цэг зөвхөн opacity-гаар асна —
@@ -40,6 +47,11 @@ export type ShowcaseSlide = {
    *  хэрэгтэй: thumbnail, клип ачаалагдах хүртэлх дэвсгэр, мөн
    *  reduced-motion-ийн хувилбар болно. */
   image: string;
+  /** Утасны хөрөг дэвсгэр (`md`-ээс доош). Байхгүй үед `image` нь
+   *  хоёр урсгалд ажиллана. Thumbnail нь тухайн урсгалын дэвсгэртэйгээ
+   *  ижил файлыг сонгоно (`<picture>`) — тэр нь кэшэд аль хэдийн байгаа
+   *  тул нэмэлт татах юм гарахгүй. */
+  imageMobile?: string;
   /** Зургийн дээр давтагдан тоглох дэвсгэр клип (mp4, дуугүй).
    *  Байхгүй үед слайд зөвхөн зурагтай үлдэнэ. */
   video?: string;
@@ -102,12 +114,14 @@ export function PortraitShowcase({
   const index = slides.length ? ((active % slides.length) + slides.length) % slides.length : 0;
   const slide = slides[index];
 
-  /* Клипүүд зөвхөн хэсэг дөхөхөд амьдарна. reduced-motion үед огт биш —
-     `near` худал хэвээр үлдэж, слайдууд зурган хэвээр ажиллана. */
+  /* Клипүүд зөвхөн хэсэг дөхөхөд амьдарна. reduced-motion үед, мөн
+     утсан дээр огт биш — `near` худал хэвээр үлдэж, `<video>` элемент
+     `src` авахгүй тул нэг ч байт татагдахгүй. */
   useEffect(() => {
     const el = root.current;
     if (!el) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (!window.matchMedia("(min-width: 768px)").matches) return;
     const io = new IntersectionObserver(
       (entries) => setNear(entries.some((e) => e.isIntersecting)),
       { rootMargin: "50% 0px" }
@@ -175,10 +189,22 @@ export function PortraitShowcase({
             i === index ? "opacity-100" : "opacity-0"
           )}
         >
+          {/* Хоёр дэвсгэр — CSS-ээр солигдоно. `display:none` дэд модны
+              дэвсгэр зургийг хөтөч татдаггүй тул тухайн төхөөрөмж зөвхөн
+              өөрийнхөө хувилбарыг л татна. */}
           <div
-            className="absolute inset-0 bg-cover bg-center"
+            className={cn(
+              "absolute inset-0 bg-cover bg-center",
+              s.imageMobile && "hidden md:block"
+            )}
             style={{ backgroundImage: `url("${s.image}")` }}
           />
+          {s.imageMobile && (
+            <div
+              className="absolute inset-0 bg-cover bg-center md:hidden"
+              style={{ backgroundImage: `url("${s.imageMobile}")` }}
+            />
+          )}
           {s.video && (
             <video
               ref={(el) => {
@@ -258,7 +284,10 @@ export function PortraitShowcase({
                 tabIndex={i === index ? 0 : -1}
                 aria-label={s.name}
                 onClick={() => (i === index && onSlideOpen ? onSlideOpen(i) : onActiveChange(i))}
-                className="flex shrink-0 flex-col items-center gap-2 outline-offset-4"
+                /* Харагдах дугуй нь 44px, гэхдээ дугуйн булангууд хоосон —
+                   хуруу зөрөхөд амархан. `p-1.5` нь товчийг 56×68px хүрэх
+                   талбай болгоно; дүрс нь өөрчлөгдөхгүй. */
+                className="flex shrink-0 flex-col items-center gap-2 p-1.5 outline-offset-2"
               >
                 <span
                   aria-hidden
@@ -273,14 +302,20 @@ export function PortraitShowcase({
                     i === index ? "ring-2 ring-white" : "opacity-70 hover:opacity-100"
                   )}
                 >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={s.image}
-                    alt={s.alt ?? ""}
-                    loading={i === 0 ? "eager" : "lazy"}
-                    decoding="async"
-                    className="h-full w-full object-cover"
-                  />
+                  {/* Дэвсгэртэйгээ ИЖИЛ файлыг сонгоно — тэр нь аль хэдийн
+                      кэшэд байгаа тул thumbnail нэмэлт байт татахгүй. Утсан
+                      дээр `image`-ыг зааж болохгүй: 44px дугуйн төлөө
+                      ширээний бүтэн кадар татагдана. */}
+                  <picture>
+                    {s.imageMobile && <source media="(min-width: 768px)" srcSet={s.image} />}
+                    <img
+                      src={s.imageMobile ?? s.image}
+                      alt={s.alt ?? ""}
+                      loading="lazy"
+                      decoding="async"
+                      className="h-full w-full object-cover"
+                    />
+                  </picture>
                 </span>
               </button>
             ))}

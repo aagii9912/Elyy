@@ -18,7 +18,11 @@
    The section runs taller than the default chapter so the last point —
    the 2027 handover date — gets the same dwell as the other three. Тэр
    зайг гараар гүйлгэх нь ядаргаатай тул эхний гүйлтийн дараа бүлэг
-   өөрөө тоглоно (`autoplaySeconds`). */
+   өөрөө тоглоно (`autoplaySeconds`).
+
+   Дээрх бүхэн ЗӨВХӨН ширээний компьютерт. Утсан дээр энэ бүлэг pin-ээс
+   салж, цэг бүр өөрийн хөрөг зурагтай карт болно (`stills`) — учрыг
+   `MonoScrollStory`-гоос үзнэ үү. */
 
 import type { SiteContent } from "@/lib/site-content";
 import { MonoScrollStory } from "./MonoScrollStory";
@@ -43,7 +47,18 @@ export function MonoStats({ site }: { site: SiteContent }) {
       frameDir="/plan-frames"
       frameExt="webp"
       stillAt={0.12}
-      heightClass="h-[280vh] md:h-[340vh]"
+      /* Утасны картуудын хөрөг зураг — цэгүүдийн дарааллаар.
+         `node scripts/build-mobile-stills.mjs plan`. */
+      stills={[
+        "/images/mobile/plan-01-masterplan.webp",
+        "/images/mobile/plan-02-green.webp",
+        "/images/mobile/plan-03-street.webp",
+        "/images/mobile/plan-04-handover.webp",
+      ]}
+      /* Өндөр нь ЗӨВХӨН `md`-ээс дээш: утсан дээр pin байхгүй тул
+         2274px-ийн хоосон гүйлт ч байх шаардлагагүй — картууд
+         өөрсдийнхөө байгалийн өндрөөр байрлана. */
+      heightClass="md:h-[340vh]"
       /* ~2.4 дэлгэц / 13сек — цэг тутамд ~2.4сек уншиж амжина. */
       autoplaySeconds={13}
       variant="numbers"

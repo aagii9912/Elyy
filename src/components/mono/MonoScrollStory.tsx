@@ -16,7 +16,14 @@
 
    The bottom-right rail is clickable — picking an entry jumps the
    scroll to that point. Frames start loading only when the section
-   nears the viewport. */
+   nears the viewport.
+
+   ЗӨВХӨН ШИРЭЭНИЙ КОМПЬЮТЕРТ. Утсан дээр pin нь 2–3 дэлгэцийн зайд
+   ганц хөдөлгөөнгүй бүдэг кадар барьдаг байсан — гүйлт нь урт, ашиг нь
+   тэг. Тиймээс `md`-ээс доош энэ бүхэн бүрэн унтарч (canvas ч,
+   ScrollTrigger ч үүсэхгүй), цэг бүр өөрийн хөрөг зурагтай ЭНГИЙН карт
+   болж энгийн урсгалд ордог (`stills`). Хоёр урсгалыг CSS-ээр
+   солино — `interactive-image-accordion`-ы аргачлалтай ижил. */
 
 import { Fragment, useEffect, useRef, useState } from "react";
 import { useLenis } from "lenis/react";
@@ -76,6 +83,7 @@ export function MonoScrollStory({
   frameDir = "/hero-frames",
   frameExt = "jpg",
   stillAt = 0.6,
+  stills,
   heightClass = "h-[300vh] md:h-[380vh]",
   exitVeilClass = "bg-ground",
   autoplaySeconds = 0,
@@ -93,9 +101,16 @@ export function MonoScrollStory({
   /** Public folder holding the `frame_NNN` sequence. */
   frameDir?: string;
   frameExt?: string;
-  /** Where in the sequence the mobile / reduced-motion still is taken from (0–1). */
+  /** Where in the sequence the reduced-motion still is taken from (0–1). */
   stillAt?: number;
-  /** Section height — controls how much scroll each point gets. */
+  /** Утасны картуудын хөрөг зураг, цэгийн дарааллаар
+   *  (`scripts/build-mobile-stills.mjs`). Админ цэг нэмбэл жагсаалт
+   *  эргэлдэнэ — зураггүй карт үлдэхгүй. Огт өгөөгүй бол картууд
+   *  зурганүй, зөвхөн бичгээр гарна. */
+  stills?: string[];
+  /** Section height — controls how much scroll each point gets. Утсан
+   *  дээр өндөр ТОГТООХГҮЙ (`md:`-ээр өгнө): картууд өөрсдийнхөө
+   *  байгалийн өндрөөр байрлана. */
   heightClass?: string;
   /** Colour the chapter dips to on the way out — match the next section. */
   exitVeilClass?: string;
@@ -140,10 +155,14 @@ export function MonoScrollStory({
     if (!ctx2d) return;
 
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const isMobile = window.matchMedia("(max-width: 767px)").matches;
+    // Утсан дээр pinned хувилбар огт байхгүй (`md:flex`) — canvas нь
+    // хэмжээгүй, ScrollTrigger нь барих юмгүй. Кадар татахаас ӨМНӨ буцна:
+    // энэ хэсэг утсанд `frameDir` рүү нэг ч хүсэлт үүсгэхгүй.
+    if (window.matchMedia("(max-width: 767px)").matches) return;
+
     const framePath = framePathIn(frameDir, frameExt);
     const count = frameEnd - frameStart + 1;
-    const framesToLoad = !reduce && !isMobile ? count : 1;
+    const framesToLoad = reduce ? 1 : count;
     const images: HTMLImageElement[] = [];
     const state = { f: 0 };
     let loading = false;
@@ -434,7 +453,8 @@ export function MonoScrollStory({
 
   return (
     <section id={id} ref={root} className={`relative ${light ? "bg-ground" : "bg-night"} ${heightClass}`}>
-      <div className="sticky top-0 flex h-[100svh] min-h-[560px] w-full overflow-hidden">
+      {/* --- Ширээний урсгал: pinned бүлэг ------------------------------ */}
+      <div className="sticky top-0 hidden h-[100svh] min-h-[560px] w-full overflow-hidden md:flex">
         <canvas ref={canvas} className="absolute inset-0 z-0 h-full w-full" />
         {/* Scrim carries just enough weight for the type over the footage —
             the dark chapter used to sit at 75/40/85 and read black; the light
@@ -707,6 +727,104 @@ export function MonoScrollStory({
                   {railLabel(p)}
                 </button>
               </Fragment>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* --- Утасны урсгал: цэг тутамд нэг карт -------------------------
+          Pin алга, canvas алга, ScrollTrigger алга. Илрэлтийг нь
+          `data-reveal` (MonoMotion) хариуцна. */}
+      <div className="px-5 py-16 md:hidden">
+        <MonoKicker tone={light ? "light" : "dark"}>
+          {chapter} — {kicker}
+        </MonoKicker>
+        <h2
+          data-reveal="heading"
+          className={`mt-4 text-[clamp(1.8rem,7.4vw,2.6rem)] font-extrabold leading-[1.06] tracking-tight [text-wrap:balance] ${
+            light ? "text-night" : "text-white"
+          }`}
+        >
+          {title}
+        </h2>
+
+        <div className="mt-9 flex flex-col gap-5">
+          {points.map((p, i) => {
+            /* Админ цэг нэмбэл жагсаалт эргэлдэнэ — зураггүй карт үлдэхгүй. */
+            const still = stills?.length ? stills[i % stills.length] : undefined;
+            const head = (
+              <>
+                <p className={`text-[10px] font-bold uppercase tracking-[0.32em] ${light ? "text-moss" : "text-lime"}`}>
+                  {p.n} / {String(points.length).padStart(2, "0")}
+                </p>
+                <h3
+                  className={`mt-2 flex items-end font-extrabold leading-none tracking-tight ${
+                    still || !light ? "text-white" : "text-night"
+                  } ${
+                    variant === "numbers" && p.heading.length <= 4
+                      ? "text-[clamp(3rem,15vw,4.4rem)]"
+                      : "text-[clamp(1.6rem,6.4vw,2.1rem)]"
+                  }`}
+                >
+                  {p.heading}
+                  {p.accent && (
+                    <span className={`mb-[0.14em] ml-0.5 text-[0.32em] font-bold ${light && !still ? "text-moss" : "text-lime"}`}>
+                      {p.accent}
+                    </span>
+                  )}
+                </h3>
+              </>
+            );
+
+            return (
+              <article
+                key={p.n}
+                data-reveal="up"
+                className={`overflow-hidden rounded-2xl border ${
+                  light ? "border-night/10 bg-white" : "border-white/15 bg-white/[0.04]"
+                }`}
+              >
+                {still ? (
+                  /* Зураг нь `<img>` биш CSS дэвсгэр: хөтөч нь `display:none`
+                     элементийн дэвсгэр зургийг татдаггүй.
+
+                     `md:hidden` нь ЯГ ЭНЭ элемент дээр байх ёстой. Зөвхөн
+                     эцгийг нь нуухад хангалтгүй — Chrome дээр хэмжсэнээр
+                     нуугдсан эцэгтэй ч `display:block` хэвээр тооцогдсон
+                     хүү элементийн дэвсгэрийг татдаг (ширээнд 480 КБ
+                     утасны зураг дэмий орж ирж байв). */
+                  <div
+                    className="relative aspect-[3/4] w-full bg-cover bg-center md:hidden"
+                    style={{ backgroundImage: `url("${still}")` }}
+                  >
+                    <div
+                      aria-hidden
+                      className="absolute inset-0 bg-gradient-to-t from-night/85 via-night/20 to-transparent"
+                    />
+                    <div className="absolute inset-x-0 bottom-0 p-5">{head}</div>
+                  </div>
+                ) : (
+                  <div className="px-5 pt-5">{head}</div>
+                )}
+
+                <div className="p-5">
+                  <p className={`text-[14px] leading-relaxed ${light ? "text-night/70" : "text-white/70"}`}>
+                    {p.text}
+                  </p>
+                  {p.link && (
+                    <a
+                      href={p.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`mt-4 inline-flex min-h-11 items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.14em] ${
+                        light ? "text-moss" : "text-lime"
+                      }`}
+                    >
+                      Дэлгэрэнгүй <span aria-hidden>↗</span>
+                    </a>
+                  )}
+                </div>
+              </article>
             );
           })}
         </div>

@@ -14,12 +14,17 @@
    real project photography. */
 
 import { useEffect, useRef } from "react";
+import Image from "next/image";
 import { gsap } from "@/lib/gsap";
 import type { SiteContent } from "@/lib/site-content";
 import { MonoKicker } from "./shared";
 
 const YEAR_START = 2006;
 const YEAR_END = 2026;
+
+/** Станцын картын өргөн: утсан дээр багтаамжийн бүтэн өргөн хасах
+ *  рельсний зай (`pl-10 pr-5`), ширээн дээр 30vw → 26vw. */
+const STATION_SIZES = "(max-width: 767px) calc(100vw - 60px), (max-width: 1023px) 30vw, 26vw";
 
 /** "2014–2019" → 2014. Буруу бичсэн ч эрэмбэ унахгүй. */
 const startYear = (years: string) => {
@@ -283,15 +288,14 @@ export function MonoDeveloper({ site }: { site: SiteContent }) {
                     i % 2 === 0 ? "md:mt-7" : "md:mt-12"
                   }`}
                 >
-                  <div className={`w-full overflow-hidden ${i % 2 === 0 ? "h-[240px] md:h-[min(320px,36svh)]" : "h-[200px] md:h-[min(260px,30svh)]"}`}>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
+                  <div className={`relative w-full overflow-hidden ${i % 2 === 0 ? "h-[240px] md:h-[min(320px,36svh)]" : "h-[200px] md:h-[min(260px,30svh)]"}`}>
+                    <Image
                       data-md-img
                       src={p.image}
                       alt={`${p.title} — ${d.name}`}
-                      loading="lazy"
-                      decoding="async"
-                      className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      fill
+                      sizes={STATION_SIZES}
+                      className="object-cover transition-transform duration-700 group-hover:scale-105"
                     />
                   </div>
                   <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-night/85 via-night/10 to-transparent" />

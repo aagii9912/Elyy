@@ -11,10 +11,14 @@
    хүнийг уулзалт руу чиглүүлнэ. Постер ч хоосон бол секц рендерлэгдэхгүй. */
 
 import { useState } from "react";
+import Image from "next/image";
 import { useLenis } from "lenis/react";
 import type { SiteContent } from "@/lib/site-content";
 import { MonoKicker } from "./shared";
 import { MonoModal } from "./MonoModal";
+
+/** Постер нь багтаамжийн бүтэн өргөн (`max-w-[1500px]`, px-5 → px-10). */
+const POSTER_SIZES = "(max-width: 767px) calc(100vw - 40px), (max-width: 1580px) calc(100vw - 80px), 1420px";
 
 export function MonoVr({ site }: { site: SiteContent }) {
   const { vr } = site;
@@ -37,14 +41,13 @@ export function MonoVr({ site }: { site: SiteContent }) {
 
   const media = (
     <>
-      <span className="block aspect-[16/10] w-full sm:aspect-[16/7]">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+      <span className="relative block aspect-[16/10] w-full sm:aspect-[16/7]">
+        <Image
           src={vr.poster}
           alt=""
-          loading="lazy"
-          decoding="async"
-          className="h-full w-full object-cover transition-transform duration-[1100ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.04]"
+          fill
+          sizes={POSTER_SIZES}
+          className="object-cover transition-transform duration-[1100ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.04]"
         />
       </span>
       <span aria-hidden className="absolute inset-0 bg-gradient-to-t from-night/70 via-night/10 to-night/20" />
