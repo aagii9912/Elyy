@@ -59,14 +59,20 @@ const EASE = "ease-[cubic-bezier(0.16,1,0.3,1)]";
    шилжих нь найдваргүй тул хоёуланг нь үргэлж зурж, зөвхөн ил тодыг
    нь шилжүүлнэ (opacity нь compositable, хямд).
 
+   Өнгө нь `--color-charcoal` (#16280f = 22,40,15) — брэндийн хамгийн
+   гүн ногоон, footer/film-д хэрэглэдэг. Өмнө нь `--color-night`
+   (21,23,23) байсныг захиалагчийн санлаар сольсон: хураангуй самбарууд
+   хайнга хар биш, Elysium-ын ногооноор бүрэлзэнэ. Гэрэлтэлт бараг
+   ижил (L 0.008 → 0.017) тул доорх зогсоолуудын контраст хэвээр.
+
    84%-аас дээшх зогсоолууд ХОЁУЛАНД ИЖИЛ — тиймээс самбар аль нь ч
    дэлгэгдсэн бай, дээд захаар нь тасралтгүй бараан рельс үргэлжилж,
    E·L·Y·S үсгүүд түүн дээр суух нь энэ хэсгийн гарын үсэг болно.
    Зогсоолуудыг §7-гийн контрастын хүснэгтгүйгээр өөрчилж БОЛОХГҮЙ. */
 const SCRIM_IDLE =
-  "bg-[linear-gradient(to_top,rgba(21,23,23,0.90)_0%,rgba(21,23,23,0.78)_45%,rgba(21,23,23,0.80)_84%,rgba(21,23,23,0.86)_100%)]";
+  "bg-[linear-gradient(to_top,rgba(22,40,15,0.90)_0%,rgba(22,40,15,0.78)_45%,rgba(22,40,15,0.80)_84%,rgba(22,40,15,0.86)_100%)]";
 const SCRIM_ACTIVE =
-  "bg-[linear-gradient(to_top,rgba(21,23,23,0.45)_0%,rgba(21,23,23,0.16)_35%,rgba(21,23,23,0.10)_58%,rgba(21,23,23,0.80)_84%,rgba(21,23,23,0.86)_100%)]";
+  "bg-[linear-gradient(to_top,rgba(22,40,15,0.45)_0%,rgba(22,40,15,0.16)_35%,rgba(22,40,15,0.10)_58%,rgba(22,40,15,0.80)_84%,rgba(22,40,15,0.86)_100%)]";
 
 /* Бичвэрийн ӨӨРИЙН дэвсгэр. Самбарын scrim дангаараа хангалтгүй: scrim-ийн
    зогсоолууд самбарын ӨНДРИЙН ХУВИАР тавигддаг бол бичвэрийн блокийн өндөр
@@ -75,7 +81,7 @@ const SCRIM_ACTIVE =
    өөрийнхөө ард градиент авснаар контраст самбарын өндрөөс ХАМААРАХГҮЙ
    болно. Дээд 25% нь бүрэн тунгалаг руу гүйснээр зураг руу зөөлөн ууна. */
 const CAPTION_SCRIM =
-  "bg-[linear-gradient(to_top,rgba(21,23,23,0.95)_0%,rgba(21,23,23,0.90)_75%,rgba(21,23,23,0)_100%)]";
+  "bg-[linear-gradient(to_top,rgba(22,40,15,0.95)_0%,rgba(22,40,15,0.90)_75%,rgba(22,40,15,0)_100%)]";
 
 /** Самбарын дотоод — хоёр урсгалд хуваалцана. */
 function PanelBody({
@@ -341,7 +347,7 @@ export function InteractiveImageAccordion({
           hover(null);
           commit(i);
         }}
-        className="group absolute inset-0 block h-full w-full text-left focus-visible:shadow-[inset_0_0_0_7px_rgba(21,23,23,0.72)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white"
+        className="group absolute inset-0 block h-full w-full text-left focus-visible:shadow-[inset_0_0_0_7px_rgba(22,40,15,0.72)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white"
       >
         <PanelBody
           item={item}
@@ -374,7 +380,7 @@ export function InteractiveImageAccordion({
                дарж, хураангуй рельсэнд уншигдах доод хэмжээ өгнө. */
             style={{ flexGrow: active === i ? activeRatio : 1, flexShrink: 1, flexBasis: 0 }}
             className={cn(
-              "relative min-w-[4.5rem] overflow-hidden rounded-2xl bg-night transition-[flex-grow] duration-700",
+              "relative min-w-[4.5rem] overflow-hidden rounded-2xl bg-charcoal transition-[flex-grow] duration-700",
               EASE
             )}
           >
@@ -393,7 +399,7 @@ export function InteractiveImageAccordion({
           <li
             key={item.id}
             className={cn(
-              "relative w-full overflow-hidden rounded-2xl bg-night transition-[height] duration-700",
+              "relative w-full overflow-hidden rounded-2xl bg-charcoal transition-[height] duration-700",
               EASE,
               active === i ? "h-[clamp(320px,82vw,380px)]" : "h-[72px]"
             )}
