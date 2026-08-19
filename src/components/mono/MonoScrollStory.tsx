@@ -22,7 +22,7 @@ import { Fragment, useEffect, useRef, useState } from "react";
 import { useLenis } from "lenis/react";
 import { gsap, type ScrollTrigger as ScrollTriggerType } from "@/lib/gsap";
 import { LogoMark } from "@/components/Logo";
-import { MonoKicker } from "./shared";
+import { MonoKicker, useScrollAutoplay } from "./shared";
 
 export type StoryPoint = {
   n: string;
@@ -78,6 +78,7 @@ export function MonoScrollStory({
   stillAt = 0.6,
   heightClass = "h-[300vh] md:h-[380vh]",
   exitVeilClass = "bg-ground",
+  autoplaySeconds = 0,
   variant,
   tone = "dark",
 }: {
@@ -98,6 +99,9 @@ export function MonoScrollStory({
   heightClass?: string;
   /** Colour the chapter dips to on the way out — match the next section. */
   exitVeilClass?: string;
+  /** Хэрэглэгчийн эхний гүйлтийн дараа бүлгийг өөрөө тоглуулах хугацаа
+   *  (сек). 0 — автомат тоглолтгүй, зөвхөн гараар. */
+  autoplaySeconds?: number;
   variant: StoryVariant;
   tone?: StoryTone;
 }) {
@@ -111,6 +115,10 @@ export function MonoScrollStory({
   /** Progress window the points share, minus the intro / exit run-outs. */
   const slot = useRef({ lead: 0, span: 1 });
   const [active, setActive] = useState(0);
+
+  /* Эхний гүйлтийн дараа бүлэг өөрөө үргэлжилнэ — 3 дэлгэц гүйлгэж
+     байж дуусдаг бүлгийг гараар татах шаардлагагүй болно. */
+  useScrollAutoplay({ trigger: st, seconds: autoplaySeconds });
 
   /** Jump the scroll so point `i` is centred in its own equal slice. */
   const goTo = (i: number) => {
@@ -438,6 +446,14 @@ export function MonoScrollStory({
               : "from-night/55 via-night/15 to-night/70"
           }`}
         />
+        {/* Мастер төлөвлөгөөний кадрууд өдрийн гэрэлтэй, цайвар — шугаман
+            хөшгийн дунд хэсэг (15%) дээр цагаан тоо уншигдахгүй. Бүх кадрыг
+            бараан болгохын оронд голд нь зөөлөн эллипс нэмнэ: ирмэг нь
+            рендерийн өнгөө хадгалж, зөвхөн бичгийн ард тодрол үүснэ. */}
+        {!light && (
+          <div className="pointer-events-none absolute inset-0 z-[5] bg-[radial-gradient(ellipse_82%_58%_at_50%_50%,rgba(21,23,23,0.5)_0%,rgba(21,23,23,0.28)_46%,transparent_74%)]" />
+        )}
+
         {/* letters chapter reads on the left — extra side scrim for contrast */}
         {variant === "letters" && (
           <div className="pointer-events-none absolute inset-0 z-[5] bg-gradient-to-r from-night/60 via-night/20 to-transparent" />
@@ -468,7 +484,11 @@ export function MonoScrollStory({
                 {/* цайвар суурьт lime уусдаг — гүн ногооноор */}
                 <div ref={progFill} className={`h-px w-full origin-left scale-x-0 ${light ? "bg-moss" : "bg-lime"}`} />
               </div>
-              <p className={`mt-2 text-[10px] font-semibold uppercase tracking-[0.3em] ${light ? "text-night/45" : "text-white/40"}`}>
+              <p
+                className={`mt-2 text-[10px] font-semibold uppercase tracking-[0.3em] ${
+                  light ? "text-night/45" : "text-white/55 [text-shadow:0_1px_10px_rgba(0,0,0,0.7)]"
+                }`}
+              >
                 Мастер төлөвлөгөө · явц
               </p>
             </div>
@@ -492,8 +512,15 @@ export function MonoScrollStory({
           </h2>
         </div>
 
-        {/* persistent corner header — fades in as the intro leaves */}
-        <div data-head className="absolute left-5 top-24 z-10 md:left-10 md:top-28">
+        {/* persistent corner header — fades in as the intro leaves.
+            Эллипс хөшиг дэлгэцийн голд төвлөрдөг тул булангийн жижиг
+            бичигт өөрийнх нь сүүдэр хэрэгтэй (өдрийн цайвар кадар). */}
+        <div
+          data-head
+          className={`absolute left-5 top-24 z-10 md:left-10 md:top-28 ${
+            light ? "" : "[text-shadow:0_1px_12px_rgba(0,0,0,0.65)]"
+          }`}
+        >
           <MonoKicker tone={light ? "light" : "dark"}>
             {chapter} — {kicker}
           </MonoKicker>

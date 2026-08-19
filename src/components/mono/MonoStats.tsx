@@ -9,14 +9,16 @@
    courtyard / parking street / finished elevation at dusk). Rebuild with
    `node scripts/build-scroll-frames.mjs plan`.
 
-   `tone="light"` — клиентийн "хэт бараан" гэсэн санал: энэ бүлгийн кадрууд
-   өөрсдөө цайвар (мастер төлөвлөгөө) тул бараан scrim-ийн оронд цагаан
-   wash + бараан бичгээр хуудасны цайвар суурьтай нэг өнгөнд уншуулна.
-   Кадруудыг градlaагүй — зөвхөн CSS. Ингэснээр бараан хэсэг нь ганц
-   hero (нар жаргах кино кадр) болон footer л үлдэнэ.
+   `tone="dark"` — энэ бүлэг богино хугацаанд `light` байсан (цагаан
+   хөшиг + бараан бичиг), гэвч цагаан хөшиг нь захиалагчийн рендерүүдийг
+   бүдгэрүүлж, бүлгийн эхлэл/төгсгөлийн хөшиг нь бүтэн дэлгэц цагаан
+   болгодог байсан тул буцаав. Одоо кадрууд бүрэн өнгөөрөө харагдаж,
+   бичиг цагаанаараа уншигдана.
 
    The section runs taller than the default chapter so the last point —
-   the 2027 handover date — gets the same dwell as the other three. */
+   the 2027 handover date — gets the same dwell as the other three. Тэр
+   зайг гараар гүйлгэх нь ядаргаатай тул эхний гүйлтийн дараа бүлэг
+   өөрөө тоглоно (`autoplaySeconds`). */
 
 import type { SiteContent } from "@/lib/site-content";
 import { MonoScrollStory } from "./MonoScrollStory";
@@ -42,8 +44,10 @@ export function MonoStats({ site }: { site: SiteContent }) {
       frameExt="webp"
       stillAt={0.12}
       heightClass="h-[280vh] md:h-[340vh]"
+      /* ~2.4 дэлгэц / 13сек — цэг тутамд ~2.4сек уншиж амжина. */
+      autoplaySeconds={13}
       variant="numbers"
-      tone="light"
+      tone="dark"
     />
   );
 }

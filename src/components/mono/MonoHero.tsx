@@ -1,26 +1,36 @@
 "use client";
 
-/* /mono — Intro. The client's Hero1 clip — the towers rising out of an
-   empty dusk sky — baked to 120 WebP frames and scrubbed frame-by-frame
+/* /mono — Intro. The client's clip — the towers rising into a clear
+   daylight sky — baked to 160 WebP frames and scrubbed frame-by-frame
    by scroll (desktop only; mobile/reduced-motion gets a single still).
-   Rebuild with `node scripts/build-scroll-frames.mjs hero`. */
+   Rebuild with `node scripts/build-scroll-frames.mjs hero`.
+
+   Хэрэглэгч эхний удаа гүйлгэмэгц үлдсэн замыг нь `useScrollAutoplay`
+   өөрөө гүйлгэж, клипийг кино шиг эцэс хүртэл тоглуулна. */
 
 import { Fragment, useEffect, useRef } from "react";
 import { useLenis } from "lenis/react";
-import { gsap } from "@/lib/gsap";
+import { gsap, type ScrollTrigger as ScrollTriggerType } from "@/lib/gsap";
 import type { SiteContent } from "@/lib/site-content";
 import { BrochureButton } from "./MonoBrochure";
+import { useScrollAutoplay } from "./shared";
 
-const FRAME_COUNT = 120;
+const FRAME_COUNT = 160;
 const framePath = (i: number) => `/hero-video-frames/frame_${String(i).padStart(3, "0")}.webp`;
 /** Still shown to mobile / reduced-motion: the towers fully risen. */
-const STILL_FRAME = 100;
+const STILL_FRAME = 132;
+/** Бүлгийг эхнээс нь дуустал автоматаар гүйлгэх хугацаа (сек) —
+    160 кадр / 7сек ≈ 23fps, эх клипийн 24fps-тэй ойрхон. */
+const AUTOPLAY_SECONDS = 7;
 
 export function MonoHero({ site }: { site: SiteContent }) {
   const { brand, hero, nav } = site;
   const lenis = useLenis();
   const root = useRef<HTMLElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
+  const st = useRef<ScrollTriggerType | null>(null);
+
+  useScrollAutoplay({ trigger: st, seconds: AUTOPLAY_SECONDS });
 
   const go = (e: React.MouseEvent, href: string) => {
     e.preventDefault();
@@ -78,12 +88,13 @@ export function MonoHero({ site }: { site: SiteContent }) {
       // Entrance animations are pure CSS (mono-fade-up / mono-float) so
       // they can't get stuck mid-tween on StrictMode/HMR remounts.
       if (!reduce && !isMobile) {
-        gsap.to(state, {
+        const tween = gsap.to(state, {
           frame: FRAME_COUNT - 1,
           ease: "none",
           scrollTrigger: { trigger: sec, start: "top top", end: "bottom bottom", scrub: 0.9 },
           onUpdate: draw,
         });
+        st.current = tween.scrollTrigger ?? null;
         gsap.to("[data-mh-copy]", {
           opacity: 0,
           yPercent: -8,
@@ -95,6 +106,7 @@ export function MonoHero({ site }: { site: SiteContent }) {
 
     return () => {
       window.removeEventListener("resize", onResize);
+      st.current = null;
       ctx.revert();
     };
   }, []);
@@ -103,7 +115,13 @@ export function MonoHero({ site }: { site: SiteContent }) {
     <section id="top" ref={root} className="relative h-[100svh] w-full bg-night md:h-[210vh]">
       <div className="sticky top-0 flex h-[100svh] min-h-[620px] w-full overflow-hidden">
         <canvas ref={canvas} className="absolute inset-0 z-0 h-full w-full" />
-        <div className="pointer-events-none absolute inset-0 z-[5] bg-gradient-to-b from-night/45 via-night/5 to-night/60" />
+        {/* Шинэ кадрууд өдрийн цэлмэг тэнгэртэй — өмнөх нар жаргах клипээс
+            хамаагүй цайвар тул цагаан бичиг дан дээр нь уншигдахгүй. Хоёр
+            давхар хөшиг: дээд/доод шугаман (толгой ба товчнуудад) + бичгийн
+            ард нэг зөөлөн эллипс. Ингэснээр кадрын ирмэг гэгээлэг хэвээр
+            үлдэж, зөвхөн бичгийн доод тал бараантана. */}
+        <div className="pointer-events-none absolute inset-0 z-[5] bg-gradient-to-b from-night/45 via-night/8 to-night/60" />
+        <div className="pointer-events-none absolute inset-0 z-[5] bg-[radial-gradient(ellipse_78%_56%_at_50%_42%,rgba(21,23,23,0.42)_0%,rgba(21,23,23,0.24)_45%,transparent_72%)]" />
 
         <div data-mh-copy className="relative z-10 flex h-full w-full flex-col items-center px-6">
           <div className="flex flex-1 flex-col items-center justify-center text-center">

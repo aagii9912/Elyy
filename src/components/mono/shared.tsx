@@ -1,9 +1,11 @@
 "use client";
 
-/* /mono — shared building blocks (kicker, drag-scroll hook, zoom reveal). */
+/* /mono — shared building blocks (kicker, drag-scroll hook, zoom reveal,
+   pinned-chapter autoplay). */
 
 import { useCallback, useEffect, useRef } from "react";
-import { gsap } from "@/lib/gsap";
+import { useLenis } from "lenis/react";
+import { gsap, type ScrollTrigger as ScrollTriggerType } from "@/lib/gsap";
 
 /** Section label — tiny lime rule (the ~5% green accent) + neutral label.
  *  `reveal` opts the kicker into the MonoMotion scroll-reveal system. */
@@ -31,6 +33,116 @@ export function MonoKicker({
       {children}
     </p>
   );
+}
+
+/* --- Пиннэсэн кадр-бүлгийн автомат тоглолт ---------------------------- */
+
+/** Хэрэглэгчийн дохио дуусаад ийм хугацаанд чимээгүй болвол автомат гүйлт
+ *  эхэлнэ. Трэкпадын инерц ~0.3сек үргэлжилдэг тул түүнээс арай урт. */
+const SETTLE_MS = 420;
+/** Үүнээс хуучирсан дохио автомат гүйлт эхлүүлэхээ болино. Ингэснээр нэг
+ *  бүлэг өөрөө дуусангуут дараагийнх нь уламжлан эхлэхгүй — бүлэг бүр
+ *  хэрэглэгчийн ӨӨРИЙН нэг гүйлтийг хүлээнэ. */
+const ARM_TTL_MS = 3000;
+/** Энэ явцаас цааш үлдсэн зам хэт бага — тоглуулах утгагүй. */
+const AUTOPLAY_END = 0.97;
+/** Гараас гүйлгэх дохио гэж үзэх товчнууд. */
+const SCROLL_KEYS = new Set([
+  "ArrowDown", "ArrowUp", "PageDown", "PageUp", "Home", "End", " ", "Spacebar",
+]);
+
+/** Кадр-бүлгийг эхний гүйлтийн дараа өөрөө "тоглуулах".
+ *
+ *  Хэсэг бүр 2–3 дэлгэцийн өндөртэй бөгөөд кадрууд гүйлтэд уягдсан тул
+ *  хүн бүх киног дугуйгаараа гараар гүйлгэх шаардлагатай болдог — урт
+ *  бүлэгт ядаргаатай. Энд хэрэглэгч бүлэг рүү орж нэг удаа гүйлгэмэгц
+ *  (дохио нь дуусахыг хүлээгээд) үлдсэн замыг нь тогтмол хурдаар Lenis-ээр
+ *  өөрөө гүйлгэнэ: кадрын scrub, цэгүүдийн солигдол, явцын зураас бүгд
+ *  хэвийн ажиллаж, зүгээр л "кино" өөрөө үргэлжилнэ.
+ *
+ *  Удирдлага үргэлж хүнийх: дугуй/хуруу хөдөлмөгц Lenis өөрөө гүйлтийг
+ *  авдаг (`onVirtualScroll` → `scrollTo(..., { programmatic: false })`),
+ *  дээш гүйлгэх, товч дарах, хаа нэгтээ дарахад зогсоно. Доош гүйлгэвэл
+ *  дахин зэвсэглээд үргэлжилнэ.
+ *
+ *  Зөвхөн ширээний компьютерт — кадрын scrub мөн тэнд л ажилладаг
+ *  (гар утсанд ганц хөдөлгөөнгүй кадр гардаг), мөн `syncTouch: false`
+ *  тул Lenis хуруунд огт хүрдэггүй. */
+export function useScrollAutoplay({
+  trigger,
+  seconds,
+}: {
+  /** Бүлгийн гүйлтийг хэмжиж буй ScrollTrigger — effect дотор үүсдэг тул ref. */
+  trigger: React.RefObject<ScrollTriggerType | null>;
+  /** Бүлгийг эхнээс нь дуустал тоглуулах хугацаа (сек). 0 — унтраалттай. */
+  seconds: number;
+}) {
+  const lenis = useLenis();
+
+  useEffect(() => {
+    if (!lenis || seconds <= 0) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (window.matchMedia("(max-width: 767px)").matches) return;
+
+    /** Сүүлийн хүний дохионы мөч. */
+    let lastInput = 0;
+    /** Доош чиглэсэн дохио ирсэн — амрахыг нь хүлээж байна. */
+    let armed = false;
+    /** Бидний эхлүүлсэн гүйлт явж байна. */
+    let playing = false;
+
+    const disarm = () => {
+      armed = false;
+      playing = false;
+    };
+
+    const onVirtualScroll = ({ deltaY }: { deltaY: number }) => {
+      if (!deltaY) return; // тап / хэвтээ дохио
+      lastInput = performance.now();
+      playing = false; // удирдлагыг Lenis аль хэдийн хүнд өглөө
+      armed = deltaY > 0; // зөвхөн доош — дээш гарахад нь бүү саад бол
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (SCROLL_KEYS.has(e.key)) disarm();
+    };
+
+    lenis.on("virtual-scroll", onVirtualScroll);
+    window.addEventListener("keydown", onKey);
+    // Товч, рэйл, цэсний холбоос бүр өөрийн гүйлттэй — дарсан бол бид гараа авна.
+    window.addEventListener("pointerdown", disarm);
+
+    const tick = () => {
+      if (playing || !armed || lenis.isStopped) return;
+      const st = trigger.current;
+      if (!st) return;
+      const idle = performance.now() - lastInput;
+      if (idle < SETTLE_MS) return;
+      if (idle > ARM_TTL_MS) {
+        armed = false;
+        return;
+      }
+      const p = st.progress;
+      // 0 / 1 гэдэг нь бүлэг дэлгэцэнд пиннэгдээгүй байна гэсэн үг.
+      if (p <= 0 || p >= AUTOPLAY_END) return;
+      armed = false;
+      playing = true;
+      lenis.scrollTo(st.end, {
+        duration: Math.max(0.5, seconds * (1 - p)),
+        easing: (x: number) => x, // тогтмол хурд — кино шиг
+        onComplete: () => {
+          playing = false;
+        },
+      });
+    };
+    gsap.ticker.add(tick);
+
+    return () => {
+      gsap.ticker.remove(tick);
+      lenis.off("virtual-scroll", onVirtualScroll);
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener("pointerdown", disarm);
+    };
+  }, [lenis, trigger, seconds]);
 }
 
 /** Pointer-drag horizontal scrolling for carousel strips (mouse).

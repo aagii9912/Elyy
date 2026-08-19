@@ -20,15 +20,18 @@ const SRC = "/Users/aagii/Downloads";
 const PUBLIC = fileURLToPath(new URL("../public/", import.meta.url));
 
 const SEQUENCES = {
-  /* Hero — the towers rising out of an empty dusk sky. Hero2 (descent
-     through cloud) and Hero3 (daylight arrival) are held back for now. */
+  /* Hero — the towers rising into a clear daylight sky (захиалагчийн
+     2026-08-19 клип, `Hero-daylight.mp4` нэрээр хадгалсан). Эхний
+     гүйлтийн дараа хэсэг өөрөө тоглодог болсон тул кадрын нягтыг
+     нэмэв (8 сек / 160 кадр ≈ 20fps) — гараар гүйлгэхэд мэдэгддэггүй
+     алгасалт автомат тоглолт дээр тод харагддаг. */
   hero: {
     out: "hero-video-frames",
-    clips: ["Hero1.mp4"],
+    clips: ["Hero-daylight.mp4"],
     xfade: 0.6,
-    frames: 120,
+    frames: 160,
     scale: "1280:720",
-    quality: 62,
+    quality: 58,
   },
   /* Ерөнхий төлөвлөлт — one clip per stat point, in POINTS order:
      506 айл · 4 блок / 85% ногоон / 513 зогсоол / 2027 II улирал. */
