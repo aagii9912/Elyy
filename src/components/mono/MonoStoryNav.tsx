@@ -66,9 +66,9 @@ export function MonoStoryNav({ site }: { site: SiteContent }) {
   return (
     <nav
       aria-label="Хэсгийн навигаци"
-      /* Хоёр бүлэг нь одоо цайвар суурьтай тул бөмбөлөг илүү тод байх
-         шаардлагатай — 50% дээр цагаан текст бүдгэрдэг байсан. */
-      className={`fixed right-4 top-1/2 z-40 hidden -translate-y-1/2 flex-col gap-1 rounded-full bg-night/85 p-2 backdrop-blur-md transition-all duration-500 md:flex lg:right-6 ${
+      /* Арын бөмбөлөг (хар суурь + blur) байхгүй — гурван бүлэг цайвар
+         суурьтай тул шошгууд шууд бараан өнгөөр хөвнө. */
+      className={`fixed right-4 top-1/2 z-40 hidden -translate-y-1/2 flex-col gap-1 transition-all duration-500 md:flex lg:right-6 ${
         visible ? "translate-x-0 opacity-100" : "pointer-events-none translate-x-4 opacity-0"
       }`}
     >
@@ -80,19 +80,21 @@ export function MonoStoryNav({ site }: { site: SiteContent }) {
           data-cursor-hover
           aria-current={active === i}
           style={{ transitionDelay: visible ? `${i * 70}ms` : "0ms" }}
-          className={`group flex items-center gap-2.5 rounded-full px-3.5 py-2 text-left transition-[background-color,opacity,transform] duration-500 ${
-            active === i ? "bg-white/10" : "hover:bg-white/5"
-          } ${visible ? "translate-x-0 opacity-100" : "translate-x-3 opacity-0"}`}
+          className={`group flex items-center gap-2.5 rounded-full px-3.5 py-2 text-left transition-[opacity,transform] duration-500 ${
+            visible ? "translate-x-0 opacity-100" : "translate-x-3 opacity-0"
+          }`}
         >
           <span
             aria-hidden
             className={`h-1.5 w-1.5 shrink-0 rounded-full transition-colors duration-300 ${
-              active === i ? "bg-lime" : "bg-white/35 group-hover:bg-white/60"
+              active === i ? "bg-lime" : "bg-white/45 mix-blend-difference group-hover:bg-white/70"
             }`}
           />
+          {/* mix-blend-difference — суурь гэрэлтэй үед бараан, бараан үед
+              цайвар болж уншигдана (арын бөмбөлөггүй болсон учир). */}
           <span
-            className={`whitespace-nowrap text-[11px] font-semibold uppercase tracking-[0.1em] transition-colors duration-300 ${
-              active === i ? "text-white" : "text-white/55 group-hover:text-white/85"
+            className={`whitespace-nowrap text-[11px] font-semibold uppercase tracking-[0.1em] mix-blend-difference transition-colors duration-300 ${
+              active === i ? "text-white" : "text-white/60 group-hover:text-white/85"
             }`}
           >
             {it.label}

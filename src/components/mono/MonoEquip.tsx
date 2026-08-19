@@ -1,20 +1,27 @@
 "use client";
 
-/* /mono — Барилгын бүтэц. Өмнө нь энэ хэсэг бүтэн дэлгэцээр бэхлэгддэг
-   (pinned) хар бүлэг байсан бөгөөд хуудсыг хэт бараан, хэт урт болгодог
-   байв. Одоо: цайвар суурин дээрх компакт секц — материал бүр карт, карт
-   дээр дарахад дэлгэрэнгүй pop-up нээгдэнэ (том зураг, бүтэн тайлбар,
-   брэндийн тэмдэг, үйлдвэрлэгчийн холбоос).
+/* / — Барилгын бүтэц (Chapter 03).
 
-   Барилгын бичлэгийн кадрууд (public/structure-frames) картын зураг
-   болон pop-up-д хэвээр ашиглагдана; текст, зураг, холбоос бүгд
-   `/admin/site` → Барилгын бүтэц хэсгээс удирдагдана. */
+   Түүх: pinned хар бүлэг → карт + pop-up → одоо бүтэн дэлгэцийн
+   слайдер. Материал бүр нэг слайд: арын зураг бүтэн дэлгэцээр солигдож,
+   доод талд дугуй thumbnail-ууд сонголтын мөр болно, мета зурвасын
+   баруун захын CTA (`equip.ctaLabel`) идэвхтэй материалын дэлгэрэнгүй
+   pop-up-ыг нээнэ — том зураг, бүтэн тайлбар, брэндийн тэмдэг,
+   үйлдвэрлэгчийн холбоос.
+
+   Барилгын бичлэгийн кадрууд (public/structure-frames) зураг
+   тохируулаагүй материалын арын дэвсгэр болно; текст, зураг, холбоос
+   бүгд `/admin/site` → Барилгын бүтэц хэсгээс удирдагдана.
+
+   Агаар сэлгэлтийн систем энэ хэсгээс ХАСАГДСАН — админ дээр хадгалсан
+   контентод үлдсэн байсан ч `HIDDEN` шүүлтүүр түүнийг гаргахгүй. */
 
 import { useState } from "react";
 import type { SiteContent } from "@/lib/site-content";
 import { LogoMark } from "@/components/Logo";
 import { MonoKicker } from "./shared";
 import { MonoModal } from "./MonoModal";
+import { PortraitShowcase, type ShowcaseSlide } from "@/components/ui/portrait-showcase";
 
 /* Брэндийн тэмдэг — материалын нэрээр таарна. Танихгүй зүйл дээр
    Elysium-ийн ромб тавина, ингэснээр админ дурын материал нэмж болно. */
@@ -25,6 +32,10 @@ const MARKS: Array<{ match: RegExp; src?: string; alt: string; mark?: boolean }>
 ];
 
 const markFor = (title: string) => MARKS.find((m) => m.match.test(title));
+
+/* Секцээс хасагдсан материал. Өгөгдмөл контентод байхгүй ч админд
+   хадгалагдсан хуучин контентод үлдсэн байж болзошгүй тул шүүнэ. */
+const HIDDEN = /агаар\s*сэлг|сэлгэлт|ventilat/i;
 
 /* Зураг тохируулаагүй үед барилгын бичлэгээс дарааллын дагуу кадр авна.
    Өгөгдмөл контентод `image` нь ЗОРИУДААР хоосон: `mergeSiteContent` нь
@@ -50,119 +61,93 @@ function BrandMark({ title, className = "" }: { title: string; className?: strin
 
 export function MonoEquip({ site }: { site: SiteContent }) {
   const { equip } = site;
-  const [open, setOpen] = useState<number | null>(null);
-  const current = open === null ? null : equip.items[open];
+  const [active, setActive] = useState(0);
+  const [open, setOpen] = useState(false);
+
+  /* Гурван үндсэн бүтээц (цутгамал каркас → цонх → фасад). Админ
+     нэмсэн зүйл бүр шинэ слайд болно; агаар сэлгэлт л хасагдана. */
+  const items = equip.items.filter((item) => !HIDDEN.test(item.title));
+  if (!items.length) return null;
+
+  const index = Math.min(active, items.length - 1);
+  const current = items[index];
+  const currentImage = imageFor(current.image, index);
+
+  const slides: ShowcaseSlide[] = items.map((item, i) => ({
+    id: `${item.title}-${i}`,
+    image: imageFor(item.image, i),
+    alt: item.title,
+    name: item.title,
+    role: markFor(item.title)?.alt,
+    description: item.body,
+  }));
 
   return (
-    <section id="equip" className="border-b border-night/10 bg-ground py-20 md:py-28">
-      <div className="mx-auto max-w-[1500px] px-5 md:px-10">
-        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          <div>
-            <MonoKicker reveal>{equip.kicker}</MonoKicker>
-            <h2
-              data-reveal="heading"
-              className="mt-4 max-w-xl text-[clamp(1.8rem,3.4vw,2.8rem)] font-extrabold leading-tight tracking-tight text-night"
-            >
-              {equip.title}
-            </h2>
-          </div>
-          <p data-reveal="up" data-reveal-delay="0.15" className="max-w-sm text-sm leading-relaxed text-night/60">
-            {equip.body}
-          </p>
-        </div>
-
-        <ul className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {equip.items.map((item, i) => (
-            <li key={`${item.title}-${i}`} data-reveal="up" data-reveal-delay={`${i * 0.06}`}>
-              <button
-                type="button"
-                data-cursor-hover
-                onClick={() => setOpen(i)}
-                aria-haspopup="dialog"
-                className="group flex h-full w-full flex-col overflow-hidden rounded-2xl border border-night/10 bg-surface text-left transition-[border-color,transform,box-shadow] duration-500 hover:-translate-y-1 hover:border-night/30 hover:shadow-[0_28px_60px_-40px_rgba(21,23,23,0.6)]"
-              >
-                {/* Гар утсанд карт нэг баганаар зэрэгцдэг тул 4:3 зураг
-                    дэлгэцийн талаас илүүг эзэлдэг байв — гар утсанд өргөн
-                    банд (2:1), md-ээс дээш 4:3 хэвээр. */}
-                <span className="relative block aspect-[2/1] w-full overflow-hidden bg-night/5 md:aspect-[4/3]">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={imageFor(item.image, i)}
-                    alt=""
-                    loading="lazy"
-                    decoding="async"
-                    className="h-full w-full object-cover transition-transform duration-[900ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.06]"
-                  />
-                  <span className="absolute left-4 top-4 rounded-full bg-surface/90 px-3 py-1 text-[11px] font-bold tracking-[0.14em] text-night backdrop-blur">
-                    {String(i + 1).padStart(2, "0")}
-                  </span>
-                </span>
-
-                <span className="flex flex-1 flex-col p-6">
-                  <span className="text-lg font-extrabold leading-snug tracking-tight text-night">
-                    {item.title}
-                  </span>
-                  <span className="mt-2.5 line-clamp-3 text-[14px] leading-relaxed text-night/60">
-                    {item.body}
-                  </span>
-                  <span className="mt-5 flex items-center justify-between border-t border-night/10 pt-4">
-                    <BrandMark title={item.title} />
-                    <span className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-night/70 transition-colors duration-300 group-hover:text-night">
-                      {equip.moreLabel}
-                      <span aria-hidden className="transition-transform duration-300 group-hover:translate-x-1">
-                        →
-                      </span>
-                    </span>
-                  </span>
-                </span>
-              </button>
-            </li>
-          ))}
-        </ul>
-      </div>
+    <section id="equip" className="relative border-b border-night/10 bg-night">
+      <PortraitShowcase
+        slides={slides}
+        active={index}
+        onActiveChange={setActive}
+        eyebrow={
+          <MonoKicker tone="dark" reveal>
+            03 — {equip.kicker}
+          </MonoKicker>
+        }
+        headline={equip.title}
+        lede={equip.body}
+        meta={`${String(index + 1).padStart(2, "0")} / ${String(items.length).padStart(2, "0")}`}
+        action={
+          <button
+            type="button"
+            data-cursor-hover
+            onClick={() => setOpen(true)}
+            aria-haspopup="dialog"
+            className="inline-flex min-h-11 items-center gap-2 rounded-full bg-white px-5 py-2.5 text-[12px] font-bold uppercase tracking-[0.1em] text-night transition-transform duration-300 hover:-translate-y-0.5"
+          >
+            {equip.ctaLabel}
+            <span aria-hidden>→</span>
+          </button>
+        }
+      />
 
       <MonoModal
-        open={current !== null}
-        onClose={() => setOpen(null)}
-        label={current?.title ?? equip.title}
+        open={open}
+        onClose={() => setOpen(false)}
+        label={current.title}
         size="lg"
       >
-        {current && open !== null && (
-          <>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={imageFor(current.image, open)}
-              alt={current.title}
-              decoding="async"
-              className="h-56 w-full object-cover sm:h-72"
-            />
-            <div className="p-6 sm:p-9">
-              <p className="flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.28em] text-night/50">
-                <span aria-hidden className="h-px w-8 bg-moss" />
-                {equip.kicker}
-              </p>
-              <h3 className="mt-4 text-[clamp(1.4rem,3vw,2rem)] font-extrabold leading-tight tracking-tight text-night">
-                {current.title}
-              </h3>
-              <p className="mt-4 text-[15px] leading-relaxed text-night/70">{current.body}</p>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={currentImage}
+          alt={current.title}
+          decoding="async"
+          className="h-56 w-full object-cover sm:h-72"
+        />
+        <div className="p-6 sm:p-9">
+          <p className="flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.28em] text-night/50">
+            <span aria-hidden className="h-px w-8 bg-moss" />
+            {equip.kicker}
+          </p>
+          <h3 className="mt-4 text-[clamp(1.4rem,3vw,2rem)] font-extrabold leading-tight tracking-tight text-night">
+            {current.title}
+          </h3>
+          <p className="mt-4 text-[15px] leading-relaxed text-night/70">{current.body}</p>
 
-              <div className="mt-7 flex flex-wrap items-center justify-between gap-4 border-t border-night/10 pt-6">
-                <BrandMark title={current.title} className="h-7" />
-                {current.link && (
-                  <a
-                    href={current.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    data-cursor-hover
-                    className="inline-flex min-h-11 items-center gap-2 rounded-full bg-night px-6 py-3 text-[12px] font-bold uppercase tracking-[0.1em] text-white transition-transform duration-300 hover:-translate-y-0.5"
-                  >
-                    {equip.sourceLabel} <span aria-hidden>↗</span>
-                  </a>
-                )}
-              </div>
-            </div>
-          </>
-        )}
+          <div className="mt-7 flex flex-wrap items-center justify-between gap-4 border-t border-night/10 pt-6">
+            <BrandMark title={current.title} className="h-7" />
+            {current.link && (
+              <a
+                href={current.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                data-cursor-hover
+                className="inline-flex min-h-11 items-center gap-2 rounded-full bg-night px-6 py-3 text-[12px] font-bold uppercase tracking-[0.1em] text-white transition-transform duration-300 hover:-translate-y-0.5"
+              >
+                {equip.sourceLabel} <span aria-hidden>↗</span>
+              </a>
+            )}
+          </div>
+        </div>
       </MonoModal>
     </section>
   );

@@ -551,10 +551,11 @@ function renderSection(
                   onChange={(e) => edit((d) => void (d[key].title = e.target.value))}
                 />
               </Field>
-              {/* Тайлбар + "дэлгэрэнгүй" шошгыг хоёр хэсэг хоёулаа
-                  ашиглана (ELYS нь accordion самбарын шошго болгож,
-                  Барилгын бүтэц нь картын шошго болгож). Зөвхөн
-                  эх сурвалжийн холбоос нь Барилгын бүтэцд хамаарна. */}
+              {/* Хэсгийн тайлбарыг хоёулаа ашиглана. "Дэлгэрэнгүй"
+                  шошго нь зөвхөн ELYS-ийн accordion самбарт үлдсэн —
+                  Барилгын бүтэц нь бүтэн дэлгэцийн слайд болсон тул
+                  доод CTA-гийн текстээр удирдагдана. Эх сурвалжийн
+                  холбоосын шошго нь Барилгын бүтэцд хамаарна. */}
               <Field label="Хэсгийн тайлбар">
                 <TextArea
                   rows={2}
@@ -562,17 +563,30 @@ function renderSection(
                   onChange={(e) => edit((d) => void (d[key].body = e.target.value))}
                 />
               </Field>
-              <Field label="Картын “дэлгэрэнгүй” текст">
-                <TextInput
-                  value={c[key].moreLabel}
-                  onChange={(e) => edit((d) => void (d[key].moreLabel = e.target.value))}
-                />
-              </Field>
+              {key === "elys" && (
+                <Field label="Самбарын “дэлгэрэнгүй” текст">
+                  <TextInput
+                    value={c.elys.moreLabel}
+                    onChange={(e) => edit((d) => void (d.elys.moreLabel = e.target.value))}
+                  />
+                </Field>
+              )}
               {key === "equip" && (
                 <Field label="Pop-up доторх холбоосын текст">
                   <TextInput
                     value={c.equip.sourceLabel}
                     onChange={(e) => edit((d) => void (d.equip.sourceLabel = e.target.value))}
+                  />
+                </Field>
+              )}
+              {key === "equip" && (
+                <Field
+                  label="Доод CTA-гийн текст"
+                  hint="Бүтэн дэлгэцийн слайдын доод зурвас дээрх товч — идэвхтэй материалын pop-up-ыг нээнэ."
+                >
+                  <TextInput
+                    value={c.equip.ctaLabel}
+                    onChange={(e) => edit((d) => void (d.equip.ctaLabel = e.target.value))}
                   />
                 </Field>
               )}
@@ -604,7 +618,7 @@ function renderSection(
                     <Field label="Гарчиг">
                       <TextInput value={item.title} onChange={(e) => set({ title: e.target.value })} />
                     </Field>
-                    <Field label="Тайлбар" hint="Картан дээр 3 мөр, pop-up дотор бүтнээрээ харагдана.">
+                    <Field label="Тайлбар" hint="Слайдын баруун дээд буланд болон pop-up дотор бүтнээрээ харагдана.">
                       <TextArea rows={3} value={item.body} onChange={(e) => set({ body: e.target.value })} />
                     </Field>
                     <ImageField
@@ -616,9 +630,9 @@ function renderSection(
                           if (it) it.image = url;
                         })
                       }
-                      ratio="4/3"
-                      maxEdge={1600}
-                      hint="Картын болон pop-up-ын зураг."
+                      ratio="16/9"
+                      maxEdge={2000}
+                      hint="Бүтэн дэлгэцийн дэвсгэр, thumbnail болон pop-up-ын зураг. Өргөн хэвтээ зураг тохиромжтой."
                     />
                     <Field label="Холбоос" hint="Үйлдвэрлэгчийн хуудас. Хоосон бол линк харагдахгүй.">
                       <TextInput

@@ -616,6 +616,18 @@ body:has(.mono-page) .ely-cursor {
 .mono-fade-up {
   animation: mono-fade-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
+/* Слайд солигдох үеийн зөөлөн орлуулга (portrait showcase) —
+   текст `key`-ээр дахин mount хийгдэхэд 4px-ээс дээш хөвж гарна. */
+@keyframes ui-fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
+}
+.ui-fade-in {
+  animation: ui-fade-in 0.5s ease both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ui-fade-in { animation: none; }
+}
 /* Hero scroll-cue float */
 @keyframes mono-float {
   0%, 100% { transform: translateY(0); }
