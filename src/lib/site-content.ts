@@ -66,8 +66,17 @@ export type SiteContent = {
   /** Chapter 01 — Ерөнхий төлөвлөлт (тоон үзүүлэлт). */
   plan: { kicker: string; title: string; points: StoryPointContent[] };
 
-  /** Chapter 02 — ELYS консепц. */
-  elys: { kicker: string; title: string; items: TitledItem[] };
+  /** Chapter 02 — ELYS консепц. Зүйл бүрийн эхний үсэг ELYS нэрийг
+   *  бүрдүүлнэ; самбар дээр дарахад дэлгэрэнгүй pop-up нээгдэнэ. */
+  elys: {
+    kicker: string;
+    title: string;
+    /** Гарчгийн баруун талын танилцуулга өгүүлбэр. */
+    body: string;
+    /** Идэвхтэй самбар дээрх "дэлгэрэнгүй" шошго. */
+    moreLabel: string;
+    items: TitledItem[];
+  };
 
   /** Үндсэн бүтээц — материалын карт бүр дээр дарахад дэлгэрэнгүй
    *  pop-up нээгдэнэ (`image` = pop-up доторх зураг, хоосон байж болно). */
@@ -314,6 +323,8 @@ export const DEFAULT_SITE_CONTENT: SiteContent = {
   elys: {
     kicker: "Агшин бүрд мэдрэх тав тух",
     title: "Төслийн консепц — ELYS",
+    body: "Эргономик төлөвлөлт, ногоон орчин, аюулгүй байдал, эрчим хүчний хэмнэлт — дөрвөн зарчмын эхний үсэг ELYS нэрийг бүрдүүлнэ. Аль ч хэсэг дээр дарж дэлгэрэнгүйг үзнэ үү.",
+    moreLabel: "Дэлгэрэнгүй",
     items: [
       {
         title: "Ergonomic Standards",

@@ -551,28 +551,30 @@ function renderSection(
                   onChange={(e) => edit((d) => void (d[key].title = e.target.value))}
                 />
               </Field>
+              {/* Тайлбар + "дэлгэрэнгүй" шошгыг хоёр хэсэг хоёулаа
+                  ашиглана (ELYS нь accordion самбарын шошго болгож,
+                  Барилгын бүтэц нь картын шошго болгож). Зөвхөн
+                  эх сурвалжийн холбоос нь Барилгын бүтэцд хамаарна. */}
+              <Field label="Хэсгийн тайлбар">
+                <TextArea
+                  rows={2}
+                  value={c[key].body}
+                  onChange={(e) => edit((d) => void (d[key].body = e.target.value))}
+                />
+              </Field>
+              <Field label="Картын “дэлгэрэнгүй” текст">
+                <TextInput
+                  value={c[key].moreLabel}
+                  onChange={(e) => edit((d) => void (d[key].moreLabel = e.target.value))}
+                />
+              </Field>
               {key === "equip" && (
-                <>
-                  <Field label="Хэсгийн тайлбар">
-                    <TextArea
-                      rows={2}
-                      value={c.equip.body}
-                      onChange={(e) => edit((d) => void (d.equip.body = e.target.value))}
-                    />
-                  </Field>
-                  <Field label="Картын “дэлгэрэнгүй” текст">
-                    <TextInput
-                      value={c.equip.moreLabel}
-                      onChange={(e) => edit((d) => void (d.equip.moreLabel = e.target.value))}
-                    />
-                  </Field>
-                  <Field label="Pop-up доторх холбоосын текст">
-                    <TextInput
-                      value={c.equip.sourceLabel}
-                      onChange={(e) => edit((d) => void (d.equip.sourceLabel = e.target.value))}
-                    />
-                  </Field>
-                </>
+                <Field label="Pop-up доторх холбоосын текст">
+                  <TextInput
+                    value={c.equip.sourceLabel}
+                    onChange={(e) => edit((d) => void (d.equip.sourceLabel = e.target.value))}
+                  />
+                </Field>
               )}
               <Field label="Навигацийн шошго">
                 <TextInput
