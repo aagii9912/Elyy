@@ -665,6 +665,72 @@ function renderSection(
               </ListEditor>
             )}
           </Card>
+          {/* Тоноглолын жагсаалт — зөвхөн Барилгын бүтэц. Слайдын гурван
+              үндсэн бүтээцээс ЯЛГААТАЙ: энд лифт, агаар сэлгэлт зэрэг
+              бүх инженерийн тоноглол багтана. */}
+          {key === "equip" && (
+            <Card title="Тоноглолын жагсаалт (CTA-гийн pop-up)">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field label="Pop-up-ын гарчиг">
+                  <TextInput
+                    value={c.equip.equipment.title}
+                    onChange={(e) => edit((d) => void (d.equip.equipment.title = e.target.value))}
+                  />
+                </Field>
+                <Field label="Pop-up-ын тайлбар">
+                  <TextArea
+                    rows={2}
+                    value={c.equip.equipment.body}
+                    onChange={(e) => edit((d) => void (d.equip.equipment.body = e.target.value))}
+                  />
+                </Field>
+              </div>
+              <div className="mt-4">
+                <ListEditor
+                  items={c.equip.equipment.items}
+                  onChange={(next) => edit((d) => void (d.equip.equipment.items = next))}
+                  blank={() => ({ category: "Тоноглол", brand: "", meta: "", logo: "", note: "" })}
+                  title={(item) => [item.category, item.brand].filter(Boolean).join(" · ")}
+                  addLabel="Тоноглол нэмэх"
+                >
+                  {(item, set, itemIndex) => (
+                    <>
+                      <div className="grid gap-4 sm:grid-cols-3">
+                        <Field label="Ангилал" hint="Ж: Ханын залгуур">
+                          <TextInput
+                            value={item.category}
+                            onChange={(e) => set({ category: e.target.value })}
+                          />
+                        </Field>
+                        <Field label="Брэнд" hint="Хоосон бол картан дээр зөвхөн ангилал гарна.">
+                          <TextInput value={item.brand} onChange={(e) => set({ brand: e.target.value })} />
+                        </Field>
+                        <Field label="Улс" hint="Ж: Герман">
+                          <TextInput value={item.meta} onChange={(e) => set({ meta: e.target.value })} />
+                        </Field>
+                      </div>
+                      <Field label="Тайлбар (заавал биш)" hint="Картан дээр 2 мөр харагдана.">
+                        <TextArea rows={2} value={item.note} onChange={(e) => set({ note: e.target.value })} />
+                      </Field>
+                      <ImageField
+                        label="Лого (заавал биш)"
+                        value={item.logo}
+                        onChange={(url) =>
+                          edit((d) => {
+                            const it = d.equip.equipment.items[itemIndex];
+                            if (it) it.logo = url;
+                          })
+                        }
+                        ratio="16/9"
+                        maxEdge={600}
+                        hint="Тунгалаг дэвсгэртэй PNG/SVG тохиромжтой. Хоосон бол брэндийн нэр өөрөө тэмдэг болно."
+                      />
+                    </>
+                  )}
+                </ListEditor>
+              </div>
+            </Card>
+          )}
         </>
       );
     }

@@ -46,6 +46,8 @@ export function PortraitShowcase({
   lede,
   meta,
   action,
+  onSlideOpen,
+  openLabel,
   className,
 }: {
   slides: ShowcaseSlide[];
@@ -61,6 +63,11 @@ export function PortraitShowcase({
   meta?: React.ReactNode;
   /** Мета зурвасын баруун захын CTA. */
   action?: React.ReactNode;
+  /** Өгсөн үед идэвхтэй слайдын нэр товч болж (мөн идэвхтэй thumbnail
+   *  дээр дахин дарахад) тухайн слайдын дэлгэрэнгүйг нээнэ. */
+  onSlideOpen?: (index: number) => void;
+  /** Нэрийн ард гарах жижиг шошго (ж: "Дэлгэрэнгүй"). */
+  openLabel?: string;
   className?: string;
 }) {
   const row = useRef<HTMLDivElement>(null);
@@ -156,7 +163,7 @@ export function PortraitShowcase({
                 aria-selected={i === index}
                 tabIndex={i === index ? 0 : -1}
                 aria-label={s.name}
-                onClick={() => onActiveChange(i)}
+                onClick={() => (i === index && onSlideOpen ? onSlideOpen(i) : onActiveChange(i))}
                 className="flex shrink-0 flex-col items-center gap-2 outline-offset-4"
               >
                 <span
@@ -186,9 +193,30 @@ export function PortraitShowcase({
           </div>
 
           <div className="flex flex-wrap items-center justify-between gap-4 border-t border-white/20 pt-5 text-[13px] font-medium sm:text-sm">
-            <span key={slide.id} className="ui-fade-in text-white">
-              {slide.name}
-            </span>
+            {onSlideOpen ? (
+              <button
+                key={slide.id}
+                type="button"
+                data-cursor-hover
+                onClick={() => onSlideOpen(index)}
+                aria-haspopup="dialog"
+                className="ui-fade-in group inline-flex items-center gap-2 text-left text-white"
+              >
+                {slide.name}
+                {openLabel && (
+                  <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-white/50 transition-colors duration-300 group-hover:text-white">
+                    {openLabel}
+                    <span aria-hidden className="ml-1 inline-block transition-transform duration-300 group-hover:translate-x-0.5">
+                      →
+                    </span>
+                  </span>
+                )}
+              </button>
+            ) : (
+              <span key={slide.id} className="ui-fade-in text-white">
+                {slide.name}
+              </span>
+            )}
             {slide.role && (
               <span key={slide.role} className="hidden text-white/70 sm:inline">
                 {slide.role}
