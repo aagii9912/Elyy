@@ -38,7 +38,17 @@ export function MonoModal({
   const restore = useRef<HTMLElement | null>(null);
   const titleId = useId();
 
-  const close = useCallback(() => onClose(), [onClose]);
+  /* Дуудагчид ихэвчлэн `onClose={() => setX(null)}` гэж шууд бичдэг тул
+     функцын хаяг рендер бүрд шинэ болно. Хэрэв `close` түүнээс шууд
+     хамаарвал доорх effect нь ЭЦЭГ бүрэлдэхүүн дахин рендерлэх бүрд
+     дахин ажиллаж, фокусыг эхний товч (✕) руу буцаан булаадаг —
+     ж: pop-up доторх хуудаслалт дарахад, эсвэл маягтын төлөв солигдоход.
+     Тиймээс `onClose`-ыг ref-д хадгалж, `close`-ыг тогтвортой болгоно. */
+  const onCloseRef = useRef(onClose);
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
+  const close = useCallback(() => onCloseRef.current(), []);
 
   useEffect(() => {
     if (!open) return;
@@ -76,7 +86,10 @@ export function MonoModal({
       window.removeEventListener("keydown", onKey);
       document.body.style.overflow = prevOverflow;
       lenis?.start();
-      restore.current?.focus?.();
+      /* preventScroll — фокус буцаах нь хуудсыг тухайн элемент рүү
+         эргүүлж гүйлгэдэг. Pop-up дотроос өөр хэсэг рүү (ж: #contact)
+         явуулах холбоос дарахад энэ нь хэрэглэгчийг буцааж чирдэг. */
+      restore.current?.focus?.({ preventScroll: true });
     };
   }, [open, lenis, close]);
 

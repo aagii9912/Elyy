@@ -21,7 +21,7 @@
    Товч дотор блок элемент бүр <span> (button-ы агуулгын загвар нь
    phrasing content тул <div>/<p> хүчингүй). */
 
-import { useRef, useState } from "react";
+import { useId, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
 export type AccordionPanel = {
@@ -66,7 +66,16 @@ const EASE = "ease-[cubic-bezier(0.16,1,0.3,1)]";
 const SCRIM_IDLE =
   "bg-[linear-gradient(to_top,rgba(21,23,23,0.90)_0%,rgba(21,23,23,0.78)_45%,rgba(21,23,23,0.80)_84%,rgba(21,23,23,0.86)_100%)]";
 const SCRIM_ACTIVE =
-  "bg-[linear-gradient(to_top,rgba(21,23,23,0.88)_0%,rgba(21,23,23,0.80)_26%,rgba(21,23,23,0.14)_50%,rgba(21,23,23,0.80)_84%,rgba(21,23,23,0.86)_100%)]";
+  "bg-[linear-gradient(to_top,rgba(21,23,23,0.45)_0%,rgba(21,23,23,0.16)_35%,rgba(21,23,23,0.10)_58%,rgba(21,23,23,0.80)_84%,rgba(21,23,23,0.86)_100%)]";
+
+/* Бичвэрийн ӨӨРИЙН дэвсгэр. Самбарын scrim дангаараа хангалтгүй: scrim-ийн
+   зогсоолууд самбарын ӨНДРИЙН ХУВИАР тавигддаг бол бичвэрийн блокийн өндөр
+   нь ПИКСЕЛЭЭР тогтмол — тиймээс намхан (гар утасны) самбар дээр гарчиг
+   scrim-ийн тунгалаг цонхонд таарч контраст 1.3:1 хүртэл унана. Бичвэр
+   өөрийнхөө ард градиент авснаар контраст самбарын өндрөөс ХАМААРАХГҮЙ
+   болно. Дээд 25% нь бүрэн тунгалаг руу гүйснээр зураг руу зөөлөн ууна. */
+const CAPTION_SCRIM =
+  "bg-[linear-gradient(to_top,rgba(21,23,23,0.95)_0%,rgba(21,23,23,0.90)_75%,rgba(21,23,23,0)_100%)]";
 
 /** Самбарын дотоод — хоёр урсгалд хуваалцана. */
 function PanelBody({
@@ -74,13 +83,17 @@ function PanelBody({
   isActive,
   openLabel,
   lane,
+  captionId,
 }: {
   item: AccordionPanel;
   isActive: boolean;
   openLabel: string;
   lane: "row" | "col";
+  /** `aria-expanded` нь ЯГ энэ мужийг заана (aria-controls). */
+  captionId: string;
 }) {
-  const pad = lane === "row" ? "p-6" : "p-5";
+  /* pt нь градиентэд уусах зай өгнө; pb/px нь бичвэрийн зай. */
+  const pad = lane === "row" ? "px-6 pb-6 pt-16" : "px-5 pb-5 pt-12";
 
   return (
     <>
@@ -177,8 +190,10 @@ function PanelBody({
       {/* Дэлгэгдсэн үеийн бичвэр — "Дэлгэрэнгүй" шошго нь энгийн урсгалд
           сууна, absolute БИШ; тиймээс бичвэртэй давхцах боломжгүй. */}
       <span
+        id={captionId}
         className={cn(
           "absolute inset-x-0 bottom-0 z-[2] block transition-[opacity,transform] duration-300 ease-out",
+          CAPTION_SCRIM,
           pad,
           isActive
             ? "translate-y-0 opacity-100 delay-200"
@@ -190,9 +205,14 @@ function PanelBody({
         <span className="block text-lg font-extrabold leading-snug tracking-tight text-white">
           {item.title}
         </span>
-        <span className="mt-2 line-clamp-2 max-w-md text-[14px] leading-relaxed text-white/85">
-          {item.body}
-        </span>
+        {/* Гар утсанд тайлбарыг харуулахгүй: 320px самбар дээр бичвэрийн
+            блок өндрийн 2/3-ыг эзэлж, рендер бараг харагдахгүй болно.
+            Бүтэн тайлбарыг pop-up агуулна. */}
+        {lane === "row" && (
+          <span className="mt-2 line-clamp-2 max-w-md text-[14px] leading-relaxed text-white/85">
+            {item.body}
+          </span>
+        )}
         <span className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-full bg-white px-5 py-3 text-[12px] font-bold uppercase tracking-[0.1em] text-night">
           {openLabel}
           <span
@@ -220,6 +240,7 @@ export function InteractiveImageAccordion({
     Math.min(Math.max(defaultIndex, 0), last)
   );
   const [hovered, setHovered] = useState<number | null>(null);
+  const uid = useId();
 
   /* Төлөвийн ТОЛЬ ref-үүд. React-ийн setState нь асинхрон тул
      `pointerenter` ба `pointerdown` хоёрын хооронд дахин рендер
@@ -279,16 +300,27 @@ export function InteractiveImageAccordion({
 
   const panelButton = (item: AccordionPanel, i: number, lane: "row" | "col") => {
     const isActive = active === i;
+    /* Хоёр урсгал ижил зүйлийг рендерлэдэг тул id-д урсгалыг оруулна —
+       эс бөгөөс баримт бичигт давхардсан id үүснэ. */
+    const captionId = `${uid}-${lane}-${i}`;
     return (
       <button
         type="button"
         data-elys-panel
         data-cursor-hover
-        aria-haspopup="dialog"
+        /* `aria-haspopup` нь ЗӨВХӨН идэвхтэй үед: тэр үед л дарахад
+           яриа цонх нээгдэнэ. Идэвхгүй самбар дээр дарахад зөвхөн
+           дэлгэгддэг тул popup зарлах нь худал мэдээлэл болно. */
+        aria-haspopup={isActive ? "dialog" : undefined}
+        /* `aria-controls`-той хослуулснаар `aria-expanded` нь яриа цонхны
+           бус, ЯГ дэлгэгдэж буй бичвэрийн мужийн төлөвийг заана. */
         aria-expanded={isActive}
+        aria-controls={captionId}
         /* Шилжилтийн 300ms-д босоо ба хэвтээ гарчиг хоёулаа DOM-д байдаг
-           тул нэрийг нь тодорхой зааж өгнө — эс тэгвээс хоёуланг уншина. */
-        aria-label={item.title}
+           тул нэрийг тодорхой зааж өгнө — эс тэгвээс хоёуланг уншина.
+           Идэвхтэй үед харагдах "Дэлгэрэнгүй" шошгыг нэрэнд оруулна
+           (SC 2.5.3 Label in Name — дуу хоолойгоор удирдагч тааруулна). */
+        aria-label={isActive ? `${item.title} — ${openLabel}` : item.title}
         onClick={() => {
           const rec = press.current;
           press.current = null;
@@ -311,7 +343,13 @@ export function InteractiveImageAccordion({
         }}
         className="group absolute inset-0 block h-full w-full text-left focus-visible:shadow-[inset_0_0_0_7px_rgba(21,23,23,0.72)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white"
       >
-        <PanelBody item={item} isActive={isActive} openLabel={openLabel} lane={lane} />
+        <PanelBody
+          item={item}
+          isActive={isActive}
+          openLabel={openLabel}
+          lane={lane}
+          captionId={captionId}
+        />
       </button>
     );
   };
@@ -346,7 +384,11 @@ export function InteractiveImageAccordion({
       </ul>
 
       {/* Босоо урсгал — md-ээс доош. Тэнхлэг эргэнэ, accordion хэвээр. */}
-      <ul className="flex flex-col gap-2 md:hidden" onKeyDown={onListKeyDown}>
+      <ul
+        className="flex flex-col gap-2 md:hidden"
+        onPointerLeave={() => hover(null)}
+        onKeyDown={onListKeyDown}
+      >
         {items.map((item, i) => (
           <li
             key={item.id}

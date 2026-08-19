@@ -18,7 +18,8 @@
    элементээс нөхдөг тул `items`-д зураг нэмбэл бүх зүйл нэг ижил
    зурагтай болно (MonoEquip энэ урхийг тайлбарласан байдаг). */
 
-import { useState } from "react";
+import { useCallback, useState } from "react";
+import { useLenis } from "lenis/react";
 import type { SiteContent } from "@/lib/site-content";
 import { MonoKicker } from "./shared";
 import { MonoModal } from "./MonoModal";
@@ -55,6 +56,25 @@ const letterOf = (title: string) => title.trim().charAt(0).toUpperCase() || "•
 export function MonoElys({ site }: { site: SiteContent }) {
   const { elys } = site;
   const [open, setOpen] = useState<number | null>(null);
+  const lenis = useLenis();
+
+  /* Тогтвортой хаах функц — MonoModal-ийн effect нь `onClose`-ын хаягаас
+     хамаардаг байсныг зассан ч, эцэг дахин рендерлэх бүрд шинэ функц
+     үүсгэхгүй байх нь зөв хэвээр. */
+  const close = useCallback(() => setOpen(null), []);
+
+  /* Уулзалт товлох — pop-up-ыг хааж, дараа нь #contact руу зөөлөн гүйлгэнэ.
+     Native hash үсрэлт нь Lenis-ийн гүйлттэй зөрчилддөг. */
+  const goContact = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setOpen(null);
+    requestAnimationFrame(() => {
+      const el = document.querySelector("#contact");
+      if (!el) return;
+      if (lenis) lenis.scrollTo(el as HTMLElement, { offset: -70 });
+      else (el as HTMLElement).scrollIntoView({ behavior: "smooth" });
+    });
+  };
 
   /* Зураг тохируулснаас олон зүйл админ нэмсэн ч уначихгүй. */
   const mediaFor = (i: number) => MEDIA[i % MEDIA.length];
@@ -114,7 +134,7 @@ export function MonoElys({ site }: { site: SiteContent }) {
 
       <MonoModal
         open={open !== null}
-        onClose={() => setOpen(null)}
+        onClose={close}
         label={current?.title ?? elys.title}
         size="lg"
       >
@@ -138,10 +158,15 @@ export function MonoElys({ site }: { site: SiteContent }) {
                 <span aria-hidden className="h-px w-8 bg-moss" />
                 {elys.kicker}
               </p>
-              <h3 className="mt-4 text-[clamp(1.4rem,3vw,2rem)] font-extrabold leading-tight tracking-tight text-night">
-                {current.title}
-              </h3>
-              <p className="mt-4 text-[15px] leading-relaxed text-night/70">{current.body}</p>
+              {/* Хуудаслалт дарахад цонхны агуулга бүхэлдээ солигддог тул
+                  дэлгэц уншигчид дуугарахгүй өнгөрдөг — polite мужид
+                  оруулснаар шинэ гарчиг, тайлбарыг уншина. */}
+              <div aria-live="polite">
+                <h3 className="mt-4 text-[clamp(1.4rem,3vw,2rem)] font-extrabold leading-tight tracking-tight text-night">
+                  {current.title}
+                </h3>
+                <p className="mt-4 text-[15px] leading-relaxed text-night/70">{current.body}</p>
+              </div>
 
               <div className="mt-7 flex flex-wrap items-center justify-between gap-4 border-t border-night/10 pt-6">
                 {/* E·L·Y·S үсгүүд өөрсдөө хуудаслалт болно — консепцийг
@@ -162,9 +187,13 @@ export function MonoElys({ site }: { site: SiteContent }) {
                           aria-label={item.title}
                           aria-current={i === open ? "true" : undefined}
                           className={`flex h-11 w-11 items-center justify-center rounded-full text-[13px] font-extrabold tracking-[0.14em] transition-colors duration-300 ${
+                            /* Идэвхгүй үсэг өмнө нь `text-night/35` байсан нь
+                               цагаан дээр ~1.5:1 — уншигдахгүй. /85 нь ~5:1.
+                               "Сонгогдоогүй" гэдгийг дүүргэсэн товч биш
+                               харин хүрээ, дэвсгэрийн ялгаа илэрхийлнэ. */
                             i === open
                               ? "bg-night text-white"
-                              : "text-night/35 hover:bg-night/5 hover:text-night/70"
+                              : "border border-night/15 text-night/85 hover:bg-night/5 hover:text-night"
                           }`}
                         >
                           <span aria-hidden>{letterOf(item.title)}</span>
@@ -177,7 +206,7 @@ export function MonoElys({ site }: { site: SiteContent }) {
                 <a
                   href="#contact"
                   data-cursor-hover
-                  onClick={() => setOpen(null)}
+                  onClick={goContact}
                   className="inline-flex min-h-11 items-center gap-2 rounded-full bg-night px-6 py-3 text-[12px] font-bold uppercase tracking-[0.1em] text-white transition-transform duration-300 hover:-translate-y-0.5"
                 >
                   {site.nav.ctaLabel} <span aria-hidden>↗</span>
