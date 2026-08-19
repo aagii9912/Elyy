@@ -17,6 +17,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLenis } from "lenis/react";
 import type { SiteContent } from "@/lib/site-content";
+import { unitPlanFor, type UnitPlan } from "@/lib/unit-plans";
 import { MonoKicker, useDragScroll } from "./shared";
 import { MonoModal } from "./MonoModal";
 
@@ -112,6 +113,9 @@ export function MonoApartments({ site }: { site: SiteContent }) {
   }, [isOpen, close, step]);
 
   const current = open === null ? null : slides[open];
+  /* Тухайн өнцгийн зурагт харгалзах брошурын хуваалт (олдоогүй бол
+     lightbox нь урьдын адил зөвхөн зургаа харуулна). */
+  const plan = current ? unitPlanFor(current.view) : null;
 
   const tabClass = (on: boolean) =>
     /* min-h-11 — хүрэх талбайн 44px доод хязгаар. */
@@ -290,15 +294,24 @@ export function MonoApartments({ site }: { site: SiteContent }) {
             </button>
           </div>
 
-          <div className="flex min-h-0 flex-1 items-center justify-center px-5 pb-2 md:px-10" onClick={(e) => e.stopPropagation()}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              key={current.view}
-              src={current.view}
-              alt={alt(current.unit, current.viewIndex)}
-              decoding="async"
-              className="max-h-full max-w-full rounded-2xl object-contain"
-            />
+          {/* Зураг + төлөвлөгөөний тайлбар. lg-ээс доош багана болж,
+              бүхэлдээ гүйнэ; lg дээр зөвхөн баруун талын самбар гүйнэ. */}
+          <div
+            className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto px-5 pb-2 md:px-10 lg:flex-row lg:gap-10 lg:overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex min-h-0 shrink-0 items-center justify-center lg:flex-1 lg:shrink">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                key={current.view}
+                src={current.view}
+                alt={alt(current.unit, current.viewIndex)}
+                decoding="async"
+                className="max-h-[46vh] max-w-full rounded-2xl object-contain lg:max-h-full"
+              />
+            </div>
+
+            {plan && <UnitPlanPanel plan={plan} />}
           </div>
 
           <div className="flex items-center justify-between gap-4 px-5 py-5 md:px-10" onClick={(e) => e.stopPropagation()}>
@@ -462,5 +475,57 @@ function UnitInquiry({
         )}
       </div>
     </MonoModal>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Lightbox доторх төлөвлөгөөний тайлбар — танилцуулгын өгөгдөл.        */
+/* ------------------------------------------------------------------ */
+
+function UnitPlanPanel({ plan }: { plan: UnitPlan }) {
+  const facts: [string, string][] = [
+    ["Хуваалт", plan.code],
+    ["Давхар", plan.floors],
+    ["Өрөөний тоо", plan.rooms],
+    ["Цонхны чиг", plan.facing],
+  ];
+
+  return (
+    <aside className="w-full shrink-0 border-t border-night/10 pt-6 lg:w-[340px] lg:overflow-y-auto lg:border-l lg:border-t-0 lg:pl-10 lg:pt-0">
+      <p className="flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.28em] text-night/50">
+        <span aria-hidden className="h-px w-8 bg-moss" />
+        Төлөвлөгөөний тайлбар
+      </p>
+
+      <dl className="mt-5 grid grid-cols-2 gap-x-5 gap-y-4 sm:grid-cols-4 lg:grid-cols-2">
+        {facts.map(([label, value]) => (
+          <div key={label}>
+            <dt className="text-[10px] font-bold uppercase tracking-[0.16em] text-night/40">{label}</dt>
+            <dd className="mt-1 text-sm font-extrabold tracking-tight text-night">{value}</dd>
+          </div>
+        ))}
+      </dl>
+
+      <p className="mt-5 text-[13px] leading-relaxed text-night/60">{plan.spot}</p>
+
+      <p className="mt-7 text-[10px] font-bold uppercase tracking-[0.16em] text-night/40">Өрөөний задаргаа</p>
+      <ul className="mt-3 border-t border-night/10">
+        {plan.list.map((r) => (
+          <li key={r.no} className="flex items-baseline justify-between gap-4 border-b border-night/10 py-2.5">
+            <span className="text-[13px] leading-snug text-night/70">
+              <span aria-hidden className="mr-2 tabular-nums text-night/35">
+                {r.no}.
+              </span>
+              {r.name}
+            </span>
+            <span className="shrink-0 text-[13px] font-bold tabular-nums text-night">{r.area} м²</span>
+          </li>
+        ))}
+      </ul>
+
+      <p className="mt-4 pb-2 text-[11px] leading-relaxed text-night/40">
+        Хэмжээ нь зураг төслийн утга — Elysium танилцуулга. Ашиглалтад орох үед бага зэрэг зөрөх боломжтой.
+      </p>
+    </aside>
   );
 }

@@ -99,11 +99,23 @@ export function SocialList({ items }: { items: SocialLink[] }) {
             target="_blank"
             rel="noopener noreferrer"
             data-cursor-hover
-            className="inline-flex items-center gap-2.5 py-1 transition-colors duration-300 hover:text-white"
+            className="group inline-flex items-center gap-2.5 py-1 transition-colors duration-300 hover:text-white"
           >
             <SocialIcon item={item} />
             {item.label}
-            <span aria-hidden className="text-white/35">↗</span>
+            {/* Шинэ табд нээхийг заасан сум — хөлний бусад icon-той нэг хэв маяг */}
+            <svg
+              aria-hidden
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.6"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="h-3.5 w-3.5 text-white/30 transition-all duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-lime"
+            >
+              <path d="M8 16.2 16.2 8m0 0H9.9m6.3 0v6.3" />
+            </svg>
           </a>
         </li>
       ))}
