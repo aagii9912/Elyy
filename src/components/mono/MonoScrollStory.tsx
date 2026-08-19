@@ -438,12 +438,15 @@ export function MonoScrollStory({
         <canvas ref={canvas} className="absolute inset-0 z-0 h-full w-full" />
         {/* Scrim carries just enough weight for the type over the footage —
             the dark chapter used to sit at 75/40/85 and read black; the light
-            chapter uses a white wash so the page never dips dark at all. */}
+            chapter uses a white wash so the page never dips dark at all.
+            Хөшгийн өнгө нь `charcoal` (#16280f) — брэндийн гүн ногоон:
+            ELYS самбартай нэг л film ажиллаж, кадрууд хайнга саарал биш
+            ногоон дор суудаг. Hero ЭНЭ ДҮРМЭЭС ГАДУУР — тэнд night хэвээр. */}
         <div
           className={`pointer-events-none absolute inset-0 z-[5] bg-gradient-to-b ${
             light
               ? "from-white/70 via-white/30 to-white/75"
-              : "from-night/55 via-night/15 to-night/70"
+              : "from-charcoal/55 via-charcoal/15 to-charcoal/70"
           }`}
         />
         {/* Мастер төлөвлөгөөний кадрууд өдрийн гэрэлтэй, цайвар — шугаман
@@ -451,12 +454,12 @@ export function MonoScrollStory({
             бараан болгохын оронд голд нь зөөлөн эллипс нэмнэ: ирмэг нь
             рендерийн өнгөө хадгалж, зөвхөн бичгийн ард тодрол үүснэ. */}
         {!light && (
-          <div className="pointer-events-none absolute inset-0 z-[5] bg-[radial-gradient(ellipse_82%_58%_at_50%_50%,rgba(21,23,23,0.5)_0%,rgba(21,23,23,0.28)_46%,transparent_74%)]" />
+          <div className="pointer-events-none absolute inset-0 z-[5] bg-[radial-gradient(ellipse_82%_58%_at_50%_50%,rgba(22,40,15,0.5)_0%,rgba(22,40,15,0.28)_46%,transparent_74%)]" />
         )}
 
         {/* letters chapter reads on the left — extra side scrim for contrast */}
         {variant === "letters" && (
-          <div className="pointer-events-none absolute inset-0 z-[5] bg-gradient-to-r from-night/60 via-night/20 to-transparent" />
+          <div className="pointer-events-none absolute inset-0 z-[5] bg-gradient-to-r from-charcoal/60 via-charcoal/20 to-transparent" />
         )}
 
         {/* entry veil — bridge in from the hero. Цайвар бүлэгт veil нь мөн

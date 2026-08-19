@@ -47,7 +47,7 @@ export function MonoVr({ site }: { site: SiteContent }) {
           className="h-full w-full object-cover transition-transform duration-[1100ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.04]"
         />
       </span>
-      <span aria-hidden className="absolute inset-0 bg-gradient-to-t from-night/70 via-night/10 to-night/20" />
+      <span aria-hidden className="absolute inset-0 bg-gradient-to-t from-charcoal/70 via-charcoal/10 to-charcoal/20" />
 
       <span className="absolute inset-0 flex flex-col items-center justify-center gap-5 px-6 text-center">
         <span className="relative flex h-[76px] w-[76px] items-center justify-center rounded-full border border-white/50 bg-white/10 text-white backdrop-blur-md transition-transform duration-500 group-hover:scale-110">
