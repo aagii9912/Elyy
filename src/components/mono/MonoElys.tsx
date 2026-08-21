@@ -12,11 +12,13 @@
    Акронимыг хатуу бичихгүй — `letterOf`-оор гарчгаас гаргана, ингэснээр
    админ 5 дахь зүйл нэмэхэд өөрөө дагаж өснө.
 
-   Текст бүхэлдээ админаас (`/admin/site` → ELYS консепц) удирдагдана;
-   зурагнууд нь доорх `MEDIA` массивт компонентын дотор үлдэнэ — учир нь
-   `mergeSiteContent` нь хадгалсан массивын дутуу талбарыг ЭХНИЙ өгөгдмөл
-   элементээс нөхдөг тул `items`-д зураг нэмбэл бүх зүйл нэг ижил
-   зурагтай болно (MonoEquip энэ урхийг тайлбарласан байдаг). */
+   Текст, ЗУРАГ хоёулаа админаас (`/admin/site` → ELYS консепц)
+   удирдагдана. Зүйлийн `image` хоосон үед доорх `MEDIA` массиваас
+   дарааллын дагуу өгөгдмөл рендер орно — тиймээс өгөгдмөл контентод
+   `image` нь хоосон байх ЁСТОЙ: `mergeSiteContent` нь хадгалсан
+   массивын дутуу талбарыг ЭХНИЙ өгөгдмөл элементээс нөхдөг тул тэнд
+   зураг бичвэл бүх зүйл нэг ижил зурагтай болно (MonoEquip энэ урхийг
+   мөн тайлбарласан байдаг). */
 
 import { useCallback, useState } from "react";
 import { useLenis } from "lenis/react";
@@ -29,8 +31,10 @@ import {
 } from "@/components/ui/interactive-image-accordion";
 
 type ElysMedia = { image: string; alt: string };
+type ElysItem = SiteContent["elys"]["items"][number];
 
-/* Захиалагчийн рендерүүд — `site.elys.items`-ийн дарааллаар. */
+/* Админ зураг сонгоогүй үеийн өгөгдмөл рендерүүд —
+   `site.elys.items`-ийн дарааллаар. */
 const MEDIA: ElysMedia[] = [
   {
     image: "/images/elys/ergonomic-interior.jpg",
@@ -79,12 +83,18 @@ export function MonoElys({ site }: { site: SiteContent }) {
   /* Зураг тохируулснаас олон зүйл админ нэмсэн ч уначихгүй. */
   const mediaFor = (i: number) => MEDIA[i % MEDIA.length];
 
+  /* Админы оруулсан зураг өгөгдмөлөөс давуу. Оруулсан зурагт өгөгдмөл
+     рендерийн тайлбар таарахаа больдог тул alt нь зүйлийн нэр болно. */
+  const imageOf = (item: ElysItem, i: number) => item.image?.trim() || mediaFor(i).image;
+  const altOf = (item: ElysItem, i: number) =>
+    item.image?.trim() ? item.title : mediaFor(i).alt;
+
   const panels: AccordionPanel[] = elys.items.map((item, i) => ({
     id: `${item.title}-${i}`,
     letter: letterOf(item.title),
     title: item.title,
     body: item.body,
-    image: mediaFor(i).image,
+    image: imageOf(item, i),
   }));
 
   const acronym = elys.items.map((item) => letterOf(item.title)).join(" · ");
@@ -150,8 +160,8 @@ export function MonoElys({ site }: { site: SiteContent }) {
             <div className="relative">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={mediaFor(open).image}
-                alt={mediaFor(open).alt}
+                src={imageOf(current, open)}
+                alt={altOf(current, open)}
                 decoding="async"
                 className="h-56 w-full object-cover sm:h-72"
               />

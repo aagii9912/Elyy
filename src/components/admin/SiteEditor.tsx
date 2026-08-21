@@ -690,18 +690,31 @@ function renderSection(
               <ListEditor
                 items={c.elys.items}
                 onChange={(next) => edit((d) => void (d.elys.items = next))}
-                blank={() => ({ title: "Гарчиг", body: "Тайлбар." })}
+                blank={() => ({ title: "Гарчиг", body: "Тайлбар.", image: "" })}
                 title={(item) => item.title}
                 addLabel="Зүйл нэмэх"
               >
-                {(item, set) => (
+                {(item, set, itemIndex) => (
                   <>
-                    <Field label="Гарчиг">
+                    <Field label="Гарчиг" hint="Эхний үсэг нь самбар дээрх E · L · Y · S тэмдэг болно.">
                       <TextInput value={item.title} onChange={(e) => set({ title: e.target.value })} />
                     </Field>
                     <Field label="Тайлбар">
                       <TextArea rows={3} value={item.body} onChange={(e) => set({ body: e.target.value })} />
                     </Field>
+                    <ImageField
+                      label="Самбарын зураг"
+                      value={item.image}
+                      onChange={(url) =>
+                        edit((d) => {
+                          const it = d.elys.items[itemIndex];
+                          if (it) it.image = url;
+                        })
+                      }
+                      ratio="4/3"
+                      maxEdge={1600}
+                      hint="Самбарын дэвсгэр, мөн дэлгэрэнгүй pop-up-ын толгой зураг. Самбар нь хураангуй үедээ НАРИЙН босоо зурвас болдог тул гол зүйл нь зургийн голд байх нь зөв. Хоосон орхивол өгөгдмөл рендер (эргономик · ногоон орчин · хяналтын төв · фасад) дарааллаараа орно."
+                    />
                   </>
                 )}
               </ListEditor>
@@ -731,7 +744,7 @@ function renderSection(
                 <ListEditor
                   items={c.equip.equipment.items}
                   onChange={(next) => edit((d) => void (d.equip.equipment.items = next))}
-                  blank={() => ({ category: "Тоноглол", brand: "", meta: "", logo: "", note: "" })}
+                  blank={() => ({ category: "Тоноглол", brand: "", meta: "", logo: "", image: "", note: "" })}
                   title={(item) => [item.category, item.brand].filter(Boolean).join(" · ")}
                   addLabel="Тоноглол нэмэх"
                 >
@@ -754,19 +767,35 @@ function renderSection(
                       <Field label="Тайлбар (заавал биш)" hint="Картан дээр 2 мөр харагдана.">
                         <TextArea rows={2} value={item.note} onChange={(e) => set({ note: e.target.value })} />
                       </Field>
-                      <ImageField
-                        label="Лого (заавал биш)"
-                        value={item.logo}
-                        onChange={(url) =>
-                          edit((d) => {
-                            const it = d.equip.equipment.items[itemIndex];
-                            if (it) it.logo = url;
-                          })
-                        }
-                        ratio="16/9"
-                        maxEdge={600}
-                        hint="Тунгалаг дэвсгэртэй PNG/SVG тохиромжтой. Хоосон бол брэндийн нэр өөрөө тэмдэг болно."
-                      />
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <ImageField
+                          label="Тоноглолын зураг (заавал биш)"
+                          value={item.image}
+                          onChange={(url) =>
+                            edit((d) => {
+                              const it = d.equip.equipment.items[itemIndex];
+                              if (it) it.image = url;
+                            })
+                          }
+                          ratio="16/10"
+                          maxEdge={1200}
+                          hint="Картын толгойд бүтэн өргөнөөр гарна. Бүтээгдэхүүний өөрийнх нь зураг тохиромжтой — лого ЭНД БҮҮ оруул, хажууд нь тусдаа талбар бий. Хоосон бол карт зураггүй, зөвхөн бичвэрээр үлдэнэ. Хамгийн цэвэр харагдацын тулд БҮХ тоноглолд зураг өгөх, эсвэл огт үл өгөхийг зөвлөе — хосолсон үед зураггүй картын доод хэсэг хоосон үлдэнэ."
+                        />
+                        <ImageField
+                          label="Лого (заавал биш)"
+                          value={item.logo}
+                          onChange={(url) =>
+                            edit((d) => {
+                              const it = d.equip.equipment.items[itemIndex];
+                              if (it) it.logo = url;
+                            })
+                          }
+                          ratio="16/9"
+                          maxEdge={600}
+                          fit="contain"
+                          hint="Тунгалаг дэвсгэртэй PNG/SVG тохиромжтой. Хоосон бол брэндийн нэр өөрөө тэмдэг болно."
+                        />
+                      </div>
                     </>
                   )}
                 </ListEditor>

@@ -207,9 +207,27 @@ export function PortraitShowcase({
       {/* Зөөлөн харанхуйлалт — доод бүсэд илүү гүн (мета зурвас), мөн
           зүүн талд нэмэлт хөшиг (гарчиг ихэвчлэн барилга дээр буудаг).
           Өнгө нь `charcoal` (#16280f) — night биш: сайтын бүх film нэг
-          брэндийн гүн ногоон дээр суурилдаг (hero-гоос бусад). */}
-      <div aria-hidden className="absolute inset-0 bg-gradient-to-b from-charcoal/60 via-charcoal/30 to-charcoal/85" />
-      <div aria-hidden className="absolute inset-0 bg-gradient-to-r from-charcoal/70 via-charcoal/10 to-transparent" />
+          брэндийн гүн ногоон дээр суурилдаг (hero-гоос бусад).
+
+          Ногоон хөшиг СУЛАРСАН (60/30/85 → 42/16/72, 70/10 → 46/6):
+          кадр өөрөө урагшилж, ногоон нь өнгө засвар шиг л үлдэнэ.
+          Хөшиг нимгэрсний хэрээр БИЧВЭР ӨӨРӨӨ тодорсон (доорх
+          `white/80`, `white`, `white/70` — өмнө нь /60, /80, /50):
+          уншигдацыг кадрыг харанхуйлж биш, бэхээ нэмж хангана.
+
+          §Контраст. Дэвсгэрийн гурван fallback кадр дээр хэмжсэн
+          (зураг + хоёр хөшгийг давхарлаад WCAG 2.1 харьцаа, бичвэрийн
+          хайрцаг доторх дундаж):
+            • гарчиг (том бичвэр, босго 3:1): 8.40 / 7.71 / 7.67 : 1,
+            • lede `white/80`   : 6.22 / 6.04 / 5.49 : 1,
+            • слайдын тайлбар `white` : 4.93 / 4.83 / 4.96 : 1,
+            • слайдын нэр `white`     : 10.88 / 9.13 / 9.48 : 1,
+            • "дэлгэрэнгүй" `white/70`: 6.29 / 5.47 / 5.63 : 1,
+            • мета `white/80`         : 5.17 / 5.12 / 5.17 : 1.
+          Бүгд 4.5:1-ээс дээш (гарчиг 3:1-ээс). Хөшгийг эсвэл бичвэрийн
+          alpha-г бууруулбал энэ хүснэгтийг ДАХИН хэмжинэ. */}
+      <div aria-hidden className="absolute inset-0 bg-gradient-to-b from-charcoal/42 via-charcoal/16 to-charcoal/72" />
+      <div aria-hidden className="absolute inset-0 bg-gradient-to-r from-charcoal/46 via-charcoal/6 to-transparent" />
 
       <div className="relative z-10 flex h-full flex-col justify-between px-5 pb-7 pt-24 sm:px-8 sm:pb-9 md:px-10 md:pt-28 lg:px-14">
         {/* Дээд бүс — гарчиг + идэвхтэй зүйлийн тайлбар */}
@@ -226,7 +244,7 @@ export function PortraitShowcase({
               <p
                 data-reveal="up"
                 data-reveal-delay="0.15"
-                className="mt-5 max-w-md text-[14px] leading-relaxed text-white/60"
+                className="mt-5 max-w-md text-[14px] leading-relaxed text-white/80"
               >
                 {lede}
               </p>
@@ -235,7 +253,7 @@ export function PortraitShowcase({
 
           <p
             key={slide.id}
-            className="ui-fade-in max-w-xs text-[14px] font-medium leading-relaxed text-white/80 sm:text-[15px] md:pt-3"
+            className="ui-fade-in max-w-xs text-[14px] font-medium leading-relaxed text-white sm:text-[15px] md:pt-3"
           >
             {slide.description}
           </p>
@@ -300,7 +318,7 @@ export function PortraitShowcase({
               >
                 {slide.name}
                 {openLabel && (
-                  <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-white/50 transition-colors duration-300 group-hover:text-white">
+                  <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-white/70 transition-colors duration-300 group-hover:text-white">
                     {openLabel}
                     <span aria-hidden className="ml-1 inline-block transition-transform duration-300 group-hover:translate-x-0.5">
                       →
@@ -329,12 +347,12 @@ export function PortraitShowcase({
               </span>
             ) : (
               slide.role && (
-                <span key={slide.role} className="hidden text-white/70 sm:inline">
+                <span key={slide.role} className="hidden text-white/80 sm:inline">
                   {slide.role}
                 </span>
               )
             )}
-            {meta && <span className="hidden text-white/70 md:inline">{meta}</span>}
+            {meta && <span className="hidden text-white/80 md:inline">{meta}</span>}
             {action}
           </div>
         </div>
