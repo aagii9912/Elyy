@@ -120,6 +120,44 @@
   --ely-fg-muted: rgba(255, 255, 255, 0.62);
 }
 
+/* ============================================================
+   Хэсгийн типографийн нэгдсэн хэмнэл
+   Kicker → гарчиг → тайлбар гэсэн бүтэц хэсэг бүрт давтагддаг байсан ч
+   хэмжээ, мөр хоорондын зай, мөрийн урт нь тус тусдаа бичигдсэн байв.
+   Эдгээрийг нэг эх сурвалж болгож жигдлэв.
+
+   `@layer components` — Tailwind-ийн утилит (ж: `max-w-xl`) эдгээрийг
+   дарж чадна, өөрөөр хэлбэл онцгой тохиолдолд газар дээр нь засаж болно.
+   ============================================================ */
+@layer components {
+  .mono-h2 {
+    font-size: clamp(1.7rem, 3.4vw, 2.8rem);
+    font-weight: 800;
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+    color: var(--ely-fg);
+    text-wrap: balance;
+  }
+
+  /* Тайлбар мөр. Гар утсанд 14px хэт жижиг байсныг 15px болгож,
+     мөрийн уртыг ~46 тэмдэгтээр хязгаарлав (өмнө нь 75 тэмдэгт хүртэл
+     сунаж, нүд мөр солиход төөрдөг байв). */
+  .mono-lead {
+    max-width: 46ch;
+    font-size: 0.9375rem;
+    line-height: 1.7;
+    color: rgba(21, 23, 23, 0.62);
+    color: color-mix(in oklab, var(--ely-fg) 62%, transparent);
+  }
+
+  @media (min-width: 768px) {
+    .mono-lead {
+      font-size: 1rem;
+      line-height: 1.72;
+    }
+  }
+}
+
 html {
   background-color: var(--color-bone);
   color: var(--color-ink);

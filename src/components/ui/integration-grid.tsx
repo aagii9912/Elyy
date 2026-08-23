@@ -49,6 +49,13 @@ export function IntegrationGrid({
 }) {
   if (!items.length) return null;
 
+  /* Зарим карт зурагтай, зарим нь зураггүй үед мөр доторх картуудын
+     өндөр зөрж, бичвэр нь шатлан харагддаг байв. Иймд НЭГ Ч карт
+     зурагтай бол БҮГД зургийн талбартай болно — зураггүй нь брэндийн
+     нэрээр бүтсэн товч тавцан авна. Огт зураггүй жагсаалт нь хуучин
+     шигээ цэвэр бичвэр хэвээр үлдэнэ. */
+  const withMedia = items.some((item) => Boolean(item.image));
+
   return (
     <ul className={cn("grid gap-3 sm:grid-cols-2 lg:grid-cols-3", className)}>
       {items.map((item) => (
@@ -61,18 +68,29 @@ export function IntegrationGrid({
               өндөр үргэлж таарна. `alt` нь ЗОРИУДААР хоосон: яг доор нь
               брэнд, ангилал, улс бичигдсэн байдаг тул дэлгэц уншигчид
               нэг зүйлийг хоёр удаа сонсох хэрэггүй. */}
-          {item.image && (
-            <span className="block aspect-[16/10] w-full overflow-hidden bg-night/5">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={item.image}
-                alt=""
-                loading="lazy"
-                decoding="async"
-                className="h-full w-full object-cover"
-              />
-            </span>
-          )}
+          {withMedia &&
+            (item.image ? (
+              <span className="block aspect-[16/10] w-full overflow-hidden bg-night/5">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={item.image}
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                  className="h-full w-full object-cover"
+                />
+              </span>
+            ) : (
+              /* Зурагласан картуудтай өндөр нь таарах орлуулагч. */
+              <span
+                aria-hidden
+                className="flex aspect-[16/10] w-full items-center justify-center overflow-hidden bg-night/[0.06] px-5"
+              >
+                <span className="line-clamp-2 text-center text-[15px] font-extrabold uppercase leading-tight tracking-[0.08em] text-night/25">
+                  {item.brand || item.category}
+                </span>
+              </span>
+            ))}
 
           <span className="flex flex-1 flex-col p-5">
             {/* Толгой — лого зураг, эсвэл брэндийн нэр (брэндгүй үед

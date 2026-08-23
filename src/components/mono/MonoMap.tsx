@@ -39,7 +39,7 @@ export function MonoMap({ site }: { site: SiteContent }) {
             <MonoKicker reveal>{location.kicker}</MonoKicker>
             <h2
               data-reveal="heading"
-              className="mt-4 max-w-xl text-[clamp(1.8rem,3.4vw,2.8rem)] font-extrabold leading-tight tracking-tight text-fg"
+              className="mt-4 max-w-xl mono-h2"
             >
               {tab.title}
             </h2>

@@ -1,37 +1,40 @@
 "use client";
 
-/* /mono — Intro. The client's clip — the towers rising into a clear
-   daylight sky — baked to 160 WebP frames and scrubbed frame-by-frame
-   by scroll (desktop only; mobile/reduced-motion gets a single still).
-   Rebuild with `node scripts/build-scroll-frames.mjs hero`.
+/* /mono — Intro. Захиалагчийн клип — өдрийн цэлмэг тэнгэрт өндөрлөх
+   цамхагууд — 160 WebP кадр болгож хөрвүүлсэн.
 
-   Хэрэглэгч эхний удаа гүйлгэмэгц үлдсэн замыг нь `useScrollAutoplay`
-   өөрөө гүйлгэж, клипийг кино шиг эцэс хүртэл тоглуулна. */
+   Кадрууд нь ӨӨРӨӨ timelapse байдлаар тоглоно: хуудас нээмэгц эхэлж,
+   ~7 секундэд бүрэн барилга хүртэл гүйгээд сүүлийн кадр дээрээ зогсоно.
+   (Өмнө нь гүйлтэнд уягдсан байсан тул ачаалахад ХООСОН тэнгэр
+   харагддаг, барилга харахын тулд доош гүйлгэх шаардлагатай байв.)
+
+   Ачаалалт удаан үед playhead нь зөвхөн БЭЛЭН болсон кадр хүртэл явна —
+   тиймээс алгасалт үүсэхгүй, зүгээр л жаахан удаан тоглоод гүйцнэ.
+
+   Кадрын багцыг дахин үүсгэх: `node scripts/build-scroll-frames.mjs hero`. */
 
 import { Fragment, useEffect, useRef } from "react";
 import { useLenis } from "lenis/react";
-import { gsap, type ScrollTrigger as ScrollTriggerType } from "@/lib/gsap";
+import { gsap } from "@/lib/gsap";
 import type { SiteContent } from "@/lib/site-content";
 import { BrochureButton } from "./MonoBrochure";
-import { useScrollAutoplay } from "./shared";
 import { sectionTone } from "@/lib/theme-css";
 
 const FRAME_COUNT = 160;
 const framePath = (i: number) => `/hero-video-frames/frame_${String(i).padStart(3, "0")}.webp`;
-/** Still shown to mobile / reduced-motion: the towers fully risen. */
+/** Хөдөлгөөн унтраасан / өгөгдөл хэмнэх горимд харуулах ганц кадр. */
 const STILL_FRAME = 132;
-/** Бүлгийг эхнээс нь дуустал автоматаар гүйлгэх хугацаа (сек) —
-    160 кадр / 7сек ≈ 23fps, эх клипийн 24fps-тэй ойрхон. */
-const AUTOPLAY_SECONDS = 7;
+/** Эхнээс дуустал тоглох хугацаа (сек). */
+const PLAY_SECONDS = 7;
+/** Гар утсанд кадрыг сийрэгжүүлнэ — 160 кадр ≈ 5.4MB нь хэт хүнд.
+ *  3 дахин сийрэгжүүлэхэд ~1.8MB болж, timelapse мэдрэмж хэвээр үлдэнэ. */
+const MOBILE_STEP = 3;
 
 export function MonoHero({ site }: { site: SiteContent }) {
   const { brand, hero, nav } = site;
   const lenis = useLenis();
   const root = useRef<HTMLElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
-  const st = useRef<ScrollTriggerType | null>(null);
-
-  useScrollAutoplay({ trigger: st, seconds: AUTOPLAY_SECONDS });
 
   const go = (e: React.MouseEvent, href: string) => {
     e.preventDefault();
@@ -50,9 +53,38 @@ export function MonoHero({ site }: { site: SiteContent }) {
 
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const isMobile = window.matchMedia("(max-width: 767px)").matches;
+    /* Data Saver горимд видео чанартай зүйл татахгүй — ганц кадр хангалттай. */
+    const conn = (navigator as { connection?: { saveData?: boolean } }).connection;
+    const stillOnly = reduce || Boolean(conn?.saveData);
 
-    const images: HTMLImageElement[] = [];
-    const state = { frame: 0 };
+    /* Тоглуулах кадрын дугаарууд. Сүүлийн кадрыг үргэлж оруулна —
+       эс бөгөөс бүрэн барилга дээр зогсохгүй. */
+    const numbers: number[] = [];
+    if (stillOnly) {
+      numbers.push(STILL_FRAME);
+    } else {
+      const step = isMobile ? MOBILE_STEP : 1;
+      for (let i = 1; i <= FRAME_COUNT; i += step) numbers.push(i);
+      if (numbers[numbers.length - 1] !== FRAME_COUNT) numbers.push(FRAME_COUNT);
+    }
+
+    const images = numbers.map((n) => {
+      const im = new Image();
+      im.decoding = "async";
+      im.src = framePath(n);
+      return im;
+    });
+
+    /* Эхнээс нь ХЭДЭН кадр ДАРААЛАН бэлэн болсныг тоолно. Playhead
+       үүнээс цааш явахгүй тул алгасалт гарахгүй. */
+    let ready = 0;
+    const markReady = () => {
+      while (ready < images.length && images[ready].complete && images[ready].naturalWidth) {
+        ready += 1;
+      }
+    };
+
+    let cursor = 0; // бутархай кадрын байрлал
 
     const resize = () => {
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -61,7 +93,7 @@ export function MonoHero({ site }: { site: SiteContent }) {
     };
 
     const draw = () => {
-      const img = images[Math.min(FRAME_COUNT - 1, Math.max(0, Math.round(state.frame)))];
+      const img = images[Math.min(images.length - 1, Math.max(0, Math.round(cursor)))];
       if (!img || !img.complete || !img.naturalWidth) return;
       const cw = cvs.width;
       const ch = cvs.height;
@@ -72,42 +104,61 @@ export function MonoHero({ site }: { site: SiteContent }) {
       ctx2d.drawImage(img, (cw - w) / 2, (ch - h) / 2, w, h);
     };
 
-    const framesToLoad = !reduce && !isMobile ? FRAME_COUNT : 1;
-    for (let i = 1; i <= framesToLoad; i++) {
-      const im = new Image();
-      // Frame 1 is bare sky before the towers rise — the single-frame
-      // fallback needs a shot that actually shows the buildings.
-      im.src = framePath(framesToLoad === 1 ? STILL_FRAME : i);
-      if (i === 1) im.onload = () => { resize(); draw(); };
-      images.push(im);
-    }
     resize();
-    const onResize = () => { resize(); draw(); };
+    const onResize = () => {
+      resize();
+      draw();
+    };
     window.addEventListener("resize", onResize);
 
+    let raf = 0;
+    let last = 0;
+    const fps = images.length > 1 ? (images.length - 1) / PLAY_SECONDS : 0;
+
+    const tick = (t: number) => {
+      if (!last) last = t;
+      /* Таб далд байгаад буцаж ирэхэд нэг дор үсрэхээс сэргийлж
+         алхмыг хязгаарлана. */
+      const dt = Math.min(0.1, (t - last) / 1000);
+      last = t;
+
+      markReady();
+      const loadedMax = Math.max(0, ready - 1);
+      cursor = Math.min(cursor + dt * fps, loadedMax, images.length - 1);
+      draw();
+
+      if (cursor >= images.length - 1) return; // дууслаа — сүүлийн кадр дээр зогсоно
+      raf = requestAnimationFrame(tick);
+    };
+
+    if (stillOnly) {
+      images[0].onload = () => {
+        resize();
+        draw();
+      };
+      if (images[0].complete) {
+        markReady();
+        draw();
+      }
+    } else {
+      raf = requestAnimationFrame(tick);
+    }
+
+    /* Гүйлгэж эхлэхэд hero-гийн бичиг зөөлөн бүдгэрнэ. */
     const ctx = gsap.context(() => {
-      // Entrance animations are pure CSS (mono-fade-up / mono-float) so
-      // they can't get stuck mid-tween on StrictMode/HMR remounts.
-      if (!reduce && !isMobile) {
-        const tween = gsap.to(state, {
-          frame: FRAME_COUNT - 1,
-          ease: "none",
-          scrollTrigger: { trigger: sec, start: "top top", end: "bottom bottom", scrub: 0.9 },
-          onUpdate: draw,
-        });
-        st.current = tween.scrollTrigger ?? null;
+      if (!reduce) {
         gsap.to("[data-mh-copy]", {
           opacity: 0,
           yPercent: -8,
           ease: "none",
-          scrollTrigger: { trigger: sec, start: "40% top", end: "80% top", scrub: true },
+          scrollTrigger: { trigger: sec, start: "top top", end: "bottom top", scrub: true },
         });
       }
     }, sec);
 
     return () => {
+      cancelAnimationFrame(raf);
       window.removeEventListener("resize", onResize);
-      st.current = null;
       ctx.revert();
     };
   }, []);
@@ -118,9 +169,9 @@ export function MonoHero({ site }: { site: SiteContent }) {
       ref={root}
       data-bg="hero"
       data-tone={sectionTone(site.theme, "hero", "dark")}
-      className="relative h-[100svh] w-full bg-night md:h-[210vh]"
+      className="relative h-[100svh] min-h-[620px] w-full bg-night"
     >
-      <div className="sticky top-0 flex h-[100svh] min-h-[620px] w-full overflow-hidden">
+      <div className="relative flex h-full w-full overflow-hidden">
         <canvas ref={canvas} className="absolute inset-0 z-0 h-full w-full" />
         {/* Шинэ кадрууд өдрийн цэлмэг тэнгэртэй — өмнөх нар жаргах клипээс
             хамаагүй цайвар тул цагаан бичиг дан дээр нь уншигдахгүй. Хоёр

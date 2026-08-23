@@ -57,10 +57,10 @@ export function MonoContact({ site }: { site: SiteContent }) {
         <div className="grid gap-12 lg:grid-cols-2 lg:gap-20">
           <div>
             <MonoKicker reveal>{contact.kicker}</MonoKicker>
-            <h2 data-reveal="heading" className="mt-5 max-w-md text-[clamp(2rem,4.4vw,3.4rem)] font-extrabold leading-[1.02] tracking-tight">
+            <h2 data-reveal="heading" className="mono-h2 mt-4 max-w-md">
               {contact.title}
             </h2>
-            <p data-reveal="up" className="mt-5 max-w-md text-[15px] leading-relaxed text-fg/60">{contact.sub}</p>
+            <p data-reveal="up" className="mono-lead mt-5">{contact.sub}</p>
 
             <dl className="mt-10 space-y-6 border-t border-fg/10 pt-8">
               <div data-reveal="up">

@@ -136,10 +136,10 @@ export function MonoApartments({ site }: { site: SiteContent }) {
             гарч, хэсгийн навигацитай мөргөлддөг байв */}
         <div className="max-w-2xl">
           <MonoKicker reveal>{apartments.kicker}</MonoKicker>
-          <h2 data-reveal="heading" className="mt-4 text-[clamp(1.8rem,3.4vw,2.8rem)] font-extrabold leading-tight tracking-tight text-fg">
+          <h2 data-reveal="heading" className="mt-4 mono-h2">
             {apartments.title}
           </h2>
-          <p data-reveal="up" data-reveal-delay="0.15" className="mt-5 text-sm leading-relaxed text-fg/60">{apartments.body}</p>
+          <p data-reveal="up" data-reveal-delay="0.15" className="mt-5 mono-lead">{apartments.body}</p>
         </div>
 
         {/* B1 / B2 шүүлтүүр — нэгээс олон блок тохируулсан үед л гарна */}

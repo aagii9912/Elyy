@@ -117,14 +117,14 @@ export function MonoElys({ site }: { site: SiteContent }) {
           <MonoKicker reveal>02 — {elys.kicker}</MonoKicker>
           <h2
             data-reveal="heading"
-            className="mt-4 text-[clamp(1.8rem,3.4vw,2.8rem)] font-extrabold leading-tight tracking-tight text-fg"
+            className="mt-4 mono-h2"
           >
             {elys.title}
           </h2>
           <p
             data-reveal="up"
             data-reveal-delay="0.15"
-            className="mt-5 text-sm leading-relaxed text-fg/60"
+            className="mt-5 mono-lead"
           >
             {elys.body}
           </p>

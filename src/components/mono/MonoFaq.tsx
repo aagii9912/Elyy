@@ -20,7 +20,7 @@ export function MonoFaq({ site }: { site: SiteContent }) {
     >
       <div className="mx-auto max-w-[1100px] px-5 md:px-10">
         <MonoKicker reveal>{faq.kicker}</MonoKicker>
-        <h2 data-reveal="heading" className="mt-4 text-[clamp(1.8rem,3.4vw,2.8rem)] font-extrabold leading-tight tracking-tight text-fg">
+        <h2 data-reveal="heading" className="mt-4 mono-h2">
           {faq.title}
         </h2>
 

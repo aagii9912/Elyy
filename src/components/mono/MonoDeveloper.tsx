@@ -236,10 +236,10 @@ export function MonoDeveloper({ site }: { site: SiteContent }) {
         <div className="relative z-10 mx-auto w-full max-w-[1500px] px-5 md:px-10">
           <MonoKicker reveal>{d.kicker}</MonoKicker>
           <div className="mt-4 flex flex-col gap-4">
-            <h2 data-reveal="heading" className="max-w-xl text-[clamp(1.8rem,3.4vw,2.8rem)] font-extrabold leading-tight tracking-tight text-fg">
+            <h2 data-reveal="heading" className="max-w-xl mono-h2">
               {d.name}
             </h2>
-            <p data-reveal="up" className="max-w-2xl text-sm leading-relaxed text-fg/60">{d.body}</p>
+            <p data-reveal="up" className="mono-lead">{d.body}</p>
           </div>
           <div data-reveal="up" className="mt-6 flex gap-10">
             <div>

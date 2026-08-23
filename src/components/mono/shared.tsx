@@ -23,7 +23,7 @@ export function MonoKicker({
   return (
     <p
       data-reveal={reveal ? "up" : undefined}
-      className={`flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.28em] ${
+      className={`flex flex-wrap items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.2em] md:tracking-[0.28em] ${
         tone === "dark" ? "text-white/60" : "text-fg/50"
       } ${className}`}
     >
