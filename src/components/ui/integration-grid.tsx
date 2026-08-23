@@ -2,23 +2,17 @@
 
 /* Integration grid — брэнд/нийлүүлэгчийн карт бүхий тор.
 
-   Карт бүр: (заавал биш) бүтээгдэхүүний зураг картын өргөнөөр, доор нь
-   лого (эсвэл логогүй үед брэндийн нэрийг типографик тэмдэг болгож
-   харуулна), улмаар ангилал (ж: "Ханын залгуур"), нийлүүлэгч + улс,
-   товч тайлбар.
+   Карт бүр НЭГ МӨР: зүүн талд бичвэр (ангилал → брэнд·улс → тайлбар),
+   баруун талд бүтээгдэхүүний зураг. Зураг нь ӨӨРИЙН ХҮРЭЭГҮЙ — баруун
+   ирмэгээс эхлээд зүүн тийш `mask-image` градиентээр картын дэвсгэр рүү
+   уусан ордог. Ингэснээр:
+     • цагаан дэвсгэртэй каталогийн зургийн ирмэг мэдэгдэхгүй,
+     • зураг тайрагдахгүй (`object-contain`),
+     • зурагтай, зураггүй карт нэг мөрөнд зэрэгцсэн ч `min-height`
+       тэднийг жигд барина — орлуулагч хэрэггүй.
 
-   Зураг нь ЗАРИМ картад л байж болно (админ бүрд нь оруулах албагүй) —
-   тиймээс зурагтай, зураггүй карт нэг мөрөнд зэрэгцэж болно. Тор
-   `items-start` БИШ хэвээр: карт бүр мөрийнхөө өндрөөр сунаж, ирмэг нь
-   жигд тэгш үлдэнэ. Хосолсон мөрөнд зураггүй картын доод хэсэг хоосон
-   үлдэх нь бий — тор тахир болохоос энэ нь дээр, мөн бүх карт зураггүй
-   (өгөгдмөл) үед харагдац огт өөрчлөгдөхгүй. Хамгийн цэвэр үр дүн нь
-   БҮХ картад зураг өгөх, эсвэл огт үл өгөх — админд `/admin/site` дээр
-   яг үүнийг зөвлөсөн байгаа.
-
-   Хамаарал байхгүй — зөвхөн Tailwind. Лого зураг нь дурын харьцаатай
-   байж болох тул тогтмол өндөртэй хайрцагт `object-contain`-аар суудаг;
-   ингэснээр өргөн (wordmark) ба дөрвөлжин лого зэрэгцээд жигд харагдана. */
+   Хамаарал байхгүй — зөвхөн Tailwind. Лого зураг дурын харьцаатай байж
+   болох тул тогтмол өндөртэй хайрцагт `object-contain`-аар суудаг. */
 
 import { cn } from "@/lib/utils";
 
@@ -31,14 +25,19 @@ export type IntegrationItem = {
   brand?: string;
   /** Улс, эсвэл бусад товч тэмдэглэгээ. */
   meta?: string;
-  /** Брэндийн лого. Хоосон бол брэндийн нэр wordmark болно. */
+  /** Брэндийн лого. Байвал брэндийн нэрийг орлоно. */
   logo?: string;
-  /** Бүтээгдэхүүний зураг — картын толгойд бүтэн өргөнөөр. Хоосон бол
-   *  карт зураггүй, зөвхөн бичвэрээр үлдэнэ. */
+  /** Бүтээгдэхүүний зураг — картын баруун талд уусан суудаг. Хоосон бол
+   *  карт зөвхөн бичвэрээр үлдэнэ (өндөр нь хэвээр). */
   image?: string;
   /** Нэмэлт тайлбар (2 мөрөөр таслагдана). */
   note?: string;
 };
+
+/* Зургийн зүүн ирмэгийг дэвсгэр рүү уусгах хөшиг. Safari 15.4-өөс өмнөх
+   хувилбарт `-webkit-` угтвар хэрэгтэй тул хоёуланг нь өгнө. */
+const FADE = "linear-gradient(to right, transparent 0%, rgba(0,0,0,0.2) 30%, #000 72%)";
+const fadeStyle = { WebkitMaskImage: FADE, maskImage: FADE } as const;
 
 export function IntegrationGrid({
   items,
@@ -49,96 +48,74 @@ export function IntegrationGrid({
 }) {
   if (!items.length) return null;
 
-  /* Зарим карт зурагтай, зарим нь зураггүй үед мөр доторх картуудын
-     өндөр зөрж, бичвэр нь шатлан харагддаг байв. Иймд НЭГ Ч карт
-     зурагтай бол БҮГД зургийн талбартай болно — зураггүй нь брэндийн
-     нэрээр бүтсэн товч тавцан авна. Огт зураггүй жагсаалт нь хуучин
-     шигээ цэвэр бичвэр хэвээр үлдэнэ. */
-  const withMedia = items.some((item) => Boolean(item.image));
-
   return (
-    <ul className={cn("grid gap-3 sm:grid-cols-2 lg:grid-cols-3", className)}>
-      {items.map((item) => (
-        <li
-          key={item.id}
-          className="flex flex-col overflow-hidden rounded-2xl border border-night/10 bg-ground/60 transition-colors duration-500 hover:border-night/25"
-        >
-          {/* Бүтээгдэхүүний зураг — картын дээд ирмэг хүртэл бүтнээрээ.
-              Тогтмол 16/10 харьцаатай тул мөр доторх картуудын зургийн
-              өндөр үргэлж таарна. `alt` нь ЗОРИУДААР хоосон: яг доор нь
-              брэнд, ангилал, улс бичигдсэн байдаг тул дэлгэц уншигчид
-              нэг зүйлийг хоёр удаа сонсох хэрэггүй. */}
-          {withMedia &&
-            (item.image ? (
-              <span className="block aspect-[16/10] w-full overflow-hidden bg-night/5">
+    <ul className={cn("grid gap-3 sm:grid-cols-2", className)}>
+      {items.map((item) => {
+        /* Лого харагдаж байвал брэндийн нэрийг давхар бичихгүй —
+           логоноос нь аль хэдийн уншигдана. */
+        const meta = [item.logo ? null : item.brand, item.meta].filter(Boolean).join(" · ");
+
+        return (
+          <li
+            key={item.id}
+            className="relative flex min-h-[116px] items-center overflow-hidden rounded-2xl border border-night/10 bg-surface px-5 py-4 transition-colors duration-500 hover:border-night/25 sm:min-h-[132px] sm:px-6 sm:py-5"
+          >
+            {/* Бүтээгдэхүүний зураг — хүрээгүй, зүүн тийшээ уусна.
+                `alt` нь ЗОРИУДААР хоосон: яг хажууд нь ангилал, брэнд,
+                улс бичигдсэн тул дэлгэц уншигчид давхар сонсох хэрэггүй. */}
+            {item.image && (
+              <span
+                aria-hidden
+                style={fadeStyle}
+                className="pointer-events-none absolute inset-y-0 right-0 w-1/2 select-none"
+              >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={item.image}
                   alt=""
                   loading="lazy"
                   decoding="async"
-                  className="h-full w-full object-cover"
+                  className="h-full w-full object-contain object-right"
                 />
               </span>
-            ) : (
-              /* Зурагласан картуудтай өндөр нь таарах орлуулагч. */
-              <span
-                aria-hidden
-                className="flex aspect-[16/10] w-full items-center justify-center overflow-hidden bg-night/[0.06] px-5"
-              >
-                <span className="line-clamp-2 text-center text-[15px] font-extrabold uppercase leading-tight tracking-[0.08em] text-night/25">
-                  {item.brand || item.category}
-                </span>
-              </span>
-            ))}
+            )}
 
-          <span className="flex flex-1 flex-col p-5">
-            {/* Толгой — лого зураг, эсвэл брэндийн нэр (брэндгүй үед
-                ангилал өөрөө) типографик тэмдэг болно. */}
-            <span className="flex h-9 items-center">
-              {item.logo ? (
+            <span
+              className={cn(
+                "relative flex flex-col",
+                item.image ? "w-[56%]" : "w-full"
+              )}
+            >
+              {item.logo && (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={item.logo}
                   alt={item.brand ?? item.category}
                   loading="lazy"
                   decoding="async"
-                  className="h-full max-w-[150px] object-contain object-left"
+                  className="mb-2.5 h-6 max-w-[130px] object-contain object-left"
                 />
-              ) : (
-                <span className="text-[19px] font-extrabold uppercase leading-none tracking-tight text-night">
-                  {item.brand || item.category}
+              )}
+
+              <span className="block text-[15px] font-extrabold leading-snug tracking-tight text-night sm:text-[17px]">
+                {item.category}
+              </span>
+
+              {meta && (
+                <span className="mt-1.5 block text-[11px] font-semibold uppercase tracking-[0.12em] text-night/45 sm:text-[12px]">
+                  {meta}
+                </span>
+              )}
+
+              {item.note && (
+                <span className="mt-2 line-clamp-2 text-[13px] leading-relaxed text-night/60">
+                  {item.note}
                 </span>
               )}
             </span>
-
-            {/* Толгойд брэнд гарсан үед л ангиллыг давхар бичнэ — эс бөгөөс
-                нэг нэр хоёр удаа давтагдана. */}
-            {item.brand && (
-              <span className="mt-5 block text-[15px] font-extrabold leading-snug tracking-tight text-night">
-                {item.category}
-              </span>
-            )}
-
-            {(item.meta || (item.logo && item.brand)) && (
-              <span
-                className={cn(
-                  "block text-[12px] font-semibold uppercase tracking-[0.12em] text-night/45",
-                  item.brand ? "mt-1" : "mt-5"
-                )}
-              >
-                {[item.logo ? item.brand : null, item.meta].filter(Boolean).join(" · ")}
-              </span>
-            )}
-
-            {item.note && (
-              <span className="mt-2.5 line-clamp-2 text-[13px] leading-relaxed text-night/60">
-                {item.note}
-              </span>
-            )}
-          </span>
-        </li>
-      ))}
+          </li>
+        );
+      })}
     </ul>
   );
 }
