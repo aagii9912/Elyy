@@ -49,3 +49,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Дизайн canvas — угсарсан гаралт (~2MB засварлагчийн багц агуулна).
+# Эх артбордууд (.dc.html) болон canvas.json нь git-д хадгалагдана,
+# гаралтыг нь тэднээс дахин угсардаг (design skill).
+/.design/**/*.html
+!/.design/**/*.dc.html
