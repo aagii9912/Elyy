@@ -34,6 +34,7 @@ import { MonoKicker } from "./shared";
 import { MonoModal } from "./MonoModal";
 import { PortraitShowcase, type ShowcaseSlide } from "@/components/ui/portrait-showcase";
 import { IntegrationGrid, type IntegrationItem } from "@/components/ui/integration-grid";
+import { sectionTone } from "@/lib/theme-css";
 
 /* Брэндийн тэмдэг — материалын нэрээр таарна. Танихгүй зүйл дээр
    Elysium-ийн ромб тавина, ингэснээр админ дурын материал нэмж болно. */
@@ -101,7 +102,7 @@ function BrandMark({
   }
   const brand = markFor(title);
   if (!brand) return null;
-  if (brand.mark) return <LogoMark className={`h-6 w-auto text-night ${className}`} />;
+  if (brand.mark) return <LogoMark className={`h-6 w-auto text-fg ${className}`} />;
   return (
     /* `/brand/*-mark.png` нь ЦАГААН лого (бараан дэвсгэрт зориулж
        бэлдсэн) — цагаан pop-up дээр шууд тавибал огт харагдахгүй тул
@@ -154,7 +155,12 @@ export function MonoEquip({ site }: { site: SiteContent }) {
   }));
 
   return (
-    <section id="equip" className="relative border-b border-night/10 bg-night">
+    <section
+      id="equip"
+      data-bg="equip"
+      data-tone={sectionTone(site.theme, "equip", "dark")}
+      className="relative border-b border-fg/10 bg-night"
+    >
       <PortraitShowcase
         slides={slides}
         active={index}
@@ -175,7 +181,7 @@ export function MonoEquip({ site }: { site: SiteContent }) {
             data-cursor-hover
             onClick={() => setOpen("list")}
             aria-haspopup="dialog"
-            className="inline-flex min-h-11 items-center gap-2 rounded-full bg-white px-5 py-2.5 text-[12px] font-bold uppercase tracking-[0.1em] text-night transition-transform duration-300 hover:-translate-y-0.5"
+            className="inline-flex min-h-11 items-center gap-2 rounded-full bg-white px-5 py-2.5 text-[12px] font-bold uppercase tracking-[0.1em] text-fg transition-transform duration-300 hover:-translate-y-0.5"
           >
             {equip.ctaLabel}
             <span aria-hidden>→</span>
@@ -191,15 +197,15 @@ export function MonoEquip({ site }: { site: SiteContent }) {
         size="full"
       >
         <div className="p-6 sm:p-9">
-          <p className="flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.28em] text-night/50">
+          <p className="flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.28em] text-fg/50">
             <span aria-hidden className="h-px w-8 bg-moss" />
             {equip.kicker}
           </p>
-          <h3 className="mt-4 text-[clamp(1.4rem,3vw,2rem)] font-extrabold leading-tight tracking-tight text-night">
+          <h3 className="mt-4 text-[clamp(1.4rem,3vw,2rem)] font-extrabold leading-tight tracking-tight text-fg">
             {equip.equipment.title}
           </h3>
           {equip.equipment.body && (
-            <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-night/60">
+            <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-fg/60">
               {equip.equipment.body}
             </p>
           )}
@@ -225,16 +231,16 @@ export function MonoEquip({ site }: { site: SiteContent }) {
               className="h-56 w-full object-cover sm:h-72"
             />
             <div className="p-6 sm:p-9">
-              <p className="flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.28em] text-night/50">
+              <p className="flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.28em] text-fg/50">
                 <span aria-hidden className="h-px w-8 bg-moss" />
                 {equip.kicker}
               </p>
-              <h3 className="mt-4 text-[clamp(1.4rem,3vw,2rem)] font-extrabold leading-tight tracking-tight text-night">
+              <h3 className="mt-4 text-[clamp(1.4rem,3vw,2rem)] font-extrabold leading-tight tracking-tight text-fg">
                 {detail.title}
               </h3>
-              <p className="mt-4 text-[15px] leading-relaxed text-night/70">{detail.body}</p>
+              <p className="mt-4 text-[15px] leading-relaxed text-fg/70">{detail.body}</p>
 
-              <div className="mt-7 flex flex-wrap items-center justify-between gap-4 border-t border-night/10 pt-6">
+              <div className="mt-7 flex flex-wrap items-center justify-between gap-4 border-t border-fg/10 pt-6">
                 <BrandMark title={detail.title} logo={detail.logo} className="h-7" />
                 {detailHref && (
                   <a

@@ -9,6 +9,7 @@
 import { useState } from "react";
 import type { SiteContent } from "@/lib/site-content";
 import { MonoKicker } from "./shared";
+import { sectionTone } from "@/lib/theme-css";
 
 /* Яг координат — pin нь тодорхой цэг дээр буух ба чиглэл мөн үүн рүү заана. */
 const embed = (coords: string) =>
@@ -26,14 +27,19 @@ export function MonoMap({ site }: { site: SiteContent }) {
   const nearby = location.nearby[group] ?? location.nearby[0];
 
   return (
-    <section id="location" className="border-b border-night/10 bg-ground py-20 md:py-28">
+    <section
+      id="location"
+      data-bg="location"
+      data-tone={sectionTone(site.theme, "location", "light")}
+      className="border-b border-fg/10 bg-ground py-20 md:py-28"
+    >
       <div className="mx-auto max-w-[1500px] px-5 md:px-10">
         <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <div>
             <MonoKicker reveal>{location.kicker}</MonoKicker>
             <h2
               data-reveal="heading"
-              className="mt-4 max-w-xl text-[clamp(1.8rem,3.4vw,2.8rem)] font-extrabold leading-tight tracking-tight text-night"
+              className="mt-4 max-w-xl text-[clamp(1.8rem,3.4vw,2.8rem)] font-extrabold leading-tight tracking-tight text-fg"
             >
               {tab.title}
             </h2>
@@ -44,7 +50,7 @@ export function MonoMap({ site }: { site: SiteContent }) {
             rel="noopener"
             data-cursor-hover
             data-reveal="up"
-            className="inline-flex min-h-11 items-center gap-2 self-start rounded-full border border-night/25 px-5 text-[11px] font-bold uppercase tracking-[0.08em] text-night transition-colors duration-300 hover:bg-night hover:text-white md:self-auto"
+            className="inline-flex min-h-11 items-center gap-2 self-start rounded-full border border-fg/25 px-5 text-[11px] font-bold uppercase tracking-[0.08em] text-fg transition-colors duration-300 hover:bg-night hover:text-white md:self-auto"
           >
             {location.directionsLabel}
           </a>
@@ -55,7 +61,7 @@ export function MonoMap({ site }: { site: SiteContent }) {
           role="tablist"
           aria-label="Байршлын төрөл"
           data-reveal="up"
-          className="mt-8 inline-flex rounded-full border border-night/15 bg-surface p-1"
+          className="mt-8 inline-flex rounded-full border border-fg/15 bg-surface p-1"
         >
           {(["project", "office"] as const).map((id) => (
             <button
@@ -69,7 +75,7 @@ export function MonoMap({ site }: { site: SiteContent }) {
               className={`min-h-11 rounded-full px-5 text-[11px] font-bold uppercase tracking-[0.08em] transition-colors ${
                 active === id
                   ? "bg-night text-white"
-                  : "text-night/55 hover:text-night"
+                  : "text-fg/55 hover:text-fg"
               }`}
             >
               {location.tabs[id].label}
@@ -80,7 +86,7 @@ export function MonoMap({ site }: { site: SiteContent }) {
         <div className="mt-8 grid gap-6 lg:grid-cols-[1.7fr_1fr]">
           <div
             data-reveal="zoom"
-            className="overflow-hidden rounded-2xl border border-night/10 bg-surface"
+            className="overflow-hidden rounded-2xl border border-fg/10 bg-surface"
           >
             <iframe
               key={tab.id}
@@ -100,11 +106,11 @@ export function MonoMap({ site }: { site: SiteContent }) {
             key={active}
             className="mono-fade-up grid content-start gap-3"
           >
-            <div className="rounded-xl border border-night/10 bg-surface px-4 py-3.5">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-night/45">
+            <div className="rounded-xl border border-fg/10 bg-surface px-4 py-3.5">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-fg/45">
                 {location.addressLabel}
               </p>
-              <p className="mt-1.5 text-sm font-bold leading-snug text-night">{tab.address}</p>
+              <p className="mt-1.5 text-sm font-bold leading-snug text-fg">{tab.address}</p>
             </div>
 
             {active === "project" ? (
@@ -126,8 +132,8 @@ export function MonoMap({ site }: { site: SiteContent }) {
                       data-cursor-hover
                       className={`min-h-11 rounded-full border px-4 text-[11px] font-bold uppercase tracking-[0.08em] transition-colors ${
                         group === i
-                          ? "border-night bg-night text-white"
-                          : "border-night/15 bg-surface text-night/55 hover:border-night/40 hover:text-night"
+                          ? "border-fg bg-night text-white"
+                          : "border-fg/15 bg-surface text-fg/55 hover:border-fg/40 hover:text-fg"
                       }`}
                     >
                       {g.label}
@@ -146,22 +152,22 @@ export function MonoMap({ site }: { site: SiteContent }) {
                   {nearby.items.map((l, i) => (
                     <li
                       key={`${l.place}-${i}`}
-                      className="flex items-center gap-3 rounded-xl border border-night/10 bg-surface px-4 py-3 transition-colors duration-300 hover:border-night/30"
+                      className="flex items-center gap-3 rounded-xl border border-fg/10 bg-surface px-4 py-3 transition-colors duration-300 hover:border-fg/30"
                     >
-                      <span className="w-6 shrink-0 text-[11px] font-bold tabular-nums text-night/35">
+                      <span className="w-6 shrink-0 text-[11px] font-bold tabular-nums text-fg/35">
                         {String(i + 1).padStart(2, "0")}
                       </span>
                       <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-bold text-night">{l.place}</p>
+                        <p className="truncate text-sm font-bold text-fg">{l.place}</p>
                         {l.kind && (
-                          <p className="text-[10px] uppercase tracking-[0.16em] text-night/45">
+                          <p className="text-[10px] uppercase tracking-[0.16em] text-fg/45">
                             {l.kind}
                           </p>
                         )}
                       </div>
-                      <span className="shrink-0 text-sm font-extrabold tabular-nums text-night">
+                      <span className="shrink-0 text-sm font-extrabold tabular-nums text-fg">
                         {l.distance}
-                        <span className="ml-0.5 text-[11px] font-bold text-night/45">м</span>
+                        <span className="ml-0.5 text-[11px] font-bold text-fg/45">м</span>
                       </span>
                     </li>
                   ))}
@@ -169,32 +175,32 @@ export function MonoMap({ site }: { site: SiteContent }) {
               </div>
             ) : (
               <div className="grid content-start gap-3">
-                <div className="rounded-xl border border-night/10 bg-surface px-4 py-3.5">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-night/45">
+                <div className="rounded-xl border border-fg/10 bg-surface px-4 py-3.5">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-fg/45">
                     {location.office.phoneLabel}
                   </p>
                   <a
                     href={`tel:+976${contact.phone.replace(/[^0-9]/g, "")}`}
                     data-cursor-hover
-                    className="mt-1.5 block text-xl font-extrabold text-night transition-opacity duration-300 hover:opacity-70"
+                    className="mt-1.5 block text-xl font-extrabold text-fg transition-opacity duration-300 hover:opacity-70"
                   >
                     {contact.phone}
                   </a>
                 </div>
-                <div className="rounded-xl border border-night/10 bg-surface px-4 py-3.5">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-night/45">
+                <div className="rounded-xl border border-fg/10 bg-surface px-4 py-3.5">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-fg/45">
                     {location.office.hoursLabel}
                   </p>
-                  <p className="mt-1.5 text-sm font-bold text-night">{contact.hours}</p>
+                  <p className="mt-1.5 text-sm font-bold text-fg">{contact.hours}</p>
                 </div>
-                <div className="rounded-xl border border-night/10 bg-surface px-4 py-3.5">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-night/45">
+                <div className="rounded-xl border border-fg/10 bg-surface px-4 py-3.5">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-fg/45">
                     {location.office.emailLabel}
                   </p>
                   <a
                     href={`mailto:${brand.email}`}
                     data-cursor-hover
-                    className="mt-1.5 block text-sm font-bold text-night underline-offset-4 transition-opacity duration-300 hover:underline hover:opacity-70"
+                    className="mt-1.5 block text-sm font-bold text-fg underline-offset-4 transition-opacity duration-300 hover:underline hover:opacity-70"
                   >
                     {brand.email}
                   </a>

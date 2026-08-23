@@ -14,6 +14,7 @@ import { gsap, type ScrollTrigger as ScrollTriggerType } from "@/lib/gsap";
 import type { SiteContent } from "@/lib/site-content";
 import { BrochureButton } from "./MonoBrochure";
 import { useScrollAutoplay } from "./shared";
+import { sectionTone } from "@/lib/theme-css";
 
 const FRAME_COUNT = 160;
 const framePath = (i: number) => `/hero-video-frames/frame_${String(i).padStart(3, "0")}.webp`;
@@ -112,7 +113,13 @@ export function MonoHero({ site }: { site: SiteContent }) {
   }, []);
 
   return (
-    <section id="top" ref={root} className="relative h-[100svh] w-full bg-night md:h-[210vh]">
+    <section
+      id="top"
+      ref={root}
+      data-bg="hero"
+      data-tone={sectionTone(site.theme, "hero", "dark")}
+      className="relative h-[100svh] w-full bg-night md:h-[210vh]"
+    >
       <div className="sticky top-0 flex h-[100svh] min-h-[620px] w-full overflow-hidden">
         <canvas ref={canvas} className="absolute inset-0 z-0 h-full w-full" />
         {/* Шинэ кадрууд өдрийн цэлмэг тэнгэртэй — өмнөх нар жаргах клипээс
@@ -149,7 +156,7 @@ export function MonoHero({ site }: { site: SiteContent }) {
               href="#contact"
               onClick={(e) => go(e, "#contact")}
               data-cursor-hover
-              className="mono-fade-up inline-flex w-full items-center justify-center gap-2 rounded-[50px] bg-white px-6 py-4 text-[14px] font-bold uppercase tracking-[-0.2px] text-night transition-transform duration-300 hover:-translate-y-0.5 sm:w-auto"
+              className="mono-fade-up inline-flex w-full items-center justify-center gap-2 rounded-[50px] bg-white px-6 py-4 text-[14px] font-bold uppercase tracking-[-0.2px] text-fg transition-transform duration-300 hover:-translate-y-0.5 sm:w-auto"
               style={{ animationDelay: "0.85s" }}
             >
               {nav.ctaLabel}

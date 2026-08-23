@@ -19,6 +19,7 @@ import { MonoFooter } from "@/components/mono/MonoFooter";
 import { MonoChatbot } from "@/components/mono/MonoChatbot";
 import { MonoStoryNav } from "@/components/mono/MonoStoryNav";
 import { MonoMotion } from "@/components/mono/MonoMotion";
+import { SiteTheme } from "@/components/SiteTheme";
 
 /* Хуудасны бүх текст/зураг нь админаас (`/admin/site`) удирдагдана.
    Хадгалахад `/api/admin/site` нь `revalidatePath("/")` дуудаж
@@ -37,7 +38,8 @@ export default async function Home() {
   const site = await loadSiteContent();
 
   return (
-    <div className="mono-page min-h-screen bg-ground font-gilroy text-night">
+    <div className="mono-page min-h-screen bg-ground font-gilroy text-fg">
+      <SiteTheme theme={site.theme} />
       <MonoMotion />
       <MonoCursor />
       <MonoHeader site={site} />

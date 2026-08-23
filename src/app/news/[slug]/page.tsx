@@ -10,6 +10,7 @@ import { MonoCursor } from "@/components/mono/MonoCursor";
 import { MonoHeader } from "@/components/mono/MonoHeader";
 import { MonoFooter } from "@/components/mono/MonoFooter";
 import { NewsCard } from "@/components/news/NewsCard";
+import { SiteTheme } from "@/components/SiteTheme";
 
 /* Нэг нийтлэл: /news/<slug>. Ноорогийг зөвхөн ?preview=1-тэй үзнэ. */
 export const dynamic = "force-dynamic";
@@ -72,7 +73,8 @@ export default async function NewsDetailPage({ params, searchParams }: Props) {
   );
 
   return (
-    <div className="mono-page min-h-screen bg-ground font-gilroy text-night">
+    <div className="mono-page min-h-screen bg-ground font-gilroy text-fg">
+      <SiteTheme theme={site.theme} />
       <MonoMotion />
       <MonoCursor />
       <MonoHeader site={site} variant="page" />

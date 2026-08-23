@@ -36,8 +36,161 @@ export const STRUCTURE_CLIPS = [
 export const CLIP_AUTO = "";
 export const CLIP_NONE = "none";
 
+/* ------------------------------------------------------------------ */
+/* Дизайн (theme) — админаас удирдагдах өнгө, градиент, дэвсгэр зураг  */
+/* ------------------------------------------------------------------ */
+
+/** Градиентийн нэг зогсоол. `at` — 0–100 (%). */
+export type ColorStop = { color: string; at: number };
+
+/** Дэвсгэрийн төрөл: нэрлэсэн токен / нэг өнгө / градиент / зураг. */
+export const BACKGROUND_KINDS = ["token", "solid", "gradient", "image"] as const;
+
+/** `kind="token"`-ийн сонголт. `auto` = кодод бичсэн өгөгдмөлийг ХӨНДӨХГҮЙ
+ *  (CSS огт үүсэхгүй) — тиймээс шинэ талбар нэмэхэд сайт хэвээрээ үлдэнэ. */
+export const BACKGROUND_TOKENS = [
+  "auto",
+  "ground",
+  "surface",
+  "dark",
+  "accent",
+  "transparent",
+] as const;
+
+export const GRADIENT_TYPES = ["linear", "radial", "conic"] as const;
+
+/** Radial/conic градиентийн хэлбэр. Чөлөөт CSS бичүүлэхгүйн тулд
+ *  бэлэн жагсаалтаас л сонгуулна (CSS injection-оос хамгаална). */
+export const RADIAL_SHAPES = [
+  "ellipse 80% 60% at 50% 50%",
+  "ellipse 100% 70% at 50% 0%",
+  "ellipse 100% 70% at 50% 100%",
+  "circle at 50% 50%",
+  "circle at 20% 20%",
+  "circle at 80% 20%",
+] as const;
+
+export const BG_POSITIONS = [
+  "center",
+  "top",
+  "bottom",
+  "left",
+  "right",
+  "top left",
+  "top right",
+  "bottom left",
+  "bottom right",
+] as const;
+
+export const BG_SIZES = ["cover", "contain", "auto"] as const;
+export const BG_REPEATS = ["no-repeat", "repeat", "repeat-x", "repeat-y"] as const;
+export const BG_ATTACHMENTS = ["scroll", "fixed"] as const;
+
+/** Бичгийн өнгөний горим. `auto` = компонентод бичсэн өгөгдмөлөөр. */
+export const TONES = ["auto", "light", "dark"] as const;
+
+/** Нэг гадаргуугийн дэвсгэрийн бүрэн тодорхойлолт. */
+export type Background = {
+  kind: string;
+  /** `kind="token"` үед — `BACKGROUND_TOKENS`-оос. */
+  token: string;
+  /** `kind="solid"` үед — hex. */
+  color: string;
+  gradient: {
+    type: string;
+    /** linear/conic-ийн өнцөг (0–360°). */
+    angle: number;
+    /** radial/conic-ийн хэлбэр — `RADIAL_SHAPES`-оос. */
+    shape: string;
+    /** Хамгийн багадаа 2 зогсоол. */
+    stops: ColorStop[];
+  };
+  image: {
+    url: string;
+    position: string;
+    size: string;
+    repeat: string;
+    attachment: string;
+    /** Бүдгэрүүлэлт (0–24px) — бичиг уншигдахуйц болгоно. */
+    blur: number;
+  };
+  /** Дэвсгэр дээр давхарлах хөшиг. `opacity: 0` бол огт үүсэхгүй. */
+  overlay: {
+    color: string;
+    /** 0–100 (%). */
+    opacity: number;
+    /** true — дээрээс доош шилжсэн зөөлөн хөшиг, false — жигд. */
+    soft: boolean;
+  };
+  /** Бичгийн өнгө: `light` = бараан бичиг, `dark` = цайвар бичиг. */
+  tone: string;
+};
+
+/** Админд жагсаалт үүсгэхэд ашиглана — дараалал нь хуудасны дараалал. */
+export const THEME_SECTIONS = [
+  { id: "header", label: "Толгой хэсэг", hint: "Дээд навигац (тунгалаг → цагаан)" },
+  { id: "hero", label: "Нүүр дэлгэц", hint: "Бичлэгийн кадрын АРД суух суурь" },
+  { id: "stats", label: "01 · Ерөнхий төлөвлөлт", hint: "Кадрын АРД суух суурь" },
+  { id: "elys", label: "02 · ELYS консепц", hint: "" },
+  { id: "equip", label: "03 · Үндсэн бүтээц", hint: "" },
+  { id: "marquee", label: "Уриа (гүйдэг мөр)", hint: "" },
+  { id: "apartments", label: "Өрөөний сонголт", hint: "" },
+  { id: "developer", label: "Төсөл хэрэгжүүлэгч", hint: "" },
+  { id: "gallery", label: "Зургийн цомог", hint: "" },
+  { id: "vr", label: "VR аялал", hint: "" },
+  { id: "location", label: "Байршил", hint: "" },
+  { id: "contact", label: "Холбоо барих", hint: "" },
+  { id: "managers", label: "Борлуулалтын баг", hint: "" },
+  { id: "faq", label: "Түгээмэл асуулт", hint: "" },
+  { id: "footer", label: "Хөл хэсэг", hint: "" },
+] as const;
+
+export type ThemeSectionId = (typeof THEME_SECTIONS)[number]["id"];
+
+export type ThemeContent = {
+  /** Глобал палитр — CSS токен руу шууд буудаг (`--color-*`). */
+  palette: {
+    /** Хуудасны үндсэн дэвсгэр (`--color-ground`). */
+    ground: string;
+    /** Карт, өргөгдсөн гадаргуу (`--color-surface`). */
+    surface: string;
+    /** Хар хэсэг ба үндсэн бичиг (`--color-night`). */
+    dark: string;
+    /** Бүдэг туслах бичиг (`--color-mist`). */
+    muted: string;
+    /** Тодруулга (`--color-lime`). */
+    accent: string;
+    /** Гүн тодруулга (`--color-moss`). */
+    accentDeep: string;
+    /** Кино хэсгүүдийн хөшгийн өнгө (`--color-charcoal`). */
+    film: string;
+  };
+  /** `<html>`-ийн суурь өнгө — overscroll бүсэд ч харагдана. */
+  page: Background;
+  sections: {
+    header: Background;
+    hero: Background;
+    stats: Background;
+    elys: Background;
+    equip: Background;
+    marquee: Background;
+    apartments: Background;
+    developer: Background;
+    gallery: Background;
+    vr: Background;
+    location: Background;
+    contact: Background;
+    managers: Background;
+    faq: Background;
+    footer: Background;
+  };
+};
+
 export type SiteContent = {
   seo: { title: string; description: string };
+
+  /** Дизайн — өнгө, градиент, дэвсгэр зураг (`/admin/site → Дизайн`). */
+  theme: ThemeContent;
 
   brand: {
     /** Hero-гийн том гарчиг (үг тус бүр mask-аар гарч ирнэ). */
@@ -319,7 +472,77 @@ export type SiteContent = {
 /* Өгөгдмөл контент — одоогийн сайт дээр байгаа бүх текст.             */
 /* ------------------------------------------------------------------ */
 
+
+/* ------------------------------------------------------------------ */
+/* Дизайны өгөгдмөл — ЯГ одоогийн сайтын өнгө.                         */
+/* Хэсэг бүрийн дэвсгэр нь `token: "auto"` — өөрөөр хэлбэл админ гараар */
+/* өөрчлөх хүртэл CSS огт үүсэхгүй, сайт нэг ч пиксел хөдлөхгүй.       */
+/* ------------------------------------------------------------------ */
+
+/** Шинэ дэвсгэрийн бүрэн объект. Хэсэг бүр өөрийн хуулбартай байх ёстой
+ *  (нэг объектыг хуваалцвал засварлагч дээр бүгд хамт өөрчлөгдөнө). */
+export function defaultBackground(): Background {
+  return {
+    kind: "token",
+    token: "auto",
+    color: "#f4f4f1",
+    gradient: {
+      type: "linear",
+      angle: 180,
+      shape: "ellipse 80% 60% at 50% 50%",
+      /* ЗААВАЛ 2 бүрэн элемент — `mergeValue` массивын дутуу түлхүүрийг
+         ЭХНИЙ элементээс нөхдөг тул template бүрэн байх шаардлагатай. */
+      stops: [
+        { color: "#ffffff", at: 0 },
+        { color: "#f4f4f1", at: 100 },
+      ],
+    },
+    image: {
+      url: "",
+      position: "center",
+      size: "cover",
+      repeat: "no-repeat",
+      attachment: "scroll",
+      blur: 0,
+    },
+    overlay: { color: "#151717", opacity: 0, soft: true },
+    tone: "auto",
+  };
+}
+
+export const DEFAULT_THEME: ThemeContent = {
+  palette: {
+    ground: "#f4f4f1",
+    surface: "#ffffff",
+    dark: "#151717",
+    muted: "#8a8d8c",
+    accent: "#b4d656",
+    accentDeep: "#3f6a33",
+    film: "#16280f",
+  },
+  page: defaultBackground(),
+  sections: {
+    header: defaultBackground(),
+    hero: defaultBackground(),
+    stats: defaultBackground(),
+    elys: defaultBackground(),
+    equip: defaultBackground(),
+    marquee: defaultBackground(),
+    apartments: defaultBackground(),
+    developer: defaultBackground(),
+    gallery: defaultBackground(),
+    vr: defaultBackground(),
+    location: defaultBackground(),
+    contact: defaultBackground(),
+    managers: defaultBackground(),
+    faq: defaultBackground(),
+    footer: defaultBackground(),
+  },
+};
+
 export const DEFAULT_SITE_CONTENT: SiteContent = {
+  theme: DEFAULT_THEME,
+
   seo: {
     title: "Elysium Residence — Бизнес зэрэглэлийн орон сууц",
     description:

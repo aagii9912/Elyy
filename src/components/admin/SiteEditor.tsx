@@ -16,8 +16,10 @@ import {
 } from "@/lib/site-content";
 import { externalHref } from "@/lib/links";
 import { Button, Card, Field, FileField, ImageField, Select, TextArea, TextInput, Toggle } from "./ui";
+import { DesignPanel } from "./DesignFields";
 
 type SectionId =
+  | "design"
   | "brand"
   | "brochure"
   | "nav"
@@ -40,6 +42,7 @@ type SectionId =
   | "seo";
 
 const SECTIONS: { id: SectionId; label: string; hint: string }[] = [
+  { id: "design", label: "🎨 Дизайн / Өнгө", hint: "Палитр, дэвсгэр, градиент, зураг" },
   { id: "brand", label: "Брэнд & холбоо", hint: "Нэр, уриа, и-мэйл, танилцуулга" },
   { id: "brochure", label: "Танилцуулга татах", hint: "Утас/и-мэйл цуглуулах маягт" },
   { id: "nav", label: "Толгой цэс", hint: "Навигац, товчнууд" },
@@ -288,6 +291,10 @@ export function SiteEditor({ initial }: { initial: SiteContent }) {
     if (!confirm(`"${label}" хэсгийг өгөгдмөл рүү буцаах уу? (Хадгалах хүртэл эцэслэгдэхгүй)`)) return;
     const defaults = cloneDefaultSiteContent();
     edit((draft) => {
+      if (section === "design") {
+        draft.theme = defaults.theme;
+        return;
+      }
       // Хэсэг бүр өөрийн нэртэй тохирсон түлхүүрийг эзэмшинэ.
       Object.assign(draft, { [section]: defaults[section] });
       if (section === "plan") draft.storyNav.plan = defaults.storyNav.plan;
@@ -304,6 +311,11 @@ export function SiteEditor({ initial }: { initial: SiteContent }) {
     const same = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b);
     const ids = new Set<SectionId>();
     for (const s of SECTIONS) {
+      // "design" нь `theme` талбарыг эзэмшинэ — бусад нь өөрийн нэрээр.
+      if (s.id === "design") {
+        if (!same(content.theme, defaults.theme)) ids.add(s.id);
+        continue;
+      }
       const storyKey = s.id === "plan" || s.id === "elys" || s.id === "equip" ? s.id : null;
       const navSame = !storyKey || content.storyNav[storyKey] === defaults.storyNav[storyKey];
       if (!same(content[s.id], defaults[s.id]) || !navSame) ids.add(s.id);
@@ -421,6 +433,15 @@ function renderSection(
   edit: (fn: (draft: SiteContent) => void) => void
 ): React.ReactNode {
   switch (section) {
+    /* ---------------------------------------------------------- */
+    case "design":
+      return (
+        <DesignPanel
+          theme={c.theme}
+          onChange={(next) => edit((d) => void (d.theme = next))}
+        />
+      );
+
     /* ---------------------------------------------------------- */
     case "brand":
       return (

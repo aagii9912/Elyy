@@ -7,6 +7,7 @@ import { MonoHeader } from "@/components/mono/MonoHeader";
 import { MonoFooter } from "@/components/mono/MonoFooter";
 import { MonoKicker } from "@/components/mono/shared";
 import { NewsCard } from "@/components/news/NewsCard";
+import { SiteTheme } from "@/components/SiteTheme";
 
 /* Мэдээний жагсаалт. Нийтлэл нэмэх/засахад `/api/admin/news` нь энэ
    замыг revalidate хийнэ; доорх нь зөвхөн нөөц хамгаалалт. */
@@ -29,7 +30,8 @@ export default async function NewsListPage() {
   ]);
 
   return (
-    <div className="mono-page min-h-screen bg-ground font-gilroy text-night">
+    <div className="mono-page min-h-screen bg-ground font-gilroy text-fg">
+      <SiteTheme theme={site.theme} />
       <MonoMotion />
       <MonoCursor />
       <MonoHeader site={site} variant="page" />

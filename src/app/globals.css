@@ -67,8 +67,57 @@
   --color-acs-mute: #8a827b; /* muted brown — placeholders / dividers */
 }
 
+/* ============================================================
+   Семантик бичгийн токен — хэсгийн `data-tone`-оос хамаарч эргэнэ.
+   `text-fg` нь ЦАЙВАР дэвсгэр дээр бараан, ХАР дэвсгэр дээр цагаан
+   болно. Ингэснээр админ хэсгийн дэвсгэрийг хартай болгоход бичиг нь
+   өөрөө уншигдахуйц хэвээр үлдэнэ (`lib/theme-css.ts`).
+   `inline` — утга нь :root-д гарахгүй, утилит дотроо `var(--ely-fg)`
+   болж шингэнэ; тиймээс элемент бүр өөрийн tone-оор шийдэгдэнэ.
+   ============================================================ */
+@theme inline {
+  --color-fg: var(--ely-fg);
+  --color-fg-muted: var(--ely-fg-muted);
+}
+
 :root {
   --header-h: 5rem;
+}
+
+/* Өгөгдмөл — цайвар дэвсгэр дээрх бараан бичиг. */
+.mono-page,
+.mono-page [data-tone="light"] {
+  --ely-fg: var(--color-night);
+  --ely-fg-muted: var(--color-mist);
+}
+
+/* Хар дэвсгэртэй хэсэг — бичиг цайрна. */
+.mono-page [data-tone="dark"] {
+  --ely-fg: #ffffff;
+  --ely-fg-muted: rgba(255, 255, 255, 0.62);
+}
+
+/* Өөрийн ТОДОРХОЙ дэвсгэртэй карт/самбар/pop-up нь бичгийн өнгөө өөрөө
+   тогтооно — хэсгийн дэвсгэрийг админ хартай болгосон ч цагаан карт
+   дотор бичиг бараан хэвээр уншигдана (мөн эсрэгээр).
+   `[data-bg]` — хэсгийн ҮНДЭС нь энэ дүрмээс гадуур: тэнд классаа биш,
+   админы сонгосон `data-tone` шийднэ (класс нь хуучин утгаараа үлддэг). */
+.mono-page
+  :is(
+    .bg-surface,
+    .bg-white,
+    [class*="bg-surface/8"],
+    [class*="bg-surface/9"],
+    [class*="bg-white/8"],
+    [class*="bg-white/9"]
+  ):not([data-bg]) {
+  --ely-fg: var(--color-night);
+  --ely-fg-muted: var(--color-mist);
+}
+
+.mono-page .bg-night:not([data-bg]) {
+  --ely-fg: #ffffff;
+  --ely-fg-muted: rgba(255, 255, 255, 0.62);
 }
 
 html {

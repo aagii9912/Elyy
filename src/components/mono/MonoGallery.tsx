@@ -3,15 +3,20 @@
 
 import type { SiteContent } from "@/lib/site-content";
 import { MonoKicker } from "./shared";
+import { sectionTone } from "@/lib/theme-css";
 
 export function MonoGallery({ site }: { site: SiteContent }) {
   const { gallery } = site;
 
   return (
-    <section className="overflow-hidden border-b border-night/10 bg-ground py-20 md:py-28">
+    <section
+      data-bg="gallery"
+      data-tone={sectionTone(site.theme, "gallery", "light")}
+      className="overflow-hidden border-b border-fg/10 bg-ground py-20 md:py-28"
+    >
       <div className="mx-auto max-w-[1500px] px-5 md:px-10">
         <MonoKicker reveal>{gallery.kicker}</MonoKicker>
-        <h2 data-reveal="heading" className="mt-4 text-[clamp(1.8rem,3.4vw,2.8rem)] font-extrabold leading-tight tracking-tight text-night">
+        <h2 data-reveal="heading" className="mt-4 text-[clamp(1.8rem,3.4vw,2.8rem)] font-extrabold leading-tight tracking-tight text-fg">
           {gallery.title}
         </h2>
       </div>
@@ -23,7 +28,7 @@ export function MonoGallery({ site }: { site: SiteContent }) {
               {gallery.images.map((img, i) => (
                 <figure
                   key={`${half}-${i}`}
-                  className="relative w-[68vw] shrink-0 overflow-hidden rounded-2xl border border-night/10 sm:w-[42vw] md:w-[30vw] lg:w-[24vw]"
+                  className="relative w-[68vw] shrink-0 overflow-hidden rounded-2xl border border-fg/10 sm:w-[42vw] md:w-[30vw] lg:w-[24vw]"
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
@@ -33,7 +38,7 @@ export function MonoGallery({ site }: { site: SiteContent }) {
                     decoding="async"
                     className="aspect-[4/3] w-full object-cover transition-transform duration-700 hover:scale-105"
                   />
-                  <figcaption className="absolute bottom-3 left-3 rounded-full bg-white/85 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-night backdrop-blur">
+                  <figcaption className="absolute bottom-3 left-3 rounded-full bg-white/85 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-fg backdrop-blur">
                     {img.tag}
                   </figcaption>
                 </figure>

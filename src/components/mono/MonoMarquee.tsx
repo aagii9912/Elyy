@@ -2,18 +2,25 @@
    marquee. Black text, lime diamond as the lone colour accent. */
 
 import type { SiteContent } from "@/lib/site-content";
+import { sectionTone } from "@/lib/theme-css";
 
 export function MonoMarquee({ site }: { site: SiteContent }) {
   const slogans = site.marquee.slogans;
   const track = [...slogans, ...slogans, ...slogans];
   return (
-    <div aria-hidden data-reveal="up" className="overflow-hidden border-b border-night/10 bg-ground py-5 md:py-7">
+    <div
+      aria-hidden
+      data-reveal="up"
+      data-bg="marquee"
+      data-tone={sectionTone(site.theme, "marquee", "light")}
+      className="overflow-hidden border-b border-fg/10 bg-ground py-5 md:py-7"
+    >
       <div className="green-marquee flex w-max items-center gap-10 whitespace-nowrap pr-10">
         {[0, 1].map((half) => (
           <div key={half} className="flex items-center gap-10">
             {track.map((s, i) => (
               <span key={`${half}-${i}`} className="flex items-center gap-10">
-                <span className="text-[clamp(1.4rem,3vw,2.4rem)] font-extrabold uppercase tracking-tight text-night/85">
+                <span className="text-[clamp(1.4rem,3vw,2.4rem)] font-extrabold uppercase tracking-tight text-fg/85">
                   {s}
                 </span>
                 <svg viewBox="696.5 -1 29 30" className="h-5 w-5 text-lime" fill="currentColor" aria-hidden>

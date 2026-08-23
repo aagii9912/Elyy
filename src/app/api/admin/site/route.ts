@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { getStore } from "@/lib/store";
 import { mergeSiteContent } from "@/lib/site-content";
+import { sanitizeTheme } from "@/lib/theme-css";
 
 export const runtime = "nodejs";
 
@@ -28,11 +29,17 @@ export async function PUT(req: Request) {
     if (!body || typeof body !== "object") {
       return NextResponse.json({ ok: false, error: "Буруу өгөгдөл." }, { status: 400 });
     }
-    const content = mergeSiteContent(body);
+    const merged = mergeSiteContent(body);
+    // Дизайны утгууд `<style>` руу ордог тул хадгалахын ӨМНӨ шүүнэ
+    // (рендерийн үед `buildThemeCss` дахин шүүнэ — хоёр давхар хамгаалалт).
+    const content = { ...merged, theme: sanitizeTheme(merged.theme) };
     await getStore().saveSiteContent(content);
 
-    // Үндсэн хуудсыг шинэчилнэ — засвар шууд нийтэд харагдана.
+    // Засвар шууд нийтэд харагдана. Дизайн нь мэдээний хуудсанд ч
+    // хамаарах тул тэдгээрийг мөн шинэчилнэ.
     revalidatePath("/");
+    revalidatePath("/news");
+    revalidatePath("/news/[slug]", "page");
 
     return NextResponse.json({ ok: true, content });
   } catch (err) {

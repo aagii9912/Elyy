@@ -5,20 +5,26 @@
 import { useState } from "react";
 import type { SiteContent } from "@/lib/site-content";
 import { MonoKicker } from "./shared";
+import { sectionTone } from "@/lib/theme-css";
 
 export function MonoFaq({ site }: { site: SiteContent }) {
   const { faq } = site;
   const [open, setOpen] = useState<number | null>(0);
 
   return (
-    <section id="faq" className="border-b border-night/10 bg-ground py-20 md:py-28">
+    <section
+      id="faq"
+      data-bg="faq"
+      data-tone={sectionTone(site.theme, "faq", "light")}
+      className="border-b border-fg/10 bg-ground py-20 md:py-28"
+    >
       <div className="mx-auto max-w-[1100px] px-5 md:px-10">
         <MonoKicker reveal>{faq.kicker}</MonoKicker>
-        <h2 data-reveal="heading" className="mt-4 text-[clamp(1.8rem,3.4vw,2.8rem)] font-extrabold leading-tight tracking-tight text-night">
+        <h2 data-reveal="heading" className="mt-4 text-[clamp(1.8rem,3.4vw,2.8rem)] font-extrabold leading-tight tracking-tight text-fg">
           {faq.title}
         </h2>
 
-        <div className="mt-10 divide-y divide-night/10 border-y border-night/10">
+        <div className="mt-10 divide-y divide-fg/10 border-y border-fg/10">
           {faq.items.map((item, i) => {
             const isOpen = open === i;
             return (
@@ -30,7 +36,7 @@ export function MonoFaq({ site }: { site: SiteContent }) {
                   data-cursor-hover
                   className="flex w-full items-center justify-between gap-6 py-5 text-left"
                 >
-                  <span className={`text-base font-bold md:text-lg ${isOpen ? "text-night" : "text-night/70"}`}>
+                  <span className={`text-base font-bold md:text-lg ${isOpen ? "text-fg" : "text-fg/70"}`}>
                     {item.q}
                   </span>
                   <span
@@ -47,7 +53,7 @@ export function MonoFaq({ site }: { site: SiteContent }) {
                   }`}
                 >
                   <div className="overflow-hidden">
-                    <p className="max-w-2xl pb-6 text-[15px] leading-relaxed text-night/65">{item.a}</p>
+                    <p className="max-w-2xl pb-6 text-[15px] leading-relaxed text-fg/65">{item.a}</p>
                   </div>
                 </div>
               </div>

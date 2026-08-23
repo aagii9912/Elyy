@@ -19,6 +19,7 @@ import type { SiteContent } from "@/lib/site-content";
 import { NEWS_PATH } from "@/lib/news-links";
 import { BrochureButton } from "./MonoBrochure";
 import { SocialRow } from "./MonoSocial";
+import { sectionTone } from "@/lib/theme-css";
 
 export function MonoHeader({
   site,
@@ -94,13 +95,15 @@ export function MonoHeader({
   return (
     <>
       <header
+        data-bg="header"
+        data-tone={sectionTone(site.theme, "header", "light")}
         className={`fixed inset-x-0 top-0 z-50 font-gilroy transition-[background-color,box-shadow,backdrop-filter,transform] duration-500 ${
           hidden && !open ? "-translate-y-full" : ""
         } ${
           open
-            ? "bg-white text-night"
+            ? "bg-white text-fg"
             : solid
-              ? "bg-white/90 text-night shadow-[0_1px_0_rgba(21,23,23,0.08)] backdrop-blur-xl"
+              ? "bg-white/90 text-fg shadow-[0_1px_0_rgba(21,23,23,0.08)] backdrop-blur-xl"
               : "bg-transparent text-white"
         }`}
       >
@@ -128,7 +131,7 @@ export function MonoHeader({
                 onClick={(e) => go(e, item.href)}
                 data-cursor-hover
                 className={`text-[11px] font-medium uppercase tracking-[0.08em] transition-colors duration-300 ${
-                  solid ? "text-night/60 hover:text-night" : "text-white/70 hover:text-white"
+                  solid ? "text-fg/60 hover:text-fg" : "text-white/70 hover:text-white"
                 }`}
               >
                 {item.label}
@@ -142,7 +145,7 @@ export function MonoHeader({
               source="elysium/mono#header"
               className={`hidden items-center gap-2 rounded-full border px-5 py-2 text-[11px] font-medium uppercase tracking-[0.08em] transition-colors duration-300 sm:inline-flex ${
                 solid
-                  ? "border-night/25 text-night hover:bg-night hover:text-white"
+                  ? "border-fg/25 text-fg hover:bg-night hover:text-white"
                   : "border-white/40 text-white hover:bg-white/10"
               }`}
             >
@@ -153,7 +156,7 @@ export function MonoHeader({
               onClick={(e) => go(e, "#contact")}
               data-cursor-hover
               className={`hidden items-center gap-2 rounded-full px-5 py-2 text-[11px] font-bold uppercase tracking-[0.08em] transition-transform duration-300 hover:-translate-y-0.5 md:inline-flex ${
-                solid ? "bg-night text-white" : "bg-white text-night"
+                solid ? "bg-night text-white" : "bg-white text-fg"
               }`}
             >
               {nav.ctaLabel}
@@ -165,7 +168,7 @@ export function MonoHeader({
               onClick={() => setOpen((v) => !v)}
               /* 44×44 — хүрэх талбайн доод хязгаар; зураас 24px хэвээр тул
                  товч томорсон ч тэмдэг нь өмнөхтэй адил харагдана. */
-              className={`relative z-50 -mr-0.5 flex h-11 w-11 flex-col items-center justify-center gap-[5px] lg:hidden ${open ? "text-night" : ""}`}
+              className={`relative z-50 -mr-0.5 flex h-11 w-11 flex-col items-center justify-center gap-[5px] lg:hidden ${open ? "text-fg" : ""}`}
             >
               <span className={`h-0.5 w-6 bg-current transition-transform duration-300 ${open ? "translate-y-[3px] rotate-45" : ""}`} />
               <span className={`h-0.5 w-6 bg-current transition-transform duration-300 ${open ? "-translate-y-[3px] -rotate-45" : ""}`} />
@@ -176,7 +179,7 @@ export function MonoHeader({
 
       {/* Mobile menu — sibling of <header>, see note above */}
       <div
-        className={`fixed inset-0 z-40 flex flex-col bg-white font-gilroy text-night transition-[opacity,visibility] duration-500 lg:hidden ${
+        className={`fixed inset-0 z-40 flex flex-col bg-white font-gilroy text-fg transition-[opacity,visibility] duration-500 lg:hidden ${
           open ? "visible opacity-100" : "invisible opacity-0"
         }`}
       >
@@ -193,7 +196,7 @@ export function MonoHeader({
             </Link>
           ))}
         </nav>
-        <div className="mt-auto flex flex-col gap-3 border-t border-night/10 px-7 py-7">
+        <div className="mt-auto flex flex-col gap-3 border-t border-fg/10 px-7 py-7">
           {/* Сошиал хаягууд — гар утасны цэснээс шууд хүрдэг байх
              (клиентийн 7-р санал). Тохируулаагүй бол мөр өөрөө гарахгүй. */}
           <SocialRow items={site.footer.social} className="pb-1" />
@@ -207,7 +210,7 @@ export function MonoHeader({
           <BrochureButton
             site={site}
             source="elysium/mono#menu"
-            className="w-full rounded-full border border-night/25 px-6 py-3.5 text-center text-sm font-semibold"
+            className="w-full rounded-full border border-fg/25 px-6 py-3.5 text-center text-sm font-semibold"
           >
             {nav.brochureLabel} ↓
           </BrochureButton>

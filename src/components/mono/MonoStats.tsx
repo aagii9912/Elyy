@@ -22,6 +22,7 @@
 
 import type { SiteContent } from "@/lib/site-content";
 import { MonoScrollStory } from "./MonoScrollStory";
+import { sectionTone } from "@/lib/theme-css";
 
 export function MonoStats({ site }: { site: SiteContent }) {
   const points = site.plan.points.map((p, i) => ({
@@ -47,7 +48,8 @@ export function MonoStats({ site }: { site: SiteContent }) {
       /* ~2.4 дэлгэц / 13сек — цэг тутамд ~2.4сек уншиж амжина. */
       autoplaySeconds={13}
       variant="numbers"
-      tone="dark"
+      bgKey="stats"
+      tone={sectionTone(site.theme, "stats", "dark")}
     />
   );
 }

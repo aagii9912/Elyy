@@ -24,7 +24,7 @@ export function MonoKicker({
     <p
       data-reveal={reveal ? "up" : undefined}
       className={`flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.28em] ${
-        tone === "dark" ? "text-white/60" : "text-night/50"
+        tone === "dark" ? "text-white/60" : "text-fg/50"
       } ${className}`}
     >
       {/* lime reads on the dark chapters; on the light ground it all but

@@ -17,6 +17,7 @@ import { useEffect, useRef } from "react";
 import { gsap } from "@/lib/gsap";
 import type { SiteContent } from "@/lib/site-content";
 import { MonoKicker } from "./shared";
+import { sectionTone } from "@/lib/theme-css";
 
 const YEAR_START = 2006;
 const YEAR_END = 2026;
@@ -194,7 +195,13 @@ export function MonoDeveloper({ site }: { site: SiteContent }) {
   }, [d.projects, d.logo]);
 
   return (
-    <section id="developer" ref={root} className="relative border-b border-night/10 bg-ground md:h-[380vh]">
+    <section
+      id="developer"
+      ref={root}
+      data-bg="developer"
+      data-tone={sectionTone(site.theme, "developer", "light")}
+      className="relative border-b border-fg/10 bg-ground md:h-[380vh]"
+    >
       <div className="flex flex-col justify-center overflow-hidden py-20 md:sticky md:top-0 md:h-[100svh] md:py-0">
         {/* backdrop mark — the company icon when one is set, otherwise the
             giant year counter running 2006 → 2026 (desktop only) */}
@@ -229,19 +236,19 @@ export function MonoDeveloper({ site }: { site: SiteContent }) {
         <div className="relative z-10 mx-auto w-full max-w-[1500px] px-5 md:px-10">
           <MonoKicker reveal>{d.kicker}</MonoKicker>
           <div className="mt-4 flex flex-col gap-4">
-            <h2 data-reveal="heading" className="max-w-xl text-[clamp(1.8rem,3.4vw,2.8rem)] font-extrabold leading-tight tracking-tight text-night">
+            <h2 data-reveal="heading" className="max-w-xl text-[clamp(1.8rem,3.4vw,2.8rem)] font-extrabold leading-tight tracking-tight text-fg">
               {d.name}
             </h2>
-            <p data-reveal="up" className="max-w-2xl text-sm leading-relaxed text-night/60">{d.body}</p>
+            <p data-reveal="up" className="max-w-2xl text-sm leading-relaxed text-fg/60">{d.body}</p>
           </div>
           <div data-reveal="up" className="mt-6 flex gap-10">
             <div>
-              <p className="text-2xl font-extrabold text-night md:text-3xl">{d.since}</p>
-              <p className="mt-1 text-[11px] font-medium uppercase tracking-[0.14em] text-night/45">{d.sinceLabel}</p>
+              <p className="text-2xl font-extrabold text-fg md:text-3xl">{d.since}</p>
+              <p className="mt-1 text-[11px] font-medium uppercase tracking-[0.14em] text-fg/45">{d.sinceLabel}</p>
             </div>
             <div>
-              <p className="text-2xl font-extrabold text-night md:text-3xl">{d.projectCount}</p>
-              <p className="mt-1 text-[11px] font-medium uppercase tracking-[0.14em] text-night/45">{d.projectCountLabel}</p>
+              <p className="text-2xl font-extrabold text-fg md:text-3xl">{d.projectCount}</p>
+              <p className="mt-1 text-[11px] font-medium uppercase tracking-[0.14em] text-fg/45">{d.projectCountLabel}</p>
             </div>
           </div>
         </div>
@@ -263,11 +270,11 @@ export function MonoDeveloper({ site }: { site: SiteContent }) {
               <div key={`${p.title}-${i}`} data-reveal="up" data-md-station className="relative md:w-[30vw] md:shrink-0 lg:w-[26vw]">
                 {/* year row — fixed height so the rail lines up across stations */}
                 <div data-md-year className="flex h-20 items-end justify-between pb-3">
-                  <p className="text-[clamp(2rem,3.6vw,3.2rem)] font-bold leading-none tracking-tight text-night/90">
+                  <p className="text-[clamp(2rem,3.6vw,3.2rem)] font-bold leading-none tracking-tight text-fg/90">
                     {p.years.split("–")[0]}
-                    <span className="text-night/35">–{p.years.split("–")[1]}</span>
+                    <span className="text-fg/35">–{p.years.split("–")[1]}</span>
                   </p>
-                  <span className="pb-1 text-[11px] font-bold text-night/30">0{i + 1}</span>
+                  <span className="pb-1 text-[11px] font-bold text-fg/30">0{i + 1}</span>
                 </div>
 
                 {/* rail segment + node (mobile: left rail handled per-card) */}
@@ -279,7 +286,7 @@ export function MonoDeveloper({ site }: { site: SiteContent }) {
                 {/* image card — staggered heights for editorial rhythm */}
                 <article
                   data-md-card
-                  className={`group relative mt-5 overflow-hidden rounded-2xl border border-night/10 bg-surface ${
+                  className={`group relative mt-5 overflow-hidden rounded-2xl border border-fg/10 bg-surface ${
                     i % 2 === 0 ? "md:mt-7" : "md:mt-12"
                   }`}
                 >
@@ -316,7 +323,7 @@ export function MonoDeveloper({ site }: { site: SiteContent }) {
           </div>
         </div>
 
-        <p className="relative z-10 mt-6 hidden px-10 text-[11px] font-medium uppercase tracking-[0.24em] text-night/45 md:block">
+        <p className="relative z-10 mt-6 hidden px-10 text-[11px] font-medium uppercase tracking-[0.24em] text-fg/45 md:block">
           {d.scrollHint}
         </p>
       </div>

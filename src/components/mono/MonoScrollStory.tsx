@@ -81,8 +81,11 @@ export function MonoScrollStory({
   autoplaySeconds = 0,
   variant,
   tone = "dark",
+  bgKey,
 }: {
   id?: string;
+  /** Админаас дэвсгэрийг нь удирдах түлхүүр (`theme.sections`). */
+  bgKey?: string;
   /** Chapter index label, e.g. "01". */
   chapter: string;
   kicker: string;
@@ -433,7 +436,13 @@ export function MonoScrollStory({
   const light = tone === "light";
 
   return (
-    <section id={id} ref={root} className={`relative ${light ? "bg-ground" : "bg-night"} ${heightClass}`}>
+    <section
+      id={id}
+      ref={root}
+      data-bg={bgKey}
+      data-tone={tone}
+      className={`relative ${light ? "bg-ground" : "bg-night"} ${heightClass}`}
+    >
       <div className="sticky top-0 flex h-[100svh] min-h-[560px] w-full overflow-hidden">
         <canvas ref={canvas} className="absolute inset-0 z-0 h-full w-full" />
         {/* Scrim carries just enough weight for the type over the footage —
@@ -476,12 +485,12 @@ export function MonoScrollStory({
         {/* blueprint HUD chrome — numbers chapter only */}
         {variant === "numbers" && (
           <div data-chrome aria-hidden className="pointer-events-none absolute inset-0 z-[6]">
-            <span className={`absolute left-5 top-20 h-6 w-6 border-l border-t md:left-8 ${light ? "border-night/25" : "border-white/25"}`} />
-            <span className={`absolute right-5 top-20 h-6 w-6 border-r border-t md:right-8 ${light ? "border-night/25" : "border-white/25"}`} />
-            <span className={`absolute bottom-6 left-5 h-6 w-6 border-b border-l md:left-8 ${light ? "border-night/25" : "border-white/25"}`} />
-            <span className={`absolute bottom-6 right-5 h-6 w-6 border-b border-r md:right-8 ${light ? "border-night/25" : "border-white/25"}`} />
-            <span className={`absolute left-1/2 top-0 h-full border-l border-dashed ${light ? "border-night/[0.08]" : "border-white/[0.07]"}`} />
-            <span className={`absolute left-0 top-1/2 w-full border-t border-dashed ${light ? "border-night/[0.08]" : "border-white/[0.07]"}`} />
+            <span className={`absolute left-5 top-20 h-6 w-6 border-l border-t md:left-8 ${light ? "border-fg/25" : "border-white/25"}`} />
+            <span className={`absolute right-5 top-20 h-6 w-6 border-r border-t md:right-8 ${light ? "border-fg/25" : "border-white/25"}`} />
+            <span className={`absolute bottom-6 left-5 h-6 w-6 border-b border-l md:left-8 ${light ? "border-fg/25" : "border-white/25"}`} />
+            <span className={`absolute bottom-6 right-5 h-6 w-6 border-b border-r md:right-8 ${light ? "border-fg/25" : "border-white/25"}`} />
+            <span className={`absolute left-1/2 top-0 h-full border-l border-dashed ${light ? "border-fg/[0.08]" : "border-white/[0.07]"}`} />
+            <span className={`absolute left-0 top-1/2 w-full border-t border-dashed ${light ? "border-fg/[0.08]" : "border-white/[0.07]"}`} />
             <div className="absolute bottom-[7vh] left-5 hidden w-[24%] md:left-10 md:block">
               <div className={`h-px w-full ${light ? "bg-night/15" : "bg-white/15"}`}>
                 {/* цайвар суурьт lime уусдаг — гүн ногооноор */}
@@ -489,7 +498,7 @@ export function MonoScrollStory({
               </div>
               <p
                 className={`mt-2 text-[10px] font-semibold uppercase tracking-[0.3em] ${
-                  light ? "text-night/45" : "text-white/55 [text-shadow:0_1px_10px_rgba(0,0,0,0.7)]"
+                  light ? "text-fg/45" : "text-white/55 [text-shadow:0_1px_10px_rgba(0,0,0,0.7)]"
                 }`}
               >
                 Мастер төлөвлөгөө · явц
@@ -505,10 +514,10 @@ export function MonoScrollStory({
           className="pointer-events-none absolute inset-0 z-[9] flex flex-col items-center justify-center px-6 text-center"
         >
           <p className={`text-[12px] font-bold uppercase tracking-[0.42em] ${light ? "text-moss" : "text-lime"}`}>{chapter}</p>
-          <p className={`mt-4 text-[11px] font-semibold uppercase tracking-[0.3em] ${light ? "text-night/55" : "text-white/55"}`}>{kicker}</p>
+          <p className={`mt-4 text-[11px] font-semibold uppercase tracking-[0.3em] ${light ? "text-fg/55" : "text-white/55"}`}>{kicker}</p>
           <h2
             className={`mt-4 max-w-3xl text-[clamp(2rem,5.4vw,4.2rem)] font-extrabold leading-[1.04] tracking-tight [text-wrap:balance] ${
-              light ? "text-night" : "text-white"
+              light ? "text-fg" : "text-white"
             }`}
           >
             {title}
@@ -529,7 +538,7 @@ export function MonoScrollStory({
           </MonoKicker>
           <h2
             className={`mt-3 text-[clamp(1.3rem,2.2vw,1.9rem)] font-extrabold leading-tight tracking-tight ${
-              light ? "text-night" : "text-white"
+              light ? "text-fg" : "text-white"
             }`}
           >
             {title}
@@ -546,7 +555,7 @@ export function MonoScrollStory({
                     <h3
                       className={`flex items-end justify-center font-extrabold leading-none tracking-tight ${
                         light
-                          ? "text-night [text-shadow:0_2px_28px_rgba(255,255,255,0.85)]"
+                          ? "text-fg [text-shadow:0_2px_28px_rgba(255,255,255,0.85)]"
                           : "text-white drop-shadow-[0_4px_36px_rgba(0,0,0,0.55)]"
                       } ${
                         p.heading.length > 4
@@ -571,7 +580,7 @@ export function MonoScrollStory({
                       data-sw
                       className={`mx-auto mt-6 max-w-md text-[12px] font-semibold uppercase tracking-[0.26em] md:text-[13px] ${
                         light
-                          ? "text-night/75 [text-shadow:0_1px_14px_rgba(255,255,255,0.85)]"
+                          ? "text-fg/75 [text-shadow:0_1px_14px_rgba(255,255,255,0.85)]"
                           : "text-white/80 drop-shadow-[0_1px_12px_rgba(0,0,0,0.6)]"
                       }`}
                     >
@@ -703,7 +712,7 @@ export function MonoScrollStory({
                     lit
                       ? `${light ? "text-moss" : "text-lime"} ${active === i ? "scale-125" : ""}`
                       : light
-                        ? "text-night/35 hover:text-night/75"
+                        ? "text-fg/35 hover:text-fg/75"
                         : "text-white/40 hover:text-white/80"
                   }`}
                 >

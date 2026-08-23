@@ -15,6 +15,7 @@ import { useLenis } from "lenis/react";
 import type { SiteContent } from "@/lib/site-content";
 import { MonoKicker } from "./shared";
 import { MonoModal } from "./MonoModal";
+import { sectionTone } from "@/lib/theme-css";
 
 export function MonoVr({ site }: { site: SiteContent }) {
   const { vr } = site;
@@ -33,7 +34,7 @@ export function MonoVr({ site }: { site: SiteContent }) {
   };
 
   const mediaClass =
-    "group relative mt-10 block w-full overflow-hidden rounded-2xl border border-night/10 bg-night/5 md:mt-12";
+    "group relative mt-10 block w-full overflow-hidden rounded-2xl border border-fg/10 bg-night/5 md:mt-12";
 
   const media = (
     <>
@@ -64,7 +65,7 @@ export function MonoVr({ site }: { site: SiteContent }) {
           {ready ? vr.ctaLabel : vr.soonLabel}
         </span>
         {!ready && (
-          <span className="inline-flex min-h-11 items-center rounded-full bg-white px-6 py-3 text-[12px] font-bold uppercase tracking-[0.1em] text-night transition-transform duration-300 group-hover:-translate-y-0.5">
+          <span className="inline-flex min-h-11 items-center rounded-full bg-white px-6 py-3 text-[12px] font-bold uppercase tracking-[0.1em] text-fg transition-transform duration-300 group-hover:-translate-y-0.5">
             {vr.soonCta}
           </span>
         )}
@@ -79,7 +80,12 @@ export function MonoVr({ site }: { site: SiteContent }) {
   );
 
   return (
-    <section id="vr" className="border-b border-night/10 bg-ground py-20 md:py-28">
+    <section
+      id="vr"
+      data-bg="vr"
+      data-tone={sectionTone(site.theme, "vr", "light")}
+      className="border-b border-fg/10 bg-ground py-20 md:py-28"
+    >
       <div className="mx-auto max-w-[1500px] px-5 md:px-10">
         {/* тайлбар нь гарчгийн доор — баруун талын багана нь гарчгаас дээш
             гарч, хэсгийн навигацитай мөргөлддөг байв */}
@@ -87,11 +93,11 @@ export function MonoVr({ site }: { site: SiteContent }) {
           <MonoKicker reveal>{vr.kicker}</MonoKicker>
           <h2
             data-reveal="heading"
-            className="mt-4 text-[clamp(1.8rem,3.4vw,2.8rem)] font-extrabold leading-tight tracking-tight text-night"
+            className="mt-4 text-[clamp(1.8rem,3.4vw,2.8rem)] font-extrabold leading-tight tracking-tight text-fg"
           >
             {vr.title}
           </h2>
-          <p data-reveal="up" data-reveal-delay="0.15" className="mt-5 text-sm leading-relaxed text-night/60">
+          <p data-reveal="up" data-reveal-delay="0.15" className="mt-5 text-sm leading-relaxed text-fg/60">
             {vr.body}
           </p>
         </div>
