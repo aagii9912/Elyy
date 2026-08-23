@@ -150,7 +150,6 @@ export function MonoEquip({ site }: { site: SiteContent }) {
     alt: item.title,
     name: item.title,
     logo: item.logo?.trim() ? { src: item.logo, alt: item.title } : undefined,
-    role: markFor(item.title)?.alt,
     description: item.body,
   }));
 
@@ -165,13 +164,15 @@ export function MonoEquip({ site }: { site: SiteContent }) {
         slides={slides}
         active={index}
         onActiveChange={setActive}
+        /* Шошго нь ХЭСГИЙН нэр («Барилгын бүтэц») — өмнө нь энэ нь
+           display гарчиг байсан ч ангиллын нэр учраас мессеж болж
+           чаддаггүй байв. Гарчгийн байрыг слайдын нэр эзэлнэ. */
         eyebrow={
           <MonoKicker tone="dark" reveal>
-            03 — {equip.kicker}
+            03 — {equip.title}
           </MonoKicker>
         }
         headline={equip.title}
-        lede={equip.body}
         meta={`${String(index + 1).padStart(2, "0")} / ${String(items.length).padStart(2, "0")}`}
         onSlideOpen={(i) => setOpen(i)}
         openLabel={equip.moreLabel}

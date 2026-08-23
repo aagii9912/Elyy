@@ -9,8 +9,9 @@
      • слайд `video`-той бол зургийн ДЭЭР давтагдан тоглох клип нэмэгдэнэ
        (доорх §Видео),
      • дээгүүр нь зөөлөн харанхуй градиент (текстийн уншигдац),
-     • контент давхарга: дээд бүсэд гарчиг + идэвхтэй зүйлийн тайлбар,
-       доод бүсэд thumbnail мөр ба мета зурвас (нэр · дэд гарчиг · CTA).
+     • контент давхарга: дээд зүүнд хэсгийн шошго + ИДЭВХТЭЙ СЛАЙДЫН
+       НЭР (гарчиг), доод зүүнд тухайн слайдын тайлбар бүтнээрээ, доор
+       нь thumbnail мөр ба мета зурвас. Бүх бичвэр нэг зүүн тэнхлэгт.
 
    Идэвхтэй индексийг ГАДНААС удирдана (`active` / `onActiveChange`) —
    дуудагч тухайн зүйлээр pop-up нээх, дүрс тэмдэг харуулах зэрэгт мөн
@@ -45,16 +46,13 @@ export type ShowcaseSlide = {
   video?: string;
   /** Дэлгэц уншигчид зориулсан зургийн тайлбар. */
   alt?: string;
-  /** Мета зурвасын нэр (ж: материалын нэр). */
+  /** Слайдын нэр — хэсгийн ГАРЧИГ болж display хэмжээгээр гарна. */
   name: string;
   /** Брэндийн лого — мета зурваст `role`-ийн ОРОНД цагаан тавцан дээр
    *  гарна. Тавцан хэрэгтэй: дурын логоны өнгө бараан зурвас дээр
    *  уншигдана гэсэн баталгаа байхгүй. */
   logo?: { src: string; alt: string };
-  /** Нэрийн доор/хажууд гарах дэд гарчиг (ж: брэнд). Лого өгсөн үед
-   *  түүнийг давхардуулахгүйн тулд харагдахгүй. */
-  role?: string;
-  /** Баруун дээд буланд гарах тайлбар. */
+  /** Слайдын тайлбар — зүүн доод талд бүтнээрээ гарна. */
   description: string;
 };
 
@@ -64,7 +62,6 @@ export function PortraitShowcase({
   onActiveChange,
   eyebrow,
   headline,
-  lede,
   meta,
   action,
   onSlideOpen,
@@ -77,9 +74,10 @@ export function PortraitShowcase({
   onActiveChange: (index: number) => void;
   /** Гарчгийн дээрх жижиг шошго. */
   eyebrow?: React.ReactNode;
+  /** Хэсгийн нэр. Харагдах гарчиг БИШ (тэр нь идэвхтэй слайдын нэр) —
+   *  зөвхөн thumbnail-ийн `aria-label` болно. */
   headline: React.ReactNode;
   /** Гарчгийн доорх хэсгийн танилцуулга (слайдаас хамаарахгүй). */
-  lede?: React.ReactNode;
   /** Мета зурвасын тогтмол текст (md-ээс дээш харагдана). */
   meta?: React.ReactNode;
   /** Мета зурвасын баруун захын CTA. */
@@ -230,37 +228,34 @@ export function PortraitShowcase({
       <div aria-hidden className="absolute inset-0 bg-gradient-to-r from-charcoal/46 via-charcoal/6 to-transparent" />
 
       <div className="relative z-10 flex h-full flex-col justify-between px-5 pb-7 pt-24 sm:px-8 sm:pb-9 md:px-10 md:pt-28 lg:px-14">
-        {/* Дээд бүс — гарчиг + идэвхтэй зүйлийн тайлбар */}
-        <div className="flex flex-col gap-7 md:flex-row md:items-start md:justify-between md:gap-14">
-          <div className="max-w-xl">
-            {eyebrow}
-            <h2
-              data-reveal="heading"
-              className="mt-4 text-[clamp(1.9rem,4.4vw,4rem)] font-extrabold leading-[1.05] tracking-tight text-white"
-            >
-              {headline}
-            </h2>
-            {lede && (
-              <p
-                data-reveal="up"
-                data-reveal-delay="0.15"
-                className="mt-5 max-w-md text-[14px] leading-relaxed text-white/80"
-              >
-                {lede}
-              </p>
-            )}
-          </div>
+        {/* Дээд бүс — хэсгийн шошго + ИДЭВХТЭЙ СЛАЙДЫН НЭР.
+            Гарчиг нь хэсгийн нэр («Барилгын бүтэц») БИШ, слайдын нэр
+            («Бүрэн цутгамал хийцлэл») — хэсгийн нэр бол ангиллын шошго
+            бөгөөд `eyebrow`-д багтдаг, харин худалдан авагчид хэлэх
+            зүйл нь слайд бүрийн техник/бүтээгдэхүүний нэр. */}
+        <div className="max-w-xl">
+          {eyebrow}
+          <h2
+            key={slide.id}
+            data-reveal="heading"
+            className="ui-fade-in mt-5 text-[clamp(1.9rem,4.4vw,4rem)] font-extrabold leading-[1.02] tracking-tight text-white"
+          >
+            {slide.name}
+          </h2>
+        </div>
 
+        {/* Доод бүс — идэвхтэй слайдын тайлбар, thumbnail сонголт,
+            мета зурвас. Тайлбар нь thumbnail-ийн ЯГ ДЭЭР суудаг:
+            thumbnail дарахад солигддог тул хяналтынхаа хажууд байх нь
+            зөв, мөн бүх бичвэр нэг зүүн тэнхлэгт эгнэнэ. */}
+        <div className="flex flex-col gap-6 sm:gap-8">
           <p
             key={slide.id}
-            className="ui-fade-in max-w-xs text-[14px] font-medium leading-relaxed text-white sm:text-[15px] md:pt-3"
+            className="ui-fade-in max-w-[46ch] text-[16px] font-medium leading-relaxed text-white/80 sm:text-[19px] sm:leading-[1.6]"
           >
             {slide.description}
           </p>
-        </div>
 
-        {/* Доод бүс — thumbnail сонголт + мета зурвас */}
-        <div className="flex flex-col gap-6 sm:gap-8">
           <div
             ref={row}
             role="tablist"
@@ -306,54 +301,48 @@ export function PortraitShowcase({
             ))}
           </div>
 
-          <div className="flex flex-wrap items-center justify-between gap-4 border-t border-white/20 pt-5 text-[13px] font-medium sm:text-sm">
-            {onSlideOpen ? (
-              <button
-                key={slide.id}
-                type="button"
-                data-cursor-hover
-                onClick={() => onSlideOpen(index)}
-                aria-haspopup="dialog"
-                className="ui-fade-in group inline-flex items-center gap-2 text-left text-white"
-              >
-                {slide.name}
-                {openLabel && (
-                  <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-white/70 transition-colors duration-300 group-hover:text-white">
-                    {openLabel}
-                    <span aria-hidden className="ml-1 inline-block transition-transform duration-300 group-hover:translate-x-0.5">
-                      →
-                    </span>
-                  </span>
-                )}
-              </button>
-            ) : (
-              <span key={slide.id} className="ui-fade-in text-white">
-                {slide.name}
-              </span>
-            )}
-            {slide.logo ? (
-              <span
-                key={slide.logo.src}
-                className="hidden shrink-0 items-center rounded-md bg-white/95 px-2.5 py-1.5 sm:inline-flex"
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={slide.logo.src}
-                  alt={slide.logo.alt}
-                  loading="lazy"
-                  decoding="async"
-                  className="h-6 w-auto max-w-[160px] object-contain"
-                />
-              </span>
-            ) : (
-              slide.role && (
-                <span key={slide.role} className="hidden text-white/80 sm:inline">
-                  {slide.role}
+          {/* Мета зурвас — ХОЁР бүлэг: зүүнд слайдын хэрэгслүүд (лого,
+              «дэлгэрэнгүй»), баруунд байрлал ба CTA. Өмнө нь дөрвөн зүйл
+              `justify-between`-ээр тарж, зай нь санамсаргүй харагддаг
+              байв. Слайдын нэр энд БАЙХГҮЙ — тэр нь дээр гарчиг болсон. */}
+          <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-4 border-t border-white/20 pt-5 text-[13px] font-medium sm:text-sm">
+            <span className="flex items-center gap-4">
+              {slide.logo && (
+                <span
+                  key={slide.logo.src}
+                  className="hidden shrink-0 items-center rounded-md bg-white/95 px-2.5 py-1.5 sm:inline-flex"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={slide.logo.src}
+                    alt={slide.logo.alt}
+                    loading="lazy"
+                    decoding="async"
+                    className="h-6 w-auto max-w-[160px] object-contain"
+                  />
                 </span>
-              )
-            )}
-            {meta && <span className="hidden text-white/80 md:inline">{meta}</span>}
-            {action}
+              )}
+              {onSlideOpen && openLabel && (
+                <button
+                  type="button"
+                  data-cursor-hover
+                  onClick={() => onSlideOpen(index)}
+                  aria-haspopup="dialog"
+                  aria-label={`${slide.name} — ${openLabel}`}
+                  className="group inline-flex min-h-11 items-center text-[11px] font-bold uppercase tracking-[0.12em] text-white/70 transition-colors duration-300 hover:text-white"
+                >
+                  {openLabel}
+                  <span aria-hidden className="ml-1.5 inline-block transition-transform duration-300 group-hover:translate-x-0.5">
+                    →
+                  </span>
+                </button>
+              )}
+            </span>
+
+            <span className="flex items-center gap-6">
+              {meta && <span className="hidden text-white/60 md:inline">{meta}</span>}
+              {action}
+            </span>
           </div>
         </div>
       </div>
