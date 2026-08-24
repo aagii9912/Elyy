@@ -1,0 +1,293 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Cormorant+Garamond:wght@300;400&family=Playfair+Display:wght@400&family=Unbounded:wght@300;400&family=Jost:wght@300;400&family=Onest:wght@400&family=Manrope:wght@400&family=Golos+Text:wght@400&family=Commissioner:wght@400&display=swap">
+  <style>
+    body { margin: 0; font-family: 'Inter', system-ui, sans-serif; -webkit-font-smoothing: antialiased; background: #fafafa; color: #171717; }
+    a { color: #2a5124; text-decoration: none; }
+    a:hover { color: #1f3d1b; }
+    * { box-sizing: border-box; }
+  </style>
+</helmet>
+<div style="min-height: 100vh; padding: 32px 16px;">
+  <div style="max-width: 1152px; margin: 0 auto;">
+    <header style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 24px;">
+      <div>
+        <h1 style="margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.02em; color: #171717;">Сайтын контент</h1>
+        <p style="margin: 4px 0 0; font-size: 14px; color: #737373;">Үндсэн хуудасны бүх текст, зураг</p>
+      </div>
+      <div style="margin-left: auto; display: flex; gap: 8px;">
+        <span style="border-radius: 8px; border: 1px solid #d4d4d4; background: #ffffff; padding: 10px 16px; font-size: 14px; font-weight: 600; color: #404040;">← Админ</span>
+        <span style="border-radius: 8px; border: 1px solid #d4d4d4; background: #ffffff; padding: 10px 16px; font-size: 14px; font-weight: 600; color: #404040;">Сайт үзэх ↗</span>
+        <span style="border-radius: 8px; background: #2a5124; padding: 10px 16px; font-size: 14px; font-weight: 600; color: #ffffff;">Хадгалах</span>
+      </div>
+    </header>
+
+    <div style="display: grid; grid-template-columns: 240px 1fr; gap: 24px; align-items: start;">
+      <nav><ul style="display: flex; flex-direction: column; gap: 4px; margin: 0; padding: 0; list-style: none;"><li><span style="display: block; border-radius: 8px; padding: 10px 12px; font-size: 13px; font-weight: 600; background: #2a5124; color: #ffffff;">🎨 Дизайн</span></li><li><span style="display: block; border-radius: 8px; padding: 10px 12px; font-size: 13px; font-weight: 600; background: transparent; color: #737373;">Брэнд & холбоо</span></li><li><span style="display: block; border-radius: 8px; padding: 10px 12px; font-size: 13px; font-weight: 600; background: transparent; color: #737373;">Танилцуулга татах</span></li><li><span style="display: block; border-radius: 8px; padding: 10px 12px; font-size: 13px; font-weight: 600; background: transparent; color: #737373;">Толгой цэс</span></li><li><span style="display: block; border-radius: 8px; padding: 10px 12px; font-size: 13px; font-weight: 600; background: transparent; color: #737373;">Нүүр дэлгэц</span></li><li><span style="display: block; border-radius: 8px; padding: 10px 12px; font-size: 13px; font-weight: 600; background: transparent; color: #737373;">01 · Ерөнхий төлөвлөлт</span></li><li><span style="display: block; border-radius: 8px; padding: 10px 12px; font-size: 13px; font-weight: 600; background: transparent; color: #737373;">02 · ELYS консепц</span></li><li><span style="display: block; border-radius: 8px; padding: 10px 12px; font-size: 13px; font-weight: 600; background: transparent; color: #737373;">03 · Үндсэн бүтээц</span></li><li><span style="display: block; border-radius: 8px; padding: 10px 12px; font-size: 13px; font-weight: 600; background: transparent; color: #737373;">Уриа (гүйдэг мөр)</span></li><li><span style="display: block; border-radius: 8px; padding: 10px 12px; font-size: 13px; font-weight: 600; background: transparent; color: #737373;">Өрөөний сонголт</span></li></ul></nav>
+      <div style="display: flex; flex-direction: column; gap: 20px;">
+        <div style="display: flex; gap: 6px;">
+          <span style="border-radius: 8px; border: 1px solid #d4d4d4; background: #ffffff; padding: 8px 14px; font-size: 13px; font-weight: 600; color: #737373;">Өнгө</span>
+          <span style="border-radius: 8px; border: 2px solid #2a5124; background: #2a51240d; padding: 7px 13px; font-size: 13px; font-weight: 700; color: #2a5124;">Типографи</span>
+          <span style="border-radius: 8px; border: 1px solid #d4d4d4; background: #ffffff; padding: 8px 14px; font-size: 13px; font-weight: 600; color: #737373;">Дэвсгэр</span>
+        </div>
+      <section style="border-radius: 16px; border: 1px solid #e5e5e5; background: #ffffff; padding: 24px; box-shadow: 0 1px 2px rgba(0,0,0,0.04);">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+          <h3 style="margin: 0; font-size: 15px; font-weight: 700; color: #171717;">Амьд preview</h3><span style="font-size:12px; color:#a3a3a3;">Гүйлгэхэд дагаж наалдана · Нүүр дэлгэц</span>
+        </div>
+        <div style="border-radius: 14px; background: #151717; padding: 30px 32px; overflow: hidden;">
+            <p style="margin: 0; font-family: 'Onest', sans-serif; font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.34em; color: rgba(255,255,255,0.55);">Бизнес зэрэглэлийн орон сууц</p>
+            <p style="margin: 14px 0 0; font-family: 'Cormorant Garamond', serif; font-size: 54px; font-weight: 400; letter-spacing: 0.08em; line-height: 1.02; color: #ffffff; text-transform: uppercase;">ELYSIUM RESIDENCE</p>
+            <p style="margin: 16px 0 0; max-width: 44ch; font-family: 'Onest', sans-serif; font-size: 14px; line-height: 1.7; color: rgba(255,255,255,0.78);">Туул голын салхи илбэсэн бүсэд байршилтай, архитектур болон инженерингийн эргономик шийдэлтэй орон сууц.</p>
+            <span style="display: inline-flex; align-items: center; margin-top: 20px; border-radius: 999px; background: #ffffff; padding: 11px 22px; font-family: 'Onest', sans-serif; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.14em; color: #151717;">Уулзалт товлох</span>
+          </div>
+        <p style="margin: 14px 0 0; font-size: 12px; line-height: 1.6; color: #a3a3a3;">Латин ба кирилл хоёулаа харагдана — сонгосон фонт монгол бичигт хэрхэн буухыг эндээс шалгана.</p>
+      </section>
+      <section style="border-radius: 16px; border: 1px solid #e5e5e5; background: #ffffff; padding: 24px; box-shadow: 0 1px 2px rgba(0,0,0,0.04);">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+          <h3 style="margin: 0; font-size: 15px; font-weight: 700; color: #171717;">Бэлэн хослол</h3>
+        </div>
+        <p style="margin: 0 0 14px; font-size: 13px; line-height: 1.6; color: #737373;">Нэг товчоор фонт, жин, үсэг хоорондын зайг хамт сольж, дараа нь доор гараар засна.</p>
+<div style="display: flex; flex-wrap: wrap; gap: 10px;"><span style="display: inline-flex; flex-direction: column; gap: 8px; border-radius: 14px; border: 1px solid #d4d4d4; background: #ffffff; padding: 12px 16px;">
+            <span style="font-family: 'Figtree', system-ui, sans-serif; font-size: 24px; font-weight: 500; letter-spacing: -0.2px; color: #171717; text-transform: uppercase;">Elysium</span>
+            <span style="font-family: 'Figtree', system-ui, sans-serif; font-size: 12px; color: #737373;">Орон сууц</span>
+            <span style="font-size: 12px; font-weight: 700; color: #404040;">Одоогийн (Gilroy)</span>
+          </span><span style="display: inline-flex; flex-direction: column; gap: 8px; border-radius: 14px; border: 2px solid #2a5124; background: #2a51240d; padding: 11px 15px;">
+            <span style="font-family: 'Cormorant Garamond', serif; font-size: 24px; font-weight: 400; letter-spacing: 0.08em; color: #171717; text-transform: uppercase;">Elysium</span>
+            <span style="font-family: 'Onest', sans-serif; font-size: 12px; color: #737373;">Орон сууц</span>
+            <span style="font-size: 12px; font-weight: 700; color: #2a5124;">Сонгодог</span>
+          </span><span style="display: inline-flex; flex-direction: column; gap: 8px; border-radius: 14px; border: 1px solid #d4d4d4; background: #ffffff; padding: 12px 16px;">
+            <span style="font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 400; letter-spacing: 0.02em; color: #171717;">Elysium</span>
+            <span style="font-family: 'Golos Text', sans-serif; font-size: 12px; color: #737373;">Орон сууц</span>
+            <span style="font-size: 12px; font-weight: 700; color: #404040;">Редакцийн</span>
+          </span><span style="display: inline-flex; flex-direction: column; gap: 8px; border-radius: 14px; border: 1px solid #d4d4d4; background: #ffffff; padding: 12px 16px;">
+            <span style="font-family: 'Jost', sans-serif; font-size: 24px; font-weight: 300; letter-spacing: 0.14em; color: #171717; text-transform: uppercase;">Elysium</span>
+            <span style="font-family: 'Manrope', sans-serif; font-size: 12px; color: #737373;">Орон сууц</span>
+            <span style="font-size: 12px; font-weight: 700; color: #404040;">Орчин үеийн</span>
+          </span></div>
+      </section>
+      <section style="border-radius: 16px; border: 1px solid #e5e5e5; background: #ffffff; padding: 24px; box-shadow: 0 1px 2px rgba(0,0,0,0.04);">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+          <h3 style="margin: 0; font-size: 15px; font-weight: 700; color: #171717;">Фонт</h3><span style="font-size:12px; color:#a3a3a3;">9 фонт</span>
+        </div>
+        <span style="display: block; margin-bottom: 6px; font-size: 13px; font-weight: 600; color: #404040;">Гарчгийн фонт</span><span style="display:block; margin-top:4px; font-size:12px; color:#a3a3a3;">Брэндийн нэр, хэсгийн гарчиг. Жагсаалтад зөвхөн КИРИЛЛ дэмждэг фонт орсон.</span>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <label style="display: flex; align-items: center; gap: 14px; border-radius: 12px; border: 1px solid #d4d4d4; background: #ffffff; padding: 14px 16px; cursor: pointer;">
+            <span style="display:flex; align-items:center; justify-content:center; width:16px; height:16px; border-radius:999px; border:1px solid #d4d4d4; flex-shrink:0;"></span>
+            <span style="min-width: 0; flex: 1;">
+              <span style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 14px; font-weight: 700; color: #171717;">Gilroy</span>
+                <span style="display: inline-flex; align-items: center; gap: 4px; border-radius: 999px; background: #f0fdf4; padding: 2px 8px; font-size: 10px; font-weight: 700; letter-spacing: 0.04em; color: #15803d;">КИРИЛЛ ✓</span>
+              </span>
+              <span style="display: block; margin-top: 2px; font-size: 12px; color: #737373;">Брэндийн фонт · өгөгдмөл</span>
+            </span>
+            <span style="flex-shrink: 0; text-align: right; font-family: 'Figtree', system-ui, sans-serif; line-height: 1.15;">
+              <span style="display: block; font-size: 21px; color: #171717;">Elysium</span>
+              <span style="display: block; font-size: 15px; color: #737373;">Орон сууц</span>
+            </span>
+          </label>
+          <label style="display: flex; align-items: center; gap: 14px; border-radius: 12px; border: 2px solid #2a5124; background: #2a51240d; padding: 13px 15px; cursor: pointer;">
+            <span style="display:flex; align-items:center; justify-content:center; width:16px; height:16px; border-radius:999px; border:5px solid #2a5124; flex-shrink:0;"></span>
+            <span style="min-width: 0; flex: 1;">
+              <span style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 14px; font-weight: 700; color: #171717;">Cormorant Garamond</span>
+                <span style="display: inline-flex; align-items: center; gap: 4px; border-radius: 999px; background: #f0fdf4; padding: 2px 8px; font-size: 10px; font-weight: 700; letter-spacing: 0.04em; color: #15803d;">КИРИЛЛ ✓</span>
+              </span>
+              <span style="display: block; margin-top: 2px; font-size: 12px; color: #737373;">Сонгодог serif · өндөр контраст</span>
+            </span>
+            <span style="flex-shrink: 0; text-align: right; font-family: 'Cormorant Garamond', serif; line-height: 1.15;">
+              <span style="display: block; font-size: 21px; color: #171717;">Elysium</span>
+              <span style="display: block; font-size: 15px; color: #737373;">Орон сууц</span>
+            </span>
+          </label>
+          <label style="display: flex; align-items: center; gap: 14px; border-radius: 12px; border: 1px solid #d4d4d4; background: #ffffff; padding: 14px 16px; cursor: pointer;">
+            <span style="display:flex; align-items:center; justify-content:center; width:16px; height:16px; border-radius:999px; border:1px solid #d4d4d4; flex-shrink:0;"></span>
+            <span style="min-width: 0; flex: 1;">
+              <span style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 14px; font-weight: 700; color: #171717;">Playfair Display</span>
+                <span style="display: inline-flex; align-items: center; gap: 4px; border-radius: 999px; background: #f0fdf4; padding: 2px 8px; font-size: 10px; font-weight: 700; letter-spacing: 0.04em; color: #15803d;">КИРИЛЛ ✓</span>
+              </span>
+              <span style="display: block; margin-top: 2px; font-size: 12px; color: #737373;">Редакцийн serif</span>
+            </span>
+            <span style="flex-shrink: 0; text-align: right; font-family: 'Playfair Display', serif; line-height: 1.15;">
+              <span style="display: block; font-size: 21px; color: #171717;">Elysium</span>
+              <span style="display: block; font-size: 15px; color: #737373;">Орон сууц</span>
+            </span>
+          </label>
+          <label style="display: flex; align-items: center; gap: 14px; border-radius: 12px; border: 1px solid #d4d4d4; background: #ffffff; padding: 14px 16px; cursor: pointer;">
+            <span style="display:flex; align-items:center; justify-content:center; width:16px; height:16px; border-radius:999px; border:1px solid #d4d4d4; flex-shrink:0;"></span>
+            <span style="min-width: 0; flex: 1;">
+              <span style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 14px; font-weight: 700; color: #171717;">Unbounded</span>
+                <span style="display: inline-flex; align-items: center; gap: 4px; border-radius: 999px; background: #f0fdf4; padding: 2px 8px; font-size: 10px; font-weight: 700; letter-spacing: 0.04em; color: #15803d;">КИРИЛЛ ✓</span>
+              </span>
+              <span style="display: block; margin-top: 2px; font-size: 12px; color: #737373;">Орчин үеийн display</span>
+            </span>
+            <span style="flex-shrink: 0; text-align: right; font-family: 'Unbounded', sans-serif; line-height: 1.15;">
+              <span style="display: block; font-size: 21px; color: #171717;">Elysium</span>
+              <span style="display: block; font-size: 15px; color: #737373;">Орон сууц</span>
+            </span>
+          </label>
+          <label style="display: flex; align-items: center; gap: 14px; border-radius: 12px; border: 1px solid #d4d4d4; background: #ffffff; padding: 14px 16px; cursor: pointer;">
+            <span style="display:flex; align-items:center; justify-content:center; width:16px; height:16px; border-radius:999px; border:1px solid #d4d4d4; flex-shrink:0;"></span>
+            <span style="min-width: 0; flex: 1;">
+              <span style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 14px; font-weight: 700; color: #171717;">Jost</span>
+                <span style="display: inline-flex; align-items: center; gap: 4px; border-radius: 999px; background: #f0fdf4; padding: 2px 8px; font-size: 10px; font-weight: 700; letter-spacing: 0.04em; color: #15803d;">КИРИЛЛ ✓</span>
+              </span>
+              <span style="display: block; margin-top: 2px; font-size: 12px; color: #737373;">Futura маягийн geometric</span>
+            </span>
+            <span style="flex-shrink: 0; text-align: right; font-family: 'Jost', sans-serif; line-height: 1.15;">
+              <span style="display: block; font-size: 21px; color: #171717;">Elysium</span>
+              <span style="display: block; font-size: 15px; color: #737373;">Орон сууц</span>
+            </span>
+          </label>
+        </div>
+        <div style="height: 22px;"></div>
+        <span style="display: block; margin-bottom: 6px; font-size: 13px; font-weight: 600; color: #404040;">Бичвэрийн фонт</span><span style="display:block; margin-top:4px; font-size:12px; color:#a3a3a3;">Тайлбар, жагсаалт, товчны бичиг.</span>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <label style="display: flex; align-items: center; gap: 14px; border-radius: 12px; border: 1px solid #d4d4d4; background: #ffffff; padding: 14px 16px; cursor: pointer;">
+            <span style="display:flex; align-items:center; justify-content:center; width:16px; height:16px; border-radius:999px; border:1px solid #d4d4d4; flex-shrink:0;"></span>
+            <span style="min-width: 0; flex: 1;">
+              <span style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 14px; font-weight: 700; color: #171717;">Gilroy</span>
+                <span style="display: inline-flex; align-items: center; gap: 4px; border-radius: 999px; background: #f0fdf4; padding: 2px 8px; font-size: 10px; font-weight: 700; letter-spacing: 0.04em; color: #15803d;">КИРИЛЛ ✓</span>
+              </span>
+              <span style="display: block; margin-top: 2px; font-size: 12px; color: #737373;">Брэндийн фонт · өгөгдмөл</span>
+            </span>
+            <span style="flex-shrink: 0; text-align: right; font-family: 'Figtree', system-ui, sans-serif; line-height: 1.15;">
+              <span style="display: block; font-size: 21px; color: #171717;">Elysium</span>
+              <span style="display: block; font-size: 15px; color: #737373;">Орон сууц</span>
+            </span>
+          </label>
+          <label style="display: flex; align-items: center; gap: 14px; border-radius: 12px; border: 2px solid #2a5124; background: #2a51240d; padding: 13px 15px; cursor: pointer;">
+            <span style="display:flex; align-items:center; justify-content:center; width:16px; height:16px; border-radius:999px; border:5px solid #2a5124; flex-shrink:0;"></span>
+            <span style="min-width: 0; flex: 1;">
+              <span style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 14px; font-weight: 700; color: #171717;">Onest</span>
+                <span style="display: inline-flex; align-items: center; gap: 4px; border-radius: 999px; background: #f0fdf4; padding: 2px 8px; font-size: 10px; font-weight: 700; letter-spacing: 0.04em; color: #15803d;">КИРИЛЛ ✓</span>
+              </span>
+              <span style="display: block; margin-top: 2px; font-size: 12px; color: #737373;">Кирилл сайн зассан</span>
+            </span>
+            <span style="flex-shrink: 0; text-align: right; font-family: 'Onest', sans-serif; line-height: 1.15;">
+              <span style="display: block; font-size: 21px; color: #171717;">Elysium</span>
+              <span style="display: block; font-size: 15px; color: #737373;">Орон сууц</span>
+            </span>
+          </label>
+          <label style="display: flex; align-items: center; gap: 14px; border-radius: 12px; border: 1px solid #d4d4d4; background: #ffffff; padding: 14px 16px; cursor: pointer;">
+            <span style="display:flex; align-items:center; justify-content:center; width:16px; height:16px; border-radius:999px; border:1px solid #d4d4d4; flex-shrink:0;"></span>
+            <span style="min-width: 0; flex: 1;">
+              <span style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 14px; font-weight: 700; color: #171717;">Manrope</span>
+                <span style="display: inline-flex; align-items: center; gap: 4px; border-radius: 999px; background: #f0fdf4; padding: 2px 8px; font-size: 10px; font-weight: 700; letter-spacing: 0.04em; color: #15803d;">КИРИЛЛ ✓</span>
+              </span>
+              <span style="display: block; margin-top: 2px; font-size: 12px; color: #737373;">Нам гүм, өргөн</span>
+            </span>
+            <span style="flex-shrink: 0; text-align: right; font-family: 'Manrope', sans-serif; line-height: 1.15;">
+              <span style="display: block; font-size: 21px; color: #171717;">Elysium</span>
+              <span style="display: block; font-size: 15px; color: #737373;">Орон сууц</span>
+            </span>
+          </label>
+          <label style="display: flex; align-items: center; gap: 14px; border-radius: 12px; border: 1px solid #d4d4d4; background: #ffffff; padding: 14px 16px; cursor: pointer;">
+            <span style="display:flex; align-items:center; justify-content:center; width:16px; height:16px; border-radius:999px; border:1px solid #d4d4d4; flex-shrink:0;"></span>
+            <span style="min-width: 0; flex: 1;">
+              <span style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 14px; font-weight: 700; color: #171717;">Golos Text</span>
+                <span style="display: inline-flex; align-items: center; gap: 4px; border-radius: 999px; background: #f0fdf4; padding: 2px 8px; font-size: 10px; font-weight: 700; letter-spacing: 0.04em; color: #15803d;">КИРИЛЛ ✓</span>
+              </span>
+              <span style="display: block; margin-top: 2px; font-size: 12px; color: #737373;">Уншихад хялбар</span>
+            </span>
+            <span style="flex-shrink: 0; text-align: right; font-family: 'Golos Text', sans-serif; line-height: 1.15;">
+              <span style="display: block; font-size: 21px; color: #171717;">Elysium</span>
+              <span style="display: block; font-size: 15px; color: #737373;">Орон сууц</span>
+            </span>
+          </label>
+          <label style="display: flex; align-items: center; gap: 14px; border-radius: 12px; border: 1px solid #d4d4d4; background: #ffffff; padding: 14px 16px; cursor: pointer;">
+            <span style="display:flex; align-items:center; justify-content:center; width:16px; height:16px; border-radius:999px; border:1px solid #d4d4d4; flex-shrink:0;"></span>
+            <span style="min-width: 0; flex: 1;">
+              <span style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 14px; font-weight: 700; color: #171717;">Commissioner</span>
+                <span style="display: inline-flex; align-items: center; gap: 4px; border-radius: 999px; background: #f0fdf4; padding: 2px 8px; font-size: 10px; font-weight: 700; letter-spacing: 0.04em; color: #15803d;">КИРИЛЛ ✓</span>
+              </span>
+              <span style="display: block; margin-top: 2px; font-size: 12px; color: #737373;">Төвийг сахисан</span>
+            </span>
+            <span style="flex-shrink: 0; text-align: right; font-family: 'Commissioner', sans-serif; line-height: 1.15;">
+              <span style="display: block; font-size: 21px; color: #171717;">Elysium</span>
+              <span style="display: block; font-size: 15px; color: #737373;">Орон сууц</span>
+            </span>
+          </label>
+        </div>
+      </section>
+      <section style="border-radius: 16px; border: 1px solid #e5e5e5; background: #ffffff; padding: 24px; box-shadow: 0 1px 2px rgba(0,0,0,0.04);">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+          <h3 style="margin: 0; font-size: 15px; font-weight: 700; color: #171717;">Гарчгийн шинж</h3>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+          <div>
+            <span style="display: block; margin-bottom: 6px; font-size: 13px; font-weight: 600; color: #404040;">Жин</span><span style="display:block; margin-top:4px; font-size:12px; color:#a3a3a3;">300 = тансаг · 700 = корпоратив</span>
+            <div style="display: flex; flex-wrap: wrap; gap: 6px;"><span style="border-radius: 8px; border: 1px solid #d4d4d4; background: #ffffff; padding: 8px 14px; font-size: 13px; font-weight: 600; color: #737373;">300</span><span style="border-radius: 8px; border: 1px solid #2a5124; background: #2a51240d; padding: 8px 14px; font-size: 13px; font-weight: 600; color: #2a5124;">400</span><span style="border-radius: 8px; border: 1px solid #d4d4d4; background: #ffffff; padding: 8px 14px; font-size: 13px; font-weight: 600; color: #737373;">500</span><span style="border-radius: 8px; border: 1px solid #d4d4d4; background: #ffffff; padding: 8px 14px; font-size: 13px; font-weight: 600; color: #737373;">700</span><span style="border-radius: 8px; border: 1px solid #d4d4d4; background: #ffffff; padding: 8px 14px; font-size: 13px; font-weight: 600; color: #737373;">800</span></div>
+          </div>
+          <div>
+            <span style="display: block; margin-bottom: 6px; font-size: 13px; font-weight: 600; color: #404040;">Үсэг хоорондын зай</span>
+            <div>
+            <div style="position: relative; height: 4px; border-radius: 999px; background: #e5e5e5; margin: 14px 0 8px;">
+              <span style="position: absolute; left: 0; top: 0; height: 4px; width: 46%; border-radius: 999px; background: #2a5124;"></span>
+              <span style="position: absolute; left: 46%; top: 50%; transform: translate(-50%,-50%); width: 16px; height: 16px; border-radius: 999px; background: #ffffff; border: 2px solid #2a5124; box-shadow: 0 1px 3px rgba(0,0,0,0.2);"></span>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 11px; color: #a3a3a3;"><span>−0.03em</span><span style="font-weight:700; color:#404040;">+0.08em</span><span>+0.20em</span></div>
+          </div>
+          </div>
+          <div>
+            <span style="display: block; margin-bottom: 6px; font-size: 13px; font-weight: 600; color: #404040;">Мөрийн өндөр</span>
+            <div>
+            <div style="position: relative; height: 4px; border-radius: 999px; background: #e5e5e5; margin: 14px 0 8px;">
+              <span style="position: absolute; left: 0; top: 0; height: 4px; width: 28%; border-radius: 999px; background: #2a5124;"></span>
+              <span style="position: absolute; left: 28%; top: 50%; transform: translate(-50%,-50%); width: 16px; height: 16px; border-radius: 999px; background: #ffffff; border: 2px solid #2a5124; box-shadow: 0 1px 3px rgba(0,0,0,0.2);"></span>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 11px; color: #a3a3a3;"><span>0.95</span><span style="font-weight:700; color:#404040;">1.02</span><span>1.20</span></div>
+          </div>
+          </div>
+          <div>
+            <span style="display: block; margin-bottom: 6px; font-size: 13px; font-weight: 600; color: #404040;">Хэлбэр</span>
+            <div style="margin-top: 10px;"><span style="display: inline-flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 500; color: #404040;">
+            <span style="position: relative; display: block; width: 36px; height: 20px; border-radius: 999px; background: #2a5124;">
+              <span style="position: absolute; top: 2px; right: 2px; width: 16px; height: 16px; border-radius: 999px; background: #ffffff;"></span>
+            </span>Том үсгээр бичих
+          </span></div>
+          </div>
+        </div>
+      </section>
+      <section style="border-radius: 16px; border: 1px solid #e5e5e5; background: #ffffff; padding: 24px; box-shadow: 0 1px 2px rgba(0,0,0,0.04);">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+          <h3 style="margin: 0; font-size: 15px; font-weight: 700; color: #171717;">Ерөнхий хэмжээ</h3>
+        </div>
+        <span style="display: block; margin-bottom: 6px; font-size: 13px; font-weight: 600; color: #404040;">Коэффициент</span><span style="display:block; margin-top:4px; font-size:12px; color:#a3a3a3;">Бүх шатлал хамт томорно/жижигрэнэ — тус тусад нь биш.</span>
+        <div>
+            <div style="position: relative; height: 4px; border-radius: 999px; background: #e5e5e5; margin: 14px 0 8px;">
+              <span style="position: absolute; left: 0; top: 0; height: 4px; width: 52%; border-radius: 999px; background: #2a5124;"></span>
+              <span style="position: absolute; left: 52%; top: 50%; transform: translate(-50%,-50%); width: 16px; height: 16px; border-radius: 999px; background: #ffffff; border: 2px solid #2a5124; box-shadow: 0 1px 3px rgba(0,0,0,0.2);"></span>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 11px; color: #a3a3a3;"><span>0.90×</span><span style="font-weight:700; color:#404040;">1.00×</span><span>1.15×</span></div>
+          </div>
+        <div style="display: flex; flex-wrap: wrap; gap: 18px; margin-top: 16px; border-top: 1px solid #e5e5e5; padding-top: 14px; font-size: 12px; color: #737373;">
+          <span>H1 <b style="color:#171717;">64px</b></span>
+          <span>H2 <b style="color:#171717;">45px</b></span>
+          <span>Тайлбар <b style="color:#171717;">16px</b></span>
+          <span>Жижиг <b style="color:#171717;">13px</b></span>
+        </div>
+      </section>
+        <div style="display: flex; gap: 10px; border-top: 1px solid #e5e5e5; padding-top: 18px;">
+          <span style="border-radius: 8px; border: 1px solid #d4d4d4; background: #ffffff; padding: 10px 16px; font-size: 14px; font-weight: 600; color: #404040;">Типографийг өгөгдмөл рүү буцаах</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div></x-dc>
+</body>
+</html>
