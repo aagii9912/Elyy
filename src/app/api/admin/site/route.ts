@@ -35,9 +35,10 @@ export async function PUT(req: Request) {
     const content = { ...merged, theme: sanitizeTheme(merged.theme) };
     await getStore().saveSiteContent(content);
 
-    // Засвар шууд нийтэд харагдана. Дизайн нь мэдээний хуудсанд ч
-    // хамаарах тул тэдгээрийг мөн шинэчилнэ.
+    // Засвар шууд нийтэд харагдана. Дизайн нь мэдээний хуудас болон
+    // `/noir` theme-д ч хамаарах тул тэдгээрийг мөн шинэчилнэ.
     revalidatePath("/");
+    revalidatePath("/noir");
     revalidatePath("/news");
     revalidatePath("/news/[slug]", "page");
 

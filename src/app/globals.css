@@ -86,15 +86,22 @@
 
 /* Өгөгдмөл — цайвар дэвсгэр дээрх бараан бичиг. */
 .mono-page,
-.mono-page [data-tone="light"] {
+:is(.mono-page, .noir-page) [data-tone="light"] {
   --ely-fg: var(--color-night);
   --ely-fg-muted: var(--color-mist);
 }
 
 /* Хар дэвсгэртэй хэсэг — бичиг цайрна. */
-.mono-page [data-tone="dark"] {
+:is(.mono-page, .noir-page) [data-tone="dark"] {
   --ely-fg: #ffffff;
   --ely-fg-muted: rgba(255, 255, 255, 0.62);
+}
+
+/* `/noir` — кино маягийн харанхуй theme нь өгөгдмөлөөрөө цайвар бичигтэй
+   (хэсгийн `data-tone` нь зөвхөн админ өөрчилсөн үед дээрээс дарна). */
+.noir-page {
+  --ely-fg: var(--nv-ink);
+  --ely-fg-muted: var(--nv-muted);
 }
 
 /* Өөрийн ТОДОРХОЙ дэвсгэртэй карт/самбар/pop-up нь бичгийн өнгөө өөрөө
@@ -102,7 +109,7 @@
    дотор бичиг бараан хэвээр уншигдана (мөн эсрэгээр).
    `[data-bg]` — хэсгийн ҮНДЭС нь энэ дүрмээс гадуур: тэнд классаа биш,
    админы сонгосон `data-tone` шийднэ (класс нь хуучин утгаараа үлддэг). */
-.mono-page
+:is(.mono-page, .noir-page)
   :is(
     .bg-surface,
     .bg-white,
@@ -115,7 +122,7 @@
   --ely-fg-muted: var(--color-mist);
 }
 
-.mono-page .bg-night:not([data-bg]) {
+:is(.mono-page, .noir-page) .bg-night:not([data-bg]) {
   --ely-fg: #ffffff;
   --ely-fg-muted: rgba(255, 255, 255, 0.62);
 }

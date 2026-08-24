@@ -257,6 +257,10 @@ export function sectionTone(
 /* Гол функц                                                           */
 /* ------------------------------------------------------------------ */
 
+/** Дизайны дүрэм үйлчлэх хуудсууд. Шинэ theme (`/noir`) нэмэгдэхэд
+ *  админы сонгосон дэвсгэр/өнгө тэнд ч хүчинтэй байхын тулд ЭНД нэмнэ. */
+const SCOPE = ":is(.mono-page,.noir-page)";
+
 /** `theme`-ээс `<style>`-д тавих CSS. Аюулгүй — бүх утга шүүгдсэн. */
 export function buildThemeCss(theme: ThemeContent | undefined): string {
   const t = theme ?? DEFAULT_THEME;
@@ -266,7 +270,7 @@ export function buildThemeCss(theme: ThemeContent | undefined): string {
 
   /* 1) Палитр — Tailwind токенууд руу шууд. */
   rules.push(
-    `:root,.mono-page{` +
+    `:root,.mono-page,.noir-page{` +
       `--color-ground:${hex(p.ground, d.ground)};` +
       `--color-surface:${hex(p.surface, d.surface)};` +
       `--color-night:${hex(p.dark, d.dark)};` +
@@ -285,13 +289,13 @@ export function buildThemeCss(theme: ThemeContent | undefined): string {
   for (const { id } of THEME_SECTIONS) {
     const bg = t.sections?.[id] ?? defaultBackground();
     const { body, before } = backgroundDecls(bg);
-    if (body) rules.push(`.mono-page [data-bg="${id}"]{${body}}`);
-    if (before) rules.push(`.mono-page [data-bg="${id}"]::before{${before}}`);
+    if (body) rules.push(`${SCOPE} [data-bg="${id}"]{${body}}`);
+    if (before) rules.push(`${SCOPE} [data-bg="${id}"]::before{${before}}`);
   }
 
   /* 4) Мобайл дээр `fixed` нь iOS-д гацдаг — үргэлж scroll руу буулгана. */
   if (rules.some((r) => r.includes("background-attachment:fixed"))) {
-    rules.push(`@media (max-width:767px){.mono-page [data-bg]{background-attachment:scroll!important}}`);
+    rules.push(`@media (max-width:767px){${SCOPE} [data-bg]{background-attachment:scroll!important}}`);
   }
 
   return rules.join("\n");

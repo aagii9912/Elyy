@@ -1,0 +1,2625 @@
+<!doctype html>
+<html lang="mn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Elysium Residence — Бизнес зэрэглэлийн орон сууц</title>
+<meta name="description" content="4 блок, 506 айлын орон сууц. Нийт талбайн 85% нь ногоон, нийтийн эзэмшлийн орон зай. 2027 оны 2-р улиралд ашиглалтад орно.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap" rel="stylesheet">
+<style>
+/* Брэндийн Gilroy — репо доторх файлаас (лицензтэй тул CDN-д тавихгүй).
+   Ачаалагдахгүй бол Manrope руу зөөлөн буцна. */
+@font-face { font-family: "GilroyLocal"; font-weight: 400; font-display: swap; src: url("../../src/fonts/gilroy/GIP-Regular.otf") format("opentype"); }
+@font-face { font-family: "GilroyLocal"; font-weight: 500; font-display: swap; src: url("../../src/fonts/gilroy/GIP-Medium.otf") format("opentype"); }
+@font-face { font-family: "GilroyLocal"; font-weight: 700; font-display: swap; src: url("../../src/fonts/gilroy/GIP-Bold.otf") format("opentype"); }
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+img, svg, video, iframe { display: block; max-width: 100%; }
+button { font: inherit; color: inherit; }
+:root { --font-gilroy: "GilroyLocal", "Manrope"; }
+body { font-family: var(--font-gilroy), ui-sans-serif, system-ui, sans-serif; background-color: #0a1207; }
+
+/* ============================================================
+   ELYSIUM — `/noir` кино маягийн харанхуй theme.
+
+   Гео­метр нь хэмжсэн 1487×1058 макетаас ЯГ хуулагдсан (нэгж бүр
+   `--u` = дэлгэцийн ӨНДРӨӨС хамаарна), харин өнгө нь бүхэлдээ
+   Elysium-ийн брэндийн ногоон/цөцгий палитр — хар биш, ягаан биш.
+
+   Бүх өнгө нь админаас (`/admin/site` → Дизайн) удирддаг
+   `--color-*` токенууд дээр тулгуурлана: палитрын `film` (гүн ногоон)
+   → хуудасны хоосон орон зай, `accent` (лайм) → тодруулга. Тиймээс
+   админ өнгөө сольмогц энэ theme бүхэлдээ дагаж эргэнэ.
+   ============================================================ */
+
+.noir-page {
+  /* ---- Хэмжээний систем — макетын 1px = 1 --u ---- */
+  --u: calc(100vh / 1058);
+  --uw: calc(100vw / 1487);
+  /* Бичиг нь өргөн дэлгэц дээр 16% хүртэл томорно, ХЭЗЭЭ Ч --u-аас
+     жижгэрэхгүй — босоо хэмнэл дэлгэцээ үргэлж дүүргэнэ. */
+  --h: clamp(var(--u), calc(var(--u) * 0.65 + var(--uw) * 0.35), calc(var(--u) * 1.16));
+
+  /* ---- Палитр — брэндийн токеноос гаралтай ---- */
+  --nv-deep: var(--color-charcoal, #16280f);
+  --nv-void: color-mix(in srgb, var(--nv-deep) 52%, #000);
+  --nv-ink: #f4f8e6;
+  --nv-nav: #c3cfb6;
+  --nv-muted: #a4b396;
+  --nv-strip: #7f8f72;
+  --nv-line: color-mix(in srgb, var(--nv-ink) 14%, transparent);
+  --nv-line-soft: color-mix(in srgb, var(--nv-ink) 8%, transparent);
+  --nv-pill: #fafee5;
+  --nv-pill-ink: var(--nv-deep);
+  --nv-accent: var(--color-lime, #b4d656);
+  --nv-accent-deep: var(--color-moss, #3f6a33);
+
+  --nv-font: var(--font-gilroy), ui-sans-serif, system-ui, sans-serif;
+  --nv-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --nv-gut: clamp(20px, calc(75 * var(--uw)), 75px);
+
+  background-color: var(--nv-void);
+  color: var(--nv-ink);
+  font-family: var(--nv-font);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: geometricPrecision;
+}
+
+@supports (height: 100dvh) {
+  .noir-page {
+    --u: calc(100dvh / 1058);
+  }
+}
+
+/* Overscroll бүсэд ч цөцгий биш, гүн ногоон харагдана. */
+body:has(.noir-page) {
+  background-color: color-mix(in srgb, var(--color-charcoal, #16280f) 52%, #000);
+}
+
+.noir-page ::selection {
+  background-color: var(--nv-accent);
+  color: var(--nv-deep);
+}
+
+/* `:where()` — жингүй сонгогч. Ингэснээр `.nv-pill`, `.nv-ghost` зэрэг
+   классууд өөрсдийн өнгөө чөлөөтэй тогтоох боломжтой (эс бөгөөс энэ
+   дүрэм илүү жинтэй байж, цөцгий товч дээр цөцгий бичиг үлддэг). */
+:where(.noir-page a) {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* ============================================================
+   1 · НҮҮР ДЭЛГЭЦ (stage) — макетын хэмжилтээр
+   ============================================================ */
+
+.nv-stage {
+  position: relative;
+  height: 100vh;
+  min-height: 560px;
+  overflow: hidden;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+@supports (height: 100dvh) {
+  .nv-stage {
+    height: 100dvh;
+  }
+}
+
+/* ---- Бүтэн дэлгэцийн клип ---- */
+
+.nv-plate {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background-color: var(--nv-void);
+}
+
+.nv-plate-video,
+.nv-plate-poster {
+  position: absolute;
+  left: 50%;
+  top: calc(1 * var(--u));
+  width: calc(1492 * var(--u));
+  height: calc(1054 * var(--u));
+  transform: translateX(calc(-50% - calc(0.5 * var(--u))));
+  object-fit: cover;
+  pointer-events: none;
+  /* Өдрийн цэлмэг кадрыг брэндийн ногоон, кино маягийн харанхуй
+     болгож "буулгана" — Elysium-ийн өнгө төрх энд шингэнэ. */
+  filter: saturate(0.58) contrast(1.1) brightness(0.44);
+}
+
+/* Ногоон grade — клипийн дээгүүр нимгэн бүрхүүл. */
+.nv-plate::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      ellipse 72% 58% at 50% 44%,
+      color-mix(in srgb, var(--nv-accent-deep) 26%, transparent) 0%,
+      transparent 70%
+    ),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--nv-deep) 62%, transparent) 0%,
+      color-mix(in srgb, var(--nv-deep) 24%, transparent) 42%,
+      color-mix(in srgb, var(--nv-void) 70%, transparent) 100%
+    );
+}
+
+/* Хэмжсэн доод бүдгэрэлт + хажуугийн letterbox. */
+.nv-plate::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      to bottom,
+      transparent 78.8%,
+      color-mix(in srgb, var(--nv-void) 23%, transparent) 79.6%,
+      color-mix(in srgb, var(--nv-void) 45%, transparent) 81.4%,
+      color-mix(in srgb, var(--nv-void) 75%, transparent) 83.3%,
+      color-mix(in srgb, var(--nv-void) 84%, transparent) 85.2%,
+      color-mix(in srgb, var(--nv-void) 89%, transparent) 88%,
+      color-mix(in srgb, var(--nv-void) 91%, transparent) 91%,
+      color-mix(in srgb, var(--nv-void) 96%, transparent) 95%,
+      var(--nv-void) 100%
+    ),
+    linear-gradient(
+      to right,
+      var(--nv-void) calc(50% - 746 * var(--u)),
+      transparent calc(50% - 676 * var(--u)),
+      transparent calc(50% + 676 * var(--u)),
+      var(--nv-void) calc(50% + 746 * var(--u))
+    );
+}
+
+/* ============================================================
+   2 · ТОЛГОЙ ХЭСЭГ
+   ============================================================ */
+
+.nv-topbar {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 60;
+  height: calc(103 * var(--u));
+  pointer-events: none;
+  transition: background-color 0.4s var(--nv-ease), backdrop-filter 0.4s var(--nv-ease),
+    border-color 0.4s var(--nv-ease), height 0.4s var(--nv-ease);
+  border-bottom: 1px solid transparent;
+}
+
+.nv-topbar > * {
+  pointer-events: auto;
+}
+
+/* Цэс нээлттэй үед хаах (X) товч хөшгийн дээр үлдэнэ. */
+.noir-page.is-open .nv-topbar {
+  z-index: 80;
+}
+
+/* Гүйлгэж hero-гоос гармагц толгой нь нягтарч, дэвсгэртэй болно. */
+.nv-topbar.is-stuck {
+  height: calc(84 * var(--u));
+  background-color: color-mix(in srgb, var(--nv-void) 94%, transparent);
+  backdrop-filter: blur(16px);
+  border-bottom-color: var(--nv-line-soft);
+}
+
+.nv-brand {
+  position: absolute;
+  left: var(--nv-gut);
+  top: calc(29 * var(--u));
+  display: block;
+  width: calc(43 * var(--u));
+  height: calc(44 * var(--u));
+  color: var(--nv-ink);
+  transition: top 0.4s var(--nv-ease), width 0.4s var(--nv-ease), height 0.4s var(--nv-ease),
+    opacity 0.3s var(--nv-ease);
+}
+
+.nv-brand svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.nv-topbar.is-stuck .nv-brand {
+  top: calc(22 * var(--u));
+  width: calc(38 * var(--u));
+  height: calc(39 * var(--u));
+}
+
+.nv-brand:hover {
+  opacity: 0.78;
+}
+
+.nv-links {
+  position: absolute;
+  left: 50%;
+  top: calc(51 * var(--u));
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  gap: calc(24.5 * var(--u));
+  font-size: calc(19 * var(--u));
+  font-weight: 400;
+  white-space: nowrap;
+  color: var(--nv-nav);
+  transition: top 0.4s var(--nv-ease);
+}
+
+.nv-topbar.is-stuck .nv-links {
+  top: calc(42 * var(--u));
+}
+
+.nv-links a {
+  position: relative;
+  padding-block: calc(6 * var(--u));
+  transition: color 0.3s var(--nv-ease);
+}
+
+.nv-links a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 1px;
+  width: 100%;
+  transform: scaleX(0);
+  transform-origin: left;
+  background-color: var(--nv-accent);
+  transition: transform 0.42s var(--nv-ease);
+}
+
+.nv-links a:hover {
+  color: var(--nv-ink);
+}
+
+.nv-links a:hover::after,
+.nv-links a[aria-current="true"]::after {
+  transform: scaleX(1);
+}
+
+/* ---- Цагаан (цөцгий) дугуй товч ---- */
+
+.nv-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background-color: var(--nv-pill);
+  color: var(--nv-pill-ink);
+  font-weight: 500;
+  white-space: nowrap;
+  transition: transform 0.36s var(--nv-ease), background-color 0.36s var(--nv-ease);
+}
+
+.nv-pill:hover {
+  transform: translateY(calc(-2 * var(--u)));
+  background-color: #ffffff;
+}
+
+.nv-pill > span {
+  transform: translateY(calc(1 * var(--u)));
+}
+
+.nv-pill-nav {
+  position: absolute;
+  right: var(--nv-gut);
+  top: calc(27 * var(--u));
+  min-width: calc(175 * var(--u));
+  height: calc(49 * var(--u));
+  padding-inline: calc(26 * var(--u));
+  font-size: calc(19.4 * var(--u));
+  transition: top 0.4s var(--nv-ease), height 0.4s var(--nv-ease), transform 0.36s var(--nv-ease),
+    background-color 0.36s var(--nv-ease);
+}
+
+.nv-topbar.is-stuck .nv-pill-nav {
+  top: calc(22 * var(--u));
+  height: calc(44 * var(--u));
+}
+
+/* ---- Бургер (зөвхөн босоо дэлгэц) ---- */
+
+.nv-burger {
+  position: absolute;
+  right: var(--nv-gut);
+  top: calc(27 * var(--u));
+  display: none;
+  width: calc(49 * var(--u));
+  height: calc(49 * var(--u));
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--nv-ink) 16%, transparent);
+  background-color: color-mix(in srgb, var(--nv-ink) 7%, transparent);
+  backdrop-filter: blur(12px);
+  color: var(--nv-ink);
+}
+
+.nv-burger i {
+  position: absolute;
+  display: block;
+  width: calc(17 * var(--u));
+  height: 1.5px;
+  border-radius: 2px;
+  background-color: currentColor;
+  transition: transform 0.42s var(--nv-ease), opacity 0.24s var(--nv-ease);
+}
+
+.nv-burger i:first-child {
+  transform: translateY(calc(-4.3 * var(--u)));
+}
+
+.nv-burger i:last-child {
+  transform: translateY(calc(4.3 * var(--u)));
+}
+
+.noir-page.is-open .nv-burger i:first-child {
+  transform: rotate(45deg);
+}
+
+.noir-page.is-open .nv-burger i:last-child {
+  transform: rotate(-45deg);
+}
+
+/* ---- Бүтэн дэлгэцийн цэс ---- */
+
+.nv-menu {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: flex;
+  align-items: flex-end;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.42s var(--nv-ease), visibility 0.42s var(--nv-ease);
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--nv-void) 96%, transparent) 0%,
+      color-mix(in srgb, var(--nv-deep) 96%, transparent) 100%
+    );
+  backdrop-filter: blur(18px);
+}
+
+.noir-page.is-open .nv-menu {
+  opacity: 1;
+  visibility: visible;
+}
+
+.nv-menu-inner {
+  width: 100%;
+  padding: 0 var(--nv-gut) calc(48px + env(safe-area-inset-bottom));
+}
+
+.nv-menu-eyebrow,
+.nv-menu-list li,
+.nv-menu-foot {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.5s var(--nv-ease), transform 0.5s var(--nv-ease);
+}
+
+.noir-page.is-open :is(.nv-menu-eyebrow, .nv-menu-list li, .nv-menu-foot) {
+  opacity: 1;
+  transform: none;
+}
+
+.nv-menu-eyebrow {
+  margin-bottom: 22px;
+  font-size: 11px;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  color: var(--nv-accent);
+  transition-delay: 0.06s;
+}
+
+.nv-menu-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--nv-line-soft);
+}
+
+.nv-menu-list li {
+  border-bottom: 1px solid var(--nv-line-soft);
+}
+
+.nv-menu-list li:nth-child(1) { transition-delay: 0.1s; }
+.nv-menu-list li:nth-child(2) { transition-delay: 0.16s; }
+.nv-menu-list li:nth-child(3) { transition-delay: 0.22s; }
+.nv-menu-list li:nth-child(4) { transition-delay: 0.28s; }
+.nv-menu-list li:nth-child(5) { transition-delay: 0.31s; }
+.nv-menu-list li:nth-child(6) { transition-delay: 0.34s; }
+
+.nv-menu-list a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-block: 15px;
+  font-size: max(25px, calc(31 * var(--u)));
+  font-weight: 400;
+  line-height: 1.15;
+}
+
+.nv-menu-list a::after {
+  content: "↗";
+  font-size: 0.5em;
+  color: var(--nv-accent);
+}
+
+.nv-menu-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px 26px;
+  margin-top: 30px;
+  transition-delay: 0.34s;
+}
+
+.nv-menu-foot .nv-pill {
+  height: 52px;
+  padding-inline: 30px;
+  font-size: 15px;
+}
+
+/* ============================================================
+   3 · НҮҮР ДЭЛГЭЦИЙН БИЧВЭР
+   ============================================================ */
+
+.nv-hero {
+  position: relative;
+  z-index: 10;
+  height: 100%;
+}
+
+/* Бичвэрийн багана — макетын 230.5u-аас эхэлж, дотроо УРСГАЛ байрлалтай.
+   Гарчиг/тайлбарын урт админаас өөрчлөгддөг тул зөвхөн эхлэлийг түгжиж,
+   доторх зайг хэмжсэн утгаар барина (эс бөгөөс урт текст товчтой давхцана). */
+.nv-copy {
+  position: absolute;
+  left: var(--nv-gut);
+  top: calc(230.5 * var(--u));
+  width: min(calc(760 * var(--h)), calc(100% - 2 * var(--nv-gut)));
+}
+
+.nv-headline {
+  margin: 0;
+  font-size: calc(71.6 * var(--h));
+  line-height: calc(80.5 * var(--h));
+  font-weight: 400;
+  letter-spacing: calc(0.3 * var(--h));
+  color: var(--nv-ink);
+  white-space: nowrap;
+}
+
+.nv-headline span {
+  display: block;
+}
+
+.nv-headline em {
+  font-style: normal;
+  color: var(--nv-accent);
+}
+
+.nv-sub {
+  margin: calc(28 * var(--h)) 0 0;
+  max-width: calc(560 * var(--h));
+  font-size: calc(20.7 * var(--h));
+  line-height: calc(25.5 * var(--h));
+  font-weight: 400;
+  word-spacing: calc(1.8 * var(--h));
+  color: var(--nv-muted);
+}
+
+.nv-actions {
+  margin-top: calc(28.5 * var(--h));
+  display: flex;
+  align-items: center;
+  gap: calc(45 * var(--h));
+}
+
+.nv-pill-cta {
+  min-width: calc(175.6 * var(--h));
+  height: calc(50 * var(--h));
+  padding-inline: calc(28 * var(--h));
+  font-size: calc(19.4 * var(--h));
+}
+
+.nv-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(9 * var(--h));
+  font-size: calc(19.4 * var(--h));
+  font-weight: 500;
+  letter-spacing: calc(0.12 * var(--h));
+  color: var(--nv-ink);
+  transition: color 0.3s var(--nv-ease);
+}
+
+.nv-ghost::after {
+  content: "";
+  width: calc(22 * var(--h));
+  height: 1px;
+  background-color: currentColor;
+  transition: width 0.36s var(--nv-ease);
+}
+
+.nv-ghost:hover {
+  color: var(--nv-accent);
+}
+
+.nv-ghost:hover::after {
+  width: calc(34 * var(--h));
+}
+
+/* ---- Доод түншийн зурвас ---- */
+
+.nv-logos {
+  position: absolute;
+  left: 50%;
+  top: calc(985 * var(--u));
+  width: calc(741 * var(--u));
+  transform: translateX(calc(-50% + 20 * var(--u)));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: calc(24 * var(--u));
+  color: var(--nv-strip);
+}
+
+.nv-lg {
+  display: flex;
+  align-items: center;
+  gap: calc(9 * var(--u));
+  font-size: calc(17 * var(--u));
+  font-weight: 700;
+  letter-spacing: calc(-0.2 * var(--u));
+  white-space: nowrap;
+  transition: color 0.4s var(--nv-ease), opacity 0.4s var(--nv-ease);
+}
+
+.nv-lg:hover {
+  color: var(--nv-ink);
+}
+
+.nv-lg-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(30 * var(--u));
+  height: calc(30 * var(--u));
+  flex: none;
+}
+
+.nv-lg-mark img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  filter: grayscale(1) brightness(1.7) opacity(0.72);
+}
+
+.nv-lg-mark svg {
+  width: 100%;
+  height: 100%;
+}
+
+.nv-lg-meta {
+  font-style: normal;
+  font-weight: 400;
+  font-size: calc(13 * var(--u));
+  opacity: 0.7;
+}
+
+/* ---- Гүйлгэх заавар ---- */
+
+/* Түншийн зурвасын БАРУУН талд — голд байрлуулбал зурвастай мөргөлдөнө. */
+.nv-scroll {
+  position: absolute;
+  right: var(--nv-gut);
+  bottom: calc(30 * var(--u));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: color-mix(in srgb, var(--nv-ink) 42%, transparent);
+}
+
+.nv-scroll i {
+  display: block;
+  width: 1px;
+  height: calc(34 * var(--u));
+  background: linear-gradient(to bottom, currentColor, transparent);
+  animation: nv-drop 2.4s var(--nv-ease) infinite;
+}
+
+@keyframes nv-drop {
+  0%, 100% { transform: scaleY(0.4); transform-origin: top; opacity: 0.4; }
+  50% { transform: scaleY(1); transform-origin: top; opacity: 1; }
+}
+
+/* ============================================================
+   3.5 · БИЧГИЙН ГОРИМ — админ хэсгийн дэвсгэрийг ЦАЙВАР болговол
+   палитр бүхэлдээ эргэж, бичиг гүн ногоон болно (уншигдахуйц хэвээр).
+   ============================================================ */
+
+.noir-page [data-tone="light"] {
+  /* Админ ЗӨВХӨН бичгийн горимыг сольсон (дэвсгэрээ "auto" орхисон)
+     тохиолдолд ч хэсэг уншигдахуйц байхын тулд цайвар суурь өгнө.
+     Админ өөрөө дэвсгэр сонговол `SiteTheme`-ийн дүрэм дараад авна. */
+  background-color: #f2f5e6;
+  --nv-ink: var(--nv-deep);
+  --nv-nav: var(--nv-accent-deep);
+  --nv-muted: #51604a;
+  --nv-strip: #77876c;
+  --nv-line: color-mix(in srgb, var(--nv-deep) 18%, transparent);
+  --nv-line-soft: color-mix(in srgb, var(--nv-deep) 11%, transparent);
+  --nv-pill: var(--nv-deep);
+  --nv-pill-ink: #fafee5;
+  --nv-accent: var(--nv-accent-deep);
+  color: var(--nv-ink);
+}
+
+.noir-page [data-tone="light"] .nv-pill:hover {
+  background-color: color-mix(in srgb, var(--nv-deep) 82%, #000);
+}
+
+/* ============================================================
+   4 · ХЭСГҮҮДИЙН ЕРӨНХИЙ СИСТЕМ (hero-гийн доорх бүх блок)
+   Карт БАЙХГҮЙ — зөвхөн үсэг зүйн хэмнэл, үс шиг нимгэн зураас,
+   бүтэн өргөний зураг.
+   ============================================================ */
+
+.nv-sec {
+  position: relative;
+  padding-block: clamp(72px, 11vh, 148px);
+}
+
+.nv-sec--tight {
+  padding-block: clamp(52px, 7vh, 96px);
+}
+
+.nv-wrap {
+  width: min(100% - 2 * var(--nv-gut), 1337px);
+  margin-inline: auto;
+}
+
+.nv-chapter {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 0 0 clamp(20px, 3vh, 34px);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--nv-accent);
+}
+
+.nv-chapter::before {
+  content: "";
+  width: clamp(28px, 4vw, 54px);
+  height: 1px;
+  background-color: currentColor;
+}
+
+.nv-h2 {
+  margin: 0;
+  font-size: clamp(30px, 4.3vw, 62px);
+  line-height: 1.06;
+  font-weight: 400;
+  letter-spacing: -0.012em;
+  color: var(--nv-ink);
+  text-wrap: balance;
+}
+
+.nv-h3 {
+  margin: 0;
+  font-size: clamp(19px, 1.7vw, 26px);
+  line-height: 1.24;
+  font-weight: 500;
+  color: var(--nv-ink);
+}
+
+.nv-lead {
+  margin: 0;
+  max-width: 62ch;
+  font-size: clamp(14.5px, 1.05vw, 17.5px);
+  line-height: 1.68;
+  color: var(--nv-muted);
+}
+
+.nv-head {
+  display: grid;
+  gap: clamp(18px, 3vw, 56px);
+  align-items: end;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (min-width: 900px) {
+  .nv-head--split {
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  }
+}
+
+.nv-rule {
+  height: 1px;
+  border: 0;
+  margin: 0;
+  background-color: var(--nv-line-soft);
+}
+
+/* ---- Илрэх анимэйшн ---- */
+
+[data-rise] {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.9s var(--nv-ease), transform 0.9s var(--nv-ease);
+  transition-delay: var(--d, 0s);
+}
+
+[data-rise].is-in {
+  opacity: 1;
+  transform: none;
+}
+
+/* ============================================================
+   5 · 01 — ТООН ҮЗҮҮЛЭЛТ
+   ============================================================ */
+
+.nv-stats {
+  display: grid;
+  gap: 0;
+  margin-top: clamp(34px, 6vh, 76px);
+  border-top: 1px solid var(--nv-line-soft);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (min-width: 900px) {
+  .nv-stats {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.nv-stat {
+  padding: clamp(22px, 3.4vh, 40px) clamp(14px, 2vw, 30px) clamp(22px, 3.4vh, 40px) 0;
+  border-bottom: 1px solid var(--nv-line-soft);
+}
+
+@media (min-width: 900px) {
+  .nv-stat + .nv-stat {
+    padding-left: clamp(18px, 2.2vw, 34px);
+    border-left: 1px solid var(--nv-line-soft);
+  }
+}
+
+.nv-stat b {
+  display: block;
+  font-size: clamp(38px, 4.6vw, 68px);
+  line-height: 1;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  color: var(--nv-ink);
+}
+
+.nv-stat b i {
+  font-style: normal;
+  color: var(--nv-accent);
+}
+
+/* Тоологддог тоо — `b`-гийн хэмжээг ӨВЛӨНӨ (шошгын дүрэмд баригдахгүй). */
+.nv-stat b span {
+  display: inline;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+}
+
+.nv-stat > span {
+  display: block;
+  margin-top: 12px;
+  font-size: clamp(12.5px, 0.92vw, 14.5px);
+  line-height: 1.5;
+  color: var(--nv-muted);
+}
+
+/* ============================================================
+   6 · 02 — ELYS КОНСЕПЦ (дэлгэгддэг самбарууд)
+   ============================================================ */
+
+.nv-panels {
+  display: grid;
+  gap: 10px;
+  margin-top: clamp(30px, 5vh, 62px);
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (min-width: 900px) {
+  .nv-panels {
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+    height: min(58vh, 520px);
+    gap: 8px;
+  }
+
+  .nv-panels:has(.nv-panel.is-active) .nv-panel {
+    flex: none;
+  }
+
+  .nv-panel.is-active {
+    grid-column: span 2;
+  }
+}
+
+.nv-panel {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: 210px;
+  padding: clamp(18px, 2.4vw, 30px);
+  border: 1px solid var(--nv-line-soft);
+  background-color: color-mix(in srgb, var(--nv-deep) 55%, transparent);
+  text-align: left;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  transition: grid-column 0.6s var(--nv-ease), border-color 0.5s var(--nv-ease);
+}
+
+.nv-panel img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: saturate(0.5) brightness(0.36);
+  transform: scale(1.04);
+  transition: transform 1.1s var(--nv-ease), filter 0.7s var(--nv-ease);
+}
+
+.nv-panel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  /* Ногоон бүрхүүл — кадрууд theme-ийн өнгөнд уусна. */
+  background:
+    linear-gradient(
+      180deg,
+      transparent 22%,
+      color-mix(in srgb, var(--nv-void) 82%, transparent) 100%
+    ),
+    linear-gradient(
+      0deg,
+      color-mix(in srgb, var(--nv-deep) 30%, transparent),
+      color-mix(in srgb, var(--nv-deep) 30%, transparent)
+    );
+}
+
+.nv-panel:hover img,
+.nv-panel.is-active img {
+  transform: scale(1);
+  filter: saturate(0.7) brightness(0.5);
+}
+
+.nv-panel.is-active {
+  border-color: color-mix(in srgb, var(--nv-accent) 42%, transparent);
+}
+
+.nv-panel > * {
+  position: relative;
+  z-index: 2;
+}
+
+.nv-panel-letter {
+  position: absolute;
+  top: clamp(16px, 2.2vw, 26px);
+  left: clamp(18px, 2.4vw, 30px);
+  z-index: 2;
+  font-size: clamp(13px, 1vw, 15px);
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: var(--nv-accent);
+}
+
+.nv-panel-body {
+  margin: 10px 0 0;
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--nv-muted);
+  transition: max-height 0.6s var(--nv-ease), opacity 0.5s var(--nv-ease);
+}
+
+.nv-panel.is-active .nv-panel-body {
+  max-height: 260px;
+  opacity: 1;
+}
+
+/* ============================================================
+   7 · 03 — БАРИЛГЫН БҮТЭЦ (клиптэй мөрүүд)
+   ============================================================ */
+
+.nv-row {
+  display: grid;
+  gap: clamp(18px, 3vw, 54px);
+  align-items: center;
+  padding-block: clamp(28px, 5vh, 64px);
+  border-top: 1px solid var(--nv-line-soft);
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (min-width: 900px) {
+  .nv-row {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+  }
+
+  .nv-row:nth-child(even) .nv-row-media {
+    order: -1;
+  }
+}
+
+.nv-row-media {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 16 / 10;
+  background-color: color-mix(in srgb, var(--nv-deep) 60%, transparent);
+}
+
+.nv-row-media video,
+.nv-row-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: saturate(0.55) brightness(0.5);
+  transition: transform 1.2s var(--nv-ease), filter 0.8s var(--nv-ease);
+}
+
+.nv-row:hover .nv-row-media :is(video, img) {
+  transform: scale(1.03);
+  filter: saturate(0.78) brightness(0.68);
+}
+
+/* Кадрын дээгүүр нимгэн ногоон бүрхүүл. */
+.nv-row-media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-color: color-mix(in srgb, var(--nv-deep) 24%, transparent);
+}
+
+.nv-row-index {
+  display: block;
+  margin-bottom: 14px;
+  font-size: 11px;
+  letter-spacing: 0.3em;
+  color: var(--nv-accent);
+}
+
+.nv-row-body {
+  margin: 14px 0 0;
+  font-size: clamp(14px, 1vw, 16.5px);
+  line-height: 1.66;
+  color: var(--nv-muted);
+}
+
+/* ============================================================
+   8 · ӨРӨӨНИЙ СОНГОЛТ — жагсаалт + хөвүүлэхэд гарах зураг
+   ============================================================ */
+
+.nv-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: clamp(22px, 3vh, 34px);
+}
+
+.nv-tab {
+  padding: 9px 18px;
+  border-radius: 999px;
+  border: 1px solid var(--nv-line);
+  background: transparent;
+  color: var(--nv-muted);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition: color 0.3s var(--nv-ease), border-color 0.3s var(--nv-ease),
+    background-color 0.3s var(--nv-ease);
+}
+
+.nv-tab:hover {
+  color: var(--nv-ink);
+  border-color: color-mix(in srgb, var(--nv-ink) 34%, transparent);
+}
+
+.nv-tab.is-on {
+  background-color: var(--nv-accent);
+  border-color: var(--nv-accent);
+  color: var(--nv-deep);
+  font-weight: 600;
+}
+
+.nv-units {
+  position: relative;
+  margin-top: clamp(24px, 4vh, 48px);
+  border-top: 1px solid var(--nv-line-soft);
+}
+
+.nv-unit {
+  position: relative;
+  display: grid;
+  width: 100%;
+  align-items: center;
+  gap: 6px 18px;
+  padding-block: clamp(16px, 2.4vh, 26px);
+  border-bottom: 1px solid var(--nv-line-soft);
+  background: none;
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  grid-template-columns: minmax(0, 1fr) auto;
+  transition: color 0.35s var(--nv-ease);
+}
+
+@media (min-width: 760px) {
+  .nv-unit {
+    grid-template-columns: calc(58px + 4vw) minmax(0, 1fr) minmax(0, 0.8fr) auto;
+  }
+}
+
+.nv-unit:hover {
+  color: var(--nv-accent);
+}
+
+.nv-unit-no {
+  display: none;
+  font-size: 12px;
+  letter-spacing: 0.24em;
+  color: var(--nv-strip);
+}
+
+@media (min-width: 760px) {
+  .nv-unit-no {
+    display: block;
+  }
+}
+
+.nv-unit-name {
+  font-size: clamp(18px, 2vw, 30px);
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+.nv-unit-meta {
+  font-size: 13.5px;
+  color: var(--nv-muted);
+}
+
+.nv-unit-cta {
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--nv-strip);
+  white-space: nowrap;
+}
+
+/* Хөвүүлэхэд хулганы дэргэд гарах жижиг зураг (зөвхөн том дэлгэц). */
+.nv-peek {
+  position: fixed;
+  z-index: 40;
+  width: 250px;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.94);
+  transition: opacity 0.35s var(--nv-ease), transform 0.45s var(--nv-ease);
+  border: 1px solid var(--nv-line);
+  background-color: var(--nv-deep);
+}
+
+.nv-peek.is-on {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.nv-peek img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+@media (hover: none), (max-width: 900px) {
+  .nv-peek {
+    display: none;
+  }
+}
+
+/* Хэсгийн төгсгөлийн CTA мөр — зүүнд бичвэр, баруунд товч. */
+.nv-cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px 28px;
+  margin-top: clamp(28px, 4vh, 48px);
+  padding-top: clamp(20px, 3vh, 32px);
+  border-top: 1px solid var(--nv-line-soft);
+}
+
+.nv-cta-row .nv-pill {
+  height: 52px;
+  padding-inline: 30px;
+  font-size: 15px;
+}
+
+/* ============================================================
+   9 · ЗУРГИЙН ЦОМОГ
+   ============================================================ */
+
+.nv-grid {
+  display: grid;
+  gap: 10px;
+  margin-top: clamp(26px, 4vh, 56px);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (min-width: 900px) {
+  .nv-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .nv-grid > *:nth-child(6n + 1) {
+    grid-column: span 2;
+    grid-row: span 2;
+  }
+}
+
+.nv-shot {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 1 / 1;
+  padding: 0;
+  border: 0;
+  background-color: color-mix(in srgb, var(--nv-deep) 60%, transparent);
+  cursor: pointer;
+}
+
+.nv-shot img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: saturate(0.5) brightness(0.5);
+  transition: transform 1.1s var(--nv-ease), filter 0.6s var(--nv-ease);
+}
+
+/* Ногоон бүрхүүл — цайвар интерьер кадрууд theme-ийн өнгөнд уусна. */
+.nv-shot::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-color: color-mix(in srgb, var(--nv-deep) 26%, transparent);
+  transition: opacity 0.6s var(--nv-ease);
+}
+
+.nv-shot:hover img {
+  transform: scale(1.05);
+  filter: saturate(0.8) brightness(0.78);
+}
+
+.nv-shot:hover::after {
+  opacity: 0;
+}
+
+.nv-shot span {
+  position: absolute;
+  left: 14px;
+  bottom: 12px;
+  z-index: 2;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--nv-ink);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.4s var(--nv-ease), transform 0.4s var(--nv-ease);
+}
+
+.nv-shot:hover span {
+  opacity: 1;
+  transform: none;
+}
+
+/* ---- Lightbox ---- */
+
+.nv-box {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: clamp(16px, 4vw, 48px);
+  background-color: color-mix(in srgb, var(--nv-void) 95%, transparent);
+  backdrop-filter: blur(14px);
+  animation: nv-fade 0.32s var(--nv-ease) both;
+}
+
+@keyframes nv-fade {
+  from { opacity: 0; }
+}
+
+.nv-box img {
+  max-width: min(100%, 1200px);
+  max-height: 76vh;
+  object-fit: contain;
+}
+
+.nv-box-bar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 12.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--nv-muted);
+}
+
+.nv-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  border: 1px solid var(--nv-line);
+  background: transparent;
+  color: var(--nv-ink);
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s var(--nv-ease), border-color 0.3s var(--nv-ease);
+}
+
+.nv-icon:hover {
+  background-color: color-mix(in srgb, var(--nv-ink) 10%, transparent);
+  border-color: color-mix(in srgb, var(--nv-ink) 30%, transparent);
+}
+
+.nv-box-close {
+  position: absolute;
+  top: clamp(14px, 3vw, 30px);
+  right: clamp(14px, 3vw, 30px);
+}
+
+/* ============================================================
+   10 · ТӨСӨЛ ХЭРЭГЖҮҮЛЭГЧ — хэвтээ гүйдэг зурвас
+   ============================================================ */
+
+.nv-rail {
+  display: flex;
+  gap: 14px;
+  margin-top: clamp(26px, 4vh, 52px);
+  padding-bottom: 16px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+
+.nv-rail::-webkit-scrollbar {
+  display: none;
+}
+
+.nv-slide {
+  position: relative;
+  flex: none;
+  width: min(78vw, 420px);
+  scroll-snap-align: start;
+}
+
+.nv-slide-media {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+  background-color: color-mix(in srgb, var(--nv-deep) 60%, transparent);
+}
+
+.nv-slide-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: saturate(0.55) brightness(0.58);
+  transition: transform 1.1s var(--nv-ease), filter 0.6s var(--nv-ease);
+}
+
+.nv-slide:hover .nv-slide-media img {
+  transform: scale(1.04);
+  filter: saturate(0.82) brightness(0.84);
+}
+
+.nv-slide-years {
+  position: absolute;
+  right: 12px;
+  bottom: 10px;
+  z-index: 2;
+  font-size: 11.5px;
+  letter-spacing: 0.16em;
+  color: var(--nv-ink);
+}
+
+.nv-slide h4 {
+  margin: 14px 0 4px;
+  font-size: 17px;
+  font-weight: 500;
+}
+
+.nv-slide p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--nv-muted);
+}
+
+/* ============================================================
+   11 · БАЙРШИЛ
+   ============================================================ */
+
+.nv-map {
+  position: relative;
+  margin-top: clamp(22px, 3.5vh, 40px);
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border: 1px solid var(--nv-line-soft);
+  background-color: color-mix(in srgb, var(--nv-deep) 60%, transparent);
+}
+
+.nv-map iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  /* Google-ийн цайвар зураглалыг theme-ийн харанхуйд оруулна. */
+  filter: invert(0.9) hue-rotate(155deg) saturate(0.65) brightness(0.94) contrast(0.92);
+}
+
+@media (max-width: 760px) {
+  .nv-map {
+    aspect-ratio: 4 / 3;
+  }
+}
+
+.nv-nearby {
+  display: grid;
+  gap: clamp(18px, 3vw, 40px);
+  margin-top: clamp(26px, 4vh, 48px);
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (min-width: 760px) {
+  .nv-nearby {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.nv-nearby h4 {
+  margin: 0 0 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--nv-line-soft);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--nv-accent);
+}
+
+.nv-nearby ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.nv-nearby li {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding-block: 9px;
+  font-size: 14px;
+  color: var(--nv-muted);
+  border-bottom: 1px solid var(--nv-line-soft);
+}
+
+.nv-nearby li b {
+  font-weight: 400;
+  color: var(--nv-ink);
+}
+
+.nv-nearby li span {
+  font-size: 12.5px;
+  color: var(--nv-strip);
+  white-space: nowrap;
+}
+
+/* ============================================================
+   12 · ХОЛБОО БАРИХ — маягт
+   ============================================================ */
+
+.nv-form {
+  display: grid;
+  gap: 4px;
+  margin-top: clamp(22px, 3.5vh, 36px);
+}
+
+.nv-field {
+  position: relative;
+  border-bottom: 1px solid var(--nv-line);
+  transition: border-color 0.35s var(--nv-ease);
+}
+
+.nv-field:focus-within {
+  border-bottom-color: var(--nv-accent);
+}
+
+.nv-field label {
+  display: block;
+  padding-top: 18px;
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--nv-strip);
+}
+
+.nv-field :is(input, textarea) {
+  width: 100%;
+  padding: 8px 0 14px;
+  border: 0;
+  background: transparent;
+  color: var(--nv-ink);
+  font: inherit;
+  font-size: clamp(15px, 1.2vw, 18px);
+  outline: none;
+  resize: none;
+}
+
+.nv-field input::placeholder,
+.nv-field textarea::placeholder {
+  color: color-mix(in srgb, var(--nv-ink) 26%, transparent);
+}
+
+.nv-field input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1) opacity(0.5);
+  cursor: pointer;
+}
+
+.nv-form .nv-pill {
+  justify-self: start;
+  margin-top: 26px;
+  height: 54px;
+  padding-inline: 32px;
+  font-size: 15px;
+  border: 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.nv-form .nv-pill[disabled] {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.nv-note {
+  margin: 14px 0 0;
+  font-size: 13px;
+  color: var(--nv-muted);
+}
+
+.nv-note--bad {
+  color: #ff9a8a;
+}
+
+.nv-contact-meta {
+  display: grid;
+  gap: 22px;
+  margin-top: clamp(22px, 3.5vh, 36px);
+}
+
+.nv-contact-meta div {
+  padding-top: 16px;
+  border-top: 1px solid var(--nv-line-soft);
+}
+
+.nv-contact-meta dt {
+  font-size: 11px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--nv-strip);
+}
+
+.nv-contact-meta dd {
+  margin: 8px 0 0;
+  font-size: clamp(16px, 1.4vw, 21px);
+  color: var(--nv-ink);
+}
+
+/* ============================================================
+   13 · ТҮГЭЭМЭЛ АСУУЛТ
+   ============================================================ */
+
+.nv-faq {
+  margin-top: clamp(24px, 4vh, 44px);
+  border-top: 1px solid var(--nv-line-soft);
+}
+
+.nv-faq-item {
+  border-bottom: 1px solid var(--nv-line-soft);
+}
+
+.nv-faq-q {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding-block: clamp(16px, 2.4vh, 26px);
+  border: 0;
+  background: none;
+  color: var(--nv-ink);
+  font: inherit;
+  font-size: clamp(16px, 1.5vw, 22px);
+  text-align: left;
+  cursor: pointer;
+  transition: color 0.3s var(--nv-ease);
+}
+
+.nv-faq-q:hover {
+  color: var(--nv-accent);
+}
+
+.nv-faq-q i {
+  position: relative;
+  flex: none;
+  width: 14px;
+  height: 14px;
+}
+
+.nv-faq-q i::before,
+.nv-faq-q i::after {
+  content: "";
+  position: absolute;
+  inset: 50% 0 auto;
+  height: 1px;
+  background-color: currentColor;
+  transition: transform 0.42s var(--nv-ease);
+}
+
+.nv-faq-q i::after {
+  transform: rotate(90deg);
+}
+
+.nv-faq-item.is-open .nv-faq-q i::after {
+  transform: rotate(0deg);
+}
+
+.nv-faq-a {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.5s var(--nv-ease);
+}
+
+.nv-faq-a p {
+  margin: 0;
+  padding: 0 0 clamp(18px, 2.6vh, 28px);
+  max-width: 76ch;
+  font-size: clamp(14px, 1vw, 16.5px);
+  line-height: 1.7;
+  color: var(--nv-muted);
+}
+
+/* ============================================================
+   14 · ХӨЛ ХЭСЭГ
+   ============================================================ */
+
+.nv-footer {
+  padding-block: clamp(56px, 8vh, 104px) calc(28px + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--nv-line-soft);
+  background-color: color-mix(in srgb, var(--nv-deep) 46%, transparent);
+}
+
+.nv-footer-mark {
+  display: block;
+  width: min(100%, 520px);
+  color: color-mix(in srgb, var(--nv-ink) 88%, transparent);
+}
+
+.nv-cols {
+  display: grid;
+  gap: clamp(26px, 4vw, 56px);
+  margin-top: clamp(34px, 5vh, 64px);
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (min-width: 760px) {
+  .nv-cols {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.nv-cols h4 {
+  margin: 0 0 14px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--nv-accent);
+}
+
+.nv-cols ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.nv-cols li {
+  padding-block: 6px;
+  font-size: 14.5px;
+  color: var(--nv-muted);
+}
+
+.nv-cols a:hover {
+  color: var(--nv-ink);
+}
+
+.nv-foot-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: clamp(32px, 5vh, 60px);
+  padding-top: 22px;
+  border-top: 1px solid var(--nv-line-soft);
+  font-size: 12.5px;
+  color: var(--nv-strip);
+}
+
+/* ============================================================
+   15 · БОСОО / ГАР УТАС — макетын дагуу урсгал байрлал руу
+   ============================================================ */
+
+@media (max-aspect-ratio: 11/10) {
+  .noir-page {
+    --m: min(calc(100vw / 430), 1.34px);
+    --u: var(--m);
+    --h: var(--m);
+    --nv-gut: clamp(18px, 5.6vw, 30px);
+  }
+
+  .nv-stage {
+    height: auto;
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    padding-top: calc(112 * var(--m));
+    padding-bottom: calc(30px + env(safe-area-inset-bottom));
+  }
+
+  .nv-plate-video,
+  .nv-plate-poster {
+    inset: 0;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    transform: none;
+    object-position: 43% center;
+  }
+
+  .nv-plate::after {
+    background:
+      linear-gradient(
+        to right,
+        color-mix(in srgb, var(--nv-void) 86%, transparent) 0%,
+        color-mix(in srgb, var(--nv-void) 66%, transparent) 42%,
+        color-mix(in srgb, var(--nv-void) 20%, transparent) 78%,
+        color-mix(in srgb, var(--nv-void) 10%, transparent) 100%
+      ),
+      linear-gradient(
+        to bottom,
+        color-mix(in srgb, var(--nv-void) 72%, transparent) 0%,
+        color-mix(in srgb, var(--nv-void) 34%, transparent) 24%,
+        color-mix(in srgb, var(--nv-void) 34%, transparent) 56%,
+        color-mix(in srgb, var(--nv-void) 80%, transparent) 82%,
+        color-mix(in srgb, var(--nv-void) 97%, transparent) 94%,
+        var(--nv-void) 100%
+      );
+  }
+
+  .nv-hero {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: calc(18 * var(--m));
+    height: auto;
+    padding: 0 var(--nv-gut);
+  }
+
+  .nv-copy,
+  .nv-logos {
+    position: static;
+    left: auto;
+    top: auto;
+    transform: none;
+    width: auto;
+  }
+
+  .nv-headline {
+    font-size: calc(52 * var(--m));
+    line-height: calc(56 * var(--m));
+    white-space: normal;
+  }
+
+  .nv-headline span {
+    display: block;
+  }
+
+  .nv-sub {
+    max-width: 40ch;
+    font-size: calc(16.5 * var(--m));
+    line-height: calc(24 * var(--m));
+  }
+
+  .nv-actions {
+    flex-wrap: wrap;
+    gap: calc(16 * var(--m));
+    margin-top: calc(6 * var(--m));
+  }
+
+  .nv-pill-cta {
+    min-width: 0;
+    height: calc(52 * var(--m));
+    padding-inline: calc(28 * var(--m));
+    font-size: calc(16 * var(--m));
+  }
+
+  .nv-ghost {
+    font-size: calc(16 * var(--m));
+  }
+
+  .nv-logos {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: calc(14 * var(--m));
+    margin-top: calc(26 * var(--m));
+    padding-top: calc(20 * var(--m));
+    border-top: 1px solid var(--nv-line-soft);
+  }
+
+  .nv-lg {
+    font-size: calc(15 * var(--m));
+  }
+
+  .nv-lg-mark {
+    width: calc(24 * var(--m));
+    height: calc(24 * var(--m));
+  }
+
+  .nv-lg-meta {
+    display: none;
+  }
+
+  .nv-links,
+  .nv-pill-nav,
+  .nv-scroll {
+    display: none;
+  }
+
+  .nv-burger {
+    display: flex;
+  }
+
+  .nv-topbar {
+    height: calc(103 * var(--m));
+  }
+
+  .nv-topbar.is-stuck {
+    height: calc(88 * var(--m));
+  }
+
+  .nv-brand {
+    width: calc(38 * var(--m));
+    height: calc(39 * var(--m));
+    top: calc(32 * var(--m));
+  }
+
+  .nv-burger {
+    top: calc(30 * var(--m));
+    width: calc(46 * var(--m));
+    height: calc(46 * var(--m));
+  }
+}
+
+/* Таблет — босоо ч гэсэн арай уужим. */
+@media (min-width: 600px) and (max-aspect-ratio: 11/10) {
+  .noir-page {
+    --m: min(calc(100vw / 860), calc(100vh / 760), 1.25px);
+  }
+
+  .nv-plate-video,
+  .nv-plate-poster {
+    object-position: 44% center;
+  }
+
+  .nv-plate::after {
+    background:
+      linear-gradient(
+        to right,
+        color-mix(in srgb, var(--nv-void) 84%, transparent) 0%,
+        color-mix(in srgb, var(--nv-void) 60%, transparent) 42%,
+        color-mix(in srgb, var(--nv-void) 16%, transparent) 78%,
+        color-mix(in srgb, var(--nv-void) 6%, transparent) 100%
+      ),
+      linear-gradient(
+        to bottom,
+        color-mix(in srgb, var(--nv-void) 66%, transparent) 0%,
+        color-mix(in srgb, var(--nv-void) 28%, transparent) 24%,
+        color-mix(in srgb, var(--nv-void) 30%, transparent) 56%,
+        color-mix(in srgb, var(--nv-void) 78%, transparent) 82%,
+        color-mix(in srgb, var(--nv-void) 96%, transparent) 94%,
+        var(--nv-void) 100%
+      );
+  }
+
+  .nv-headline {
+    font-size: calc(64 * var(--m));
+    line-height: calc(70 * var(--m));
+  }
+
+  .nv-headline span {
+    display: block;
+  }
+
+  .nv-logos {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* ============================================================
+   16 · НЭВТРЭХ АНИМЭЙШН (хөдөлгөөн зөвшөөрсөн үед)
+   ============================================================ */
+
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes nv-rise {
+    from {
+      opacity: 0;
+      transform: translateY(calc(14 * var(--u)));
+    }
+  }
+
+  @keyframes nv-rise-nav {
+    from {
+      opacity: 0;
+      transform: translate(-50%, calc(-50% + 14 * var(--u)));
+    }
+    to {
+      opacity: 1;
+      transform: translate(-50%, -50%);
+    }
+  }
+
+  @keyframes nv-fade-in {
+    from {
+      opacity: 0;
+    }
+  }
+
+  .nv-brand,
+  .nv-pill-nav,
+  .nv-burger {
+    animation: nv-rise 0.8s var(--nv-ease) both;
+  }
+
+  .nv-links {
+    animation: nv-rise-nav 0.8s var(--nv-ease) both;
+  }
+
+  .nv-headline {
+    animation: nv-rise 0.9s var(--nv-ease) 0.06s both;
+  }
+
+  .nv-sub {
+    animation: nv-rise 0.9s var(--nv-ease) 0.14s both;
+  }
+
+  .nv-actions {
+    animation: nv-rise 0.9s var(--nv-ease) 0.22s both;
+  }
+
+  .nv-logos {
+    animation: nv-fade-in 1.1s var(--nv-ease) 0.34s both;
+  }
+
+  .nv-scroll {
+    animation: nv-fade-in 1.2s var(--nv-ease) 0.5s both;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .noir-page *,
+  .noir-page *::before,
+  .noir-page *::after {
+    animation-duration: 0.001s !important;
+    transition-duration: 0.001s !important;
+  }
+
+  [data-rise] {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+</style>
+</head>
+<body>
+
+  <div class="noir-page">
+    <header class="nv-topbar">
+      <a class="nv-brand" href="#top" aria-label="Elysium Residence"><svg viewBox="696.5 -1 29 30" fill="currentColor" role="img" aria-label="Elysium"><g>
+<path d="M724.7627131503,1.6928812257l-1.5571644463-1.5571639374c-.1809564854-.1809564263-.4743448685-.1809563783-.6553012947.0000001071l-10.9339166573,10.9339202305c-.0868983404.0868983688-.1357173084.2047578379-.1357172883.3276506695l.0000002984,1.8262380573c.0000000201.1228928316.0488190266.2407522848.1357173954.3276506252l1.5571644463,1.5571639374c.1809564854.1809564262.4743448685.1809563783.6553012947-.0000001071l10.9339166573-10.9339202304c.0868983404-.0868983688.1357173084-.2047578379.1357172883-.3276506695l-.0000002984-1.8262380573c-.0000000201-.1228928316-.0488190266-.2407522848-.1357173954-.3276506252Z"/>
+<path d="M724.7627131503,11.0526964505l-1.5571644463-1.5571639374c-.1809564854-.1809564262-.4743448685-.1809563783-.6553012947.0000001071l-10.9339166573,10.9339202304c-.0868983404.0868983688-.1357173084.2047578379-.1357172883.3276506695l.0000002984,1.8262380573c.0000000201.1228928316.0488190266.2407522848.1357173954.3276506252l1.5571644463,1.5571639374c.1809564854.1809564262.4743448685.1809563783.6553012947-.0000001071l10.9339166573-10.9339202304c.0868983404-.0868983688.1357173084-.2047578379.1357172883-.3276506695l-.0000002984-1.8262380573c-.0000000201-.1228928316-.0488190266-.2407522848-.1357173954-.3276506252Z"/>
+<path d="M710.6956105802,15.7571507035l-1.5571644462-1.5571639374c-.1809564854-.1809564262-.4743448685-.1809563783-.6553012947.0000001071l-10.9339166573,10.9339202304c-.0868983404.0868983688-.1357173084.2047578379-.1357172883.3276506695l.0000002984,1.8262380573c.0000000201.1228928316.0488190266.2407522848.1357173954.3276506252l1.5571644463,1.5571639374c.1809564854.1809564263.4743448685.1809563783.6553012947-.0000001071l10.9339166573-10.9339202305c.0868983404-.0868983688.1357173084-.2047578379.1357172883-.3276506695l-.0000002984-1.8262380573c-.0000000201-.1228928316-.0488190266-.2407522848-.1357173954-.3276506252Z"/>
+<path d="M710.6956105802,6.3674608853l-1.5571644462-1.5571639374c-.1809564854-.1809564262-.4743448685-.1809563783-.6553012947.0000001071l-10.9339166573,10.9339202304c-.0868983404.0868983688-.1357173084.2047578379-.1357172883.3276506695l.0000002984,1.8262380573c.0000000201.1228928316.0488190266.2407522848.1357173954.3276506252l1.5571644463,1.5571639374c.1809564854.1809564262.4743448685.1809563783.6553012947-.0000001071l10.9339166573-10.9339202304c.0868983404-.0868983688.1357173084-.2047578379.1357172883-.3276506695l-.0000002984-1.8262380573c-.0000000201-.1228928316-.0488190266-.2407522848-.1357173954-.3276506252Z"/>
+</g></svg></a>
+      <nav class="nv-links" aria-label="Үндсэн цэс">
+        <a href="#about">Төслийн тухай</a>
+        <a href="#elys">Давуу тал</a>
+        <a href="#apartments">Өрөөний сонголт</a>
+        <a href="#developer">Төсөл хэрэгжүүлэгч</a>
+        <a href="#location">Байршил</a>
+        <a href="#faq">FAQ</a>
+      </nav>
+      <a class="nv-pill nv-pill-nav" href="#contact"><span>Уулзалт товлох</span></a>
+      <button type="button" class="nv-burger" id="burger" aria-expanded="false" aria-controls="menu" aria-label="Цэс"><i></i><i></i></button>
+    </header>
+
+    <nav class="nv-menu" id="menu" aria-label="Цэс" aria-hidden="true">
+      <div class="nv-menu-inner">
+        <p class="nv-menu-eyebrow">Цэс</p>
+        <ul class="nv-menu-list">
+          <li><a href="#about">Төслийн тухай</a></li>
+          <li><a href="#elys">Давуу тал</a></li>
+          <li><a href="#apartments">Өрөөний сонголт</a></li>
+          <li><a href="#developer">Төсөл хэрэгжүүлэгч</a></li>
+          <li><a href="#location">Байршил</a></li>
+          <li><a href="#faq">FAQ</a></li>
+        </ul>
+        <div class="nv-menu-foot">
+          <a class="nv-pill" href="#contact"><span>Уулзалт товлох</span></a>
+          <a class="nv-ghost" href="../../public/brochure.pdf" target="_blank" rel="noopener">Танилцуулга татах</a>
+        </div>
+      </div>
+    </nav>
+
+    <main>
+      <section id="top" class="nv-stage" data-tone="dark">
+        <div class="nv-plate">
+          <video class="nv-plate-video" autoplay muted loop playsinline preload="auto" poster="../../public/hero-video-frames/frame_132.webp" aria-hidden="true">
+            <source src="../../public/video/hero-source.mp4" type="video/mp4">
+          </video>
+        </div>
+        <div class="nv-hero">
+          <div class="nv-copy">
+            <h1 class="nv-headline"><span>Elysium</span><span>Residence</span></h1>
+            <p class="nv-sub">Туул голын салхи илбэсэн бүсэд байршилтай, архитектур болон инженерингийн эргономик шийдэлтэй орон сууц.</p>
+            <div class="nv-actions">
+              <a class="nv-pill nv-pill-cta" href="#contact"><span>Уулзалт товлох</span></a>
+              <a class="nv-ghost" href="../../public/brochure.pdf" target="_blank" rel="noopener">Танилцуулга татах</a>
+            </div>
+          </div>
+          <div class="nv-logos" aria-label="Түншлэгч үйлдвэрлэгчид">
+            <span class="nv-lg">E.C.A.<i class="nv-lg-meta">Турк</i></span>
+            <span class="nv-lg">Legrand<i class="nv-lg-meta">Франц</i></span>
+            <span class="nv-lg">Egger<i class="nv-lg-meta">Герман</i></span>
+            <span class="nv-lg">LX Hausys<i class="nv-lg-meta">Солонгос</i></span>
+          </div>
+          <span class="nv-scroll" aria-hidden="true"><i></i></span>
+        </div>
+      </section>
+
+      <section id="about" class="nv-sec" data-tone="dark"><div class="nv-wrap">
+        
+      <div class="nv-head nv-head--split">
+        <div>
+          <p class="nv-chapter">01 · Ерөнхий төлөвлөлт</p>
+          <h2 class="nv-h2" data-rise>Form Follows Function</h2>
+        </div>
+        <p class="nv-lead" data-rise style="--d:.08s">Туул голын салхи илбэсэн бүсэд байршилтай, архитектур болон инженерингийн эргономик шийдэлтэй орон сууц.</p>
+      </div>
+        <div class="nv-stats">
+          <div class="nv-stat" data-rise style="--d:0.00s">
+            <b><span data-count="506">0</span></b>
+            <span>айлын орон сууц · 4 блок</span>
+          </div>
+          <div class="nv-stat" data-rise style="--d:0.06s">
+            <b><span data-count="85">0</span><i>%</i></b>
+            <span>нийтийн эзэмшлийн талбай — ногоон байгууламж, орон зай</span>
+          </div>
+          <div class="nv-stat" data-rise style="--d:0.12s">
+            <b><span data-count="513">0</span></b>
+            <span>автомашины зогсоол</span>
+          </div>
+          <div class="nv-stat" data-rise style="--d:0.18s">
+            <b>2027 · II</b>
+            <span>улиралд ашиглалтад орно</span>
+          </div>
+        </div>
+      </div></section>
+
+      <section id="elys" class="nv-sec" data-tone="dark"><div class="nv-wrap">
+        
+      <div class="nv-head nv-head--split">
+        <div>
+          <p class="nv-chapter">02 · Агшин бүрд мэдрэх тав тух</p>
+          <h2 class="nv-h2" data-rise>Төслийн консепц — ELYS</h2>
+        </div>
+        <p class="nv-lead" data-rise style="--d:.08s">Эргономик төлөвлөлт, ногоон орчин, аюулгүй байдал, эрчим хүчний хэмнэлт — дөрвөн зарчмын эхний үсэг ELYS нэрийг бүрдүүлнэ.</p>
+      </div>
+        <div class="nv-panels" data-rise style="--d:.12s">
+          <button type="button" class="nv-panel is-active" data-panel aria-expanded="true">
+            <img src="../../public/images/elys/ergonomic-interior.jpg" alt="" aria-hidden="true">
+            <span class="nv-panel-letter">E</span>
+            <h3 class="nv-h3">Ergonomic Standards</h3>
+            <p class="nv-panel-body">Эрүүл амьдрахад тань зориулж, хүний бүх хэрэгцээг тооцоолон гаргасан эргономик шийдэлтэй тул тав тухтай амьдрах боломжтой.</p>
+          </button>
+          <button type="button" class="nv-panel" data-panel aria-expanded="false">
+            <img src="../../public/images/elys/harmony-courtyard.jpg" alt="" aria-hidden="true">
+            <span class="nv-panel-letter">L</span>
+            <h3 class="nv-h3">Live in Harmony</h3>
+            <p class="nv-panel-body">Эрүүл зөв амьдралын хэв маягт хөтлөх нийтийн эзэмшлийн ногоон байгууламж талбайг төлөвлөсөн.</p>
+          </button>
+          <button type="button" class="nv-panel" data-panel aria-expanded="false">
+            <img src="../../public/images/elys/safety-control-room.jpg" alt="" aria-hidden="true">
+            <span class="nv-panel-letter">Y</span>
+            <h3 class="nv-h3">Your Safety</h3>
+            <p class="nv-panel-body">Аюулгүй байдал тав тухыг хангасан орчин үеийн нэвтрэлтийн нэгдсэн системийг цогцоор нь төлөвлөсөн.</p>
+          </button>
+          <button type="button" class="nv-panel" data-panel aria-expanded="false">
+            <img src="../../public/images/elys/efficiency-tower-crown.jpg" alt="" aria-hidden="true">
+            <span class="nv-panel-letter">S</span>
+            <h3 class="nv-h3">Save Big</h3>
+            <p class="nv-panel-body">Дулаан алдагдал багатай, эрчим хүчний хэмнэлттэй шийдэл нь урт хугацаандаа таны ашиглалтын зардлыг бууруулна.</p>
+          </button>
+        </div>
+      </div></section>
+
+      <section id="equip" class="nv-sec" data-tone="dark"><div class="nv-wrap">
+        
+      <div class="nv-head nv-head--split">
+        <div>
+          <p class="nv-chapter">03 · Дэлгэрэнгүйд нухацтай</p>
+          <h2 class="nv-h2" data-rise>Барилгын бүтэц</h2>
+        </div>
+        <p class="nv-lead" data-rise style="--d:.08s">Каркасаас фасад хүртэл ашигласан үндсэн материал, тоноглол бүр нь урт хугацааны тав тух, эрчим хүчний хэмнэлтэд ажиллана.</p>
+      </div>
+        <div style="margin-top:clamp(26px,4vh,52px)">
+          <article class="nv-row" data-rise style="--d:0.00s">
+            <div>
+              <span class="nv-row-index">01</span>
+              <h3 class="nv-h3">Бүрэн цутгамал хийцлэл</h3>
+              <p class="nv-row-body">Газар хөдлөлтийн 8 баллд тэсвэртэй, айл хоорондын дуу тусгаарлалт сайтай бүрэн цутгамал хийцлэл.</p>
+              
+            </div>
+            <div class="nv-row-media">
+              <video data-clip muted loop playsinline preload="none" poster="../../public/structure-frames/frame_040.webp" aria-hidden="true"><source src="../../public/video/structure-frame.mp4" type="video/mp4"></video>
+            </div>
+          </article>
+          <article class="nv-row" data-rise style="--d:0.05s">
+            <div>
+              <span class="nv-row-index">02</span>
+              <h3 class="nv-h3">Veka Softline</h3>
+              <p class="nv-row-body">E-Low түрхлэгтэй, гурван давхар шилтэй вакум цонх нь гэрт буй дулааныг гадагшлуулахгүй байхаас гадна хэт халалтаас хамгаална.</p>
+              <a class="nv-ghost" href="https://www.veka.de/window-fabricators/products-services/front-doors/softline-82/" target="_blank" rel="noopener noreferrer" style="margin-top:18px;font-size:13.5px">Үйлдвэрлэгчийн хуудас</a>
+            </div>
+            <div class="nv-row-media">
+              <video data-clip muted loop playsinline preload="none" poster="../../public/structure-frames/frame_075.webp" aria-hidden="true"><source src="../../public/video/structure-windows.mp4" type="video/mp4"></video>
+            </div>
+          </article>
+          <article class="nv-row" data-rise style="--d:0.10s">
+            <div>
+              <span class="nv-row-index">03</span>
+              <h3 class="nv-h3">Yaret aluminum composite panels</h3>
+              <p class="nv-row-body">Гурван давхар дулаалга бүхий гал дэмжихгүй метал фасад.</p>
+              <a class="nv-ghost" href="https://www.yaretacp.com/" target="_blank" rel="noopener noreferrer" style="margin-top:18px;font-size:13.5px">Үйлдвэрлэгчийн хуудас</a>
+            </div>
+            <div class="nv-row-media">
+              <video data-clip muted loop playsinline preload="none" poster="../../public/structure-frames/frame_119.webp" aria-hidden="true"><source src="../../public/video/structure-facade.mp4" type="video/mp4"></video>
+            </div>
+          </article>
+        </div>
+      </div></section>
+
+      <section id="apartments" class="nv-sec" data-tone="dark"><div class="nv-wrap">
+        
+      <div class="nv-head nv-head--split">
+        <div>
+          <p class="nv-chapter">Өрөөний сонголт</p>
+          <h2 class="nv-h2" data-rise>Танд тохирох орон зай</h2>
+        </div>
+        <p class="nv-lead" data-rise style="--d:.08s">Уужим, ашигтай, минимал орон сууцны сонголтоос та өөрт тохирохыг сонгоорой.</p>
+      </div>
+        <div class="nv-tabs" data-rise>
+          <button type="button" class="nv-tab is-on" data-block="">Бүх тип</button>
+          <button type="button" class="nv-tab" data-block="B1">B1</button>
+          <button type="button" class="nv-tab" data-block="B2">B2</button>
+        </div>
+        <div class="nv-units">
+          <button type="button" class="nv-unit" data-rise data-unit-block="B1"
+            data-views="../../public/images/axono/a-01.jpg|../../public/images/axono/a-02.jpg"
+            data-thumb="../../public/images/axono/a-01-sm.jpg" data-caption="A тип · 3 өрөө · 84.66 м²">
+            <span class="nv-unit-no">01</span>
+            <span class="nv-unit-name">A тип</span>
+            <span class="nv-unit-meta">3 өрөө · 84.66 м² · B1</span>
+            <span class="nv-unit-cta">2 өнцөг ↗</span>
+          </button>
+          <button type="button" class="nv-unit" data-rise data-unit-block="B1"
+            data-views="../../public/images/axono/b-01.jpg|../../public/images/axono/b-02.jpg"
+            data-thumb="../../public/images/axono/b-01-sm.jpg" data-caption="B тип · 4 өрөө · 133.61 м²">
+            <span class="nv-unit-no">02</span>
+            <span class="nv-unit-name">B тип</span>
+            <span class="nv-unit-meta">4 өрөө · 133.61 м² · B1</span>
+            <span class="nv-unit-cta">2 өнцөг ↗</span>
+          </button>
+          <button type="button" class="nv-unit" data-rise data-unit-block="B1"
+            data-views="../../public/images/axono/c-01.jpg|../../public/images/axono/c-02.jpg"
+            data-thumb="../../public/images/axono/c-01-sm.jpg" data-caption="C тип · 3 өрөө · 80.32 м²">
+            <span class="nv-unit-no">03</span>
+            <span class="nv-unit-name">C тип</span>
+            <span class="nv-unit-meta">3 өрөө · 80.32 м² · B1</span>
+            <span class="nv-unit-cta">2 өнцөг ↗</span>
+          </button>
+          <button type="button" class="nv-unit" data-rise data-unit-block="B1"
+            data-views="../../public/images/axono/d-01.jpg|../../public/images/axono/d-02.jpg"
+            data-thumb="../../public/images/axono/d-01-sm.jpg" data-caption="D тип · 2 өрөө · 51.72 м²">
+            <span class="nv-unit-no">04</span>
+            <span class="nv-unit-name">D тип</span>
+            <span class="nv-unit-meta">2 өрөө · 51.72 м² · B1</span>
+            <span class="nv-unit-cta">2 өнцөг ↗</span>
+          </button>
+          <button type="button" class="nv-unit" data-rise data-unit-block="B1"
+            data-views="../../public/images/axono/d2f-01.jpg|../../public/images/axono/d2f-02.jpg"
+            data-thumb="../../public/images/axono/d2f-01-sm.jpg" data-caption="D тип · 2 давхар · 2 өрөө · 49.19 м²">
+            <span class="nv-unit-no">05</span>
+            <span class="nv-unit-name">D тип · 2 давхар</span>
+            <span class="nv-unit-meta">2 өрөө · 49.19 м² · B1</span>
+            <span class="nv-unit-cta">2 өнцөг ↗</span>
+          </button>
+          <button type="button" class="nv-unit" data-rise data-unit-block="B2"
+            data-views="../../public/images/axono/e-01.jpg|../../public/images/axono/e-02.jpg"
+            data-thumb="../../public/images/axono/e-01-sm.jpg" data-caption="E тип · 3 өрөө · 89.73 м²">
+            <span class="nv-unit-no">06</span>
+            <span class="nv-unit-name">E тип</span>
+            <span class="nv-unit-meta">3 өрөө · 89.73 м² · B2</span>
+            <span class="nv-unit-cta">2 өнцөг ↗</span>
+          </button>
+          <button type="button" class="nv-unit" data-rise data-unit-block="B2"
+            data-views="../../public/images/axono/e2f-01.jpg|../../public/images/axono/e2f-02.jpg"
+            data-thumb="../../public/images/axono/e2f-01-sm.jpg" data-caption="E тип · 2 давхар · 2 өрөө · 64.16 м²">
+            <span class="nv-unit-no">07</span>
+            <span class="nv-unit-name">E тип · 2 давхар</span>
+            <span class="nv-unit-meta">2 өрөө · 64.16 м² · B2</span>
+            <span class="nv-unit-cta">2 өнцөг ↗</span>
+          </button>
+        </div>
+        <div class="nv-cta-row">
+          <div>
+            <p class="nv-chapter">Аксонометр зураг</p>
+            <h3 class="nv-h3">Төлөвлөгөөгөө менежертэй хамт сонгоорой</h3>
+          </div>
+          <a class="nv-pill" href="#contact"><span>Уулзалт товлох</span></a>
+        </div>
+      </div></section>
+
+      <section id="gallery" class="nv-sec" data-tone="dark"><div class="nv-wrap">
+        <p class="nv-chapter">Зургийн цомог</p>
+        <h2 class="nv-h2" data-rise>Elysium-ийн дүр төрх</h2>
+        <div class="nv-grid">
+          <button type="button" class="nv-shot" data-rise style="--d:0.00s" data-shot="../../public/images/interior/living-01.jpg" data-caption="Зочны өрөө" aria-label="Зочны өрөө">
+            <img src="../../public/images/interior/living-01.jpg" alt="Зочны өрөө" loading="lazy"><span>Зочны өрөө</span>
+          </button>
+          <button type="button" class="nv-shot" data-rise style="--d:0.04s" data-shot="../../public/images/interior/bedroom-01.jpg" data-caption="Унтлагын өрөө" aria-label="Унтлагын өрөө">
+            <img src="../../public/images/interior/bedroom-01.jpg" alt="Унтлагын өрөө" loading="lazy"><span>Унтлагын өрөө</span>
+          </button>
+          <button type="button" class="nv-shot" data-rise style="--d:0.08s" data-shot="../../public/images/interior/living-02.jpg" data-caption="Зочны өрөө" aria-label="Зочны өрөө">
+            <img src="../../public/images/interior/living-02.jpg" alt="Зочны өрөө" loading="lazy"><span>Зочны өрөө</span>
+          </button>
+          <button type="button" class="nv-shot" data-rise style="--d:0.12s" data-shot="../../public/images/interior/bath-01.jpg" data-caption="Угаалгын өрөө" aria-label="Угаалгын өрөө">
+            <img src="../../public/images/interior/bath-01.jpg" alt="Угаалгын өрөө" loading="lazy"><span>Угаалгын өрөө</span>
+          </button>
+          <button type="button" class="nv-shot" data-rise style="--d:0.16s" data-shot="../../public/images/interior/living-03.jpg" data-caption="Зочны өрөө" aria-label="Зочны өрөө">
+            <img src="../../public/images/interior/living-03.jpg" alt="Зочны өрөө" loading="lazy"><span>Зочны өрөө</span>
+          </button>
+          <button type="button" class="nv-shot" data-rise style="--d:0.20s" data-shot="../../public/images/interior/bedroom-02.jpg" data-caption="Унтлагын өрөө" aria-label="Унтлагын өрөө">
+            <img src="../../public/images/interior/bedroom-02.jpg" alt="Унтлагын өрөө" loading="lazy"><span>Унтлагын өрөө</span>
+          </button>
+          <button type="button" class="nv-shot" data-rise style="--d:0.24s" data-shot="../../public/images/interior/living-04.jpg" data-caption="Зочны өрөө" aria-label="Зочны өрөө">
+            <img src="../../public/images/interior/living-04.jpg" alt="Зочны өрөө" loading="lazy"><span>Зочны өрөө</span>
+          </button>
+          <button type="button" class="nv-shot" data-rise style="--d:0.28s" data-shot="../../public/images/interior/bedroom-03.jpg" data-caption="Унтлагын өрөө" aria-label="Унтлагын өрөө">
+            <img src="../../public/images/interior/bedroom-03.jpg" alt="Унтлагын өрөө" loading="lazy"><span>Унтлагын өрөө</span>
+          </button>
+          <button type="button" class="nv-shot" data-rise style="--d:0.32s" data-shot="../../public/images/interior/living-05.jpg" data-caption="Зочны өрөө" aria-label="Зочны өрөө">
+            <img src="../../public/images/interior/living-05.jpg" alt="Зочны өрөө" loading="lazy"><span>Зочны өрөө</span>
+          </button>
+          <button type="button" class="nv-shot" data-rise style="--d:0.32s" data-shot="../../public/images/interior/bath-02.jpg" data-caption="Угаалгын өрөө" aria-label="Угаалгын өрөө">
+            <img src="../../public/images/interior/bath-02.jpg" alt="Угаалгын өрөө" loading="lazy"><span>Угаалгын өрөө</span>
+          </button>
+          <button type="button" class="nv-shot" data-rise style="--d:0.32s" data-shot="../../public/images/interior/living-06.jpg" data-caption="Зочны өрөө" aria-label="Зочны өрөө">
+            <img src="../../public/images/interior/living-06.jpg" alt="Зочны өрөө" loading="lazy"><span>Зочны өрөө</span>
+          </button>
+          <button type="button" class="nv-shot" data-rise style="--d:0.32s" data-shot="../../public/images/interior/bedroom-04.jpg" data-caption="Унтлагын өрөө" aria-label="Унтлагын өрөө">
+            <img src="../../public/images/interior/bedroom-04.jpg" alt="Унтлагын өрөө" loading="lazy"><span>Унтлагын өрөө</span>
+          </button>
+        </div>
+      </div></section>
+
+      <section id="developer" class="nv-sec" data-tone="dark"><div class="nv-wrap">
+        
+      <div class="nv-head nv-head--split">
+        <div>
+          <p class="nv-chapter">Төсөл хэрэгжүүлэгч</p>
+          <h2 class="nv-h2" data-rise>Монкон Констракшн ХХК</h2>
+        </div>
+        <p class="nv-lead" data-rise style="--d:.08s">Монкон Констракшн ХХК нь 2006 оноос хойш захиалагч, хэрэглэгчдэдээ барилгын зураг төслөөс эхлээд түлхүүр гардуулах хүртэлх барилгын цогц үйлчилгээг хүргэхдээ архитектурын шинэлэг шийдлийг нэвтрүүлж, барилга угсралтын чанараа тогтмол сайжруулсаар ирсэн.</p>
+      </div>
+        <div class="nv-stats" style="margin-top:clamp(28px,4vh,52px)">
+          <div class="nv-stat" data-rise><b>2006</b><span>оноос</span></div>
+          <div class="nv-stat" data-rise style="--d:.06s"><b>60+</b><span>төсөл</span></div>
+        </div>
+        <div class="nv-rail" data-rise style="--d:.1s">
+          <article class="nv-slide">
+            <div class="nv-slide-media"><img src="../../public/images/projects/comfort.jpg" alt="Комфорт хотхон" loading="lazy"><span class="nv-slide-years">2014–2019</span></div>
+            <h4>Комфорт хотхон</h4><p>15 давхар · 600 айл</p>
+          </article>
+          <article class="nv-slide">
+            <div class="nv-slide-media"><img src="../../public/images/projects/mandala-khotkhon.jpg" alt="Мандала хотхон" loading="lazy"><span class="nv-slide-years">2015–2019</span></div>
+            <h4>Мандала хотхон</h4><p>18 давхар · 510 айл</p>
+          </article>
+          <article class="nv-slide">
+            <div class="nv-slide-media"><img src="../../public/images/projects/mandala-garden.jpg" alt="Мандала гарден" loading="lazy"><span class="nv-slide-years">2019–2030</span></div>
+            <h4>Мандала гарден</h4><p>16 давхар · 2500 айл</p>
+          </article>
+          <article class="nv-slide">
+            <div class="nv-slide-media"><img src="../../public/images/projects/mandala-tower-360.jpg" alt="360, 365 Мандала Тауэр" loading="lazy"><span class="nv-slide-years">2018–2025</span></div>
+            <h4>360, 365 Мандала Тауэр</h4><p>25 давхар · 200 айл</p>
+          </article>
+        </div>
+        <p class="nv-note">Гүйлгэж үргэлжлүүлэх →</p>
+      </div></section>
+
+      <section id="location" class="nv-sec" data-tone="dark"><div class="nv-wrap">
+        <div class="nv-head nv-head--split">
+          <div>
+            <p class="nv-chapter">Байршил</p>
+            <h2 class="nv-h2" data-rise data-loc-title>Хотын төвд, байгалийн хажууд</h2>
+          </div>
+          <div data-rise style="--d:.08s">
+            <p class="nv-lead">
+              <b style="display:block;font-weight:400;color:var(--nv-strip);font-size:11px;letter-spacing:.24em;text-transform:uppercase;margin-bottom:8px">Хаяг</b>
+              <span data-loc-address>Үндэсний цэцэрлэгт хүрээлэнгийн баруун хойно, Улаанбаатар</span>
+            </p>
+            <a class="nv-ghost" data-loc-dir href="https://www.google.com/maps/dir/?api=1&amp;destination=47.89733862835647%2C106.88538756153864" target="_blank" rel="noopener noreferrer" style="margin-top:18px;font-size:14px">Чиглэл авах ↗</a>
+          </div>
+        </div>
+        <div class="nv-tabs">
+          <button type="button" class="nv-tab is-on" data-loc="47.89733862835647,106.88538756153864" data-loc-name="Хотын төвд, байгалийн хажууд" data-loc-addr="Үндэсний цэцэрлэгт хүрээлэнгийн баруун хойно, Улаанбаатар">Төслийн байршил</button>
+          <button type="button" class="nv-tab" data-loc="47.90146685024925,106.93241183285195" data-loc-name="Биечлэн ирж танилцаарай" data-loc-addr="Үндэсний цэцэрлэгт хүрээлэнгийн баруун хойно, 360 Мандала тауэр">Борлуулалтын оффис</button>
+        </div>
+        <div class="nv-map" data-rise>
+          <iframe id="map" src="https://www.google.com/maps?q=47.89733862835647%2C106.88538756153864&amp;z=16&amp;output=embed" title="Хотын төвд, байгалийн хажууд" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
+        </div>
+        <div class="nv-nearby">
+          <div data-rise style="--d:0.00s">
+            <h4>Боловсрол</h4>
+            <ul><li><b>Номин Кидс</b><span>Цэцэрлэг · 450м</span></li><li><b>Оном сургууль</b><span>Сургууль · 600м</span></li><li><b>18-р сургууль</b><span>Сургууль · 1000м</span></li><li><b>Орхон Хасу</b><span>Сургууль · 1200м</span></li></ul>
+          </div>
+          <div data-rise style="--d:0.05s">
+            <h4>Худалдаа, үйлчилгээ</h4>
+            <ul><li><b>Поларис их дэлгүүр</b><span>550м</span></li><li><b>Номин Юнайтэд</b><span>620м</span></li><li><b>Лавай зах</b><span>1100м</span></li><li><b>Хүннү молл</b><span>3700м</span></li></ul>
+          </div>
+          <div data-rise style="--d:0.10s">
+            <h4>Эрүүл мэнд</h4>
+            <ul><li><b>ХУД эрүүл мэндийн төв</b><span>1000м</span></li><li><b>Интермед эмнэлэг</b><span>1700м</span></li><li><b>Улаанбаатар сувилал</b><span>1800м</span></li></ul>
+          </div>
+        </div>
+      </div></section>
+
+      <section id="contact" class="nv-sec" data-tone="dark"><div class="nv-wrap">
+        <div class="nv-head nv-head--split">
+          <div>
+            <p class="nv-chapter">Холбоо барих</p>
+            <h2 class="nv-h2" data-rise>Бидэнтэй холбогдох</h2>
+            <p class="nv-lead" style="margin-top:18px">Та доорх асуулгыг бөглөснөөр манай борлуулалтын менежерүүд тантай холбогдон уулзалтын өдрийг баталгаажуулах болно.</p>
+            <dl class="nv-contact-meta">
+              <div><dt>Утас</dt><dd><a href="tel:77862222">7786-2222</a></dd></div>
+              <div><dt>Цагийн хуваарь</dt><dd>Даваа – Ням · 09:00 – 18:00</dd></div>
+              <div><dt>Борлуулалтын алба</dt><dd style="font-size:16px;line-height:1.5">Үндэсний цэцэрлэгт хүрээлэнгийн баруун хойно, 360 Мандала тауэр</dd></div>
+              <div><dt>И-мэйл</dt><dd><a href="mailto:info@elysium.mn">info@elysium.mn</a></dd></div>
+            </dl>
+          </div>
+          <div data-rise style="--d:.08s">
+            <form class="nv-form" id="lead">
+              <div class="nv-field"><label for="f-name">Нэр</label><input id="f-name" name="name" required></div>
+              <div class="nv-field"><label for="f-phone">Утас</label><input id="f-phone" name="phone" required inputmode="tel"></div>
+              <div class="nv-field"><label for="f-date">Уулзах хүссэн огноо</label><input id="f-date" name="date" type="date"></div>
+              <button type="submit" class="nv-pill"><span>Хүсэлт илгээх</span></button>
+              <p class="nv-note">Бие даасан урьдчилан харах хувилбар — маягт илгээгдэхгүй. Амьд хувилбар нь /noir.</p>
+            </form>
+          </div>
+        </div>
+      </div></section>
+
+      <section id="faq" class="nv-sec" data-tone="dark"><div class="nv-wrap">
+        <p class="nv-chapter">Түгээмэл асуулт</p>
+        <h2 class="nv-h2" data-rise>Түгээмэл асуулт, хариулт</h2>
+        <div class="nv-faq">
+          <div class="nv-faq-item is-open" data-faq>
+            <button type="button" class="nv-faq-q" aria-expanded="true">Хэзээ ашиглалтад орох вэ?<i aria-hidden="true"></i></button>
+            <div class="nv-faq-a" style="max-height:420px"><p>Elysium Residence 2027 оны 2-р улиралд ашиглалтад орохоор төлөвлөгдсөн.</p></div>
+          </div>
+          <div class="nv-faq-item" data-faq>
+            <button type="button" class="nv-faq-q" aria-expanded="false">Давхартаа хэдэн айлтай вэ?<i aria-hidden="true"></i></button>
+            <div class="nv-faq-a"><p>Блок, давхар тус бүрийн айлын тоо төлөвлөлтөөс хамаарна. Дэлгэрэнгүйг борлуулалтын албанаас тодруулна уу.</p></div>
+          </div>
+          <div class="nv-faq-item" data-faq>
+            <button type="button" class="nv-faq-q" aria-expanded="false">Төслийн байршил хаана вэ?<i aria-hidden="true"></i></button>
+            <div class="nv-faq-a"><p>Үндэсний цэцэрлэгт хүрээлэнгийн баруун хойно, 360 Мандала тауэрын ойролцоо.</p></div>
+          </div>
+          <div class="nv-faq-item" data-faq>
+            <button type="button" class="nv-faq-q" aria-expanded="false">Борлуулалтын албатай хэрхэн холбогдох вэ?<i aria-hidden="true"></i></button>
+            <div class="nv-faq-a"><p>Утас 7786-2222, эсвэл “Уулзалт товлох” хэсгээр хүсэлт үлдээнэ үү.</p></div>
+          </div>
+          <div class="nv-faq-item" data-faq>
+            <button type="button" class="nv-faq-q" aria-expanded="false">Гадаадаас орон сууц захиалах боломжтой юу?<i aria-hidden="true"></i></button>
+            <div class="nv-faq-a"><p>Тийм. Цахим үзлэг, онлайн захиалга, зайнаас гэрээ байгуулах боломжтой.</p></div>
+          </div>
+        </div>
+      </div></section>
+    </main>
+
+    <footer class="nv-footer" data-tone="dark">
+      <div class="nv-wrap">
+        <svg class="nv-footer-mark" viewBox="0 -1 146 33" fill="currentColor" role="img" aria-label="Elysium"><g>
+<path d="M14.6551469059,30.6464374324H0V.1786129951h14.2337458385c.2327333831,0,.4214010674.1886676843.4214010674.4214010674v.9147425533H4.2768437607v12.6953380206h9.487211794v1.3361436207H4.2768437607v13.7640555547h10.3783031452v1.3361436207Z"/>
+<path d="M34.4356749206,30.6464374324h-15.4574251655V.1786129951h3.8554426933c.2327333831,0,.4214010674.1886676843.4214010674.4214010674v28.7102797493h11.1805814049v1.3361436207Z"/>
+<path d="M54.2866077699.1786129951l-9.0875528824,15.1446057211v15.3232187162h-4.2758569486v-15.4495306685L31.9461680148.1786129951h4.6347519077c.1509544457,0,.2903780701.0807448173.3655057145.2116764091l7.6783045922,13.3816606475L52.678104002.1756525587l1.6085037679.0029604364Z"/>
+<path d="M74.6159478028,22.2279431725c0,2.553869786-.8841836663,4.6399906236-2.6505773745,6.2583625128s-3.9413276373,2.4275578337-6.5248017872,2.4275578337c-4.6034785749,0-7.5727962666-2.1532240623-8.9089398873-6.4596721868l1.3805501664-.356239178c1.4851522519,3.6531784961,3.7419915876,5.478780932,6.7705180069,5.478780932,1.7219871625,0,3.1479306868-.525970864,4.2768437607-1.5779125919,1.1279262618-1.0529285401,1.6923827987-2.4393995792,1.6923827987-4.1594131175,0-2.638735629-1.2029239835-4.6991993513-3.6077851382-6.1813911668-2.2272349718-1.1565438135-4.4544699436-2.298285445-6.6817049155-3.4252248946-2.4058479669-1.5719917192-3.6077851382-3.7952794425-3.6077851382-6.6708499821,0-2.3130876269.890104539-4.1663208024,2.6722872413-5.5596995265C61.0591227949.6680718103,63.064325038,0,65.4405686411,0,68.8845429662,0,71.4828192979,1.4851522519,73.2353976364,4.4544699436l-1.6035697072.6680718103c-.4756434455-1.0687175341-1.2700272081-1.9667165702-2.383151288-2.6949839203-1.1131240799-.727280538-2.2499316508-1.091414213-3.4074622763-1.091414213-1.4851522519,0-2.7837970117.5200499912-3.8979079037,1.5591631615-1.1131240798,1.0400999824-1.6696861198,2.2874305116-1.6696861198,3.7419915876,0,1.7525783385,1.2463437171,3.2515459602,3.7410047754,4.4988764894,1.7219871625.8012914476,3.4449611372,1.6183718891,5.1669482997,2.4502545126,1.7821827023.9503000788,3.0739197772,1.9894132491,3.8752112248,3.1173395109,1.0391131703,1.4259435243,1.5591631615,3.2673349542,1.5591631615,5.5241742899Z"/>
+<path d="M83.1924433118,30.6464374324h-4.2768437607V.1786129951h3.8554426933c.2327333831,0,.4214010674.1886676843.4214010674.4214010674v30.0464233699Z"/>
+<path d="M107.2836368005,22.8960149828c0,2.4650566946-.8318826235,4.4248655798-2.4946610584,5.8794266558-1.663765247,1.4555478881-3.7419915876,2.1828284261-6.2366526459,2.1828284261-2.4936742463,0-4.572887399-.6828739923-6.2356658338-2.0496087889-1.8117870661-1.454561076-2.7176805992-3.3995677793-2.7176805992-5.8350201101V.1786129951h3.8554426933c.2327333831,0,.4214010674.1886676843.4214010674.4214010674v22.4736271033c0,1.7525783385.5486675429,3.2150339115,1.647976253,4.387366719,1.0983218979,1.1733196196,2.5232786101,1.7594860234,4.2758569486,1.7594860234,1.7821827023,0,3.2584536451-.6009685857,4.4327600768-1.8038925691,1.1723328075-1.2029239835,1.7594860234-2.6949839203,1.7594860234-4.4761798105V.1786129951h.8703360076c.2327333831,0,.4214010674.1886676843.4214010674.4214010674v22.2960009204Z"/>
+<path d="M141.7246534145,30.6464374324h-4.2758569486V4.6330829387l-11.0917683134,26.6360329461-12.3825185762-26.635046134v26.0123676815h-1.3815369785V.1786129951h3.7549154174c.1642026944,0,.313451545.0953803421.3824235099.2443950826l10.7625373862,23.2525884859L138.0004244452.1786129951h3.3028279019c.2327333831,0,.4214010674.1886676843.4214010674.4214010674v30.0464233699Z"/>
+</g></svg>
+        <div class="nv-cols">
+          <div>
+            <h4>Борлуулалтын алба</h4>
+            <ul>
+              <li><a href="tel:77862222">7786-2222</a></li>
+              <li><a href="mailto:info@elysium.mn">info@elysium.mn</a></li>
+              <li>Даваа – Ням · 09:00 – 18:00</li>
+              <li>Үндэсний цэцэрлэгт хүрээлэнгийн баруун хойно, 360 Мандала тауэр</li>
+            </ul>
+          </div>
+          <div>
+            <h4>Цэс</h4>
+            <ul><li><a href="#apartments">Өрөөний сонголт</a></li><li><a href="#elys">Төслийн давуу тал</a></li><li><a href="#location">Байршил</a></li><li><a href="#faq">Түгээмэл асуулт</a></li></ul>
+          </div>
+        </div>
+        <div class="nv-foot-bar"><span>Form Follows Function · Comfort · Serenity</span><span>© 2026 Elysium Residence</span></div>
+      </div>
+    </footer>
+
+    <div class="nv-peek" id="peek" aria-hidden="true"><img alt=""></div>
+  </div>
+<script>
+(function () {
+  var root = document.querySelector('.noir-page');
+  var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* Цэс */
+  var burger = document.getElementById('burger');
+  var menu = document.getElementById('menu');
+  function setMenu(open) {
+    root.classList.toggle('is-open', open);
+    burger.setAttribute('aria-expanded', String(open));
+    burger.setAttribute('aria-label', open ? 'Цэс хаах' : 'Цэс');
+    menu.setAttribute('aria-hidden', String(!open));
+    document.documentElement.style.overflow = open ? 'hidden' : '';
+  }
+  burger.addEventListener('click', function () { setMenu(!root.classList.contains('is-open')); });
+  menu.addEventListener('click', function (e) { if (e.target.closest('a')) setMenu(false); });
+  addEventListener('keydown', function (e) { if (e.key === 'Escape') { setMenu(false); closeBox(); } });
+  addEventListener('resize', function () { if (innerWidth / innerHeight > 1.1) setMenu(false); });
+
+  /* Толгойн нягтрал */
+  var bar = document.querySelector('.nv-topbar');
+  function onScroll() { bar.classList.toggle('is-stuck', scrollY > innerHeight * 0.62); }
+  addEventListener('scroll', onScroll, { passive: true }); onScroll();
+
+  /* Илрэх анимэйшн ба тоолуур */
+  var rises = [].slice.call(document.querySelectorAll('[data-rise],[data-count]'));
+  if (reduce) {
+    rises.forEach(function (el) { el.classList.add('is-in'); });
+  } else {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        var el = entry.target;
+        el.classList.add('is-in');
+        var raw = el.getAttribute('data-count');
+        if (raw) {
+          var target = Number(raw), start = performance.now();
+          (function step(now) {
+            var t = Math.min(1, (now - start) / 1100);
+            var eased = t === 1 ? 1 : 1 - Math.pow(2, -10 * t);
+            el.textContent = Math.round(target * eased).toLocaleString('en-US');
+            if (t < 1) requestAnimationFrame(step);
+          })(start);
+        }
+        io.unobserve(el);
+      });
+    }, { rootMargin: '0px 0px -10% 0px', threshold: 0.06 });
+    rises.forEach(function (el) { io.observe(el); });
+  }
+
+  /* Клип — харагдах үед л тоглоно */
+  if (!reduce) {
+    var clipIo = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) { var p = e.target.play(); if (p) p.catch(function () {}); }
+        else e.target.pause();
+      });
+    }, { threshold: 0.25 });
+    [].forEach.call(document.querySelectorAll('[data-clip]'), function (v) { clipIo.observe(v); });
+  }
+
+  /* ELYS самбарууд */
+  var panels = [].slice.call(document.querySelectorAll('[data-panel]'));
+  panels.forEach(function (panel) {
+    function pick() {
+      panels.forEach(function (p) { p.classList.remove('is-active'); p.setAttribute('aria-expanded', 'false'); });
+      panel.classList.add('is-active'); panel.setAttribute('aria-expanded', 'true');
+    }
+    panel.addEventListener('click', pick);
+    panel.addEventListener('mouseenter', pick);
+  });
+
+  /* Өрөөний шүүлтүүр */
+  var units = [].slice.call(document.querySelectorAll('.nv-unit'));
+  [].forEach.call(document.querySelectorAll('[data-block]'), function (tab) {
+    tab.addEventListener('click', function () {
+      [].forEach.call(document.querySelectorAll('[data-block]'), function (t) { t.classList.remove('is-on'); });
+      tab.classList.add('is-on');
+      var want = tab.getAttribute('data-block');
+      units.forEach(function (u) {
+        u.style.display = !want || u.getAttribute('data-unit-block') === want ? '' : 'none';
+      });
+    });
+  });
+
+  /* Хөвүүлэхэд гарах төлөвлөгөө */
+  var peek = document.getElementById('peek'), peekImg = peek.querySelector('img');
+  units.forEach(function (u) {
+    u.addEventListener('mousemove', function (e) {
+      peekImg.src = u.getAttribute('data-thumb');
+      peek.style.left = (e.clientX + 170) + 'px';
+      peek.style.top = e.clientY + 'px';
+      peek.classList.add('is-on');
+    });
+    u.addEventListener('mouseleave', function () { peek.classList.remove('is-on'); });
+    u.addEventListener('click', function () {
+      peek.classList.remove('is-on');
+      openBox(u.getAttribute('data-views').split('|'), 0, u.getAttribute('data-caption'));
+    });
+  });
+
+  /* Байршлын табууд */
+  [].forEach.call(document.querySelectorAll('[data-loc]'), function (tab) {
+    tab.addEventListener('click', function () {
+      [].forEach.call(document.querySelectorAll('[data-loc]'), function (t) { t.classList.remove('is-on'); });
+      tab.classList.add('is-on');
+      var coords = tab.getAttribute('data-loc');
+      document.querySelector('[data-loc-title]').textContent = tab.getAttribute('data-loc-name');
+      document.querySelector('[data-loc-address]').textContent = tab.getAttribute('data-loc-addr');
+      document.querySelector('[data-loc-dir]').href = 'https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(coords);
+      document.getElementById('map').src = 'https://www.google.com/maps?q=' + encodeURIComponent(coords) + '&z=16&output=embed';
+    });
+  });
+
+  /* Асуулт & хариулт */
+  [].forEach.call(document.querySelectorAll('[data-faq]'), function (item) {
+    item.querySelector('.nv-faq-q').addEventListener('click', function () {
+      var open = item.classList.contains('is-open');
+      [].forEach.call(document.querySelectorAll('[data-faq]'), function (i) {
+        i.classList.remove('is-open');
+        i.querySelector('.nv-faq-q').setAttribute('aria-expanded', 'false');
+        i.querySelector('.nv-faq-a').style.maxHeight = '0px';
+      });
+      if (!open) {
+        item.classList.add('is-open');
+        item.querySelector('.nv-faq-q').setAttribute('aria-expanded', 'true');
+        item.querySelector('.nv-faq-a').style.maxHeight = '420px';
+      }
+    });
+  });
+
+  /* Зураг үзэх цонх */
+  var box = null, boxImages = [], boxIndex = 0, boxCaption = '';
+  function renderBox() {
+    box.querySelector('img').src = boxImages[boxIndex];
+    box.querySelector('[data-box-label]').textContent =
+      boxCaption + (boxImages.length > 1 ? ' · ' + (boxIndex + 1) + '/' + boxImages.length : '');
+  }
+  function openBox(images, index, caption) {
+    boxImages = images; boxIndex = index; boxCaption = caption || '';
+    if (!box) {
+      box = document.createElement('div');
+      box.className = 'nv-box'; box.setAttribute('role', 'dialog'); box.setAttribute('aria-modal', 'true');
+      box.innerHTML = '<button type="button" class="nv-icon nv-box-close" aria-label="Хаах">✕</button>' +
+        '<img alt="">' +
+        '<div class="nv-box-bar"><button type="button" class="nv-icon" data-step="-1" aria-label="Өмнөх">←</button>' +
+        '<span data-box-label></span>' +
+        '<button type="button" class="nv-icon" data-step="1" aria-label="Дараах">→</button></div>';
+      box.addEventListener('click', function (e) {
+        if (e.target === box || e.target.closest('.nv-box-close')) return closeBox();
+        var step = e.target.closest('[data-step]');
+        if (step) { boxIndex = (boxIndex + Number(step.getAttribute('data-step')) + boxImages.length) % boxImages.length; renderBox(); }
+      });
+      document.querySelector('.noir-page').appendChild(box);
+    }
+    box.style.display = '';
+    document.documentElement.style.overflow = 'hidden';
+    renderBox();
+  }
+  function closeBox() {
+    if (!box) return;
+    box.style.display = 'none';
+    document.documentElement.style.overflow = '';
+  }
+  [].forEach.call(document.querySelectorAll('[data-shot]'), function (shot, i, all) {
+    shot.addEventListener('click', function () {
+      openBox([].map.call(all, function (s) { return s.getAttribute('data-shot'); }), i, shot.getAttribute('data-caption'));
+    });
+  });
+  addEventListener('keydown', function (e) {
+    if (!box || box.style.display === 'none') return;
+    if (e.key === 'ArrowRight') { boxIndex = (boxIndex + 1) % boxImages.length; renderBox(); }
+    if (e.key === 'ArrowLeft') { boxIndex = (boxIndex - 1 + boxImages.length) % boxImages.length; renderBox(); }
+  });
+
+  /* Маягт — бие даасан файлд сервер байхгүй тул зөвхөн мэдэгдэнэ. */
+  document.getElementById('lead').addEventListener('submit', function (e) {
+    e.preventDefault();
+    e.target.querySelector('.nv-note').textContent = 'Энэ бол урьдчилан харах хувилбар — хүсэлт илгээгдээгүй. Амьд хувилбар: /noir';
+  });
+})();
+</script>
+</body>
+</html>

@@ -539,18 +539,51 @@ function renderSection(
     /* ---------------------------------------------------------- */
     case "hero":
       return (
-        <Card title="Нүүр дэлгэц">
-          <Field label="Тайлбар" hint="Гол гарчгийн доорх богино өгүүлбэр.">
-            <TextArea
-              rows={3}
-              value={c.hero.sub}
-              onChange={(e) => edit((d) => void (d.hero.sub = e.target.value))}
-            />
-          </Field>
-          <p className="mt-3 text-xs text-neutral-400">
-            Гол гарчиг, дэд шошго, товчны нэрсийг “Брэнд & холбоо”, “Толгой цэс” хэсгээс засна.
-          </p>
-        </Card>
+        <>
+          <Card title="Нүүр дэлгэц">
+            <Field
+              label="Кино гарчиг"
+              hint="Мөр бүрийг ШИНЭ МӨРӨӨР бичнэ — /noir дизайн дээр мөр тус бүр тусад нь гарч ирнэ. Хоосон бол “Брэнд”-ийн гол гарчиг орно."
+            >
+              <TextArea
+                rows={2}
+                value={c.hero.title}
+                onChange={(e) => edit((d) => void (d.hero.title = e.target.value))}
+              />
+            </Field>
+            <div className="mt-4">
+              <Field label="Тайлбар" hint="Гол гарчгийн доорх богино өгүүлбэр.">
+                <TextArea
+                  rows={3}
+                  value={c.hero.sub}
+                  onChange={(e) => edit((d) => void (d.hero.sub = e.target.value))}
+                />
+              </Field>
+            </div>
+            <p className="mt-3 text-xs text-neutral-400">
+              Дэд шошго, товчны нэрсийг “Брэнд &amp; холбоо”, “Толгой цэс” хэсгээс засна.
+            </p>
+          </Card>
+
+          <Card title="Дэвсгэр клип">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <FileField
+                label="Клип (MP4)"
+                accept="video/mp4,video/webm"
+                value={c.hero.video}
+                onChange={(url) => edit((d) => void (d.hero.video = url))}
+                hint="Бүтэн дэлгэцээр давтагдан тоглоно. Хоосон бол зөвхөн постер зураг харагдана."
+              />
+              <ImageField
+                label="Постер (эхний кадр)"
+                ratio="16/9"
+                value={c.hero.poster}
+                onChange={(url) => edit((d) => void (d.hero.poster = url))}
+                hint="Клип ачаалахаас өмнө харагдах зураг."
+              />
+            </div>
+          </Card>
+        </>
       );
 
     /* ---------------------------------------------------------- */

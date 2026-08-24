@@ -227,7 +227,11 @@ export type SiteContent = {
     menuAria: string;
   };
 
-  hero: { sub: string };
+  /** Нүүр дэлгэц. `title` — мөр бүрийг ШИНЭ МӨРӨӨР тусгаарлана
+   *  (кино маягийн `/noir` theme дээр мөр тус бүр тусдаа гарч ирнэ);
+   *  хоосон бол `brand.line` рүү буцна. `video` — бүтэн дэлгэцийн
+   *  давтагдах клип, `poster` — клип ачаалахаас өмнөх кадр. */
+  hero: { title: string; sub: string; video: string; poster: string };
 
   /** Chapter 01 — Ерөнхий төлөвлөлт (тоон үзүүлэлт). */
   plan: { kicker: string; title: string; points: StoryPointContent[] };
@@ -587,7 +591,10 @@ export const DEFAULT_SITE_CONTENT: SiteContent = {
   },
 
   hero: {
+    title: "Elysium\nResidence",
     sub: "Туул голын салхи илбэсэн бүсэд байршилтай, архитектур болон инженерингийн эргономик шийдэлтэй орон сууц.",
+    video: "/video/hero-source.mp4",
+    poster: "/hero-video-frames/frame_132.webp",
   },
 
   plan: {
