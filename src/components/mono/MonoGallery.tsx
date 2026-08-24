@@ -12,9 +12,9 @@ export function MonoGallery({ site }: { site: SiteContent }) {
     <section
       data-bg="gallery"
       data-tone={sectionTone(site.theme, "gallery", "light")}
-      className="overflow-hidden border-b border-fg/10 bg-ground py-20 md:py-28"
+      className="overflow-hidden border-b border-fg/10 bg-ground py-24 md:py-28"
     >
-      <div className="mx-auto max-w-[1500px] px-5 md:px-10">
+      <div className="mx-auto max-w-[1500px] px-6 md:px-10">
         <MonoKicker reveal>{gallery.kicker}</MonoKicker>
         <h2 data-reveal="heading" className="mt-4 mono-h2">
           {gallery.title}
@@ -38,7 +38,7 @@ export function MonoGallery({ site }: { site: SiteContent }) {
                     decoding="async"
                     className="aspect-[4/3] w-full object-cover transition-transform duration-700 hover:scale-105"
                   />
-                  <figcaption className="absolute bottom-3 left-3 rounded-full bg-white/85 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-fg backdrop-blur">
+                  <figcaption className="glass glass-chip absolute bottom-3 left-3 rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-fg">
                     {img.tag}
                   </figcaption>
                 </figure>

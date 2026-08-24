@@ -16,9 +16,9 @@ export function MonoFaq({ site }: { site: SiteContent }) {
       id="faq"
       data-bg="faq"
       data-tone={sectionTone(site.theme, "faq", "light")}
-      className="border-b border-fg/10 bg-ground py-20 md:py-28"
+      className="border-b border-fg/10 bg-ground py-24 md:py-28"
     >
-      <div className="mx-auto max-w-[1100px] px-5 md:px-10">
+      <div className="mx-auto max-w-[1100px] px-6 md:px-10">
         <MonoKicker reveal>{faq.kicker}</MonoKicker>
         <h2 data-reveal="heading" className="mt-4 mono-h2">
           {faq.title}

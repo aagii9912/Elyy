@@ -97,7 +97,7 @@ export default async function NewsDetailPage({ params, searchParams }: Props) {
                 aria-hidden
                 className="absolute inset-0 -z-10 bg-gradient-to-t from-night/90 via-night/45 to-night/60"
               />
-              <div className="mx-auto w-full max-w-[1100px] px-5 md:px-10">
+              <div className="mx-auto w-full max-w-[1100px] px-6 md:px-10">
                 <Link
                   href={NEWS_PATH}
                   data-cursor-hover
@@ -122,7 +122,7 @@ export default async function NewsDetailPage({ params, searchParams }: Props) {
             </header>
           ) : (
             <header className="border-b border-night/10 bg-ground pb-12 pt-[124px] md:pb-16 md:pt-[148px]">
-              <div className="mx-auto max-w-[820px] px-5 md:px-10">
+              <div className="mx-auto max-w-[820px] px-6 md:px-10">
                 <Link
                   href={NEWS_PATH}
                   data-cursor-hover
@@ -194,7 +194,7 @@ export default async function NewsDetailPage({ params, searchParams }: Props) {
                   {block.caption && (
                     <figcaption
                       className={`mt-3 text-[13px] leading-relaxed text-night/50 ${
-                        block.size === "full" ? "mx-auto max-w-[820px] px-5 md:px-10" : ""
+                        block.size === "full" ? "mx-auto max-w-[820px] px-6 md:px-10" : ""
                       }`}
                     >
                       {block.caption}
@@ -230,7 +230,7 @@ export default async function NewsDetailPage({ params, searchParams }: Props) {
 
         {others.length > 0 && (
           <section className="border-t border-night/10 bg-ground py-14 md:py-20">
-            <div className="mx-auto max-w-[1500px] px-5 md:px-10">
+            <div className="mx-auto max-w-[1500px] px-6 md:px-10">
               <h2
                 data-reveal="heading"
                 className="text-[clamp(1.5rem,3vw,2.2rem)] font-extrabold tracking-tight text-night"

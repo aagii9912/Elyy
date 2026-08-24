@@ -639,7 +639,7 @@ export function MonoScrollStory({
                       vectorEffect="non-scaling-stroke"
                     />
                   </svg>
-                  <div className="absolute bottom-[10vh] left-4 right-4 border border-white/25 bg-night/60 p-6 backdrop-blur-xl md:bottom-[13vh] md:left-auto md:right-[6%] md:w-[340px] md:p-7">
+                  <div className="glass-dark absolute bottom-[10vh] left-4 right-4 rounded-2xl p-6 md:bottom-[13vh] md:left-auto md:right-[6%] md:w-[340px] md:p-7">
                     <span aria-hidden className="absolute left-0 top-0 h-3 w-3 border-l-2 border-t-2 border-lime" />
                     <span aria-hidden className="absolute bottom-0 right-0 h-3 w-3 border-b-2 border-r-2 border-lime" />
                     <p data-sw className="text-[10px] font-bold uppercase tracking-[0.32em] text-lime">

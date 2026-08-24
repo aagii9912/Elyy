@@ -51,7 +51,7 @@ export function MonoVr({ site }: { site: SiteContent }) {
       <span aria-hidden className="absolute inset-0 bg-gradient-to-t from-charcoal/70 via-charcoal/10 to-charcoal/20" />
 
       <span className="absolute inset-0 flex flex-col items-center justify-center gap-5 px-6 text-center">
-        <span className="relative flex h-[76px] w-[76px] items-center justify-center rounded-full border border-white/50 bg-white/10 text-white backdrop-blur-md transition-transform duration-500 group-hover:scale-110">
+        <span className="glass-dark relative flex h-[76px] w-[76px] items-center justify-center rounded-full text-white transition-transform duration-500 group-hover:scale-110">
           <span aria-hidden className="green-ping absolute inset-0 rounded-full text-white/70" />
           {ready ? (
             <svg aria-hidden viewBox="0 0 24 24" className="relative h-7 w-7" fill="currentColor">
@@ -84,9 +84,9 @@ export function MonoVr({ site }: { site: SiteContent }) {
       id="vr"
       data-bg="vr"
       data-tone={sectionTone(site.theme, "vr", "light")}
-      className="border-b border-fg/10 bg-ground py-20 md:py-28"
+      className="border-b border-fg/10 bg-ground py-24 md:py-28"
     >
-      <div className="mx-auto max-w-[1500px] px-5 md:px-10">
+      <div className="mx-auto max-w-[1500px] px-6 md:px-10">
         {/* тайлбар нь гарчгийн доор — баруун талын багана нь гарчгаас дээш
             гарч, хэсгийн навигацитай мөргөлддөг байв */}
         <div className="max-w-2xl">

@@ -51,9 +51,9 @@ export function MonoContact({ site }: { site: SiteContent }) {
       id="contact"
       data-bg="contact"
       data-tone={sectionTone(site.theme, "contact", "light")}
-      className="border-b border-fg/10 bg-ground py-20 font-gilroy text-fg md:py-28"
+      className="border-b border-fg/10 bg-ground py-24 font-gilroy text-fg md:py-28"
     >
-      <div className="mx-auto max-w-[1500px] px-5 md:px-10">
+      <div className="mx-auto max-w-[1500px] px-6 md:px-10">
         <div className="grid gap-12 lg:grid-cols-2 lg:gap-20">
           <div>
             <MonoKicker reveal>{contact.kicker}</MonoKicker>

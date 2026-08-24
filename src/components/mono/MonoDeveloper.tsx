@@ -202,7 +202,7 @@ export function MonoDeveloper({ site }: { site: SiteContent }) {
       data-tone={sectionTone(site.theme, "developer", "light")}
       className="relative border-b border-fg/10 bg-ground md:h-[380vh]"
     >
-      <div className="flex flex-col justify-center overflow-hidden py-20 md:sticky md:top-0 md:h-[100svh] md:py-0">
+      <div className="flex flex-col justify-center overflow-hidden py-24 md:sticky md:top-0 md:h-[100svh] md:py-0">
         {/* backdrop mark — the company icon when one is set, otherwise the
             giant year counter running 2006 → 2026 (desktop only) */}
         {d.logo ? (
@@ -233,7 +233,7 @@ export function MonoDeveloper({ site }: { site: SiteContent }) {
         {/* header — kicker, name, then the company blurb directly beneath it
             (it used to sit off to the right, where it collided with the
             timeline and the backdrop mark) */}
-        <div className="relative z-10 mx-auto w-full max-w-[1500px] px-5 md:px-10">
+        <div className="relative z-10 mx-auto w-full max-w-[1500px] px-6 md:px-10">
           <MonoKicker reveal>{d.kicker}</MonoKicker>
           <div className="mt-4 flex flex-col gap-4">
             <h2 data-reveal="heading" className="max-w-xl mono-h2">
@@ -306,7 +306,7 @@ export function MonoDeveloper({ site }: { site: SiteContent }) {
                     <h3 className="text-lg font-extrabold tracking-tight text-white md:text-xl">{p.title}</h3>
                     <p className="mt-1 text-[13px] text-white/65">{p.meta}</p>
                   </div>
-                  <span className="absolute right-4 top-4 rounded-full bg-night/60 px-3 py-1 text-[11px] font-bold text-white/85 backdrop-blur">
+                  <span className="glass-dark glass-chip absolute right-4 top-4 rounded-full px-3 py-1 text-[11px] font-bold text-white/85">
                     {p.units}
                   </span>
                 </article>

@@ -25,9 +25,9 @@ export function MonoManagers({ site }: { site: SiteContent }) {
       id="managers"
       data-bg="managers"
       data-tone={sectionTone(site.theme, "managers", "light")}
-      className="border-b border-fg/10 bg-ground py-20 md:py-28"
+      className="border-b border-fg/10 bg-ground py-24 md:py-28"
     >
-      <div className="mx-auto max-w-[1500px] px-5 md:px-10">
+      <div className="mx-auto max-w-[1500px] px-6 md:px-10">
         {/* тайлбар нь гарчгийн доор — баруун талын багана нь гарчгаас дээш
             гарч, хэсгийн навигацитай мөргөлддөг байв */}
         <div className="max-w-2xl">

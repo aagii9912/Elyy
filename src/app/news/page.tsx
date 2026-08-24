@@ -38,7 +38,7 @@ export default async function NewsListPage() {
 
       <main className="pt-[104px] md:pt-[124px]">
         <section className="border-b border-night/10 bg-ground py-14 md:py-20">
-          <div className="mx-auto max-w-[1500px] px-5 md:px-10">
+          <div className="mx-auto max-w-[1500px] px-6 md:px-10">
             <MonoKicker reveal>{site.news.kicker}</MonoKicker>
             <h1
               data-reveal="heading"
@@ -53,7 +53,7 @@ export default async function NewsListPage() {
         </section>
 
         <section className="py-14 md:py-20">
-          <div className="mx-auto max-w-[1500px] px-5 md:px-10">
+          <div className="mx-auto max-w-[1500px] px-6 md:px-10">
             {news.length === 0 ? (
               <div className="rounded-2xl border border-dashed border-night/20 py-20 text-center">
                 <p className="text-sm text-night/50">{site.news.empty}</p>

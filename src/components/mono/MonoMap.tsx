@@ -31,9 +31,9 @@ export function MonoMap({ site }: { site: SiteContent }) {
       id="location"
       data-bg="location"
       data-tone={sectionTone(site.theme, "location", "light")}
-      className="border-b border-fg/10 bg-ground py-20 md:py-28"
+      className="border-b border-fg/10 bg-ground py-24 md:py-28"
     >
-      <div className="mx-auto max-w-[1500px] px-5 md:px-10">
+      <div className="mx-auto max-w-[1500px] px-6 md:px-10">
         <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <div>
             <MonoKicker reveal>{location.kicker}</MonoKicker>

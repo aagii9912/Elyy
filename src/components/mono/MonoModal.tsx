@@ -107,7 +107,7 @@ export function MonoModal({
       className="fixed inset-0 z-[90] flex items-end justify-center sm:items-center"
       onClick={close}
     >
-      <div aria-hidden className="mono-modal-veil absolute inset-0 bg-night/60 backdrop-blur-sm" />
+      <div aria-hidden className="mono-modal-veil absolute inset-0 bg-night/55 backdrop-blur-[6px]" />
 
       <div
         ref={panel}
@@ -122,7 +122,7 @@ export function MonoModal({
           onClick={close}
           data-cursor-hover
           aria-label={closeLabel}
-          className="absolute right-3 top-3 z-10 flex h-11 w-11 items-center justify-center rounded-full border border-night/12 bg-surface/90 text-night backdrop-blur transition-colors duration-300 hover:bg-night hover:text-white"
+          className="glass glass-chip absolute right-3 top-3 z-10 flex h-11 w-11 items-center justify-center rounded-full text-night transition-colors duration-300 hover:bg-night hover:text-white"
         >
           <svg aria-hidden viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M6 6l12 12M18 6L6 18" strokeLinecap="round" />

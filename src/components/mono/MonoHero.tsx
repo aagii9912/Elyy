@@ -216,7 +216,7 @@ export function MonoHero({ site }: { site: SiteContent }) {
               <BrochureButton
                 site={site}
                 source="elysium/mono#hero"
-                className="inline-flex w-full items-center justify-center gap-2 rounded-[50px] border border-white/40 bg-white/[0.06] px-6 py-4 text-[14px] font-medium uppercase tracking-[-0.2px] text-white backdrop-blur-[16px] transition-colors duration-300 hover:bg-white/15 sm:w-auto"
+                className="glass-dark inline-flex w-full items-center justify-center gap-2 rounded-[50px] px-6 py-4 text-[14px] font-medium uppercase tracking-[-0.2px] text-white transition-colors duration-300 hover:bg-white/15 sm:w-auto"
               >
                 {nav.brochureLabel}
               </BrochureButton>

@@ -171,7 +171,7 @@ export function MonoElys({ site }: { site: SiteContent }) {
                 decoding="async"
                 className="h-56 w-full object-cover sm:h-72"
               />
-              <span className="absolute bottom-4 left-6 flex h-11 w-11 items-center justify-center rounded-full bg-surface/95 text-[15px] font-extrabold tracking-[0.06em] text-fg backdrop-blur">
+              <span className="glass glass-chip absolute bottom-4 left-6 flex h-11 w-11 items-center justify-center rounded-full text-[15px] font-extrabold tracking-[0.06em] text-fg">
                 {letterOf(current.title)}
               </span>
             </div>

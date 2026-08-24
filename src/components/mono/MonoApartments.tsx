@@ -129,9 +129,9 @@ export function MonoApartments({ site }: { site: SiteContent }) {
       id="apartments"
       data-bg="apartments"
       data-tone={sectionTone(site.theme, "apartments", "light")}
-      className="border-b border-fg/10 bg-ground py-20 md:py-28"
+      className="border-b border-fg/10 bg-ground py-24 md:py-28"
     >
-      <div className="mx-auto max-w-[1500px] px-5 md:px-10">
+      <div className="mx-auto max-w-[1500px] px-6 md:px-10">
         {/* тайлбар нь гарчгийн доор — баруун талын багана нь гарчгаас дээш
             гарч, хэсгийн навигацитай мөргөлддөг байв */}
         <div className="max-w-2xl">
@@ -215,7 +215,7 @@ export function MonoApartments({ site }: { site: SiteContent }) {
                     )}
                   </span>
                   {unit.views.length > 0 && (
-                    <span className="absolute bottom-4 right-4 rounded-full border border-fg/15 bg-surface/85 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.1em] text-fg backdrop-blur">
+                    <span className="glass glass-chip absolute bottom-4 right-4 rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-[0.1em] text-fg">
                       {unit.views.length} {apartments.viewsWord}
                     </span>
                   )}

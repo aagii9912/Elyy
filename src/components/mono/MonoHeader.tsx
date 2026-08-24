@@ -103,7 +103,7 @@ export function MonoHeader({
           open
             ? "bg-white text-fg"
             : solid
-              ? "bg-white/90 text-fg shadow-[0_1px_0_rgba(21,23,23,0.08)] backdrop-blur-xl"
+              ? "glass border-x-0 border-t-0 text-fg"
               : "bg-transparent text-white"
         }`}
       >
