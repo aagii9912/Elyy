@@ -253,9 +253,27 @@ export type TypeContent = {
   scale: number;
 };
 
+/* ---- Шилэн гадаргуу (liquid glass) ------------------------------ */
+
+/** `default` — globals.css-ийн өгөгдмөл (20px / 165%), CSS үүсэхгүй.
+ *  `custom`  — доорх утгуудыг гаргана.
+ *  `off`     — шилийг бүрэн унтрааж, дүүргэлттэй гадаргуу болгоно. */
+export const GLASS_MODES = ["default", "custom", "off"] as const;
+
+export type GlassContent = {
+  mode: string;
+  /** Бүдгэрүүлэлт 4–40px. */
+  blur: number;
+  /** Ханалт 100–220%. Зөвхөн blur бол манан; ханалт нэмэхэд шил болно. */
+  saturation: number;
+};
+
 export type ThemeContent = {
   /** Типографи — фонт, жин, үсэг хоорондын зай, хэмжээ. */
   type: TypeContent;
+
+  /** Шилэн гадаргуу — бүдгэрүүлэлт, ханалт. */
+  glass: GlassContent;
 
   /** Глобал палитр — CSS токен руу шууд буудаг (`--color-*`). */
   palette: {
@@ -633,6 +651,9 @@ export const DEFAULT_THEME: ThemeContent = {
     headingUppercase: true,
     scale: 1,
   },
+
+  /* `default` — globals.css-ийн 20px / 165% хэвээр, CSS үүсэхгүй. */
+  glass: { mode: "default", blur: 20, saturation: 165 },
 
   palette: {
     ground: "#f4f4f1",

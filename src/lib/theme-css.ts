@@ -15,6 +15,8 @@
    ============================================================ */
 
 import {
+  GLASS_MODES,
+  type GlassContent,
   BODY_FONTS,
   DISPLAY_FONTS,
   TYPE_MODES,
@@ -329,6 +331,40 @@ function typeCss(theme: ThemeContent): string {
   return rules.join("\n");
 }
 
+
+/* ------------------------------------------------------------------ */
+/* Шилэн гадаргуу                                                      */
+/* ------------------------------------------------------------------ */
+
+export function sanitizeGlass(g: GlassContent | undefined): GlassContent {
+  const d = DEFAULT_THEME.glass;
+  const src = g ?? d;
+  return {
+    mode: pick(src.mode, GLASS_MODES, "default"),
+    blur: Math.round(num(src.blur, 4, 40, d.blur)),
+    saturation: Math.round(num(src.saturation, 100, 220, d.saturation)),
+  };
+}
+
+/** `default` горимд ХООСОН — globals.css-ийн утгууд хэвээр. */
+function glassCss(theme: ThemeContent): string {
+  const g = sanitizeGlass(theme.glass);
+  if (g.mode === "custom") {
+    return `.mono-page{--glass-blur:${g.blur}px;--glass-sat:${g.saturation}%}`;
+  }
+  if (g.mode === "off") {
+    /* `prefers-reduced-transparency`-ийн нөөц замтай ижил — шил бүрэн
+       унтарч, дүүргэлттэй гадаргуу болно. */
+    return (
+      `.mono-page .glass,.mono-page .glass-dark{` +
+        `-webkit-backdrop-filter:none;backdrop-filter:none;background-image:none}` +
+      `.mono-page .glass{background-color:rgba(255,255,255,0.96)}` +
+      `.mono-page .glass-dark{background-color:rgba(21,23,23,0.86)}`
+    );
+  }
+  return "";
+}
+
 /* ------------------------------------------------------------------ */
 /* Гол функц                                                           */
 /* ------------------------------------------------------------------ */
@@ -369,7 +405,11 @@ export function buildThemeCss(theme: ThemeContent | undefined): string {
   const type = typeCss(t);
   if (type) rules.push(type);
 
-  /* 5) Мобайл дээр `fixed` нь iOS-д гацдаг — үргэлж scroll руу буулгана. */
+  /* 5) Шилэн гадаргуу — `default` горимд юу ч үүсэхгүй. */
+  const glass = glassCss(t);
+  if (glass) rules.push(glass);
+
+  /* 6) Мобайл дээр `fixed` нь iOS-д гацдаг — үргэлж scroll руу буулгана. */
   if (rules.some((r) => r.includes("background-attachment:fixed"))) {
     rules.push(`@media (max-width:767px){.mono-page [data-bg]{background-attachment:scroll!important}}`);
   }
@@ -429,6 +469,7 @@ export function sanitizeTheme(theme: ThemeContent | undefined): ThemeContent {
   }
   return {
     type: sanitizeType(t.type),
+    glass: sanitizeGlass(t.glass),
     palette: {
       ground: hex(p.ground, d.ground),
       surface: hex(p.surface, d.surface),

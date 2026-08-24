@@ -8,6 +8,7 @@
 
 import { useState } from "react";
 import {
+  type GlassContent,
   BODY_FONTS,
   DISPLAY_FONTS,
   type FontOption,
@@ -850,6 +851,137 @@ export function TypePanel({
   );
 }
 
+
+/* ------------------------------------------------------------------ */
+/* Шилэн гадаргуу                                                      */
+/* ------------------------------------------------------------------ */
+
+const GLASS_PRESETS: { id: string; label: string; value: GlassContent }[] = [
+  { id: "off", label: "Унтраах", value: { mode: "off", blur: 20, saturation: 165 } },
+  { id: "soft", label: "Зөөлөн", value: { mode: "custom", blur: 12, saturation: 130 } },
+  { id: "default", label: "Энгийн", value: { mode: "default", blur: 20, saturation: 165 } },
+  { id: "strong", label: "Тод", value: { mode: "custom", blur: 30, saturation: 200 } },
+];
+
+/** Шилний тохиргоог ЖИНХЭНЭ `.glass` классаар харуулна — админы CSS
+ *  нь сайттай нэг globals.css тул preview нь бодит үр дүн. */
+function GlassPreview({ g }: { g: GlassContent }) {
+  const off = g.mode === "off";
+  const vars =
+    g.mode === "custom"
+      ? ({ "--glass-blur": `${g.blur}px`, "--glass-sat": `${g.saturation}%` } as React.CSSProperties)
+      : undefined;
+  return (
+    <div
+      style={vars}
+      className="relative overflow-hidden rounded-2xl"
+      aria-hidden
+    >
+      {/* Ард нь өнгөт зураас — шил ажиллаж байгаа эсэхийг эндээс харна */}
+      <div className="h-[128px] w-full bg-[linear-gradient(115deg,#2a5124_0%,#b4d656_28%,#f4f4f1_52%,#151717_78%,#3f6a33_100%)]" />
+      <div className="absolute inset-0 flex items-center justify-center gap-3">
+        <span
+          className={`rounded-full px-4 py-2 text-[12px] font-bold uppercase tracking-[0.1em] text-neutral-900 ${
+            off ? "bg-white/96" : "glass glass-chip"
+          }`}
+        >
+          Цайвар шил
+        </span>
+        <span
+          className={`rounded-full px-4 py-2 text-[12px] font-bold uppercase tracking-[0.1em] text-white ${
+            off ? "bg-[#151717]/[0.86]" : "glass-dark glass-chip"
+          }`}
+        >
+          Хар шил
+        </span>
+      </div>
+    </div>
+  );
+}
+
+export function GlassPanel({
+  value,
+  onChange,
+}: {
+  value: GlassContent;
+  onChange: (next: GlassContent) => void;
+}) {
+  const active = GLASS_PRESETS.find(
+    (p) => JSON.stringify(p.value) === JSON.stringify(value)
+  )?.id;
+  const custom = value.mode === "custom";
+
+  return (
+    <Card
+      title="Шилэн гадаргуу"
+      right={<span className="text-xs text-neutral-400">Толгой, тэмдэг, товч, pop-up</span>}
+    >
+      <p className="mb-3.5 text-[13px] leading-relaxed text-neutral-500">
+        Зураг, кадрын дээр суудаг гадаргуунуудын тунгалаг байдал. Ханалт нь хамгийн чухал: зөвхөн
+        бүдгэрүүлэлт бол манан, ханалт нэмэхэд шил болно.
+      </p>
+
+      <GlassPreview g={value} />
+
+      <div className="mt-4 flex flex-wrap gap-1.5">
+        {GLASS_PRESETS.map((p) => (
+          <button
+            key={p.id}
+            type="button"
+            onClick={() => onChange({ ...p.value })}
+            className={`rounded-lg border px-3.5 py-2 text-[13px] font-semibold transition-colors ${
+              active === p.id
+                ? "border-[#2a5124] bg-[#2a5124]/5 text-[#2a5124]"
+                : "border-neutral-300 text-neutral-500 hover:bg-neutral-50"
+            }`}
+          >
+            {p.label}
+          </button>
+        ))}
+      </div>
+
+      {value.mode !== "off" && (
+        <div className="mt-5 grid gap-5 sm:grid-cols-2">
+          <Field label={`Бүдгэрүүлэлт — ${value.blur}px`}>
+            <input
+              type="range"
+              min={4}
+              max={40}
+              step={1}
+              value={value.blur}
+              onChange={(e) => onChange({ ...value, mode: "custom", blur: Number(e.target.value) })}
+              className="w-full accent-[#2a5124]"
+            />
+          </Field>
+          <Field label={`Ханалт — ${value.saturation}%`} hint="100% = өнгө нэмэхгүй (манан). 165% = шил.">
+            <input
+              type="range"
+              min={100}
+              max={220}
+              step={5}
+              value={value.saturation}
+              onChange={(e) =>
+                onChange({ ...value, mode: "custom", saturation: Number(e.target.value) })
+              }
+              className="w-full accent-[#2a5124]"
+            />
+          </Field>
+        </div>
+      )}
+
+      <p className="mt-4 border-t border-neutral-200 pt-3.5 text-xs leading-relaxed text-neutral-400">
+        {value.mode === "off"
+          ? "Шил унтраалттай — гадаргуунууд дүүргэлттэй болно."
+          : custom
+            ? "Тохируулсан горим — сайт дээр нэмэлт CSS үүснэ."
+            : "Өгөгдмөл горим — сайт дээр нэмэлт CSS үүсэхгүй."}{" "}
+        Тунгалаг байдлыг багасгах тохиргоотой (`prefers-reduced-transparency`) хэрэглэгч энэ
+        тохиргооноос үл хамааран дүүргэлттэй хувилбар авна.
+      </p>
+    </Card>
+  );
+}
+
 /* ------------------------------------------------------------------ */
 /* Бэлэн палитрууд                                                     */
 /* ------------------------------------------------------------------ */
@@ -1030,6 +1162,8 @@ export function DesignPanel({
 
       {tab === "bg" && (
       <>
+      <GlassPanel value={theme.glass} onChange={(glass) => onChange({ ...theme, glass })} />
+
       <Card title="Хуудасны суурь дэвсгэр" right={<span className="text-xs text-neutral-400">html</span>}>
         <p className="mb-4 text-[13px] leading-relaxed text-neutral-500">
           Гүйлтийн хязгаараас хальсан үед (overscroll) харагдах өнгө.
