@@ -8,6 +8,10 @@
 
 import { useState } from "react";
 import {
+  BODY_FONTS,
+  DISPLAY_FONTS,
+  type FontOption,
+  type TypeContent,
   BACKGROUND_TOKENS,
   BG_ATTACHMENTS,
   BG_POSITIONS,
@@ -481,6 +485,371 @@ export function BackgroundField({
   );
 }
 
+
+/* ------------------------------------------------------------------ */
+/* Типографи                                                           */
+/* ------------------------------------------------------------------ */
+
+/** Админ дээр дээж харуулахын тулд бүх сонгож болох фонтыг татна.
+ *  (Зөвхөн энэ хуудсанд — нийтийн сайт зөвхөн СОНГОСОН фонтоо татна.) */
+const SPECIMEN_HREF =
+  "https://fonts.googleapis.com/css2?" +
+  [...new Set([...DISPLAY_FONTS, ...BODY_FONTS].map((f) => f.google).filter(Boolean))]
+    .map((f) => `family=${f}`)
+    .join("&") +
+  "&display=swap";
+
+type TypePreset = { id: string; label: string; value: TypeContent };
+
+const TYPE_PRESETS: TypePreset[] = [
+  {
+    id: "default",
+    label: "Одоогийн (Gilroy)",
+    value: { ...DEFAULT_THEME.type },
+  },
+  {
+    id: "classic",
+    label: "Сонгодог",
+    value: {
+      mode: "custom", displayFont: "cormorant", bodyFont: "onest",
+      headingWeight: 400, headingTracking: 0.08, headingLeading: 1.02,
+      headingUppercase: true, scale: 1,
+    },
+  },
+  {
+    id: "editorial",
+    label: "Редакцийн",
+    value: {
+      mode: "custom", displayFont: "playfair", bodyFont: "golos",
+      headingWeight: 400, headingTracking: 0.02, headingLeading: 1.05,
+      headingUppercase: false, scale: 1,
+    },
+  },
+  {
+    id: "modern",
+    label: "Орчин үеийн",
+    value: {
+      mode: "custom", displayFont: "jost", bodyFont: "manrope",
+      headingWeight: 300, headingTracking: 0.14, headingLeading: 1.02,
+      headingUppercase: true, scale: 1,
+    },
+  },
+];
+
+function stackOf(list: FontOption[], id: string): string {
+  return (list.find((f) => f.id === id) ?? list[0]).stack;
+}
+
+function CyrillicBadge() {
+  return (
+    <span className="inline-flex items-center rounded-full bg-green-50 px-2 py-0.5 text-[10px] font-bold tracking-[0.04em] text-green-700">
+      КИРИЛЛ ✓
+    </span>
+  );
+}
+
+/** Фонтыг ЖАГСААЛТААР — dropdown-д зөвхөн нэр харагдана, дизайнер
+ *  сонгохоосоо өмнө үсгийг нь харах ёстой. Мөр бүрт латин + кирилл дээж. */
+function FontList({
+  fonts,
+  value,
+  onChange,
+}: {
+  fonts: FontOption[];
+  value: string;
+  onChange: (id: string) => void;
+}) {
+  return (
+    <div className="flex flex-col gap-2">
+      {fonts.map((f) => {
+        const on = f.id === value;
+        return (
+          <button
+            key={f.id}
+            type="button"
+            onClick={() => onChange(f.id)}
+            className={`flex items-center gap-3.5 rounded-xl border px-4 py-3 text-left transition-colors ${
+              on ? "border-2 border-[#2a5124] bg-[#2a5124]/5 px-[15px] py-[11px]" : "border-neutral-300 bg-white hover:bg-neutral-50"
+            }`}
+          >
+            <span
+              aria-hidden
+              className={`h-4 w-4 shrink-0 rounded-full ${
+                on ? "border-[5px] border-[#2a5124]" : "border border-neutral-300"
+              }`}
+            />
+            <span className="min-w-0 flex-1">
+              <span className="flex flex-wrap items-center gap-2">
+                <span className="text-[14px] font-bold text-neutral-900">{f.label}</span>
+                <CyrillicBadge />
+              </span>
+              <span className="mt-0.5 block text-[12px] text-neutral-500">{f.note}</span>
+            </span>
+            <span className="shrink-0 text-right leading-[1.15]" style={{ fontFamily: f.stack }}>
+              <span className="block text-[21px] text-neutral-900">Elysium</span>
+              <span className="block text-[15px] text-neutral-500">Орон сууц</span>
+            </span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function Segmented({
+  options,
+  value,
+  onChange,
+}: {
+  options: number[];
+  value: number;
+  onChange: (v: number) => void;
+}) {
+  return (
+    <div className="flex flex-wrap gap-1.5">
+      {options.map((o) => (
+        <button
+          key={o}
+          type="button"
+          onClick={() => onChange(o)}
+          className={`rounded-lg border px-3.5 py-2 text-[13px] font-semibold transition-colors ${
+            o === value
+              ? "border-[#2a5124] bg-[#2a5124]/5 text-[#2a5124]"
+              : "border-neutral-300 text-neutral-500 hover:bg-neutral-50"
+          }`}
+        >
+          {o}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/** Нүүр дэлгэцийн бичгийг тухайн тохиргоогоор харуулах хар самбар. */
+function TypePreview({ t }: { t: TypeContent }) {
+  const display = stackOf(DISPLAY_FONTS, t.displayFont);
+  const body = stackOf(BODY_FONTS, t.bodyFont);
+  const custom = t.mode === "custom";
+  return (
+    <div className="overflow-hidden rounded-2xl bg-[#151717] px-8 py-7">
+      <p
+        className="text-[10px] font-medium uppercase tracking-[0.34em] text-white/55"
+        style={{ fontFamily: custom ? body : undefined }}
+      >
+        Бизнес зэрэглэлийн орон сууц
+      </p>
+      <p
+        className="mt-3.5 text-white"
+        style={{
+          fontFamily: custom ? display : undefined,
+          fontSize: `${Math.round(54 * (custom ? t.scale : 1))}px`,
+          fontWeight: custom ? t.headingWeight : 500,
+          letterSpacing: custom ? `${t.headingTracking}em` : "-0.2px",
+          lineHeight: custom ? t.headingLeading : 1.05,
+          textTransform: (custom ? t.headingUppercase : true) ? "uppercase" : "none",
+        }}
+      >
+        Elysium Residence
+      </p>
+      <p
+        className="mt-4 max-w-[44ch] leading-[1.7] text-white/[0.78]"
+        style={{
+          fontFamily: custom ? body : undefined,
+          fontSize: `${Math.round(14 * (custom ? t.scale : 1))}px`,
+        }}
+      >
+        Туул голын салхи илбэсэн бүсэд байршилтай, архитектур болон инженерингийн эргономик
+        шийдэлтэй орон сууц.
+      </p>
+      <span
+        className="mt-5 inline-flex items-center rounded-full bg-white px-5 py-2.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#151717]"
+        style={{ fontFamily: custom ? body : undefined }}
+      >
+        Уулзалт товлох
+      </span>
+    </div>
+  );
+}
+
+export function TypePanel({
+  value,
+  onChange,
+}: {
+  value: TypeContent;
+  onChange: (next: TypeContent) => void;
+}) {
+  /* Ямар нэг хөшүүрэг хөдөлмөгц `custom` руу шилжинэ — тэр мөчөөс
+     эхлэн сайт дээр CSS үүсч, тохиргоо үйлчилнэ. */
+  const set = (patch: Partial<TypeContent>) => onChange({ ...value, ...patch, mode: "custom" });
+  const custom = value.mode === "custom";
+  const activePreset = TYPE_PRESETS.find(
+    (p) => JSON.stringify(p.value) === JSON.stringify(value)
+  )?.id;
+
+  return (
+    <>
+      {/* Админ дээр дээж харуулахад бүх фонт хэрэгтэй */}
+      {/* eslint-disable-next-line @next/next/no-page-custom-font */}
+      <link rel="stylesheet" href={SPECIMEN_HREF} />
+
+      {/* Preview нь ДЭЭРЭЭ, гүйлгэхэд дагаж наалдана — хөшүүрэг
+          тохируулж байхад үр дүн үргэлж нүдний өмнө байх ёстой. */}
+      <div className="sticky top-4 z-10">
+        <Card title="Амьд preview" right={<span className="text-xs text-neutral-400">Нүүр дэлгэц</span>}>
+          <TypePreview t={value} />
+          <p className="mt-3.5 text-xs leading-relaxed text-neutral-400">
+            Латин ба кирилл хоёулаа харагдана — сонгосон фонт монгол бичигт хэрхэн буухыг эндээс
+            шалгана.
+            {!custom && " Одоо кодын өгөгдмөл хэвээр: сайт дээр нэмэлт CSS, нэмэлт фонт татагдахгүй."}
+          </p>
+        </Card>
+      </div>
+
+      <Card title="Бэлэн хослол">
+        <p className="mb-3.5 text-[13px] leading-relaxed text-neutral-500">
+          Нэг товчоор фонт, жин, үсэг хоорондын зайг хамт сольж, дараа нь доор гараар засна.
+        </p>
+        <div className="flex flex-wrap gap-2.5">
+          {TYPE_PRESETS.map((p) => {
+            const on = activePreset === p.id;
+            const d = stackOf(DISPLAY_FONTS, p.value.displayFont);
+            const b = stackOf(BODY_FONTS, p.value.bodyFont);
+            return (
+              <button
+                key={p.id}
+                type="button"
+                onClick={() => onChange({ ...p.value })}
+                className={`flex flex-col gap-2 rounded-xl border px-4 py-3 text-left transition-colors ${
+                  on ? "border-2 border-[#2a5124] bg-[#2a5124]/5 px-[15px] py-[11px]" : "border-neutral-300 bg-white hover:bg-neutral-50"
+                }`}
+              >
+                <span
+                  className="text-[24px] leading-none text-neutral-900"
+                  style={{
+                    fontFamily: d,
+                    fontWeight: p.value.headingWeight,
+                    letterSpacing: `${p.value.headingTracking}em`,
+                    textTransform: p.value.headingUppercase ? "uppercase" : "none",
+                  }}
+                >
+                  Elysium
+                </span>
+                <span className="text-[12px] text-neutral-500" style={{ fontFamily: b }}>
+                  Орон сууц
+                </span>
+                <span className={`text-[12px] font-bold ${on ? "text-[#2a5124]" : "text-neutral-700"}`}>
+                  {p.label}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </Card>
+
+      <Card title="Фонт" right={<span className="text-xs text-neutral-400">{DISPLAY_FONTS.length + BODY_FONTS.length} сонголт</span>}>
+        <Field
+          label="Гарчгийн фонт"
+          hint="Брэндийн нэр, хэсгийн гарчиг. Жагсаалтад ЗӨВХӨН кирилл дэмждэг фонт орсон — эс бөгөөс монгол бичиг системийн фонт руу унана."
+        >
+          <div className="mt-1.5">
+            <FontList fonts={DISPLAY_FONTS} value={value.displayFont} onChange={(displayFont) => set({ displayFont })} />
+          </div>
+        </Field>
+        <div className="h-5" />
+        <Field label="Бичвэрийн фонт" hint="Тайлбар, жагсаалт, товчны бичиг.">
+          <div className="mt-1.5">
+            <FontList fonts={BODY_FONTS} value={value.bodyFont} onChange={(bodyFont) => set({ bodyFont })} />
+          </div>
+        </Field>
+      </Card>
+
+      <Card title="Гарчгийн шинж">
+        <div className="grid gap-5 sm:grid-cols-2">
+          <Field label="Жин" hint="300 = тансаг · 700 = корпоратив">
+            <div className="mt-1.5">
+              <Segmented
+                options={[300, 400, 500, 700, 800]}
+                value={value.headingWeight}
+                onChange={(headingWeight) => set({ headingWeight })}
+              />
+            </div>
+          </Field>
+          <Field label={`Үсэг хоорондын зай — ${value.headingTracking > 0 ? "+" : ""}${value.headingTracking}em`}>
+            <input
+              type="range"
+              min={-0.03}
+              max={0.2}
+              step={0.005}
+              value={value.headingTracking}
+              onChange={(e) => set({ headingTracking: Number(e.target.value) })}
+              className="w-full accent-[#2a5124]"
+            />
+          </Field>
+          <Field label={`Мөрийн өндөр — ${value.headingLeading}`}>
+            <input
+              type="range"
+              min={0.95}
+              max={1.2}
+              step={0.01}
+              value={value.headingLeading}
+              onChange={(e) => set({ headingLeading: Number(e.target.value) })}
+              className="w-full accent-[#2a5124]"
+            />
+          </Field>
+          <Field label="Хэлбэр">
+            <div className="mt-2.5">
+              <Toggle
+                checked={value.headingUppercase}
+                onChange={(headingUppercase) => set({ headingUppercase })}
+                label="Том үсгээр бичих"
+              />
+            </div>
+          </Field>
+        </div>
+      </Card>
+
+      <Card title="Ерөнхий хэмжээ">
+        <Field
+          label={`Коэффициент — ${value.scale.toFixed(2)}×`}
+          hint="Бүх шатлал ХАМТ томорно/жижигрэнэ — тус тусад нь биш. Ингэснээр шатлал хоорондын харьцаа хэзээ ч эвдрэхгүй."
+        >
+          <input
+            type="range"
+            min={0.9}
+            max={1.15}
+            step={0.01}
+            value={value.scale}
+            onChange={(e) => set({ scale: Number(e.target.value) })}
+            className="w-full accent-[#2a5124]"
+          />
+        </Field>
+        <div className="mt-4 flex flex-wrap gap-4 border-t border-neutral-200 pt-3.5 text-xs text-neutral-500">
+          {[
+            ["H1 (hero)", 73.6],
+            ["H2 (хэсэг)", 44.8],
+            ["Тайлбар", 16],
+          ].map(([label, base]) => (
+            <span key={label as string}>
+              {label} <b className="text-neutral-900">{Math.round((base as number) * value.scale)}px</b>
+            </span>
+          ))}
+        </div>
+      </Card>
+
+      <div className="flex flex-wrap items-center gap-2 border-t border-neutral-200 pt-4">
+        <Button type="button" variant="ghost" onClick={() => onChange({ ...DEFAULT_THEME.type })}>
+          Типографийг өгөгдмөл рүү буцаах
+        </Button>
+        {custom && (
+          <span className="text-xs text-neutral-400">
+            Одоо тохируулсан горимд — сайт дээр нэмэлт CSS үүснэ.
+          </span>
+        )}
+      </div>
+    </>
+  );
+}
+
 /* ------------------------------------------------------------------ */
 /* Бэлэн палитрууд                                                     */
 /* ------------------------------------------------------------------ */
@@ -525,6 +894,7 @@ export function DesignPanel({
   onChange: (next: ThemeContent) => void;
 }) {
   const [open, setOpen] = useState<string | null>(null);
+  const [tab, setTab] = useState<"color" | "type" | "bg">("color");
   const p = theme.palette;
 
   const setPalette = (patch: Partial<ThemeContent["palette"]>) =>
@@ -537,8 +907,40 @@ export function DesignPanel({
   const changed = (bg: Background) =>
     JSON.stringify(bg) !== JSON.stringify(defaultBackground());
 
+  const TABS = [
+    { id: "color", label: "Өнгө" },
+    { id: "type", label: "Типографи" },
+    { id: "bg", label: "Дэвсгэр" },
+  ] as const;
+
   return (
     <>
+      <div className="flex flex-wrap gap-1.5">
+        {TABS.map((t) => (
+          <button
+            key={t.id}
+            type="button"
+            onClick={() => setTab(t.id)}
+            className={`rounded-lg border px-3.5 py-2 text-[13px] font-semibold transition-colors ${
+              tab === t.id
+                ? "border-2 border-[#2a5124] bg-[#2a5124]/5 px-[13px] py-[7px] text-[#2a5124]"
+                : "border-neutral-300 bg-white text-neutral-500 hover:bg-neutral-50"
+            }`}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      {tab === "type" && (
+        <TypePanel
+          value={theme.type}
+          onChange={(type) => onChange({ ...theme, type })}
+        />
+      )}
+
+      {tab === "color" && (
+      <>
       <Card title="Бэлэн палитр">
         <p className="mb-3 text-[13px] leading-relaxed text-neutral-500">
           Нэг товчоор бүх өнгийг сольж, дараа нь доор гараар засна. Хэсэг тус
@@ -623,6 +1025,11 @@ export function DesignPanel({
         </div>
       </Card>
 
+      </>
+      )}
+
+      {tab === "bg" && (
+      <>
       <Card title="Хуудасны суурь дэвсгэр" right={<span className="text-xs text-neutral-400">html</span>}>
         <p className="mb-4 text-[13px] leading-relaxed text-neutral-500">
           Гүйлтийн хязгаараас хальсан үед (overscroll) харагдах өнгө.
@@ -676,6 +1083,8 @@ export function DesignPanel({
           })}
         </ul>
       </Card>
+      </>
+      )}
     </>
   );
 }

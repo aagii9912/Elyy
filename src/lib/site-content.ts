@@ -147,7 +147,116 @@ export const THEME_SECTIONS = [
 
 export type ThemeSectionId = (typeof THEME_SECTIONS)[number]["id"];
 
+/* ---- Типографи ------------------------------------------------- */
+
+/** Админд сонгож болох фонт. `google` хоосон = локал (next/font).
+ *  ЗӨВХӨН кирилл дэмждэг фонт орно — эс бөгөөс монгол бичиг чимээгүйхэн
+ *  системийн фонт руу унана (Bodoni Moda, Marcellus, Instrument Serif,
+ *  Figtree зэрэг олон «тансаг» фонт кириллгүй). */
+export type FontOption = {
+  id: string;
+  label: string;
+  note: string;
+  /** CSS `font-family` утга. */
+  stack: string;
+  /** Google Fonts-ын `family=` тодорхойлолт. Хоосон = татах шаардлагагүй. */
+  google: string;
+};
+
+const LOCAL_STACK = "var(--font-gilroy), ui-sans-serif, system-ui, sans-serif";
+
+/** Гарчгийн фонт. */
+export const DISPLAY_FONTS: FontOption[] = [
+  { id: "gilroy", label: "Gilroy", note: "Брэндийн фонт · өгөгдмөл", stack: LOCAL_STACK, google: "" },
+  {
+    id: "cormorant",
+    label: "Cormorant Garamond",
+    note: "Сонгодог serif · өндөр контраст",
+    stack: "'Cormorant Garamond', Georgia, serif",
+    google: "Cormorant+Garamond:wght@300;400;500;600;700",
+  },
+  {
+    id: "playfair",
+    label: "Playfair Display",
+    note: "Редакцийн serif",
+    stack: "'Playfair Display', Georgia, serif",
+    google: "Playfair+Display:wght@400;500;600;700;800;900",
+  },
+  {
+    id: "unbounded",
+    label: "Unbounded",
+    note: "Орчин үеийн display",
+    stack: "'Unbounded', ui-sans-serif, system-ui, sans-serif",
+    google: "Unbounded:wght@300;400;500;600;700;800",
+  },
+  {
+    id: "jost",
+    label: "Jost",
+    note: "Futura маягийн geometric",
+    stack: "'Jost', ui-sans-serif, system-ui, sans-serif",
+    google: "Jost:wght@300;400;500;600;700",
+  },
+];
+
+/** Бичвэрийн фонт. */
+export const BODY_FONTS: FontOption[] = [
+  { id: "gilroy", label: "Gilroy", note: "Брэндийн фонт · өгөгдмөл", stack: LOCAL_STACK, google: "" },
+  {
+    id: "onest",
+    label: "Onest",
+    note: "Кирилл сайн зассан",
+    stack: "'Onest', ui-sans-serif, system-ui, sans-serif",
+    google: "Onest:wght@400;500;600;700",
+  },
+  {
+    id: "manrope",
+    label: "Manrope",
+    note: "Нам гүм, өргөн",
+    stack: "'Manrope', ui-sans-serif, system-ui, sans-serif",
+    google: "Manrope:wght@400;500;600;700",
+  },
+  {
+    id: "golos",
+    label: "Golos Text",
+    note: "Уншихад хялбар",
+    stack: "'Golos Text', ui-sans-serif, system-ui, sans-serif",
+    google: "Golos+Text:wght@400;500;600;700",
+  },
+  {
+    id: "commissioner",
+    label: "Commissioner",
+    note: "Төвийг сахисан",
+    stack: "'Commissioner', ui-sans-serif, system-ui, sans-serif",
+    google: "Commissioner:wght@400;500;600;700",
+  },
+];
+
+/** `mode` — `default` үед CSS ОГТ үүсэхгүй, сайт кодын өгөгдмөлөөрөө
+ *  үлдэнэ. Дизайнер ямар нэг зүйл сонгосон үед л `custom` болно. */
+export const TYPE_MODES = ["default", "custom"] as const;
+
+export type TypeContent = {
+  mode: string;
+  /** `DISPLAY_FONTS`-ийн id. */
+  displayFont: string;
+  /** `BODY_FONTS`-ийн id. */
+  bodyFont: string;
+  /** Гарчгийн жин 300–800. */
+  headingWeight: number;
+  /** Үсэг хоорондын зай (em) −0.03 … 0.20. */
+  headingTracking: number;
+  /** Мөрийн өндөр 0.95 … 1.20. */
+  headingLeading: number;
+  /** Гарчгийг том үсгээр. */
+  headingUppercase: boolean;
+  /** Бүх шатлалын хэмжээний коэффициент 0.90 … 1.15. */
+  scale: number;
+};
+
 export type ThemeContent = {
+  /** Типографи — фонт, жин, үсэг хоорондын зай, хэмжээ. */
+  type: TypeContent;
+
   /** Глобал палитр — CSS токен руу шууд буудаг (`--color-*`). */
   palette: {
     /** Хуудасны үндсэн дэвсгэр (`--color-ground`). */
@@ -511,6 +620,20 @@ export function defaultBackground(): Background {
 }
 
 export const DEFAULT_THEME: ThemeContent = {
+  /* `default` — CSS үүсэхгүй. Доорх утгууд нь дизайнер `custom` руу
+     шилжихэд слайдерууд эхлэх цэг болно (аль ч гарчигт зохимжтой,
+     аль хэдийн сайжирсан утга). */
+  type: {
+    mode: "default",
+    displayFont: "gilroy",
+    bodyFont: "gilroy",
+    headingWeight: 500,
+    headingTracking: 0.06,
+    headingLeading: 1.05,
+    headingUppercase: true,
+    scale: 1,
+  },
+
   palette: {
     ground: "#f4f4f1",
     surface: "#ffffff",

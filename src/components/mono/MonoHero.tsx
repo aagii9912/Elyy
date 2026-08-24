@@ -186,7 +186,7 @@ export function MonoHero({ site }: { site: SiteContent }) {
             <p className="mono-fade-up mb-5 text-[11px] font-semibold uppercase tracking-[0.42em] text-lime md:mb-6 md:text-[12px]" style={{ animationDelay: "0.4s" }}>
               {brand.tag}
             </p>
-            <h1 className="text-[clamp(2.6rem,7.5vw,4.6rem)] font-medium uppercase leading-[1.05] tracking-[-0.2px] text-white [text-wrap:balance] drop-shadow-[0_2px_30px_rgba(0,0,0,0.4)]">
+            <h1 className="mono-h1 text-white drop-shadow-[0_2px_30px_rgba(0,0,0,0.4)]">
               {/* word-by-word mask rise */}
               {brand.line.split(" ").map((word, i) => (
                 <Fragment key={`${word}-${i}`}>

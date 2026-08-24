@@ -15,6 +15,11 @@
    ============================================================ */
 
 import {
+  BODY_FONTS,
+  DISPLAY_FONTS,
+  TYPE_MODES,
+  type FontOption,
+  type TypeContent,
   BACKGROUND_KINDS,
   BACKGROUND_TOKENS,
   BG_ATTACHMENTS,
@@ -253,6 +258,77 @@ export function sectionTone(
   return value === "auto" ? fallback : value;
 }
 
+
+/* ------------------------------------------------------------------ */
+/* Типографи                                                           */
+/* ------------------------------------------------------------------ */
+
+function fontOf(list: FontOption[], id: unknown): FontOption {
+  const key = typeof id === "string" ? id : "";
+  return list.find((f) => f.id === key) ?? list[0];
+}
+
+/** Хадгалахын өмнөх цэвэрлэгээ — бүх утга зөвшөөрөгдсөн мужид. */
+export function sanitizeType(t: TypeContent | undefined): TypeContent {
+  const d = DEFAULT_THEME.type;
+  const src = t ?? d;
+  return {
+    mode: pick(src.mode, TYPE_MODES, "default"),
+    displayFont: fontOf(DISPLAY_FONTS, src.displayFont).id,
+    bodyFont: fontOf(BODY_FONTS, src.bodyFont).id,
+    /* Жин нь 100-ийн алхамтай — дурын тоо CSS-д орохоос сэргийлнэ. */
+    headingWeight: Math.round(num(src.headingWeight, 300, 800, d.headingWeight) / 100) * 100,
+    headingTracking: Math.round(num(src.headingTracking, -0.03, 0.2, d.headingTracking) * 1000) / 1000,
+    headingLeading: Math.round(num(src.headingLeading, 0.95, 1.2, d.headingLeading) * 100) / 100,
+    headingUppercase:
+      typeof src.headingUppercase === "boolean" ? src.headingUppercase : d.headingUppercase,
+    scale: Math.round(num(src.scale, 0.9, 1.15, d.scale) * 100) / 100,
+  };
+}
+
+/** Сонгосон фонтуудыг татах Google Fonts хаяг. Хоосон = татах юмгүй
+ *  (өгөгдмөл Gilroy нь локал тул НЭМЭЛТ ХҮСЭЛТ ГАРАХГҮЙ). */
+export function googleFontHref(theme: ThemeContent | undefined): string {
+  const t = sanitizeType(theme?.type);
+  if (t.mode !== "custom") return "";
+  const specs = [
+    fontOf(DISPLAY_FONTS, t.displayFont).google,
+    fontOf(BODY_FONTS, t.bodyFont).google,
+  ].filter(Boolean);
+  const unique = [...new Set(specs)];
+  if (!unique.length) return "";
+  return `https://fonts.googleapis.com/css2?${unique.map((f) => `family=${f}`).join("&")}&display=swap`;
+}
+
+/** Типографийн CSS. `default` горимд ХООСОН — сайт хэвээрээ. */
+function typeCss(theme: ThemeContent): string {
+  const t = sanitizeType(theme.type);
+  if (t.mode !== "custom") return "";
+
+  const display = fontOf(DISPLAY_FONTS, t.displayFont).stack;
+  const body = fontOf(BODY_FONTS, t.bodyFont).stack;
+  const rules: string[] = [];
+
+  /* Гарчгийн токенууд. `.mono-h1` ба `.mono-h2` эдгээрийг ӨӨР ӨӨР
+     нөөц утгатайгаар уншдаг тул тохируулаагүй үед тус тусын кодын
+     өгөгдмөл хэвээр үлдэж, тохируулмагц ХОЁУЛАА нэг системд орно. */
+  rules.push(
+    `.mono-page{` +
+      `--ely-h-weight:${t.headingWeight};` +
+      `--ely-h-track:${t.headingTracking}em;` +
+      `--ely-h-leading:${t.headingLeading};` +
+      `--ely-h-transform:${t.headingUppercase ? "uppercase" : "none"};` +
+      `--ely-scale:${t.scale};` +
+      `font-family:${body};` +
+      `}`
+  );
+  /* Tailwind-ийн `font-gilroy` утилитыг дарна (layer-гүй тул ялна). */
+  rules.push(`.mono-page .mono-h1,.mono-page .mono-h2{font-family:${display}}`);
+  rules.push(`.mono-page .font-gilroy{font-family:${body}}`);
+
+  return rules.join("\n");
+}
+
 /* ------------------------------------------------------------------ */
 /* Гол функц                                                           */
 /* ------------------------------------------------------------------ */
@@ -289,7 +365,11 @@ export function buildThemeCss(theme: ThemeContent | undefined): string {
     if (before) rules.push(`.mono-page [data-bg="${id}"]::before{${before}}`);
   }
 
-  /* 4) Мобайл дээр `fixed` нь iOS-д гацдаг — үргэлж scroll руу буулгана. */
+  /* 4) Типографи — `default` горимд юу ч үүсэхгүй. */
+  const type = typeCss(t);
+  if (type) rules.push(type);
+
+  /* 5) Мобайл дээр `fixed` нь iOS-д гацдаг — үргэлж scroll руу буулгана. */
   if (rules.some((r) => r.includes("background-attachment:fixed"))) {
     rules.push(`@media (max-width:767px){.mono-page [data-bg]{background-attachment:scroll!important}}`);
   }
@@ -348,6 +428,7 @@ export function sanitizeTheme(theme: ThemeContent | undefined): ThemeContent {
     sections[id] = sanitizeBackground(t.sections?.[id]);
   }
   return {
+    type: sanitizeType(t.type),
     palette: {
       ground: hex(p.ground, d.ground),
       surface: hex(p.surface, d.surface),

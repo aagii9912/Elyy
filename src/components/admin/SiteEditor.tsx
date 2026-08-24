@@ -42,7 +42,7 @@ type SectionId =
   | "seo";
 
 const SECTIONS: { id: SectionId; label: string; hint: string }[] = [
-  { id: "design", label: "🎨 Дизайн / Өнгө", hint: "Палитр, дэвсгэр, градиент, зураг" },
+  { id: "design", label: "🎨 Дизайн", hint: "Өнгө, типографи, дэвсгэр" },
   { id: "brand", label: "Брэнд & холбоо", hint: "Нэр, уриа, и-мэйл, танилцуулга" },
   { id: "brochure", label: "Танилцуулга татах", hint: "Утас/и-мэйл цуглуулах маягт" },
   { id: "nav", label: "Толгой цэс", hint: "Навигац, товчнууд" },

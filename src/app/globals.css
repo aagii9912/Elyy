@@ -130,11 +130,25 @@
    дарж чадна, өөрөөр хэлбэл онцгой тохиолдолд газар дээр нь засаж болно.
    ============================================================ */
 @layer components {
+  /* Гарчгийн токенууд (`--ely-h-*`, `--ely-scale`) нь `/admin/site →
+     Дизайн → Типографи`-аас ирнэ (`lib/theme-css.ts`). h1 ба h2 нь
+     ӨӨР ӨӨР нөөц утгатай: админ юу ч тохируулаагүй үед тус бүр өөрийн
+     кодын өгөгдмөлөөрөө үлдэж, тохируулмагц хоёулаа нэг системд орно. */
+  .mono-h1 {
+    font-size: calc(clamp(2.6rem, 7.5vw, 4.6rem) * var(--ely-scale, 1));
+    font-weight: var(--ely-h-weight, 500);
+    line-height: var(--ely-h-leading, 1.05);
+    letter-spacing: var(--ely-h-track, -0.2px);
+    text-transform: var(--ely-h-transform, uppercase);
+    text-wrap: balance;
+  }
+
   .mono-h2 {
-    font-size: clamp(1.7rem, 3.4vw, 2.8rem);
-    font-weight: 800;
-    line-height: 1.08;
-    letter-spacing: -0.02em;
+    font-size: calc(clamp(1.7rem, 3.4vw, 2.8rem) * var(--ely-scale, 1));
+    font-weight: var(--ely-h-weight, 800);
+    line-height: var(--ely-h-leading, 1.08);
+    letter-spacing: var(--ely-h-track, -0.02em);
+    text-transform: var(--ely-h-transform, none);
     color: var(--ely-fg);
     text-wrap: balance;
   }
@@ -144,7 +158,7 @@
      сунаж, нүд мөр солиход төөрдөг байв). */
   .mono-lead {
     max-width: 46ch;
-    font-size: 0.9375rem;
+    font-size: calc(0.9375rem * var(--ely-scale, 1));
     line-height: 1.7;
     color: rgba(21, 23, 23, 0.62);
     color: color-mix(in oklab, var(--ely-fg) 62%, transparent);
@@ -152,7 +166,7 @@
 
   @media (min-width: 768px) {
     .mono-lead {
-      font-size: 1rem;
+      font-size: calc(1rem * var(--ely-scale, 1));
       line-height: 1.72;
     }
   }
