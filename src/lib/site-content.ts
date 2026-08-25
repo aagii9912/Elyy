@@ -231,7 +231,26 @@ export type SiteContent = {
    *  (кино маягийн `/noir` theme дээр мөр тус бүр тусдаа гарч ирнэ);
    *  хоосон бол `brand.line` рүү буцна. `video` — бүтэн дэлгэцийн
    *  давтагдах клип, `poster` — клип ачаалахаас өмнөх кадр. */
-  hero: { title: string; sub: string; video: string; poster: string };
+  hero: {
+    title: string;
+    sub: string;
+    video: string;
+    poster: string;
+    /** `/velorah` — шилэн (glassmorphic) кино hero. Зөвхөн тэр хуудсанд. */
+    cinema: {
+      /** Толгойн богино wordmark. Хоосон бол `brand.line` орно. */
+      logo: string;
+      /** Wordmark-ийн дээд индекс (ж: ®). Хоосон бол огт гарахгүй.
+       *  ⚠️ ® нь БҮРТГЭГДСЭН барааны тэмдгийг илэрхийлдэг — брэнд
+       *  бүртгэлгүй бол энэ талбарыг хоосон болгоно уу. */
+      mark: string;
+      /** Гол өгүүлбэр. `*од*` дотор орсон хэсэг нь бүдэг өнгөөр
+       *  ялгарч гарна (макетын хоёр өнгийн эффект). */
+      headline: string;
+      /** Бүтэн дэлгэцийн давтагдах клип. */
+      video: string;
+    };
+  };
 
   /** Chapter 01 — Ерөнхий төлөвлөлт (тоон үзүүлэлт). */
   plan: { kicker: string; title: string; points: StoryPointContent[] };
@@ -595,6 +614,13 @@ export const DEFAULT_SITE_CONTENT: SiteContent = {
     sub: "Туул голын салхи илбэсэн бүсэд байршилтай, архитектур болон инженерингийн эргономик шийдэлтэй орон сууц.",
     video: "/video/hero-source.mp4",
     poster: "/hero-video-frames/frame_132.webp",
+    cinema: {
+      logo: "Elysium",
+      mark: "®",
+      headline: "*Мөрөөдөл* нам гүмээр дамжин *дээшлэх орон зай.*",
+      video:
+        "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260314_131748_f2ca2a28-fed7-44c8-b9a9-bd9acdd5ec31.mp4",
+    },
   },
 
   plan: {

@@ -565,6 +565,51 @@ function renderSection(
             </p>
           </Card>
 
+          <Card title="Шилэн кино hero (/velorah)">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field label="Wordmark" hint="Толгойн богино нэр. Хоосон бол “Брэнд”-ийн гол гарчиг орно.">
+                <TextInput
+                  value={c.hero.cinema.logo}
+                  onChange={(e) => edit((d) => void (d.hero.cinema.logo = e.target.value))}
+                />
+              </Field>
+              <Field
+                label="Дээд индекс"
+                hint="⚠️ ® нь БҮРТГЭГДСЭН барааны тэмдгийг илэрхийлнэ — бүртгэлгүй бол хоосон орхи."
+              >
+                <TextInput
+                  value={c.hero.cinema.mark}
+                  onChange={(e) => edit((d) => void (d.hero.cinema.mark = e.target.value))}
+                />
+              </Field>
+            </div>
+            <div className="mt-4">
+              <Field
+                label="Гол өгүүлбэр"
+                hint="Одоор (*) хашсан хэсэг нь бүдэг өнгөөр ялгарна — ж: “*Мөрөөдөл* нам гүмээр дамжин *дээшлэх орон зай.*”"
+              >
+                <TextArea
+                  rows={2}
+                  value={c.hero.cinema.headline}
+                  onChange={(e) => edit((d) => void (d.hero.cinema.headline = e.target.value))}
+                />
+              </Field>
+            </div>
+            <div className="mt-4">
+              <FileField
+                label="Клип (MP4)"
+                accept="video/mp4,video/webm"
+                value={c.hero.cinema.video}
+                onChange={(url) => edit((d) => void (d.hero.cinema.video = url))}
+                hint="Бүтэн дэлгэцээр давтагдана. Гадаад хаяг (https://…) ч болно."
+              />
+            </div>
+            <p className="mt-3 text-xs text-neutral-400">
+              Тайлбар бичвэр, цэс, товчны нэр нь дээрх “Тайлбар” болон “Толгой цэс”-ээс
+              хамтдаа удирдагдана.
+            </p>
+          </Card>
+
           <Card title="Дэвсгэр клип">
             <div className="grid gap-4 sm:grid-cols-2">
               <FileField

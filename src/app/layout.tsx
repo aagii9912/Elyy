@@ -1,5 +1,14 @@
 import type { Metadata } from "next";
-import { Fraunces, Inter, Instrument_Sans, Lora, Mulish, JetBrains_Mono } from "next/font/google";
+import {
+  Fraunces,
+  Inter,
+  Instrument_Sans,
+  Instrument_Serif,
+  Lora,
+  Mulish,
+  JetBrains_Mono,
+  Playfair_Display,
+} from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
 import { LangProvider } from "@/components/LangProvider";
@@ -25,6 +34,25 @@ const instrumentSans = Instrument_Sans({
   variable: "--font-instrument-sans",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
+  display: "swap",
+});
+
+/* Instrument Serif — /velorah-ийн дэлгэцийн (display) фонт. Латин ба
+   latin-ext ЛЭ агуулна — кирилл үсэг ЭНД БАЙХГҮЙ. */
+const instrumentSerif = Instrument_Serif({
+  variable: "--font-instrument-serif",
+  subsets: ["latin"],
+  weight: ["400"],
+  display: "swap",
+});
+
+/* Playfair Display — Instrument Serif-ийн КИРИЛЛ хос. Хөтөч нь үсэг
+   тус бүрээр буцдаг тул "Elysium" нь Instrument Serif-ээр, монгол
+   бичвэр нь Playfair-ээр гарч, нэг л дидон гэр бүлийн мэдрэмж үлдэнэ. */
+const playfair = Playfair_Display({
+  variable: "--font-playfair",
+  subsets: ["latin", "cyrillic"],
+  weight: ["400", "500"],
   display: "swap",
 });
 
@@ -100,7 +128,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="mn" className={`${fraunces.variable} ${inter.variable} ${instrumentSans.variable} ${lora.variable} ${mulish.variable} ${gilroy.variable} ${jetbrainsMono.variable}`}>
+    <html lang="mn" className={`${fraunces.variable} ${inter.variable} ${instrumentSans.variable} ${instrumentSerif.variable} ${playfair.variable} ${lora.variable} ${mulish.variable} ${gilroy.variable} ${jetbrainsMono.variable}`}>
       <body className="min-h-dvh bg-bone text-ink">
         <noscript>
           <style>{`.fade-up,.clip-reveal{opacity:1!important;transform:none!important;clip-path:none!important}`}</style>

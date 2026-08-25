@@ -1,0 +1,137 @@
+/* ============================================================
+   `/velorah` — шилэн (glassmorphic) кино hero.
+
+   Макетын дагуу: бүтэн дэлгэцийн давтагдах клип, шилэн цэс,
+   Instrument Serif дэлгэцийн бичиг, гүн хөх суурь. Чимэглэлийн
+   бөмбөлөг, радиал градиент, хөшиг БАЙХГҮЙ — гүн гүнзгийг зөвхөн
+   клип өгнө.
+
+   Өнгө нь `.velorah-page`-д хаалттай: `globals.css`-ийн
+   `@theme inline` нь `hsl(var(--background))` гэж уншдаг тул эдгээр
+   утилит энэ хуудсаас гадуур огт үйлчлэхгүй.
+   ============================================================ */
+
+.velorah-page {
+  /* ---- Макетын HSL палитр ---- */
+  --background: 201 100% 13%;
+  --foreground: 0 0% 100%;
+  --muted-foreground: 240 4% 66%;
+  --primary: 0 0% 100%;
+  --primary-foreground: 0 0% 4%;
+  --secondary: 0 0% 10%;
+  --muted: 0 0% 10%;
+  --accent: 0 0% 10%;
+  --border: 0 0% 18%;
+  --input: 0 0% 18%;
+
+  /* ---- Бичгийн гэр бүл ----
+     Instrument Serif нь КИРИЛЛГҮЙ тул ард нь Playfair Display
+     (кириллтэй) зогсоно: хөтөч үсэг тус бүрээр буцаж, латин нэр нь
+     Instrument Serif-ээр, монгол бичвэр нь Playfair-ээр гарна. */
+  --font-display: var(--font-instrument-serif), var(--font-playfair), Georgia,
+    "Times New Roman", serif;
+  --font-body: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Overscroll бүсэд ч цөцгий биш, гүн хөх харагдана. */
+body:has(.velorah-page) {
+  background-color: hsl(201 100% 13%);
+}
+
+/* Сайтын нийтлэг чимэг (гүйлтийн зурвас, өөрийн курсор) энэ макетад
+   байхгүй — минимал, зөвхөн клип. Курсорыг нь эргүүлж асаана. */
+body:has(.velorah-page) :is(.scroll-progress, .ely-cursor) {
+  display: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html.has-cursor:has(.velorah-page),
+  html.has-cursor:has(.velorah-page) * {
+    cursor: auto !important;
+  }
+
+  html.has-cursor:has(.velorah-page) :is(a, button) {
+    cursor: pointer !important;
+  }
+}
+
+/* ============================================================
+   Шилэн гадаргуу (liquid glass)
+   ============================================================ */
+
+.liquid-glass {
+  background: rgba(255, 255, 255, 0.01);
+  background-blend-mode: luminosity;
+  /* Prefix ЭХЭЛЖ, стандарт нь ДАРАА — эсрэгээр бичихэд минификатор
+     хоёуланг нэгтгээд стандарт хувилбарыг хаядаг (Firefox блургүй үлдэнэ). */
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  border: none;
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.liquid-glass::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.4px;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.45) 0%,
+    rgba(255, 255, 255, 0.15) 20%,
+    rgba(255, 255, 255, 0) 40%,
+    rgba(255, 255, 255, 0) 60%,
+    rgba(255, 255, 255, 0.15) 80%,
+    rgba(255, 255, 255, 0.45) 100%
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  /* Стандарт `mask` — үүнгүйгээр Firefox дээр `mask-composite: exclude`
+     ажиллахгүй тул градиент нь ирмэг биш, БҮТЭН дүүргэлт болж харагдана. */
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* ============================================================
+   Нэвтрэх хөдөлгөөн
+   ============================================================ */
+
+@keyframes fade-rise {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-rise {
+  animation: fade-rise 0.8s ease-out both;
+}
+
+.animate-fade-rise-delay {
+  animation: fade-rise 0.8s ease-out 0.2s both;
+}
+
+.animate-fade-rise-delay-2 {
+  animation: fade-rise 0.8s ease-out 0.4s both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .velorah-page :is(.animate-fade-rise, .animate-fade-rise-delay, .animate-fade-rise-delay-2) {
+    animation: none;
+  }
+
+  .velorah-page :is(button, a) {
+    transition: none;
+  }
+}

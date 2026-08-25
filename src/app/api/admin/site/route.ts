@@ -36,9 +36,10 @@ export async function PUT(req: Request) {
     await getStore().saveSiteContent(content);
 
     // Засвар шууд нийтэд харагдана. Дизайн нь мэдээний хуудас болон
-    // `/noir` theme-д ч хамаарах тул тэдгээрийг мөн шинэчилнэ.
+    // `/noir`, `/velorah` theme-д ч хамаарах тул тэдгээрийг мөн шинэчилнэ.
     revalidatePath("/");
     revalidatePath("/noir");
+    revalidatePath("/velorah");
     revalidatePath("/news");
     revalidatePath("/news/[slug]", "page");
 
