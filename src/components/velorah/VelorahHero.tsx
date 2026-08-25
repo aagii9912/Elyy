@@ -13,20 +13,30 @@ import { VelorahVideo } from "./VelorahVideo";
    Бүх бичвэр `/admin/site`-аас удирдагдана (`hero.cinema`, `nav`,
    `brand`) — server component тул JS-гүйгээр ч бүтнээрээ гарна. */
 
-/** `*од*` доторх хэсгийг макетын бүдэг өнгөт `<em>` болгоно. */
+/** `*од*` доторх хэсгийг макетын бүдэг өнгөт `<em>` болгоно.
+ *
+ *  ЗӨВХӨН жинхэнэ тохирлыг ялгана. Өмнө нь `split` хийгээд хэсэг бүрийг
+ *  "од-оор эхэлж, од-оор төгссөн үү" гэж шалгадаг байсан нь тохирол
+ *  БИШ хэсгүүдийг ч барьж авдаг байв: `"***"` → бүдэг `*` болно.
+ *  `exec`-ээр алхахад бүлэг нь оролтын жинхэнэ тохирол л байна. */
 function headlineParts(text: string) {
-  return text
-    .split(/(\*[^*]+\*)/g)
-    .filter(Boolean)
-    .map((part, i) =>
-      part.length > 2 && part.startsWith("*") && part.endsWith("*") ? (
-        <em key={i} className="not-italic text-muted-foreground">
-          {part.slice(1, -1)}
-        </em>
-      ) : (
-        <Fragment key={i}>{part}</Fragment>
-      )
+  const mark = /\*([^*]+)\*/g;
+  const out: React.ReactNode[] = [];
+  let last = 0;
+  let m: RegExpExecArray | null;
+
+  while ((m = mark.exec(text)) !== null) {
+    if (m.index > last) out.push(<Fragment key={last}>{text.slice(last, m.index)}</Fragment>);
+    out.push(
+      <em key={`em-${m.index}`} className="not-italic text-muted-foreground">
+        {m[1]}
+      </em>
     );
+    last = m.index + m[0].length;
+  }
+  if (last < text.length) out.push(<Fragment key={last}>{text.slice(last)}</Fragment>);
+
+  return out;
 }
 
 /** Hero нь ганц дэлгэц тул хуудасны доторх зангуу үндсэн сайт руу заана.
