@@ -39,11 +39,23 @@ src/components/velorah/VelorahHero.tsx — server component (client JS = 0)
 Instrument Serif нь **кирилл үсэггүй** (latin, latin-ext). Тиймээс дэлгэцийн
 стек нь `Instrument Serif → Playfair Display → Georgia → serif`: хөтөч үсэг
 тус бүрээр буцдаг тул “Elysium” нь Instrument Serif-ээр, монгол бичвэр нь
-Playfair-ээр гарч, нэг л дидон гэр бүлийн мэдрэмж үлдэнэ. Их бие — Inter.
+Playfair-ээр гарна. Их бие — Inter.
 
-`fontFamily` нь `var(--font-display)`-ыг заана (`'Instrument Serif'` гэж шууд
-бичихгүй) — `next/font` фонтын нэрийг хэшилдэг тул шууд бичвэл системийн
-serif рүү унана.
+⚠️ **`var(--font-instrument-serif)` хэрэглэж БОЛОХГҮЙ.** `next/font` нь тэр
+хувьсагчийг ХОЁР гэр бүлийн жагсаалт болгодог:
+`"Instrument Serif", "Instrument Serif Fallback"`. Сүүлийнх нь
+`src: local(Times New Roman)` бөгөөд **unicode-range заагаагүй** — кирилл
+үсэг бүр Playfair хүрэлгүй тэнд унана. Үр дүнд нь гарчиг Windows/macOS дээр
+83.94% хэмжээтэй Times New Roman, Times байхгүй систем (Android) дээр
+Playfair болж, **платформоос хамааран өөр** харагдана. `adjustFontFallback:
+false` нь Next 16.2.9-д үйлчилсэнгүй (build-ийн гаралтаас шалгасан), тиймээс
+`velorah.css` дотор гэр бүлийн нэрийг **шууд** бичсэн. Google-ийн фонтын
+@font-face нэр хэшлэгддэггүй тул энэ найдвартай.
+
+Дэлгэцийн хоёр фонт нь root layout-д БИШ, `app/velorah/layout.tsx`-д
+тодорхойлогдоно — `next/font` нь фонтыг импортолсон сегментэд л
+`<link rel=preload>` гаргадаг. Ингэснээр `/`, `/noir`, `/news` дээрх
+фонтын preload 34-өөс 31 болж буурсан.
 
 ## Агуулга — бүгд админаас
 
@@ -55,6 +67,7 @@ serif рүү унана.
 | `hero.cinema.mark` | Дээд индекс. ⚠️ `®` нь БҮРТГЭГДСЭН барааны тэмдгийг илэрхийлнэ — брэнд бүртгэлгүй бол хоосон болго |
 | `hero.cinema.headline` | Гол өгүүлбэр. `*од*` хашсан хэсэг бүдэг өнгөөр ялгарна |
 | `hero.cinema.video` | Бүтэн дэлгэцийн клип (дотоод зам эсвэл `https://…`) |
+| `hero.cinema.poster` | Клип тоглохоос өмнөх кадр. **Өгөгдмөл нь хоосон** — сангийн экстерьер зураг бүр тод (135–197/255) тул хөх композицид зохихгүй. Өөрийн клипийн эхний кадраар дүүргэнэ үү: iOS-ийн эрчим хүч хэмнэх горим autoplay-г хаадаг |
 
 Тайлбар бичвэр (`hero.sub`), цэс (`nav.items`), товчны нэр (`nav.ctaLabel`),
 брэнд (`brand.line`) нь үндсэн сайттай ХАМТ удирдагдана. Админ хадгалахад

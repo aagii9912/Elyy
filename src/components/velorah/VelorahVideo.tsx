@@ -6,11 +6,15 @@
    хөдөлгөөн багасгахыг сонгосон бол суумагц зогсоож, эхний кадр дээр
    барина — WCAG 2.2.2 (Pause, Stop, Hide). Макет дээр харагдах pause
    товч байхгүй тул систем түвшний сонголтыг хүндэтгэх нь цорын ганц
-   зөв зам. */
+   зөв зам.
+
+   `poster` — autoplay хаагдсан (iOS эрчим хүч хэмнэх горим, Safari-ийн
+   бодлого) үед hero хоосон хөх дэлгэц болохоос сэргийлнэ; мөн LCP-д
+   зурах бодит кадр өгнө. */
 
 import { useEffect, useRef } from "react";
 
-export function VelorahVideo({ src }: { src: string }) {
+export function VelorahVideo({ src, poster }: { src: string; poster?: string }) {
   const ref = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
@@ -32,6 +36,7 @@ export function VelorahVideo({ src }: { src: string }) {
     <video
       ref={ref}
       src={src}
+      poster={poster || undefined}
       className="absolute inset-0 z-0 h-full w-full object-cover"
       autoPlay
       loop

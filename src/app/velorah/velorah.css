@@ -27,9 +27,13 @@
   /* ---- Бичгийн гэр бүл ----
      Instrument Serif нь КИРИЛЛГҮЙ тул ард нь Playfair Display
      (кириллтэй) зогсоно: хөтөч үсэг тус бүрээр буцаж, латин нэр нь
-     Instrument Serif-ээр, монгол бичвэр нь Playfair-ээр гарна. */
-  --font-display: var(--font-instrument-serif), var(--font-playfair), Georgia,
-    "Times New Roman", serif;
+     Instrument Serif-ээр, монгол бичвэр нь Playfair-ээр гарна.
+
+     `var(--font-instrument-serif)` БИШ, гэр бүлийн нэрийг шууд бичсэн:
+     тэр хувьсагч дотор next/font-ийн metric fallback (local Times New
+     Roman, unicode-range-гүй) нуугдаж, кириллийг өөртөө татан авдаг
+     тул Playfair хүртэл хүрэхгүй байсан (`layout.tsx`-ийг үз). */
+  --font-display: "Instrument Serif", var(--font-playfair), Georgia, "Times New Roman", serif;
   --font-body: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 
   font-family: var(--font-body);

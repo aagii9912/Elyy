@@ -79,7 +79,7 @@ export function VelorahHero({ site }: { site: SiteContent }) {
      үүнгүйгээр гарчгийн ҮНДСЭН өнгө ногоон болж өвлөгдөнө. */
   return (
     <div className="velorah-page relative flex min-h-[100svh] flex-col overflow-hidden bg-background text-foreground">
-      {cinema.video && <VelorahVideo src={cinema.video} />}
+      {cinema.video && <VelorahVideo src={cinema.video} poster={cinema.poster} />}
 
       <nav className="relative z-10 mx-auto flex w-full max-w-7xl items-center justify-between px-8 py-6">
         {/* `aria-label` БАЙХГҮЙ: харагдах бичиг нь өөрөө нэр болно.

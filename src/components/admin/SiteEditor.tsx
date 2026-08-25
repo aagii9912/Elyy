@@ -595,13 +595,20 @@ function renderSection(
                 />
               </Field>
             </div>
-            <div className="mt-4">
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
               <FileField
-                label="Клип (MP4)"
+                label="Клип (MP4 / WebM)"
                 accept="video/mp4,video/webm"
                 value={c.hero.cinema.video}
                 onChange={(url) => edit((d) => void (d.hero.cinema.video = url))}
                 hint="Бүтэн дэлгэцээр давтагдана. Гадаад хаяг (https://…) ч болно."
+              />
+              <ImageField
+                label="Постер (эхний кадр)"
+                ratio="16/9"
+                value={c.hero.cinema.poster}
+                onChange={(url) => edit((d) => void (d.hero.cinema.poster = url))}
+                hint="iOS-ийн эрчим хүч хэмнэх горим autoplay-г хаадаг — постергүй бол дэлгэц хоосон үлдэнэ. Клипийнхээ эхний кадраар солих нь хамгийн зөв."
               />
             </div>
             <p className="mt-3 text-xs text-neutral-400">
