@@ -7,6 +7,17 @@
    эргэдэг (`noir.css` доторх `[data-tone="light"]` дүрэм). */
 
 import { useLenis } from "lenis/react";
+import { externalHref } from "@/lib/links";
+
+/** Админаас ирсэн цэсний хаягийг браузерт өгөхөд аюулгүй болгоно.
+ *  Хуудасны доторх зангуу (`#…`) ба дотоод зам (`/…`) хэвээр; бусад нь
+ *  `externalHref` шүүлтүүрээр дамжиж, `javascript:` мэт схем хаягдана
+ *  (хоосон мөр = холбоосыг огт үзүүлэхгүй). */
+export function navHref(raw: string): string {
+  const value = (raw ?? "").trim();
+  if (value.startsWith("#") || value.startsWith("/")) return value;
+  return externalHref(value);
+}
 
 /** Хуудас доторх зангуу руу Lenis-ээр зөөлөн гүйлгэнэ. */
 export function useAnchorGo(offset = -90) {

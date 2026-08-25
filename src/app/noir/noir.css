@@ -50,7 +50,10 @@
   }
 }
 
-/* Overscroll бүсэд ч цөцгий биш, гүн ногоон харагдана. */
+/* Overscroll бүсэд ч цөцгий биш, гүн ногоон харагдана.
+   ⚠️ `html` дээр байх ЁСТОЙ: `globals.css` нь `html`-д цөцгий дэвсгэр
+   өгдөг тул `body`-гийн дэвсгэр canvas руу ХЭЗЭЭ Ч дамжихгүй. */
+html:has(.noir-page),
 body:has(.noir-page) {
   background-color: color-mix(in srgb, var(--color-charcoal, #16280f) 52%, #000);
 }

@@ -10,7 +10,7 @@ import { useCallback, useEffect, useState } from "react";
 import type { SiteContent } from "@/lib/site-content";
 import { LogoMark } from "@/components/Logo";
 import { BrochureButton } from "@/components/mono/MonoBrochure";
-import { useAnchorGo } from "./shared";
+import { useAnchorGo, navHref } from "./shared";
 
 export function NoirHeader({ site }: { site: SiteContent }) {
   const { nav, brand } = site;
@@ -88,16 +88,20 @@ export function NoirHeader({ site }: { site: SiteContent }) {
         </a>
 
         <nav className="nv-links" aria-label="Үндсэн цэс">
-          {nav.items.map((item) => (
-            <a
-              key={item.href + item.label}
-              href={item.href}
-              aria-current={active === item.href ? "true" : undefined}
-              onClick={(e) => onNavClick(e, item.href)}
-            >
-              {item.label}
-            </a>
-          ))}
+          {nav.items.map((item) => {
+            const href = navHref(item.href);
+            if (!href) return null;
+            return (
+              <a
+                key={item.href + item.label}
+                href={href}
+                aria-current={active === item.href ? "true" : undefined}
+                onClick={(e) => onNavClick(e, href)}
+              >
+                {item.label}
+              </a>
+            );
+          })}
         </nav>
 
         <a className="nv-pill nv-pill-nav" href="#contact" onClick={(e) => onNavClick(e, "#contact")}>
@@ -121,13 +125,17 @@ export function NoirHeader({ site }: { site: SiteContent }) {
         <div className="nv-menu-inner">
           <p className="nv-menu-eyebrow">{nav.menuAria}</p>
           <ul className="nv-menu-list">
-            {nav.items.map((item) => (
-              <li key={item.href + item.label}>
-                <a href={item.href} tabIndex={open ? 0 : -1} onClick={(e) => onNavClick(e, item.href)}>
-                  {item.label}
-                </a>
-              </li>
-            ))}
+            {nav.items.map((item) => {
+              const href = navHref(item.href);
+              if (!href) return null;
+              return (
+                <li key={item.href + item.label}>
+                  <a href={href} tabIndex={open ? 0 : -1} onClick={(e) => onNavClick(e, href)}>
+                    {item.label}
+                  </a>
+                </li>
+              );
+            })}
           </ul>
           <div className="nv-menu-foot">
             <a

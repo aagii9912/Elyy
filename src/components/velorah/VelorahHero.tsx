@@ -1,6 +1,8 @@
 import { Fragment } from "react";
 import Link from "next/link";
 import type { SiteContent } from "@/lib/site-content";
+import { externalHref } from "@/lib/links";
+import { VelorahVideo } from "./VelorahVideo";
 
 /* `/velorah` — шилэн кино hero.
 
@@ -27,8 +29,15 @@ function headlineParts(text: string) {
     );
 }
 
-/** Hero нь ганц дэлгэц тул хуудасны доторх зангуу үндсэн сайт руу заана. */
-const siteHref = (href: string) => (href.startsWith("#") ? `/${href}` : href);
+/** Hero нь ганц дэлгэц тул хуудасны доторх зангуу үндсэн сайт руу заана.
+ *  Админы оруулсан бусад утга нь `externalHref` шүүлтүүрээр дамжина —
+ *  `javascript:` мэтийн схем хаягдаж, хоосон мөр буцна (холбоос нуугдана). */
+function navHref(raw: string): string {
+  const value = raw.trim();
+  if (value.startsWith("#")) return `/${value}`;
+  if (value.startsWith("/")) return value;
+  return externalHref(value);
+}
 
 /** Дотоод зам — `next/link`, гадаад хаяг — энгийн шинэ таб. */
 function NavLink({
@@ -59,47 +68,38 @@ export function VelorahHero({ site }: { site: SiteContent }) {
   /* `text-foreground` — сайтын `body` нь брэндийн ногоон ink-тэй тул
      үүнгүйгээр гарчгийн ҮНДСЭН өнгө ногоон болж өвлөгдөнө. */
   return (
-    <div className="velorah-page relative flex min-h-screen flex-col overflow-hidden bg-background text-foreground">
-      {cinema.video && (
-        <video
-          className="absolute inset-0 z-0 h-full w-full object-cover"
-          autoPlay
-          loop
-          muted
-          playsInline
-          preload="auto"
-          aria-hidden="true"
-        >
-          <source src={cinema.video} type="video/mp4" />
-        </video>
-      )}
+    <div className="velorah-page relative flex min-h-[100svh] flex-col overflow-hidden bg-background text-foreground">
+      {cinema.video && <VelorahVideo src={cinema.video} />}
 
       <nav className="relative z-10 mx-auto flex w-full max-w-7xl items-center justify-between px-8 py-6">
-        <Link
-          href="/"
-          className="text-3xl tracking-tight text-foreground"
-          style={display}
-          aria-label={brand.line}
-        >
+        {/* `aria-label` БАЙХГҮЙ: харагдах бичиг нь өөрөө нэр болно.
+            Өөр нэр өгвөл WCAG 2.5.3 (Label in Name) зөрчигдөнө. */}
+        <Link href="/" className="text-3xl tracking-tight text-foreground" style={display}>
           {cinema.logo.trim() || brand.line}
           {cinema.mark && <sup className="text-xs">{cinema.mark}</sup>}
         </Link>
 
         <div className="hidden items-center gap-8 md:flex">
-          {nav.items.map((item, i) => (
-            <NavLink
-              key={item.href + item.label}
-              href={siteHref(item.href)}
-              className={
-                i === 0
-                  ? "text-sm text-foreground transition-colors"
-                  : "text-sm text-muted-foreground transition-colors hover:text-foreground"
-              }
-              aria-current={i === 0 ? "page" : undefined}
-            >
-              {item.label}
-            </NavLink>
-          ))}
+          {nav.items.map((item, i) => {
+            const href = navHref(item.href);
+            if (!href) return null;
+            return (
+              /* `aria-current` БАЙХГҮЙ: эхний холбоос нь энэ хуудас БИШ,
+                 үндсэн сайт руу заадаг тул "page" гэж хэлбэл худал болно.
+                 Тодруулга нь зөвхөн харааны онцлол хэвээр. */
+              <NavLink
+                key={item.href + item.label}
+                href={href}
+                className={
+                  i === 0
+                    ? "text-sm text-foreground transition-colors"
+                    : "text-sm text-muted-foreground transition-colors hover:text-foreground"
+                }
+              >
+                {item.label}
+              </NavLink>
+            );
+          })}
         </div>
 
         <Link
@@ -110,12 +110,12 @@ export function VelorahHero({ site }: { site: SiteContent }) {
         </Link>
       </nav>
 
-      <section className="relative z-10 flex flex-1 flex-col items-center justify-center px-6 pt-32 pb-40 text-center py-[90px]">
+      <main className="relative z-10 flex flex-1 flex-col items-center justify-center px-6 pt-32 pb-40 text-center py-[90px]">
         {/* Макетын -2.46px нь 96px (md:text-8xl) хэмжээнд зориулагдсан.
             Жижиг дэлгэцэд ижил утга нь үсэг хоорондын зайг 5% болгож
             монгол бичвэрийг наалддаг тул зөвхөн ТЭНД сулруулна. */}
         <h1
-          className="animate-fade-rise max-w-7xl text-5xl leading-[0.95] font-normal tracking-[-1px] sm:text-7xl sm:tracking-[-1.8px] md:text-8xl md:tracking-[-2.46px]"
+          className="animate-fade-rise max-w-7xl text-5xl leading-[0.95] font-normal tracking-[-1px] break-words sm:text-7xl sm:tracking-[-1.8px] md:text-8xl md:tracking-[-2.46px]"
           style={display}
         >
           {headlineParts(cinema.headline.trim() || brand.line)}
@@ -131,7 +131,7 @@ export function VelorahHero({ site }: { site: SiteContent }) {
         >
           {nav.ctaLabel}
         </Link>
-      </section>
+      </main>
     </div>
   );
 }

@@ -36,7 +36,11 @@
   -webkit-font-smoothing: antialiased;
 }
 
-/* Overscroll бүсэд ч цөцгий биш, гүн хөх харагдана. */
+/* Overscroll бүсэд ч цөцгий биш, гүн хөх харагдана.
+   ⚠️ `html` дээр байх ЁСТОЙ: `globals.css` нь `html`-д цөцгий дэвсгэр
+   өгдөг тул `body`-гийн дэвсгэр canvas руу ХЭЗЭЭ Ч дамжихгүй
+   (дамжуулалт зөвхөн `html` тунгалаг үед болдог). */
+html:has(.velorah-page),
 body:has(.velorah-page) {
   background-color: hsl(201 100% 13%);
 }
@@ -53,16 +57,29 @@ body:has(.velorah-page) :is(.scroll-progress, .ely-cursor) {
     cursor: auto !important;
   }
 
-  html.has-cursor:has(.velorah-page) :is(a, button) {
+  /* Холбоос/товч ба ДОТООД элементүүд нь (ж: ®-ийн `<sup>`) заагчтай
+     хэвээр — эс бөгөөс дээрх `*` дүрэм тэднийг `auto` болгоно. */
+  html.has-cursor:has(.velorah-page) :is(a, button),
+  html.has-cursor:has(.velorah-page) :is(a, button) * {
     cursor: pointer !important;
   }
 }
 
+/* Бичиг сонгоход брэндийн ногоон/цөцгий биш, энэ хуудасны өнгөөр. */
+.velorah-page ::selection {
+  background-color: hsl(var(--foreground));
+  color: hsl(var(--primary-foreground));
+}
+
 /* ============================================================
    Шилэн гадаргуу (liquid glass)
+
+   Класс нь `.velorah-page`-д хаалттай: энэ CSS нь route-ийн багцад
+   ордог ч нэр нь ерөнхий тул өөр хуудсанд санамсаргүй тохирохоос
+   сэргийлнэ.
    ============================================================ */
 
-.liquid-glass {
+.velorah-page .liquid-glass {
   background: rgba(255, 255, 255, 0.01);
   background-blend-mode: luminosity;
   /* Prefix ЭХЭЛЖ, стандарт нь ДАРАА — эсрэгээр бичихэд минификатор
@@ -75,7 +92,7 @@ body:has(.velorah-page) :is(.scroll-progress, .ely-cursor) {
   overflow: hidden;
 }
 
-.liquid-glass::before {
+.velorah-page .liquid-glass::before {
   content: "";
   position: absolute;
   inset: 0;
@@ -114,15 +131,15 @@ body:has(.velorah-page) :is(.scroll-progress, .ely-cursor) {
   }
 }
 
-.animate-fade-rise {
+.velorah-page .animate-fade-rise {
   animation: fade-rise 0.8s ease-out both;
 }
 
-.animate-fade-rise-delay {
+.velorah-page .animate-fade-rise-delay {
   animation: fade-rise 0.8s ease-out 0.2s both;
 }
 
-.animate-fade-rise-delay-2 {
+.velorah-page .animate-fade-rise-delay-2 {
   animation: fade-rise 0.8s ease-out 0.4s both;
 }
 

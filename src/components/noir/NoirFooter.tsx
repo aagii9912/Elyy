@@ -7,7 +7,7 @@ import type { SiteContent } from "@/lib/site-content";
 import { sectionTone } from "@/lib/theme-css";
 import { Logo } from "@/components/Logo";
 import { externalHref } from "@/lib/links";
-import { useAnchorGo } from "./shared";
+import { useAnchorGo, navHref } from "./shared";
 
 export function NoirFooter({ site }: { site: SiteContent }) {
   const { footer, contact, brand } = site;
@@ -41,13 +41,17 @@ export function NoirFooter({ site }: { site: SiteContent }) {
           <div>
             <h4>{footer.menuTitle}</h4>
             <ul>
-              {footer.menu.map((item) => (
-                <li key={item.href + item.label}>
-                  <a href={item.href} onClick={(e) => go(e, item.href)}>
-                    {item.label}
-                  </a>
-                </li>
-              ))}
+              {footer.menu.map((item) => {
+                const href = navHref(item.href);
+                if (!href) return null;
+                return (
+                  <li key={item.href + item.label}>
+                    <a href={href} onClick={(e) => go(e, href)}>
+                      {item.label}
+                    </a>
+                  </li>
+                );
+              })}
             </ul>
           </div>
 
