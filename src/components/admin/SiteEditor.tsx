@@ -547,7 +547,20 @@ function renderSection(
               onChange={(e) => edit((d) => void (d.hero.sub = e.target.value))}
             />
           </Field>
-          <p className="mt-3 text-xs text-neutral-400">
+          <div className="mt-5 border-t border-neutral-200 pt-4">
+            <Toggle
+              checked={c.hero.wordmark}
+              onChange={(v) => edit((d) => void (d.hero.wordmark = v))}
+              label="Гол гарчгийг брэндийн логогоор харуулах"
+            />
+            <p className="mt-2 text-xs leading-relaxed text-neutral-500">
+              Асаалттай үед нүүр дэлгэцийн гарчиг нь ELYSIUM лого (вектор) болж, доор нь
+              нэрийн үлдсэн хэсэг зайтай том үсгээр гарна. Толгой дахь лого болон гарчиг нэг
+              ижил үсгэн зурагтай болно. Унтраавал “Брэнд & холбоо”-гийн “Гол гарчиг” бичвэр
+              фонтоор гарна.
+            </p>
+          </div>
+          <p className="mt-4 text-xs text-neutral-400">
             Гол гарчиг, дэд шошго, товчны нэрсийг “Брэнд & холбоо”, “Толгой цэс” хэсгээс засна.
           </p>
         </Card>

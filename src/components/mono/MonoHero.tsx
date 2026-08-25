@@ -17,6 +17,7 @@ import { Fragment, useEffect, useRef } from "react";
 import { useLenis } from "lenis/react";
 import { gsap } from "@/lib/gsap";
 import type { SiteContent } from "@/lib/site-content";
+import { Logo } from "@/components/Logo";
 import { BrochureButton } from "./MonoBrochure";
 import { sectionTone } from "@/lib/theme-css";
 
@@ -32,6 +33,10 @@ const MOBILE_STEP = 3;
 
 export function MonoHero({ site }: { site: SiteContent }) {
   const { brand, hero, nav } = site;
+  /* Логон дор гарах хэсэг — нэрийн ЭХНИЙ үг нь лого өөрөө (ELYSIUM),
+     үлдсэн нь («Residence») зайтай том үсгээр доор нь суудаг. */
+  const wordmark = hero.wordmark;
+  const rest = brand.line.trim().split(/\s+/).slice(1).join(" ");
   const lenis = useLenis();
   const root = useRef<HTMLElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
@@ -179,25 +184,84 @@ export function MonoHero({ site }: { site: SiteContent }) {
             ард нэг зөөлөн эллипс. Ингэснээр кадрын ирмэг гэгээлэг хэвээр
             үлдэж, зөвхөн бичгийн доод тал бараантана. */}
         <div className="pointer-events-none absolute inset-0 z-[5] bg-gradient-to-b from-night/45 via-night/8 to-night/60" />
-        <div className="pointer-events-none absolute inset-0 z-[5] bg-[radial-gradient(ellipse_78%_56%_at_50%_42%,rgba(21,23,23,0.42)_0%,rgba(21,23,23,0.24)_45%,transparent_72%)]" />
+        <div className="pointer-events-none absolute inset-0 z-[5] bg-[radial-gradient(ellipse_80%_58%_at_50%_44%,rgba(21,23,23,0.48)_0%,rgba(21,23,23,0.26)_46%,transparent_74%)]" />
+        {/* Гарчгийн лого-блокийн ард ЗӨВХӨН тэр хэсэгт нь нэмэлт хөшиг.
+            Бүх кадрыг харанхуйлахын оронд нарийн эллипс нэмснээр зургийн
+            ирмэг гэгээлэг хэвээр үлдэнэ.
+
+            §Контраст. Бичгийн СҮҮДРИЙГ авсан (сүүдэр нь хямдын шинж)
+            тул уншигдацыг зөвхөн хөшиг хангана. 1440×900 дээр бичгийг
+            нууж, дэвсгэрийн хамгийн цайвар 5%-иар хэмжсэн WCAG харьцаа:
+              • лого (том бичвэр, босго 3:1) : 7.93 : 1,
+              • RESIDENCE  (4.5:1)           : 5.55 : 1,
+              • шошго      (4.5:1)           : 7.02 : 1,
+              • тайлбар    (4.5:1)           : 6.31 : 1.
+            Энэ эллипсгүйгээр RESIDENCE 3.70:1 болж УНАДАГ. Хөшгийг
+            сулруулах, эсвэл бичгийн alpha-г бууруулбал ДАХИН хэмжинэ. */}
+        <div className="pointer-events-none absolute inset-0 z-[5] bg-[radial-gradient(ellipse_44%_24%_at_50%_36%,rgba(21,23,23,0.34)_0%,rgba(21,23,23,0.18)_52%,transparent_78%)]" />
 
         <div data-mh-copy className="relative z-10 flex h-full w-full flex-col items-center px-6">
           <div className="flex flex-1 flex-col items-center justify-center text-center">
-            <p className="mono-fade-up mb-5 text-[11px] font-semibold uppercase tracking-[0.42em] text-lime md:mb-6 md:text-[12px]" style={{ animationDelay: "0.4s" }}>
+            {/* Шошго — лайм нь БҮТЭН хүчээрээ дээд талд байхад анхаарал
+                сарниулж, тансаглалыг бууруулдаг. Одоо бичиг нь тайван
+                цагаан, лайм нь хоёр талын нимгэн зураас болж үлдэнэ. */}
+            <p
+              className="mono-fade-up mb-6 flex items-center gap-4 text-[11px] font-medium uppercase tracking-[0.4em] text-white/60 md:mb-8 md:text-[12px]"
+              style={{ animationDelay: "0.4s" }}
+            >
+              <span aria-hidden className="hidden h-px w-7 bg-lime sm:block" />
               {brand.tag}
+              <span aria-hidden className="hidden h-px w-7 bg-lime sm:block" />
             </p>
-            <h1 className="mono-h1 text-white drop-shadow-[0_2px_30px_rgba(0,0,0,0.4)]">
-              {/* word-by-word mask rise */}
-              {brand.line.split(" ").map((word, i) => (
-                <Fragment key={`${word}-${i}`}>
-                  {i > 0 && " "}
-                  <span className="mono-word">
-                    <span style={{ animationDelay: `${0.5 + i * 0.09}s` }}>{word}</span>
+
+            {wordmark ? (
+              /* Брэндийн ЖИНХЭНЭ лого нь гарчиг. Толгой дахь лого болон
+                 hero нэг ижил үсгэн зурагтай болж брэнд нэгдэнэ; мөн
+                 фонтоос хамаарахгүй тул хэзээ ч зөрөхгүй.
+                 Бичгийн сүүдэр АВСАН — сүүдэр нь хямдын шинж, уншигдацыг
+                 хөшиг өөрөө хангана. */
+              <h1 className="flex flex-col items-center text-white">
+                <span className="sr-only">{brand.line}</span>
+                <span
+                  aria-hidden
+                  className="mono-fade-up block w-full max-w-[min(78vw,620px)]"
+                  style={{ animationDelay: "0.5s" }}
+                >
+                  <Logo className="h-auto w-full" />
+                </span>
+                {rest && (
+                  <span
+                    aria-hidden
+                    className="mono-fade-up mt-5 block text-[clamp(0.8rem,1.5vw,0.95rem)] font-normal uppercase leading-none tracking-[0.62em] text-white md:mt-6"
+                    style={{ animationDelay: "0.62s", textIndent: "0.62em" }}
+                  >
+                    {rest}
                   </span>
-                </Fragment>
-              ))}
-            </h1>
-            <p className="mono-fade-up mt-5 max-w-md text-[15px] font-medium leading-relaxed text-white/80 md:text-base" style={{ animationDelay: "0.7s" }}>
+                )}
+              </h1>
+            ) : (
+              <h1 className="mono-h1 text-white">
+                {/* word-by-word mask rise */}
+                {brand.line.split(" ").map((word, i) => (
+                  <Fragment key={`${word}-${i}`}>
+                    {i > 0 && " "}
+                    <span className="mono-word">
+                      <span style={{ animationDelay: `${0.5 + i * 0.09}s` }}>{word}</span>
+                    </span>
+                  </Fragment>
+                ))}
+              </h1>
+            )}
+
+            <span
+              aria-hidden
+              className="mono-fade-up mt-10 block h-px w-16 bg-white/25 md:mt-12"
+              style={{ animationDelay: "0.72s" }}
+            />
+            <p
+              className="mono-fade-up mt-8 max-w-[54ch] text-[15px] font-normal leading-[1.75] text-white/80 md:text-base"
+              style={{ animationDelay: "0.8s" }}
+            >
               {hero.sub}
             </p>
           </div>
@@ -207,7 +271,7 @@ export function MonoHero({ site }: { site: SiteContent }) {
               href="#contact"
               onClick={(e) => go(e, "#contact")}
               data-cursor-hover
-              className="mono-fade-up inline-flex w-full items-center justify-center gap-2 rounded-[50px] bg-white px-6 py-4 text-[14px] font-bold uppercase tracking-[-0.2px] text-fg transition-transform duration-300 hover:-translate-y-0.5 sm:w-auto"
+              className="mono-fade-up inline-flex min-h-[52px] w-full items-center justify-center gap-2 rounded-[50px] bg-white px-8 py-4 text-[13px] font-semibold uppercase tracking-[0.14em] text-fg transition-transform duration-300 hover:-translate-y-0.5 sm:w-auto"
               style={{ animationDelay: "0.85s" }}
             >
               {nav.ctaLabel}
@@ -216,7 +280,7 @@ export function MonoHero({ site }: { site: SiteContent }) {
               <BrochureButton
                 site={site}
                 source="elysium/mono#hero"
-                className="glass-dark inline-flex w-full items-center justify-center gap-2 rounded-[50px] px-6 py-4 text-[14px] font-medium uppercase tracking-[-0.2px] text-white transition-colors duration-300 hover:bg-white/15 sm:w-auto"
+                className="glass-dark inline-flex min-h-[52px] w-full items-center justify-center gap-2 rounded-[50px] px-7 py-4 text-[13px] font-medium uppercase tracking-[0.14em] text-white transition-colors duration-300 hover:bg-white/15 sm:w-auto"
               >
                 {nav.brochureLabel}
               </BrochureButton>
@@ -224,7 +288,7 @@ export function MonoHero({ site }: { site: SiteContent }) {
           </div>
         </div>
 
-        <div className="mono-float absolute bottom-7 left-1/2 z-10 h-9 w-px -translate-x-1/2 bg-white/50" />
+        <div className="mono-float absolute bottom-7 left-1/2 z-10 h-11 w-px -translate-x-1/2 bg-gradient-to-b from-white/45 to-transparent" />
       </div>
     </section>
   );

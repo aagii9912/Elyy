@@ -354,7 +354,12 @@ export type SiteContent = {
     menuAria: string;
   };
 
-  hero: { sub: string };
+  hero: {
+    sub: string;
+    /** Гол гарчгийг брэндийн ЛОГО-гоор (SVG) харуулах эсэх. Унтраавал
+     *  `brand.line` бичвэрээр гарна. */
+    wordmark: boolean;
+  };
 
   /** Chapter 01 — Ерөнхий төлөвлөлт (тоон үзүүлэлт). */
   plan: { kicker: string; title: string; points: StoryPointContent[] };
@@ -732,6 +737,7 @@ export const DEFAULT_SITE_CONTENT: SiteContent = {
 
   hero: {
     sub: "Туул голын салхи илбэсэн бүсэд байршилтай, архитектур болон инженерингийн эргономик шийдэлтэй орон сууц.",
+    wordmark: true,
   },
 
   plan: {
