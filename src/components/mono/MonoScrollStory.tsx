@@ -23,6 +23,7 @@ import { useLenis } from "lenis/react";
 import { gsap, type ScrollTrigger as ScrollTriggerType } from "@/lib/gsap";
 import { LogoMark } from "@/components/Logo";
 import { MonoKicker, useScrollAutoplay } from "./shared";
+import type { MediaFilmStyle } from "@/lib/theme-css";
 
 export type StoryPoint = {
   n: string;
@@ -82,10 +83,15 @@ export function MonoScrollStory({
   variant,
   tone = "dark",
   bgKey,
+  film,
 }: {
   id?: string;
   /** Админаас дэвсгэрийг нь удирдах түлхүүр (`theme.sections`). */
   bgKey?: string;
+  /** Кадрын ДЭЭР буух өнгөт хальс (`mediaFilmStyle`). Хэсгийн өөрийн
+   *  `background` нь кадрын АРД сууж харагддаггүй тул админы «Өнгө /
+   *  Градиент» сонголт эндээс л нүдэнд буунa. `undefined` = хальсгүй. */
+  film?: MediaFilmStyle | null;
   /** Chapter index label, e.g. "01". */
   chapter: string;
   kicker: string;
@@ -464,6 +470,17 @@ export function MonoScrollStory({
             рендерийн өнгөө хадгалж, зөвхөн бичгийн ард тодрол үүснэ. */}
         {!light && (
           <div className="pointer-events-none absolute inset-0 z-[5] bg-[radial-gradient(ellipse_82%_58%_at_50%_50%,rgba(22,40,15,0.5)_0%,rgba(22,40,15,0.28)_46%,transparent_74%)]" />
+        )}
+
+        {/* Админаас сонгосон дэвсгэр — кадрын ДЭЭР. Өгөгдмөл («Auto»)
+            үед `null` буюу энэ давхарга огт үүсэхгүй. */}
+        {film && (
+          <div
+            aria-hidden
+            data-theme-film
+            className="pointer-events-none absolute inset-0 z-[6]"
+            style={film}
+          />
         )}
 
         {/* letters chapter reads on the left — extra side scrim for contrast */}

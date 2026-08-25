@@ -18,7 +18,7 @@ import { useLenis } from "lenis/react";
 import { gsap } from "@/lib/gsap";
 import type { SiteContent } from "@/lib/site-content";
 import { BrochureButton } from "./MonoBrochure";
-import { sectionTone } from "@/lib/theme-css";
+import { mediaFilmStyle, sectionTone } from "@/lib/theme-css";
 
 const FRAME_COUNT = 160;
 const framePath = (i: number) => `/hero-video-frames/frame_${String(i).padStart(3, "0")}.webp`;
@@ -163,6 +163,8 @@ export function MonoHero({ site }: { site: SiteContent }) {
     };
   }, []);
 
+  const film = mediaFilmStyle(site.theme, "hero");
+
   return (
     <section
       id="top"
@@ -180,6 +182,19 @@ export function MonoHero({ site }: { site: SiteContent }) {
             үлдэж, зөвхөн бичгийн доод тал бараантана. */}
         <div className="pointer-events-none absolute inset-0 z-[5] bg-gradient-to-b from-night/45 via-night/8 to-night/60" />
         <div className="pointer-events-none absolute inset-0 z-[5] bg-[radial-gradient(ellipse_78%_56%_at_50%_42%,rgba(21,23,23,0.42)_0%,rgba(21,23,23,0.24)_45%,transparent_72%)]" />
+
+        {/* Админаас сонгосон дэвсгэр — кадрын ДЭЭР буух өнгөт хальс.
+            Хэсгийн `background` нь бичлэгийн АРД сууж харагддаггүй тул
+            «Өнгө / Градиент» сонголт эндээс л нүдэнд буунa. Өгөгдмөл
+            («Auto») үед `null` — hero нэг ч пиксел хөдлөхгүй. */}
+        {film && (
+          <div
+            aria-hidden
+            data-theme-film
+            className="pointer-events-none absolute inset-0 z-[6]"
+            style={film}
+          />
+        )}
 
         <div data-mh-copy className="relative z-10 flex h-full w-full flex-col items-center px-6">
           <div className="flex flex-1 flex-col items-center justify-center text-center">

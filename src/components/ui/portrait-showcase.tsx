@@ -67,6 +67,7 @@ export function PortraitShowcase({
   onSlideOpen,
   openLabel,
   className,
+  film,
 }: {
   slides: ShowcaseSlide[];
   /** Идэвхтэй слайдын индекс (хязгаараас гарвал эхнийх рүү эргэнэ). */
@@ -88,6 +89,11 @@ export function PortraitShowcase({
   /** Нэрийн ард гарах жижиг шошго (ж: "Дэлгэрэнгүй"). */
   openLabel?: string;
   className?: string;
+  /** Кадрын ДЭЭР, бичвэрийн ДООР буух өнгөт хальс — админы дизайнаас
+   *  (`mediaFilmStyle`). Кадар бүтэн дэлгэцийг эзэлдэг тул хэсгийн
+   *  өөрийн `background` харагддаггүй; өнгө, градиентийн сонголт
+   *  эндээс л нүдэнд буунa. `undefined` = хальсгүй. */
+  film?: React.CSSProperties | null;
 }) {
   const row = useRef<HTMLDivElement>(null);
   const root = useRef<HTMLDivElement>(null);
@@ -226,6 +232,10 @@ export function PortraitShowcase({
           alpha-г бууруулбал энэ хүснэгтийг ДАХИН хэмжинэ. */}
       <div aria-hidden className="absolute inset-0 bg-gradient-to-b from-charcoal/42 via-charcoal/16 to-charcoal/72" />
       <div aria-hidden className="absolute inset-0 bg-gradient-to-r from-charcoal/46 via-charcoal/6 to-transparent" />
+
+      {film && (
+        <div aria-hidden data-theme-film className="pointer-events-none absolute inset-0" style={film} />
+      )}
 
       <div className="relative z-10 flex h-full flex-col justify-between px-5 pb-7 pt-24 sm:px-8 sm:pb-9 md:px-10 md:pt-28 lg:px-14">
         {/* Дээд бүс — хэсгийн шошго + ИДЭВХТЭЙ СЛАЙДЫН НЭР.

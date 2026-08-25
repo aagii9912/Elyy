@@ -8,8 +8,11 @@
    1.1x while the others collapse down to 0.3x, growing out of the lime
    rail (years rise from it, cards hang off it). The rail itself stays
    continuous — only the content scales.
-   MOBILE  — vertical rail timeline: lime fill follows the scroll, dots
-   pop as stations arrive, images zoom down into place.
+   MOBILE  — ХЭВТЭЭ гүйдэг карусель. Өмнө нь босоо цаг хугацааны шугам
+   байсан: төсөл бүр бүтэн дэлгэц эзэлж, 8 төсөлтэй үед хэрэглэгч зөвхөн
+   энэ хэсгийг давахын тулд 8 дэлгэц гүйлгэдэг байв. Одоо картууд хажуу
+   тийш snap-тайгаар гүйж, доор нь явцын зурвас байрлана — хэсэг нэг
+   дэлгэцэд багтана.
    Project photos are Elysium render stand-ins until Монкон supplies
    real project photography. */
 
@@ -34,7 +37,7 @@ export function MonoDeveloper({ site }: { site: SiteContent }) {
   const prog = useRef<HTMLDivElement>(null);
   const mark = useRef<HTMLDivElement>(null);
   const logoMark = useRef<HTMLImageElement>(null);
-  const mobileProg = useRef<HTMLDivElement>(null);
+  const mobileBar = useRef<HTMLSpanElement>(null);
   const d = site.developer;
 
   /* chronological stations (sorted by start year) */
@@ -152,47 +155,46 @@ export function MonoDeveloper({ site }: { site: SiteContent }) {
         return () => gsap.ticker.remove(focal);
       }
 
-      // MOBILE — vertical timeline choreography
-      if (mobileProg.current) {
-        gsap.fromTo(
-          mobileProg.current,
-          { scaleY: 0 },
-          {
-            scaleY: 1,
-            ease: "none",
-            scrollTrigger: { trigger: tr, start: "top 70%", end: "bottom 85%", scrub: 0.4 },
-          }
-        );
+      /* MOBILE — картууд ХЭВТЭЭ гүйнэ. Гүйлт нь хуудсынх биш каруселийн
+         өөрийнх тул ScrollTrigger хэрэггүй: доорх `scroll` сонсогч
+         явцын зурвасыг шууд хөдөлгөнө. Энд зөвхөн картын зурган дээрх
+         анхны "суух" хөдөлгөөн үлдэнэ. */
+      const imgs = Array.from(tr.querySelectorAll<HTMLElement>("[data-md-img]"));
+      if (imgs.length) {
+        gsap.from(imgs, {
+          scale: 1.14,
+          duration: 0.9,
+          ease: "power2.out",
+          stagger: 0.06,
+          scrollTrigger: { trigger: tr, start: "top 88%" },
+        });
       }
-      tr.querySelectorAll<HTMLElement>("[data-md-card]").forEach((card) => {
-        const img = card.querySelector("[data-md-img]");
-        if (img) {
-          gsap.fromTo(
-            img,
-            { scale: 1.22 },
-            {
-              scale: 1,
-              ease: "none",
-              scrollTrigger: { trigger: card, start: "top 95%", end: "top 35%", scrub: 0.5 },
-            }
-          );
-        }
-      });
-      tr.querySelectorAll<HTMLElement>("[data-md-dot]").forEach((dot) => {
-        gsap.fromTo(
-          dot,
-          { scale: 0 },
-          {
-            scale: 1,
-            duration: 0.55,
-            ease: "back.out(2.2)",
-            scrollTrigger: { trigger: dot, start: "top 82%" },
-          }
-        );
-      });
     }, sec);
     return () => ctx.revert();
   }, [d.projects, d.logo]);
+
+  /* Гар утасны каруселийн явцын зурвас. Хэвтээ `scrollLeft`-ыг 0–1
+     болгож `scaleX` руу буулгана — рендер дахин ажиллуулахгүй тул
+     хуруу дагасан зөөлөн хөдөлгөөн гарна. Ширээний компьютерт track нь
+     гүйдэггүй (`md:overflow-visible`) — сонсогч ажиллах ч утга 0 хэвээр,
+     зурвас нь `md:hidden`. */
+  useEffect(() => {
+    const tr = track.current;
+    const bar = mobileBar.current;
+    if (!tr || !bar) return;
+    const onScroll = () => {
+      const max = tr.scrollWidth - tr.clientWidth;
+      const p = max > 0 ? tr.scrollLeft / max : 0;
+      bar.style.transform = `scaleX(${Math.min(1, Math.max(0, p)) || 0.001})`;
+    };
+    onScroll();
+    tr.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      tr.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
+  }, [d.projects]);
 
   return (
     <section
@@ -255,9 +257,11 @@ export function MonoDeveloper({ site }: { site: SiteContent }) {
 
         {/* timeline */}
         <div className="relative z-10 mt-12 md:mt-14">
+          {/* Гар утсанд ХЭВТЭЭ snap-карусель (`overflow-x-auto`), ширээний
+              компьютерт GSAP-аар зөөгддөг эгнээ (`md:overflow-visible`). */}
           <div
             ref={track}
-            className="relative flex flex-col gap-14 pl-10 pr-5 md:flex-row md:items-start md:gap-[4vw] md:pl-10 md:pr-10"
+            className="relative flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-pl-6 px-6 pb-2 [-ms-overflow-style:none] [scrollbar-width:none] md:snap-none md:items-start md:gap-[4vw] md:overflow-visible md:px-0 md:pb-0 md:pl-10 md:pr-10 [&::-webkit-scrollbar]:hidden"
           >
             {/* lime progress rail (desktop) */}
             <div
@@ -267,9 +271,14 @@ export function MonoDeveloper({ site }: { site: SiteContent }) {
             />
 
             {stations.map((p, i) => (
-              <div key={`${p.title}-${i}`} data-reveal="up" data-md-station className="relative md:w-[30vw] md:shrink-0 lg:w-[26vw]">
+              <div
+                key={`${p.title}-${i}`}
+                data-reveal="up"
+                data-md-station
+                className="relative w-[78vw] max-w-[340px] shrink-0 snap-start md:w-[30vw] md:max-w-none lg:w-[26vw]"
+              >
                 {/* year row — fixed height so the rail lines up across stations */}
-                <div data-md-year className="flex h-20 items-end justify-between pb-3">
+                <div data-md-year className="flex h-14 items-end justify-between pb-3 md:h-20">
                   <p className="text-[clamp(2rem,3.6vw,3.2rem)] font-bold leading-none tracking-tight text-fg/90">
                     {p.years.split("–")[0]}
                     <span className="text-fg/35">–{p.years.split("–")[1]}</span>
@@ -281,16 +290,15 @@ export function MonoDeveloper({ site }: { site: SiteContent }) {
                 <div aria-hidden className="relative hidden h-px w-full bg-night/15 md:block">
                   <span className="absolute -top-[5px] left-0 h-2.5 w-2.5 rounded-full bg-lime shadow-[0_0_0_4px_var(--color-ground)]" />
                 </div>
-                <span aria-hidden data-md-dot className="absolute -left-[30px] top-[4.5rem] h-3 w-3 rounded-full bg-lime md:hidden" />
 
                 {/* image card — staggered heights for editorial rhythm */}
                 <article
                   data-md-card
-                  className={`group relative mt-5 overflow-hidden rounded-2xl border border-fg/10 bg-surface ${
+                  className={`group relative mt-4 overflow-hidden rounded-2xl border border-fg/10 bg-surface ${
                     i % 2 === 0 ? "md:mt-7" : "md:mt-12"
                   }`}
                 >
-                  <div className={`w-full overflow-hidden ${i % 2 === 0 ? "h-[240px] md:h-[min(320px,36svh)]" : "h-[200px] md:h-[min(260px,30svh)]"}`}>
+                  <div className={`w-full overflow-hidden h-[228px] ${i % 2 === 0 ? "md:h-[min(320px,36svh)]" : "md:h-[min(260px,30svh)]"}`}>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       data-md-img
@@ -317,9 +325,20 @@ export function MonoDeveloper({ site }: { site: SiteContent }) {
             <div aria-hidden className="hidden md:block md:w-[24vw] md:shrink-0" />
           </div>
 
-          {/* mobile left rail — lime fill follows the scroll */}
-          <div aria-hidden className="absolute bottom-0 left-4 top-0 w-px bg-night/15 md:hidden">
-            <div ref={mobileProg} className="h-full w-px origin-top scale-y-0 bg-lime" />
+          {/* Гар утас — каруселийн явцын зурвас + гүйлгэх сануулга */}
+          <div className="mt-5 flex items-center gap-4 px-6 md:hidden">
+            {/* Тоолуур ЗҮҮН талд — баруун доод буланг чатботын бөмбөлөг
+                эзэлдэг тул тэнд бичиг тавьж болохгүй. */}
+            <span className="shrink-0 text-[10px] font-semibold uppercase tracking-[0.24em] text-fg/45">
+              {stations.length} төсөл →
+            </span>
+            <span aria-hidden className="h-px flex-1 bg-fg/15">
+              <span
+                ref={mobileBar}
+                data-md-bar
+                className="block h-px w-full origin-left scale-x-0 bg-lime"
+              />
+            </span>
           </div>
         </div>
 

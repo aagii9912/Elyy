@@ -34,7 +34,7 @@ import { MonoKicker } from "./shared";
 import { MonoModal } from "./MonoModal";
 import { PortraitShowcase, type ShowcaseSlide } from "@/components/ui/portrait-showcase";
 import { IntegrationGrid, type IntegrationItem } from "@/components/ui/integration-grid";
-import { sectionTone } from "@/lib/theme-css";
+import { mediaFilmStyle, sectionTone } from "@/lib/theme-css";
 
 /* Брэндийн тэмдэг — материалын нэрээр таарна. Танихгүй зүйл дээр
    Elysium-ийн ромб тавина, ингэснээр админ дурын материал нэмж болно. */
@@ -164,6 +164,7 @@ export function MonoEquip({ site }: { site: SiteContent }) {
         slides={slides}
         active={index}
         onActiveChange={setActive}
+        film={mediaFilmStyle(site.theme, "equip")}
         /* Шошго нь ХЭСГИЙН нэр («Барилгын бүтэц») — өмнө нь энэ нь
            display гарчиг байсан ч ангиллын нэр учраас мессеж болж
            чаддаггүй байв. Гарчгийн байрыг слайдын нэр эзэлнэ. */

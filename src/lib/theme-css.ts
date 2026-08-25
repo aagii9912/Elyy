@@ -247,6 +247,68 @@ function backgroundDecls(bg: Background): Declarations {
 }
 
 /* ------------------------------------------------------------------ */
+/* Кадрын ДЭЭР буух өнгөт хальс                                        */
+/* ------------------------------------------------------------------ */
+
+/** Кадрын дээрх хальсны өгөгдмөл тун. Одоогийн ногоон film-үүдтэй
+ *  (charcoal/42…/72) ойролцоо — сонгомогц шууд харагдана, гэхдээ кадар
+ *  бүрэн дарагдахгүй. */
+const MEDIA_FILM_OPACITY = 0.55;
+
+export type MediaFilmStyle = {
+  backgroundColor?: string;
+  backgroundImage?: string;
+  opacity?: number;
+};
+
+/** Бичлэг/кадраар БҮРЭН бүрхэгдсэн хэсгүүдэд (hero · 01 · 03) зориулсан
+ *  давхарга.
+ *
+ *  Эдгээр хэсгийн `background` нь кадрын АРД сууна — тиймээс админаас
+ *  өнгө, градиент сонгоход дэлгэц дээр нэг ч пиксел өөрчлөгддөггүй байв.
+ *  Шийдэл: сонгосон дэвсгэрийг кадрын ДЭЭР буух хальс болгож буулгана.
+ *
+ *    • «Өнгө» / «Градиент» / «Токен» — сонгомогц хальс болно
+ *      (тун нь өгөгдмөл 55%; «Хөшиг → Хүч» түүнийг дарж тохируулна).
+ *    • «Өгөгдмөл (auto)» ба «Зураг» — хальс үүсэхгүй; зөвхөн «Хөшиг»
+ *      тохируулсан үед тэр нь хальс болж буунa.
+ *
+ *  `null` = хальсгүй, хэсэг кодод бичсэн дүр төрхөөрөө хэвээр үлдэнэ. */
+export function mediaFilmStyle(
+  theme: ThemeContent | undefined,
+  id: ThemeSectionId
+): MediaFilmStyle | null {
+  return backgroundFilmStyle(theme?.sections?.[id]);
+}
+
+/** `mediaFilmStyle`-ийн цөм — нэг дэвсгэрээс хальс гаргана. `palette`
+ *  өгвөл токеныг ЖИНХЭНЭ hex-ээр (админы урьдчилан харахад
+ *  `--color-*` хувьсагч байхгүй тул). */
+export function backgroundFilmStyle(
+  bg: Background | undefined,
+  palette?: ThemeContent["palette"]
+): MediaFilmStyle | null {
+  if (!bg) return null;
+
+  const kind = pick(bg.kind, BACKGROUND_KINDS, "token");
+  const strength = num(bg.overlay?.opacity, 0, 100, 0) / 100;
+  const opacity = strength > 0 ? strength : MEDIA_FILM_OPACITY;
+
+  if (kind === "solid") return { backgroundColor: hex(bg.color, "#151717"), opacity };
+  if (kind === "gradient") return { backgroundImage: gradientCss(bg), opacity };
+  if (kind === "token") {
+    const token = pick(bg.token, BACKGROUND_TOKENS, "auto");
+    // "auto" → null (юу ч бүү хий), "transparent" → хальс утгагүй.
+    const value = token === "transparent" ? null : tokenValue(token, palette);
+    if (value) return { backgroundColor: value, opacity };
+  }
+
+  const overlay = overlayCss(bg);
+  return overlay ? { backgroundImage: overlay } : null;
+}
+
+
+/* ------------------------------------------------------------------ */
 /* Бичгийн горим (tone)                                                */
 /* ------------------------------------------------------------------ */
 

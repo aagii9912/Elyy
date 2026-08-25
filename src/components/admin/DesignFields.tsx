@@ -26,7 +26,7 @@ import {
   type Background,
   type ThemeContent,
 } from "@/lib/site-content";
-import { backgroundStyle } from "@/lib/theme-css";
+import { backgroundFilmStyle, backgroundStyle } from "@/lib/theme-css";
 import { Button, Card, Field, ImageField, Select, TextInput, Toggle } from "./ui";
 
 /* ------------------------------------------------------------------ */
@@ -245,6 +245,11 @@ function GradientBuilder({
 /* Дэвсгэрийн бүрэн засварлагч                                         */
 /* ------------------------------------------------------------------ */
 
+/** Кадрын оронд тавих дүрс — хальс ямар өнгөтэй буухыг харуулах
+ *  зорилготой, жинхэнэ бичлэгийг татахгүйгээр. */
+const FRAME_STANDIN =
+  "linear-gradient(158deg,#4d5a63 0%,#8f9aa1 34%,#cdd3d6 58%,#6f7a82 100%)";
+
 const KIND_TABS: { id: string; label: string }[] = [
   { id: "token", label: "Токен" },
   { id: "solid", label: "Өнгө" },
@@ -286,28 +291,45 @@ export function BackgroundField({
   onChange,
   palette,
   hint,
+  film = false,
 }: {
   value: Background;
   onChange: (next: Background) => void;
   /** Урьдчилан харахад токенийг жинхэнэ өнгө болгоход хэрэгтэй. */
   palette: ThemeContent["palette"];
   hint?: React.ReactNode;
+  /** Кадраар бүрхэгдсэн хэсэг үү — тийм бол дэвсгэр нь кадрын ДЭЭР буух
+   *  хальс болно (`lib/theme-css.ts` → `mediaFilmStyle`). Урьдчилан
+   *  харахад ч мөн хальс болгож үзүүлнэ. */
+  film?: boolean;
 }) {
   const set = (patch: Partial<Background>) => onChange({ ...value, ...patch });
   const kind = value.kind || "token";
   const preview = backgroundStyle(value, palette);
   const dark = value.tone === "dark";
   const blurred = kind === "image" && value.image.blur > 0 && Boolean(value.image.url);
+  /* Кадртай хэсэгт дэвсгэр нь ард нь биш, кадрын ДЭЭР хальс болж
+     буудаг — урьдчилан харахыг ч яг тэр дарааллаар нь угсарна. */
+  const filmLayer = film ? backgroundFilmStyle(value, palette) : null;
 
   return (
     <div className="space-y-4">
       {/* Урьдчилан харах — бүдгэрүүлсэн зураг нь public талд `::before`
           давхаргаар ордог тул энд ч тусдаа давхаргаар харуулна. */}
       <div
-        style={blurred ? { aspectRatio: "16/6" } : { ...preview, aspectRatio: "16/6" }}
+        style={
+          film
+            ? { backgroundImage: FRAME_STANDIN, aspectRatio: "16/6" }
+            : blurred
+              ? { aspectRatio: "16/6" }
+              : { ...preview, aspectRatio: "16/6" }
+        }
         className="relative flex flex-col justify-center gap-1 overflow-hidden rounded-xl border border-neutral-300 px-5"
       >
-        {blurred && (
+        {filmLayer && (
+          <span aria-hidden style={{ ...filmLayer, position: "absolute", inset: 0 }} />
+        )}
+        {!film && blurred && (
           <span
             aria-hidden
             style={{
@@ -435,16 +457,33 @@ export function BackgroundField({
         </div>
       )}
 
-      {/* Хөшиг */}
+      {/* Хөшиг. Кадртай хэсэгт энэ нь ХАЛЬСНЫ ТУН болж хувирдаг тул
+          шошго, тайлбарыг нь тэр утгаар нь бичнэ (эс бөгөөс «0% үед
+          хөшиг огт үүсэхгүй» гэсэн тайлбар худал болно — тэнд 0% нь
+          «өгөгдмөл 55%» гэсэн үг). */}
       <div className="rounded-xl border border-neutral-200 p-4">
-        <p className="mb-3 text-[13px] font-bold text-neutral-800">Хөшиг (дэвсгэр дээр давхарлана)</p>
+        <p className="mb-3 text-[13px] font-bold text-neutral-800">
+          {film ? "Хальсны тун" : "Хөшиг (дэвсгэр дээр давхарлана)"}
+        </p>
         <div className="grid gap-4 sm:grid-cols-2">
           <ColorField
             label="Хөшгийн өнгө"
             value={value.overlay.color}
             onChange={(color) => set({ overlay: { ...value.overlay, color } })}
+            hint={
+              film
+                ? "Зөвхөн дэвсгэр нь «Өгөгдмөл» үед хэрэглэгдэнэ — өнгө/градиент сонгосон бол тэр нь хальс болно."
+                : undefined
+            }
           />
-          <Field label={`Хүч — ${value.overlay.opacity}%`} hint="0% үед хөшиг огт үүсэхгүй.">
+          <Field
+            label={`Хүч — ${value.overlay.opacity}%`}
+            hint={
+              film
+                ? "0% үед хальс өгөгдмөл 55% тунгаар буунa."
+                : "0% үед хөшиг огт үүсэхгүй."
+            }
+          >
             <input
               type="range"
               min={0}
@@ -1209,7 +1248,20 @@ export function DesignPanel({
                 </button>
                 {isOpen && (
                   <div className="border-t border-neutral-200 p-4">
-                    <BackgroundField value={bg} palette={p} onChange={(next) => setSection(s.id, next)} />
+                    {"film" in s && s.film && (
+                      <p className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-3.5 py-2.5 text-[12px] leading-relaxed text-amber-800">
+                        Энэ хэсгийг бичлэг/кадар бүтэн бүрхдэг. Сонгосон өнгө, градиент
+                        нь <b>кадрын ДЭЭР</b> буух өнгөт хальс болж буунa (өгөгдмөл тун
+                        55%). Тунг «Хөшиг → Хүч» гүйлгүүрээр тохируулна. «Өгөгдмөл»
+                        үед хальс үүсэхгүй — хэсэг хэвээрээ үлдэнэ.
+                      </p>
+                    )}
+                    <BackgroundField
+                      value={bg}
+                      palette={p}
+                      film={"film" in s ? Boolean(s.film) : false}
+                      onChange={(next) => setSection(s.id, next)}
+                    />
                   </div>
                 )}
               </li>
