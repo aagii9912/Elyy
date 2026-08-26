@@ -519,15 +519,30 @@ export type SiteContent = {
   };
 
   location: {
-    kicker: string;
     directionsLabel: string;
     addressLabel: string;
+    /** Зөвхөн төслийн байршил. Борлуулалтын оффисын таб хасагдсан ч
+     *  `tabs` бүтэц нь хадгалсан контенттой нийцэхийн тулд үлдэв. */
     tabs: {
       project: { label: string; title: string; address: string; coords: string };
-      office: { label: string; title: string; address: string; coords: string };
     };
-    nearby: { label: string; items: { place: string; distance: string; kind: string }[] }[];
-    office: { phoneLabel: string; hoursLabel: string; emailLabel: string; ctaLabel: string };
+    /** Хэсгийн үндсэн зураг — хотын агаарын рендер. Дугаартай цэгүүд
+     *  яг үүн дээр буудаг тул зургийг сольвол `pins`-ийн байрлалыг
+     *  дахин тааруулах шаардлагатай. */
+    mapImage: string;
+    /** Рендер дээрх дугаартай цэгүүд. `x`/`y` нь зургийн өргөн/өндрийн
+     *  ХУВЬ (0–100) — ингэснээр зураг ямар ч хэмжээтэй байсан цэг нэг
+     *  газраа үлдэнэ. `distance` нь ЗӨВХӨН тоо, нэгжийг `unit` дээр
+     *  тусад нь сонгоно (м / км) — тоо нь томоор, нэгж нь жижгээр гарна.
+     *  Хоосон талбарууд карт дээр огт харагдахгүй. */
+    pins: {
+      place: string;
+      description: string;
+      distance: string;
+      unit: string;
+      x: number;
+      y: number;
+    }[];
   };
 
   contact: {
@@ -1037,64 +1052,27 @@ export const DEFAULT_SITE_CONTENT: SiteContent = {
   },
 
   location: {
-    kicker: "Байршил",
-    directionsLabel: "Чиглэл авах ↗",
+    directionsLabel: "Чиглэл авах",
     addressLabel: "Хаяг",
     tabs: {
       project: {
         label: "Төслийн байршил",
-        title: "Хотын төвд, байгалийн хажууд",
+        title: "Төслийн байршил",
         address: "Үндэсний цэцэрлэгт хүрээлэнгийн баруун хойно, Улаанбаатар",
         coords: "47.89733862835647,106.88538756153864",
       },
-      office: {
-        label: "Борлуулалтын оффис",
-        title: "Биечлэн ирж танилцаарай",
-        address: "Үндэсний цэцэрлэгт хүрээлэнгийн баруун хойно, 360 Мандала тауэр",
-        coords: "47.90146685024925,106.93241183285195",
-      },
     },
-    nearby: [
-      {
-        label: "Боловсрол",
-        items: [
-          { place: "Номин Кидс", distance: "450", kind: "Цэцэрлэг" },
-          { place: "Оном сургууль", distance: "600", kind: "Сургууль" },
-          { place: "18-р сургууль", distance: "1000", kind: "Сургууль" },
-          { place: "72-р цэцэрлэг", distance: "1000", kind: "Цэцэрлэг" },
-          { place: "Орхон Хасу", distance: "1200", kind: "Сургууль" },
-          { place: "15-р сургууль", distance: "1500", kind: "Сургууль" },
-          { place: "65-р цэцэрлэг", distance: "1650", kind: "Цэцэрлэг" },
-          { place: "67-р цэцэрлэг", distance: "1790", kind: "Цэцэрлэг" },
-          { place: "75-р сургууль", distance: "1800", kind: "Сургууль" },
-        ],
-      },
-      {
-        label: "Худалдаа, үйлчилгээ",
-        items: [
-          { place: "Поларис их дэлгүүр", distance: "550", kind: "" },
-          { place: "Номин Юнайтэд", distance: "620", kind: "" },
-          { place: "Лавай зах", distance: "1100", kind: "" },
-          { place: "19-р үйлчилгээний төв", distance: "1600", kind: "" },
-          { place: "Хүннү молл", distance: "3700", kind: "" },
-          { place: "Food City", distance: "3800", kind: "" },
-        ],
-      },
-      {
-        label: "Эрүүл мэнд",
-        items: [
-          { place: "ХУД эрүүл мэндийн төв", distance: "1000", kind: "" },
-          { place: "Интермед эмнэлэг", distance: "1700", kind: "" },
-          { place: "Улаанбаатар сувилал", distance: "1800", kind: "" },
-        ],
-      },
+    mapImage: "/images/location-aerial.jpg",
+    pins: [
+      { place: "Эрэл Групп", description: "", distance: "", unit: "м", x: 41.6, y: 80.5 },
+      { place: "Поларис их дэлгүүр", description: "", distance: "", unit: "м", x: 65.1, y: 83.9 },
+      { place: "Анун төв", description: "", distance: "", unit: "м", x: 90.3, y: 82.2 },
+      { place: "Таван Богд", description: "", distance: "", unit: "м", x: 80.7, y: 55.9 },
+      { place: "Мишээл экспо", description: "", distance: "", unit: "м", x: 95.7, y: 51 },
+      { place: "Номин Юнайтед", description: "", distance: "", unit: "м", x: 67.7, y: 49.6 },
+      { place: "Нарны гүүр", description: "", distance: "", unit: "м", x: 72.8, y: 44.7 },
+      { place: "Талбай", description: "", distance: "", unit: "м", x: 80.8, y: 13.8 },
     ],
-    office: {
-      phoneLabel: "Утас",
-      hoursLabel: "Цагийн хуваарь",
-      emailLabel: "И-мэйл",
-      ctaLabel: "Уулзалт товлох",
-    },
   },
 
   contact: {

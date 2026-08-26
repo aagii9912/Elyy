@@ -17,6 +17,7 @@ import {
 import { externalHref } from "@/lib/links";
 import { Button, Card, Field, FileField, ImageField, Select, TextArea, TextInput, Toggle } from "./ui";
 import { DesignPanel } from "./DesignFields";
+import { PinMapEditor } from "./PinMapEditor";
 
 type SectionId =
   | "design"
@@ -55,7 +56,7 @@ const SECTIONS: { id: SectionId; label: string; hint: string }[] = [
   { id: "developer", label: "Төсөл хэрэгжүүлэгч", hint: "Компани, өмнөх төслүүд" },
   { id: "gallery", label: "Зургийн цомог", hint: "Интерьер зургууд" },
   { id: "vr", label: "VR аялал", hint: "360° embed холбоос, постер" },
-  { id: "location", label: "Байршил", hint: "Газрын зураг, ойролцоох цэгүүд" },
+  { id: "location", label: "Байршил", hint: "Агаарын рендер, дугаартай цэгүүд" },
   { id: "contact", label: "Холбоо барих", hint: "Утас, хаяг, маягт" },
   { id: "managers", label: "Борлуулалтын баг", hint: "Менежерүүд" },
   { id: "faq", label: "Түгээмэл асуулт", hint: "Асуулт & хариулт" },
@@ -117,6 +118,13 @@ function LinkInput({
 /* ------------------------------------------------------------------ */
 /* Жагсаалт засварлагч — нэмэх / зөөх / устгах                         */
 /* ------------------------------------------------------------------ */
+
+/** Зургийн хувийн байрлал — 0–100 хооронд барина. Хоосон/буруу утга 0. */
+function pct(value: string): number {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return 0;
+  return Math.min(100, Math.max(0, Math.round(n * 10) / 10));
+}
 
 function ListEditor<T>({
   items,
@@ -1518,13 +1526,7 @@ function renderSection(
       return (
         <>
           <Card title="Гарчиг">
-            <div className="grid gap-4 sm:grid-cols-3">
-              <Field label="Kicker">
-                <TextInput
-                  value={c.location.kicker}
-                  onChange={(e) => edit((d) => void (d.location.kicker = e.target.value))}
-                />
-              </Field>
+            <div className="grid gap-4 sm:grid-cols-2">
               <Field label="Чиглэл авах товч">
                 <TextInput
                   value={c.location.directionsLabel}
@@ -1540,107 +1542,124 @@ function renderSection(
             </div>
           </Card>
 
-          {(["project", "office"] as const).map((tab) => (
-            <Card key={tab} title={tab === "project" ? "Таб · Төслийн байршил" : "Таб · Борлуулалтын оффис"}>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <Field label="Табны нэр">
-                  <TextInput
-                    value={c.location.tabs[tab].label}
-                    onChange={(e) => edit((d) => void (d.location.tabs[tab].label = e.target.value))}
-                  />
-                </Field>
-                <Field label="Гарчиг">
-                  <TextInput
-                    value={c.location.tabs[tab].title}
-                    onChange={(e) => edit((d) => void (d.location.tabs[tab].title = e.target.value))}
-                  />
-                </Field>
-                <Field label="Хаяг">
-                  <TextInput
-                    value={c.location.tabs[tab].address}
-                    onChange={(e) => edit((d) => void (d.location.tabs[tab].address = e.target.value))}
-                  />
-                </Field>
-                <Field label="Координат" hint="Өргөрөг,уртраг — ж: 47.897,106.885">
-                  <TextInput
-                    value={c.location.tabs[tab].coords}
-                    onChange={(e) => edit((d) => void (d.location.tabs[tab].coords = e.target.value))}
-                  />
-                </Field>
-              </div>
-            </Card>
-          ))}
-
-          <Card title="Оффисын самбарын шошгууд">
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              <Field label="Утас">
+          <Card title="Төслийн байршил">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field label="Гарчиг">
                 <TextInput
-                  value={c.location.office.phoneLabel}
-                  onChange={(e) => edit((d) => void (d.location.office.phoneLabel = e.target.value))}
+                  value={c.location.tabs.project.title}
+                  onChange={(e) => edit((d) => void (d.location.tabs.project.title = e.target.value))}
                 />
               </Field>
-              <Field label="Цагийн хуваарь">
+              <Field label="Зургийн alt" hint="Зураг ачаалагдаагүй үед болон дэлгэц уншигчид">
                 <TextInput
-                  value={c.location.office.hoursLabel}
-                  onChange={(e) => edit((d) => void (d.location.office.hoursLabel = e.target.value))}
+                  value={c.location.tabs.project.label}
+                  onChange={(e) => edit((d) => void (d.location.tabs.project.label = e.target.value))}
                 />
               </Field>
-              <Field label="И-мэйл">
+              <Field label="Хаяг">
                 <TextInput
-                  value={c.location.office.emailLabel}
-                  onChange={(e) => edit((d) => void (d.location.office.emailLabel = e.target.value))}
+                  value={c.location.tabs.project.address}
+                  onChange={(e) => edit((d) => void (d.location.tabs.project.address = e.target.value))}
                 />
               </Field>
-              <Field label="Товч">
+              <Field label="Координат" hint="Өргөрөг,уртраг — ж: 47.897,106.885">
                 <TextInput
-                  value={c.location.office.ctaLabel}
-                  onChange={(e) => edit((d) => void (d.location.office.ctaLabel = e.target.value))}
+                  value={c.location.tabs.project.coords}
+                  onChange={(e) => edit((d) => void (d.location.tabs.project.coords = e.target.value))}
                 />
               </Field>
             </div>
           </Card>
 
-          <Card title="Ойролцоох цэгүүд">
+          <Card title="Байршлын зураг">
+            <ImageField
+              label="Агаарын рендер"
+              value={c.location.mapImage}
+              onChange={(url) => edit((d) => void (d.location.mapImage = url))}
+              ratio="16/9"
+              maxEdge={2400}
+              hint="Дугаартай цэгүүд ЯГ энэ зураг дээр буудаг — зургаа сольбол доорх цэгүүдийн X/Y-г дахин тааруулна уу."
+            />
+          </Card>
+
+          <Card title="Зураг дээрх цэгүүд">
+            <PinMapEditor
+              image={c.location.mapImage}
+              pins={c.location.pins}
+              onChange={(next) => edit((d) => void (d.location.pins = next))}
+            />
+            <div className="mt-5 border-t border-neutral-200 pt-5" />
             <ListEditor
-              items={c.location.nearby}
-              onChange={(next) => edit((d) => void (d.location.nearby = next))}
-              blank={() => ({ label: "Шинэ бүлэг", items: [] })}
-              title={(item) => `${item.label} · ${item.items.length}`}
-              addLabel="Бүлэг нэмэх"
+              items={c.location.pins}
+              onChange={(next) => edit((d) => void (d.location.pins = next))}
+              blank={() => ({ place: "Шинэ цэг", description: "", distance: "", unit: "м", x: 50, y: 50 })}
+              title={(item) =>
+                item.distance ? `${item.place} · ${item.distance}${item.unit}` : item.place
+              }
+              addLabel="Цэг нэмэх"
             >
-              {(group, setGroup) => (
-                <>
-                  <Field label="Бүлгийн нэр">
-                    <TextInput value={group.label} onChange={(e) => setGroup({ label: e.target.value })} />
+              {(item, set) => (
+                <div className="space-y-4">
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <Field label="Нэршил" hint="Картын гарчиг болон цэгийн тайлбар">
+                      <TextInput
+                        value={item.place}
+                        onChange={(e) => set({ place: e.target.value })}
+                      />
+                    </Field>
+                    <div className="grid grid-cols-[1fr_7rem] gap-3">
+                      <Field label="Elysium-ээс хол зай" hint="Зөвхөн тоо — ж: 450 эсвэл 1.2">
+                        <TextInput
+                          inputMode="decimal"
+                          value={item.distance}
+                          onChange={(e) => set({ distance: e.target.value })}
+                        />
+                      </Field>
+                      <Field label="Нэгж">
+                        <Select
+                          value={item.unit}
+                          onChange={(e) => set({ unit: e.target.value })}
+                        >
+                          <option value="м">м</option>
+                          <option value="км">км</option>
+                        </Select>
+                      </Field>
+                    </div>
+                  </div>
+                  <Field label="Тайлбар" hint="Нэрний доор гарна — хоосон бол огт харагдахгүй">
+                    <TextArea
+                      rows={2}
+                      value={item.description}
+                      onChange={(e) => set({ description: e.target.value })}
+                    />
                   </Field>
-                  <ListEditor
-                    items={group.items}
-                    onChange={(next) => setGroup({ items: next })}
-                    blank={() => ({ place: "Шинэ цэг", distance: "0", kind: "" })}
-                    title={(item) => `${item.place} · ${item.distance}м`}
-                    addLabel="Цэг нэмэх"
-                  >
-                    {(place, setPlace) => (
-                      <div className="grid gap-3 sm:grid-cols-3">
-                        <Field label="Нэр">
-                          <TextInput value={place.place} onChange={(e) => setPlace({ place: e.target.value })} />
-                        </Field>
-                        <Field label="Зай (метр)">
-                          <TextInput
-                            value={place.distance}
-                            onChange={(e) => setPlace({ distance: e.target.value })}
-                          />
-                        </Field>
-                        <Field label="Төрөл" hint="Заавал биш.">
-                          <TextInput value={place.kind} onChange={(e) => setPlace({ kind: e.target.value })} />
-                        </Field>
-                      </div>
-                    )}
-                  </ListEditor>
-                </>
+                  <div className="grid grid-cols-2 gap-3 sm:max-w-xs">
+                    <Field label="X (%)" hint="Зүүн ирмэгээс">
+                      <TextInput
+                        type="number"
+                        min={0}
+                        max={100}
+                        step={0.1}
+                        value={item.x}
+                        onChange={(e) => set({ x: pct(e.target.value) })}
+                      />
+                    </Field>
+                    <Field label="Y (%)" hint="Дээд ирмэгээс">
+                      <TextInput
+                        type="number"
+                        min={0}
+                        max={100}
+                        step={0.1}
+                        value={item.y}
+                        onChange={(e) => set({ y: pct(e.target.value) })}
+                      />
+                    </Field>
+                  </div>
+                </div>
               )}
             </ListEditor>
           </Card>
+
         </>
       );
 
