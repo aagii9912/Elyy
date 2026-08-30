@@ -1,40 +1,55 @@
 "use client";
 
-/* /mono — Intro. Захиалагчийн клип — өдрийн цэлмэг тэнгэрт өндөрлөх
-   цамхагууд — 160 WebP кадр болгож хөрвүүлсэн.
+/* / — Intro. Захиалагчийн 10 секундын клип — Улаанбаатарын хөндлөнгөөс
+   харагдах цамхагууд — ДАВТАГДАН тоглоно.
 
-   Кадрууд нь ӨӨРӨӨ timelapse байдлаар тоглоно: хуудас нээмэгц эхэлж,
-   ~7 секундэд бүрэн барилга хүртэл гүйгээд сүүлийн кадр дээрээ зогсоно.
-   (Өмнө нь гүйлтэнд уягдсан байсан тул ачаалахад ХООСОН тэнгэр
-   харагддаг, барилга харахын тулд доош гүйлгэх шаардлагатай байв.)
+   Өмнө нь энэ хэсэг 160 WebP кадрыг canvas дээр нэг удаа гүйлгэж
+   (timelapse) сүүлийн кадар дээрээ зогсдог байсан. Одоо жинхэнэ mp4:
+   гүйлт ч, canvas ч, зогсох цэг ч байхгүй — хуудас нээлттэй байх
+   хугацаанд тасралтгүй эргэлдэнэ.
 
-   Ачаалалт удаан үед playhead нь зөвхөн БЭЛЭН болсон кадр хүртэл явна —
-   тиймээс алгасалт үүсэхгүй, зүгээр л жаахан удаан тоглоод гүйцнэ.
+   ХОЁР ЭХ ФАЙЛ, нэгийг нь л татна:
+     • веб (≥768px)  → hero-loop-desktop.mp4 (1920×980),
+     • гар утас      → hero-loop-mobile.mp4  (1080×1820).
+   Босоо дэлгэц дээр хэвтээ клипийг кроп хийхгүй — захиалагч тус бүрд нь
+   тохируулж зассан. Сонголтыг matchMedia хийх тул хөтөч хоёуланг нь
+   татахгүй; постер зураг нь `<picture media>`-ээр мөн адил.
 
-   Кадрын багцыг дахин үүсгэх: `node scripts/build-scroll-frames.mjs hero`. */
+   Урсгал: постер (SSR-ээс эхлэн) → клип бэлэн болмогц дээр нь зөөлөн
+   гарч ирнэ. prefers-reduced-motion / Data Saver үед клип ОГТ татагдахгүй,
+   постер л үлдэнэ; iOS-ийн Low Power Mode шиг авто-тоглолт няцаагдсан
+   тохиолдолд ч мөн адил (`playing` эвент ирэхгүй тул клип ил гарахгүй).
 
-import { Fragment, useEffect, useRef } from "react";
+   Клипүүдийг дахин хөрвүүлэх: `node scripts/build-section-videos.mjs hero`. */
+
+import { Fragment, useEffect, useRef, useState } from "react";
 import { useLenis } from "lenis/react";
 import { gsap } from "@/lib/gsap";
 import type { SiteContent } from "@/lib/site-content";
 import { BrochureButton } from "./MonoBrochure";
 import { mediaFilmStyle, sectionTone } from "@/lib/theme-css";
 
-const FRAME_COUNT = 160;
-const framePath = (i: number) => `/hero-video-frames/frame_${String(i).padStart(3, "0")}.webp`;
-/** Хөдөлгөөн унтраасан / өгөгдөл хэмнэх горимд харуулах ганц кадр. */
-const STILL_FRAME = 132;
-/** Эхнээс дуустал тоглох хугацаа (сек). */
-const PLAY_SECONDS = 7;
-/** Гар утсанд кадрыг сийрэгжүүлнэ — 160 кадр ≈ 5.4MB нь хэт хүнд.
- *  3 дахин сийрэгжүүлэхэд ~1.8MB болж, timelapse мэдрэмж хэвээр үлдэнэ. */
-const MOBILE_STEP = 3;
+const CLIP = {
+  desktop: { src: "/video/hero-loop-desktop.mp4", poster: "/video/hero-loop-desktop.jpg" },
+  mobile: { src: "/video/hero-loop-mobile.mp4", poster: "/video/hero-loop-mobile.jpg" },
+} as const;
+
+/** Tailwind-ийн `md` — постерын `<picture media>`-тэй ЯГ ижил байх ёстой,
+ *  эс бөгөөс постер нэг клип, видео нөгөөг нь татна. */
+const DESKTOP_QUERY = "(min-width: 768px)";
+
+/** `still` — хөдөлгөөнгүй горим: клип татахгүй, зөвхөн постер. */
+type Variant = "still" | keyof typeof CLIP;
 
 export function MonoHero({ site }: { site: SiteContent }) {
   const { brand, hero, nav } = site;
   const lenis = useLenis();
   const root = useRef<HTMLElement>(null);
-  const canvas = useRef<HTMLCanvasElement>(null);
+  const video = useRef<HTMLVideoElement>(null);
+  /** Аль клип тоглох вэ — сервер дээр мэдэгдэхгүй тул эхэндээ `null`. */
+  const [variant, setVariant] = useState<Variant | null>(null);
+  /** Клип ҮНЭХЭЭР тоглож эхэлсэн үү — тэр үед л постерын дээр гарна. */
+  const [playing, setPlaying] = useState(false);
 
   const go = (e: React.MouseEvent, href: string) => {
     e.preventDefault();
@@ -44,126 +59,54 @@ export function MonoHero({ site }: { site: SiteContent }) {
     else (el as HTMLElement).scrollIntoView({ behavior: "smooth" });
   };
 
+  /* Клипийн сонголт. Дэлгэц эргэх / цонх сунгахад breakpoint давбал
+     нөгөө клип рүү шилжинэ (`key={variant}`-аар дахин mount хийгдэнэ). */
   useEffect(() => {
-    const cvs = canvas.current;
-    const sec = root.current;
-    if (!cvs || !sec) return;
-    const ctx2d = cvs.getContext("2d");
-    if (!ctx2d) return;
-
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const isMobile = window.matchMedia("(max-width: 767px)").matches;
-    /* Data Saver горимд видео чанартай зүйл татахгүй — ганц кадр хангалттай. */
+    const mq = window.matchMedia(DESKTOP_QUERY);
+    /* Data Saver горимд видео чанартай зүйл татахгүй — постер хангалттай. */
     const conn = (navigator as { connection?: { saveData?: boolean } }).connection;
-    const stillOnly = reduce || Boolean(conn?.saveData);
+    const still =
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches || Boolean(conn?.saveData);
 
-    /* Тоглуулах кадрын дугаарууд. Сүүлийн кадрыг үргэлж оруулна —
-       эс бөгөөс бүрэн барилга дээр зогсохгүй. */
-    const numbers: number[] = [];
-    if (stillOnly) {
-      numbers.push(STILL_FRAME);
-    } else {
-      const step = isMobile ? MOBILE_STEP : 1;
-      for (let i = 1; i <= FRAME_COUNT; i += step) numbers.push(i);
-      if (numbers[numbers.length - 1] !== FRAME_COUNT) numbers.push(FRAME_COUNT);
-    }
+    const apply = () => setVariant(still ? "still" : mq.matches ? "desktop" : "mobile");
+    apply();
+    mq.addEventListener("change", apply);
 
-    const images = numbers.map((n) => {
-      const im = new Image();
-      im.decoding = "async";
-      im.src = framePath(n);
-      return im;
-    });
+    return () => mq.removeEventListener("change", apply);
+  }, []);
 
-    /* Эхнээс нь ХЭДЭН кадр ДАРААЛАН бэлэн болсныг тоолно. Playhead
-       үүнээс цааш явахгүй тул алгасалт гарахгүй. */
-    let ready = 0;
-    const markReady = () => {
-      while (ready < images.length && images[ready].complete && images[ready].naturalWidth) {
-        ready += 1;
-      }
+  /* Таб далд болоход хөтөч клипийг зогсоодог бөгөөд буцаж ирэхэд
+     үргэлж өөрөө үргэлжлүүлдэггүй. Ил гармагц дахин эхлүүлнэ. */
+  useEffect(() => {
+    const resume = () => {
+      const v = video.current;
+      if (!v || document.hidden || !v.paused) return;
+      void v.play().catch(() => {});
     };
+    document.addEventListener("visibilitychange", resume);
+    return () => document.removeEventListener("visibilitychange", resume);
+  }, []);
 
-    let cursor = 0; // бутархай кадрын байрлал
+  /* Гүйлгэж эхлэхэд hero-гийн бичиг зөөлөн бүдгэрнэ. */
+  useEffect(() => {
+    const sec = root.current;
+    if (!sec) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-    const resize = () => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      cvs.width = Math.round(cvs.clientWidth * dpr);
-      cvs.height = Math.round(cvs.clientHeight * dpr);
-    };
-
-    const draw = () => {
-      const img = images[Math.min(images.length - 1, Math.max(0, Math.round(cursor)))];
-      if (!img || !img.complete || !img.naturalWidth) return;
-      const cw = cvs.width;
-      const ch = cvs.height;
-      const scale = Math.max(cw / img.naturalWidth, ch / img.naturalHeight);
-      const w = img.naturalWidth * scale;
-      const h = img.naturalHeight * scale;
-      ctx2d.clearRect(0, 0, cw, ch);
-      ctx2d.drawImage(img, (cw - w) / 2, (ch - h) / 2, w, h);
-    };
-
-    resize();
-    const onResize = () => {
-      resize();
-      draw();
-    };
-    window.addEventListener("resize", onResize);
-
-    let raf = 0;
-    let last = 0;
-    const fps = images.length > 1 ? (images.length - 1) / PLAY_SECONDS : 0;
-
-    const tick = (t: number) => {
-      if (!last) last = t;
-      /* Таб далд байгаад буцаж ирэхэд нэг дор үсрэхээс сэргийлж
-         алхмыг хязгаарлана. */
-      const dt = Math.min(0.1, (t - last) / 1000);
-      last = t;
-
-      markReady();
-      const loadedMax = Math.max(0, ready - 1);
-      cursor = Math.min(cursor + dt * fps, loadedMax, images.length - 1);
-      draw();
-
-      if (cursor >= images.length - 1) return; // дууслаа — сүүлийн кадр дээр зогсоно
-      raf = requestAnimationFrame(tick);
-    };
-
-    if (stillOnly) {
-      images[0].onload = () => {
-        resize();
-        draw();
-      };
-      if (images[0].complete) {
-        markReady();
-        draw();
-      }
-    } else {
-      raf = requestAnimationFrame(tick);
-    }
-
-    /* Гүйлгэж эхлэхэд hero-гийн бичиг зөөлөн бүдгэрнэ. */
     const ctx = gsap.context(() => {
-      if (!reduce) {
-        gsap.to("[data-mh-copy]", {
-          opacity: 0,
-          yPercent: -8,
-          ease: "none",
-          scrollTrigger: { trigger: sec, start: "top top", end: "bottom top", scrub: true },
-        });
-      }
+      gsap.to("[data-mh-copy]", {
+        opacity: 0,
+        yPercent: -8,
+        ease: "none",
+        scrollTrigger: { trigger: sec, start: "top top", end: "bottom top", scrub: true },
+      });
     }, sec);
 
-    return () => {
-      cancelAnimationFrame(raf);
-      window.removeEventListener("resize", onResize);
-      ctx.revert();
-    };
+    return () => ctx.revert();
   }, []);
 
   const film = mediaFilmStyle(site.theme, "hero");
+  const clip = variant && variant !== "still" ? CLIP[variant] : null;
 
   return (
     <section
@@ -174,16 +117,49 @@ export function MonoHero({ site }: { site: SiteContent }) {
       className="relative h-[100svh] min-h-[620px] w-full bg-night"
     >
       <div className="relative flex h-full w-full overflow-hidden">
-        <canvas ref={canvas} className="absolute inset-0 z-0 h-full w-full" />
-        {/* Шинэ кадрууд өдрийн цэлмэг тэнгэртэй — өмнөх нар жаргах клипээс
-            хамаагүй цайвар тул цагаан бичиг дан дээр нь уншигдахгүй. Хоёр
-            давхар хөшиг: дээд/доод шугаман (толгой ба товчнуудад) + бичгийн
-            ард нэг зөөлөн эллипс. Ингэснээр кадрын ирмэг гэгээлэг хэвээр
-            үлдэж, зөвхөн бичгийн доод тал бараантана. */}
-        <div className="pointer-events-none absolute inset-0 z-[5] bg-gradient-to-b from-night/45 via-night/8 to-night/60" />
-        <div className="pointer-events-none absolute inset-0 z-[5] bg-[radial-gradient(ellipse_78%_56%_at_50%_42%,rgba(21,23,23,0.42)_0%,rgba(21,23,23,0.24)_45%,transparent_72%)]" />
+        {/* Постер — эхний кадар. Клип ирэх хүртэл, мөн хөдөлгөөнгүй
+            горимд энэ л харагдана. `media` нь видеоны matchMedia-тай
+            ижил тул хоёр зургийн зөвхөн НЭГ нь татагдана. */}
+        <picture>
+          <source media={DESKTOP_QUERY} srcSet={CLIP.desktop.poster} />
+          <img
+            src={CLIP.mobile.poster}
+            alt=""
+            aria-hidden
+            fetchPriority="high"
+            className="absolute inset-0 z-0 h-full w-full object-cover"
+          />
+        </picture>
 
-        {/* Админаас сонгосон дэвсгэр — кадрын ДЭЭР буух өнгөт хальс.
+        {clip && (
+          <video
+            key={variant}
+            ref={video}
+            src={clip.src}
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="auto"
+            aria-hidden
+            tabIndex={-1}
+            onPlaying={() => setPlaying(true)}
+            onCanPlay={(e) => {
+              /* Нуугдсан таб дээр авто-тоглолт хойшлогддог — бэлэн
+                 болмогц дахин оролдоно. Няцаагдвал постер үлдэнэ. */
+              void e.currentTarget.play().catch(() => {});
+            }}
+            className={`absolute inset-0 z-[1] h-full w-full object-cover transition-opacity duration-700 ease-out ${
+              playing ? "opacity-100" : "opacity-0"
+            }`}
+          />
+        )}
+
+        {/* Бараан хөшиг ЗОРИУДААР байхгүй — клип бүрэн өнгөөрөө
+            харагдана. Бичгийн уншигдац нь үсгэн дээрх сүүдрээр
+            (`drop-shadow`) л барина. */}
+
+        {/* Админаас сонгосон дэвсгэр — клипийн ДЭЭР буух өнгөт хальс.
             Хэсгийн `background` нь бичлэгийн АРД сууж харагддаггүй тул
             «Өнгө / Градиент» сонголт эндээс л нүдэнд буунa. Өгөгдмөл
             («Auto») үед `null` — hero нэг ч пиксел хөдлөхгүй. */}

@@ -7,7 +7,7 @@
  * Sources live outside the repo (~/Downloads) — this script is a one-off
  * regeneration tool, the committed output is public/<out>/frame_NNN.webp.
  *
- *   node scripts/build-scroll-frames.mjs [hero|plan]
+ *   node scripts/build-scroll-frames.mjs [plan|structure]
  */
 
 import { execFileSync } from "node:child_process";
@@ -20,19 +20,8 @@ const SRC = "/Users/aagii/Downloads";
 const PUBLIC = fileURLToPath(new URL("../public/", import.meta.url));
 
 const SEQUENCES = {
-  /* Hero — the towers rising into a clear daylight sky (захиалагчийн
-     2026-08-19 клип, `Hero-daylight.mp4` нэрээр хадгалсан). Эхний
-     гүйлтийн дараа хэсэг өөрөө тоглодог болсон тул кадрын нягтыг
-     нэмэв (8 сек / 160 кадр ≈ 20fps) — гараар гүйлгэхэд мэдэгддэггүй
-     алгасалт автомат тоглолт дээр тод харагддаг. */
-  hero: {
-    out: "hero-video-frames",
-    clips: ["Hero-daylight.mp4"],
-    xfade: 0.6,
-    frames: 160,
-    scale: "1280:720",
-    quality: 58,
-  },
+  /* Нүүр дэлгэцийн `hero` багц ХАСАГДСАН: тэр хэсэг кадрын дараалал
+     биш, давталттай mp4 болсон — `build-section-videos.mjs hero`. */
   /* Ерөнхий төлөвлөлт — one clip per stat point, in POINTS order:
      506 айл · 4 блок / 85% ногоон / 513 зогсоол / 2027 II улирал. */
   plan: {

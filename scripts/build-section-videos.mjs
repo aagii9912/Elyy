@@ -9,7 +9,7 @@
  * Sources live outside the repo (~/Downloads) — this is a one-off
  * regeneration tool, the committed output is public/video/<out>.
  *
- *   node scripts/build-section-videos.mjs [structure]
+ *   node scripts/build-section-videos.mjs [structure|hero]
  */
 
 import { execFileSync } from "node:child_process";
@@ -37,6 +37,34 @@ const SETS = {
       { src: "hf_20260813_071213_3fff4b01-2e51-4845-a099-d82f7b624e76.mp4", out: "structure-facade.mp4" },
     ],
   },
+
+  /* Нүүр дэлгэц (hero) — 10 секундын давталт. Кадрын дараалал
+     (хуучин `hero-video-frames`, одоо устгагдсан) орлож, ГҮЙЛТЭД
+     уягдахаа больсон: хуудас нээмэгц өөрөө эргэлдэнэ.
+
+     Хоёр эх файл — веб (хэвтээ 1920×1080) ба гар утас (босоо
+     1080×1920). Босоо дэлгэц дээр хэвтээ клипийг кроп хийхгүй:
+     захиалагч тус бүрд нь тохируулж зассан. Хөтөч зөвхөн НЭГИЙГ нь
+     татна (`MonoHero` дотор matchMedia-гаар сонгоно).
+
+     Хэвтээ эх нь HEVC 10-bit — вэбд h264 8-bit болгож заавал
+     хөрвүүлнэ, эс бөгөөс Chrome/Firefox дээр огт тоглохгүй.
+
+     `crop` — эх клипийн баруун доод буланд «AI generated» ус тэмдэг
+     шатаагдсан. Доод захыг нь хайчилж авна: тэнд зам, агуулахын дээвэр
+     л байгаа тул цамхагуудын байрлалд огт нөлөөлөхгүй. */
+  hero: {
+    dir: "video",
+    scale: "1920:-2",
+    crf: 26,
+    /* Постер — эхний кадар зурагдах хүртэлх дэвсгэр, мөн
+       prefers-reduced-motion / Data Saver үеийн ганц зураг. */
+    poster: 0.2,
+    clips: [
+      { src: "895869ca-11d7-4043-b25f-2aa9dd67d8f0.mp4", out: "hero-loop-desktop.mp4", crop: "1920:980:0:0" },
+      { src: "5e6a0e26-b78c-4e12-9937-64efe5564ba7.mp4", out: "hero-loop-mobile.mp4", crop: "1080:1820:0:0", scale: "1080:-2", crf: 28 },
+    ],
+  },
 };
 
 function build(name) {
@@ -46,6 +74,10 @@ function build(name) {
 
   for (const clip of set.clips) {
     const out = join(outDir, clip.out);
+    const scale = clip.scale ?? set.scale;
+    const crf = clip.crf ?? set.crf;
+    const crop = clip.crop ?? set.crop;
+    const vf = [crop && `crop=${crop}`, `scale=${scale}`].filter(Boolean).join(",");
     execFileSync(
       ffmpeg,
       [
@@ -54,11 +86,11 @@ function build(name) {
         "-i", join(SRC, clip.src),
         // Дэвсгэр — дуугүй. Эх файлд ч дууны урсгал байхгүй.
         "-an",
-        "-vf", `scale=${set.scale}`,
+        "-vf", vf,
         "-c:v", "libx264",
         "-profile:v", "main",
         "-pix_fmt", "yuv420p",
-        "-crf", String(set.crf),
+        "-crf", String(crf),
         "-preset", "slow",
         // 2 секунд тутамд түлхүүр кадар — давталтын эргэлт цэвэр болно.
         "-g", "48",
@@ -70,6 +102,25 @@ function build(name) {
     );
     const kb = Math.round(statSync(out).size / 1024);
     console.log(`[${name}] ${clip.out} — ${kb} KB`);
+
+    const at = clip.poster ?? set.poster;
+    if (at == null) continue;
+    const poster = out.replace(/\.mp4$/, ".jpg");
+    execFileSync(
+      ffmpeg,
+      [
+        "-y",
+        "-v", "error",
+        "-ss", String(at),
+        "-i", join(SRC, clip.src),
+        "-frames:v", "1",
+        "-vf", vf,
+        "-q:v", "4",
+        poster,
+      ],
+      { stdio: ["ignore", "inherit", "inherit"] }
+    );
+    console.log(`[${name}] ${poster.split("/").pop()} — ${Math.round(statSync(poster).size / 1024)} KB`);
   }
 }
 
