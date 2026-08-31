@@ -3,7 +3,7 @@
 
 import type { SiteContent } from "@/lib/site-content";
 import { MonoKicker } from "./shared";
-import { sectionTone } from "@/lib/theme-css";
+import { flatSectionTone } from "@/lib/theme-css";
 
 export function MonoGallery({ site }: { site: SiteContent }) {
   const { gallery } = site;
@@ -11,7 +11,7 @@ export function MonoGallery({ site }: { site: SiteContent }) {
   return (
     <section
       data-bg="gallery"
-      data-tone={sectionTone(site.theme, "gallery", "light")}
+      data-tone={flatSectionTone(site.theme, "gallery")}
       className="overflow-hidden border-b border-fg/10 bg-ground py-24 md:py-28"
     >
       <div className="mx-auto max-w-[1500px] px-6 md:px-10">

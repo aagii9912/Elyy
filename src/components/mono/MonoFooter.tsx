@@ -7,7 +7,7 @@ import type { SiteContent } from "@/lib/site-content";
 import { NEWS_PATH } from "@/lib/news-links";
 import { SocialList, liveSocials } from "./MonoSocial";
 import { BrochureButton } from "./MonoBrochure";
-import { sectionTone } from "@/lib/theme-css";
+import { flatSectionTone } from "@/lib/theme-css";
 
 /** Файл/гадаад холбоосыг шинэ табд нээнэ, дотоод замыг апп дотор. */
 const opensInNewTab = (href: string) => /^https?:\/\//.test(href) || /\.[a-z0-9]{2,4}$/i.test(href);
@@ -139,7 +139,7 @@ export function MonoFooter({
   return (
     <footer
       data-bg="footer"
-      data-tone={sectionTone(site.theme, "footer", "dark")}
+      data-tone={flatSectionTone(site.theme, "footer", "dark")}
       className="bg-night font-gilroy text-fg"
     >
       <div className="mx-auto max-w-[1500px] px-6 py-16 md:px-10 md:py-20">

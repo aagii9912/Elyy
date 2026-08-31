@@ -312,7 +312,12 @@ export function backgroundFilmStyle(
 /* Бичгийн горим (tone)                                                */
 /* ------------------------------------------------------------------ */
 
-/** Тухайн хэсгийн бичгийн горим. `auto` үед компонентын өгөгдмөлөөр. */
+/** Тухайн хэсгийн бичгийн горим. `auto` үед компонентын өгөгдмөлөөр.
+ *
+ *  Зөвхөн МЕДИА дээр бичдэг хэсгүүдэд (hero, stats) шууд ашиглана —
+ *  тэнд дэвсгэр нь элементийн өнгө биш, бичлэг/кадр өөрөө тул тоныг
+ *  дэвсгэрээс тооцоолох боломжгүй. Бүтэн өнгөт дэвсгэртэй хэсгүүд
+ *  `flatSectionTone`-г ашиглана. */
 export function sectionTone(
   theme: ThemeContent | undefined,
   id: ThemeSectionId,
@@ -320,6 +325,89 @@ export function sectionTone(
 ): "light" | "dark" {
   const value = pick(theme?.sections?.[id]?.tone, TONES, "auto");
   return value === "auto" ? fallback : value;
+}
+
+/** hex → харьцангуй гэрэлтэлт (0–1, WCAG). */
+function luminance(hexColor: string): number {
+  let h = hexColor.slice(1);
+  if (h.length === 3 || h.length === 4) h = h.split("").map((c) => c + c).join("");
+  const lin = [0, 2, 4].map((i) => {
+    const v = parseInt(h.slice(i, i + 2), 16) / 255;
+    return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+  });
+  return 0.2126 * lin[0] + 0.7152 * lin[1] + 0.0722 * lin[2];
+}
+
+/** Үүнээс бүдэг дэвсгэрийг «бараан» гэж үзнэ — цагаан бичиг л
+ *  уншигдана. (#151717 → 0.008, #16280f → 0.017, #f4f4f1 → 0.90.) */
+const DARK_MAX_LUM = 0.18;
+
+/** Дэвсгэр бараан эсэх. `null` — тодорхойлох боломжгүй: `auto`
+ *  (хэсгийн өөрийн өгөгдмөл), `transparent`, эсвэл зогсоолгүй градиент. */
+function backgroundIsDark(
+  bg: Background | undefined,
+  palette: ThemeContent["palette"]
+): boolean | null {
+  if (!bg) return null;
+  const kind = pick(bg.kind, BACKGROUND_KINDS, "token");
+
+  if (kind === "solid") return luminance(hex(bg.color, "#f4f4f1")) <= DARK_MAX_LUM;
+
+  if (kind === "gradient") {
+    const stops = Array.isArray(bg.gradient?.stops) ? bg.gradient.stops : [];
+    const lums = stops
+      .map((st) => hex(st?.color, ""))
+      .filter(Boolean)
+      .map(luminance);
+    if (!lums.length) return null;
+    /* Дундаж — нэг л зогсоол бараан байхад бүхэлдээ бараан гэж үзэхгүй. */
+    return lums.reduce((a, b) => a + b, 0) / lums.length <= DARK_MAX_LUM;
+  }
+
+  if (kind === "token") {
+    const token = pick(bg.token, BACKGROUND_TOKENS, "auto");
+    /* Токеныг ЖИНХЭНЭ hex рүү — палитрыг админ өөрчилсөн байж болно
+       (ж: `ground`-ыг бараан болгосон бол тон нь дагаж эргэнэ). */
+    const value = tokenValue(token, palette);
+    return value && value.startsWith("#") ? luminance(value) <= DARK_MAX_LUM : null;
+  }
+
+  return null; // "image" — гэрэлтэлтийг нь мэдэх аргагүй
+}
+
+/** Бүтэн ӨНГӨТ дэвсгэртэй («тэгш») хэсгийн бичгийн горим.
+ *
+ *  `tone` ба `background`-ыг админаас ТУСДАА тохируулдаг тул хосолол
+ *  зөрчилдөж чадна: `tone="dark"` (→ цагаан бичиг) атлаа дэвсгэр нь
+ *  цайвар хэвээр үлдвэл гарчиг ЦАГААН ДЭЭР ЦАГААН болж уншигдахаа
+ *  болино. 2026-08-30-нд `#elys` дээр яг ийм зүйл болж, амьд сайт дээр
+ *  бүтэн хэсэг уншигдахгүй байв (Supabase-д `sections.elys.tone` нь
+ *  `dark`, харин `background.token` нь `auto` = цайвар үлдсэн).
+ *
+ *  Эдгээр хэсгийн дэвсгэр нь бүтэн өнгө тул ямар тон ЗӨВ болохыг
+ *  дэвсгэрээс нь шууд тооцоолж болно — тиймээс энд дэвсгэр нь `tone`
+ *  тохиргоог ДАВУУЛНА:
+ *    • дэвсгэр бараан            → цагаан бичиг
+ *    • дэвсгэр цайвар            → бараан бичиг
+ *    • дэвсгэр `auto`/тунгалаг   → хэсгийн өөрийн `ownGround`
+ *    • дэвсгэр ЗУРАГ             → гэрэлтэлт мэдэгдэхгүй тул админы `tone`
+ *
+ *  Өөрөөр хэлбэл хэсгийг бараан болгохын тулд ТОНЫГ биш, ДЭВСГЭРИЙГ
+ *  нь бараан болгоно — тон нь өөрөө дагана.
+ *
+ *  @param ownGround Админ юу ч сонгоогүй үеийн хэсгийн өөрийн дэвсгэр.
+ */
+export function flatSectionTone(
+  theme: ThemeContent | undefined,
+  id: ThemeSectionId,
+  ownGround: "light" | "dark" = "light"
+): "light" | "dark" {
+  const bg = theme?.sections?.[id];
+  if (pick(bg?.kind, BACKGROUND_KINDS, "token") === "image") {
+    return sectionTone(theme, id, ownGround);
+  }
+  const dark = backgroundIsDark(bg, theme?.palette ?? DEFAULT_THEME.palette);
+  return dark === null ? ownGround : dark ? "dark" : "light";
 }
 
 

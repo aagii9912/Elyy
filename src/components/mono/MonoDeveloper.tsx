@@ -20,7 +20,7 @@ import { useEffect, useRef } from "react";
 import { gsap } from "@/lib/gsap";
 import type { SiteContent } from "@/lib/site-content";
 import { MonoKicker } from "./shared";
-import { sectionTone } from "@/lib/theme-css";
+import { flatSectionTone } from "@/lib/theme-css";
 
 const YEAR_START = 2006;
 const YEAR_END = 2026;
@@ -201,7 +201,7 @@ export function MonoDeveloper({ site }: { site: SiteContent }) {
       id="developer"
       ref={root}
       data-bg="developer"
-      data-tone={sectionTone(site.theme, "developer", "light")}
+      data-tone={flatSectionTone(site.theme, "developer")}
       className="relative border-b border-fg/10 bg-ground md:h-[380vh]"
     >
       <div className="flex flex-col justify-center overflow-hidden py-24 md:sticky md:top-0 md:h-[100svh] md:py-0">

@@ -20,7 +20,7 @@ import type { SiteContent } from "@/lib/site-content";
 import { unitPlanFor, type UnitPlan } from "@/lib/unit-plans";
 import { MonoKicker, useDragScroll } from "./shared";
 import { MonoModal } from "./MonoModal";
-import { sectionTone } from "@/lib/theme-css";
+import { flatSectionTone } from "@/lib/theme-css";
 
 type Unit = SiteContent["apartments"]["units"][number];
 
@@ -128,7 +128,7 @@ export function MonoApartments({ site }: { site: SiteContent }) {
     <section
       id="apartments"
       data-bg="apartments"
-      data-tone={sectionTone(site.theme, "apartments", "light")}
+      data-tone={flatSectionTone(site.theme, "apartments")}
       className="border-b border-fg/10 bg-ground py-24 md:py-28"
     >
       <div className="mx-auto max-w-[1500px] px-6 md:px-10">

@@ -13,7 +13,7 @@
 
 import type { SiteContent } from "@/lib/site-content";
 import { MonoKicker } from "./shared";
-import { sectionTone } from "@/lib/theme-css";
+import { flatSectionTone } from "@/lib/theme-css";
 
 const digits = (phone: string) => `976${phone.replace(/[^0-9]/g, "")}`;
 
@@ -66,7 +66,7 @@ export function MonoManagers({ site }: { site: SiteContent }) {
     <section
       id="managers"
       data-bg="managers"
-      data-tone={sectionTone(site.theme, "managers", "light")}
+      data-tone={flatSectionTone(site.theme, "managers")}
       className="border-b border-fg/10 bg-ground py-24 md:py-28"
     >
       {/* Хэмжээ нь доорх FAQ-тэй ижил 1100px — 1500px дээр мөрийн нэр,

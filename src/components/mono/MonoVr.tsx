@@ -15,7 +15,7 @@ import { useLenis } from "lenis/react";
 import type { SiteContent } from "@/lib/site-content";
 import { MonoKicker } from "./shared";
 import { MonoModal } from "./MonoModal";
-import { sectionTone } from "@/lib/theme-css";
+import { flatSectionTone } from "@/lib/theme-css";
 
 export function MonoVr({ site }: { site: SiteContent }) {
   const { vr } = site;
@@ -83,7 +83,7 @@ export function MonoVr({ site }: { site: SiteContent }) {
     <section
       id="vr"
       data-bg="vr"
-      data-tone={sectionTone(site.theme, "vr", "light")}
+      data-tone={flatSectionTone(site.theme, "vr")}
       className="border-b border-fg/10 bg-ground py-24 md:py-28"
     >
       <div className="mx-auto max-w-[1500px] px-6 md:px-10">

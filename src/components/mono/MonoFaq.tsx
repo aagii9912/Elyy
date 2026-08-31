@@ -5,7 +5,7 @@
 import { useState } from "react";
 import type { SiteContent } from "@/lib/site-content";
 import { MonoKicker } from "./shared";
-import { sectionTone } from "@/lib/theme-css";
+import { flatSectionTone } from "@/lib/theme-css";
 
 export function MonoFaq({ site }: { site: SiteContent }) {
   const { faq } = site;
@@ -15,7 +15,7 @@ export function MonoFaq({ site }: { site: SiteContent }) {
     <section
       id="faq"
       data-bg="faq"
-      data-tone={sectionTone(site.theme, "faq", "light")}
+      data-tone={flatSectionTone(site.theme, "faq")}
       className="border-b border-fg/10 bg-ground py-24 md:py-28"
     >
       <div className="mx-auto max-w-[1100px] px-6 md:px-10">

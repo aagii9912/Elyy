@@ -25,7 +25,7 @@ import { useLenis } from "lenis/react";
 import type { SiteContent } from "@/lib/site-content";
 import { MonoKicker } from "./shared";
 import { MonoModal } from "./MonoModal";
-import { sectionTone } from "@/lib/theme-css";
+import { flatSectionTone } from "@/lib/theme-css";
 import {
   InteractiveImageAccordion,
   type AccordionPanel,
@@ -105,7 +105,7 @@ export function MonoElys({ site }: { site: SiteContent }) {
     <section
       id="elys"
       data-bg="elys"
-      data-tone={sectionTone(site.theme, "elys", "light")}
+      data-tone={flatSectionTone(site.theme, "elys")}
       className="border-b border-fg/10 bg-ground text-fg"
     >
       <div className="mx-auto max-w-[1500px] px-5 pb-20 pt-20 md:px-10 md:pb-28 md:pt-32">

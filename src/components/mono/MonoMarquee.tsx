@@ -2,7 +2,7 @@
    marquee. Black text, lime diamond as the lone colour accent. */
 
 import type { SiteContent } from "@/lib/site-content";
-import { sectionTone } from "@/lib/theme-css";
+import { flatSectionTone } from "@/lib/theme-css";
 
 export function MonoMarquee({ site }: { site: SiteContent }) {
   const slogans = site.marquee.slogans;
@@ -12,7 +12,7 @@ export function MonoMarquee({ site }: { site: SiteContent }) {
       aria-hidden
       data-reveal="up"
       data-bg="marquee"
-      data-tone={sectionTone(site.theme, "marquee", "light")}
+      data-tone={flatSectionTone(site.theme, "marquee")}
       className="overflow-hidden border-b border-fg/10 bg-ground py-5 md:py-7"
     >
       <div className="green-marquee flex w-max items-center gap-10 whitespace-nowrap pr-10">

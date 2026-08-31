@@ -16,7 +16,7 @@
 
 import { useState } from "react";
 import type { SiteContent } from "@/lib/site-content";
-import { sectionTone } from "@/lib/theme-css";
+import { flatSectionTone } from "@/lib/theme-css";
 
 /* Яг координат — чиглэл нь тодорхой цэг рүү заана. */
 const directions = (coords: string) =>
@@ -39,7 +39,7 @@ export function MonoMap({ site }: { site: SiteContent }) {
     <section
       id="location"
       data-bg="location"
-      data-tone={sectionTone(site.theme, "location", "light")}
+      data-tone={flatSectionTone(site.theme, "location")}
       className="relative border-b border-fg/10 bg-ground"
     >
       {/* Рендер + цэгүүд — хайрцаг нь зургийн харьцааг яг дагана */}

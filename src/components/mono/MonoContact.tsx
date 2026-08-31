@@ -8,7 +8,7 @@ import { useState } from "react";
 import type { SiteContent } from "@/lib/site-content";
 import { MonoKicker } from "./shared";
 import { SocialRow } from "./MonoSocial";
-import { sectionTone } from "@/lib/theme-css";
+import { flatSectionTone } from "@/lib/theme-css";
 
 export function MonoContact({ site }: { site: SiteContent }) {
   const { contact, brand } = site;
@@ -50,7 +50,7 @@ export function MonoContact({ site }: { site: SiteContent }) {
     <section
       id="contact"
       data-bg="contact"
-      data-tone={sectionTone(site.theme, "contact", "light")}
+      data-tone={flatSectionTone(site.theme, "contact")}
       className="border-b border-fg/10 bg-ground py-24 font-gilroy text-fg md:py-28"
     >
       <div className="mx-auto max-w-[1500px] px-6 md:px-10">
