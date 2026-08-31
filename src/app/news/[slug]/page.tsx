@@ -10,6 +10,7 @@ import { MonoCursor } from "@/components/mono/MonoCursor";
 import { MonoHeader } from "@/components/mono/MonoHeader";
 import { MonoFooter } from "@/components/mono/MonoFooter";
 import { NewsCard } from "@/components/news/NewsCard";
+import { NewsText } from "@/components/news/NewsText";
 import { SiteTheme } from "@/components/SiteTheme";
 
 /* Нэг нийтлэл: /news/<slug>. Ноорогийг зөвхөн ?preview=1-тэй үзнэ. */
@@ -122,7 +123,7 @@ export default async function NewsDetailPage({ params, searchParams }: Props) {
             </header>
           ) : (
             <header className="border-b border-night/10 bg-ground pb-12 pt-[124px] md:pb-16 md:pt-[148px]">
-              <div className="mx-auto max-w-[820px] px-6 md:px-10">
+              <div className="mx-auto max-w-[1100px] px-6 md:px-10">
                 <Link
                   href={NEWS_PATH}
                   data-cursor-hover
@@ -146,21 +147,32 @@ export default async function NewsDetailPage({ params, searchParams }: Props) {
           )}
 
           {/* Агуулга */}
-          <div className="mx-auto max-w-[820px] px-5 py-12 md:px-10 md:py-16">
+          <div className="mx-auto max-w-[1100px] px-6 py-12 md:px-10 md:py-16">
             {blocks.map((block, i) =>
               block.kind === "heading" ? (
-                <h2
-                  key={i}
-                  className="mt-10 text-[clamp(1.25rem,2.2vw,1.6rem)] font-extrabold tracking-tight text-night first:mt-0"
-                >
-                  {block.text}
-                </h2>
+                block.level === 3 ? (
+                  <h3
+                    key={i}
+                    className="mt-8 text-[clamp(1.05rem,1.6vw,1.25rem)] font-extrabold tracking-tight text-night first:mt-0"
+                  >
+                    {block.text}
+                  </h3>
+                ) : (
+                  <h2
+                    key={i}
+                    className="mt-10 text-[clamp(1.25rem,2.2vw,1.6rem)] font-extrabold tracking-tight text-night first:mt-0"
+                  >
+                    {block.text}
+                  </h2>
+                )
               ) : block.kind === "list" ? (
                 <ul key={i} className="mt-5 space-y-2.5">
                   {block.items.map((li, j) => (
                     <li key={j} className="flex gap-3 text-[16px] leading-relaxed text-night/75">
                       <span aria-hidden className="mt-2.5 h-1.5 w-1.5 shrink-0 rounded-full bg-moss" />
-                      {li}
+                      <span>
+                        <NewsText spans={li} />
+                      </span>
                     </li>
                   ))}
                 </ul>
@@ -174,7 +186,7 @@ export default async function NewsDetailPage({ params, searchParams }: Props) {
                     block.size === "full"
                       ? "relative left-1/2 w-screen -translate-x-1/2"
                       : block.size === "wide"
-                        ? "md:-mx-[140px] lg:-mx-[180px]"
+                        ? "relative left-1/2 w-[92vw] max-w-[1400px] -translate-x-1/2"
                         : ""
                   }`}
                 >
@@ -194,7 +206,7 @@ export default async function NewsDetailPage({ params, searchParams }: Props) {
                   {block.caption && (
                     <figcaption
                       className={`mt-3 text-[13px] leading-relaxed text-night/50 ${
-                        block.size === "full" ? "mx-auto max-w-[820px] px-6 md:px-10" : ""
+                        block.size === "full" ? "mx-auto max-w-[1100px] px-6 md:px-10" : ""
                       }`}
                     >
                       {block.caption}
@@ -203,7 +215,7 @@ export default async function NewsDetailPage({ params, searchParams }: Props) {
                 </figure>
               ) : (
                 <p key={i} className="mt-5 text-[16px] leading-relaxed text-night/75 first:mt-0">
-                  {block.text}
+                  <NewsText spans={block.spans} />
                 </p>
               )
             )}

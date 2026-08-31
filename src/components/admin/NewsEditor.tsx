@@ -1,16 +1,16 @@
 "use client";
 
 /* Нэг мэдээний засварлагч — гарчиг, slug, огноо, шошго, нүүр зураг,
-   товч танилцуулга, агуулга. Агуулга нь энгийн текст: хоосон мөр =
-   шинэ догол мөр, `## ` = дэд гарчиг, `- ` = жагсаалт,
-   `![тайлбар](URL)` = нийтлэлийн дунд орох зураг. */
+   товч танилцуулга, агуулга. Агуулгыг `NewsBodyEditor` (WYSIWYG) засна;
+   энд зөвхөн хадгалах хэлбэрийг нь (`draft.body`) барина. */
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { newsImageMarkup, parseNewsBody, type NewsDoc, type NewsImageSize } from "@/lib/news";
+import { parseNewsBody, type NewsDoc } from "@/lib/news";
+import { NewsText } from "@/components/news/NewsText";
+import { NewsBodyEditor } from "./NewsBodyEditor";
 import { Button, Card, Field, ImageField, TextArea, TextInput } from "./ui";
-import { uploadFile } from "./upload";
 
 type Draft = Pick<NewsDoc, "title" | "slug" | "excerpt" | "cover" | "tag" | "date" | "body" | "status">;
 
@@ -32,49 +32,10 @@ export function NewsEditor({ initial }: { initial: NewsDoc }) {
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
 
-  const bodyRef = useRef<HTMLTextAreaElement>(null);
-  const bodyFileRef = useRef<HTMLInputElement>(null);
-  /** Аль товчоор файл сонгож эхэлснийг санана (нэг л <input type=file>). */
-  const pendingSize = useRef<NewsImageSize>("normal");
-  const [imgBusy, setImgBusy] = useState(false);
-  const [imgErr, setImgErr] = useState<string | null>(null);
-
   const set = (patch: Partial<Draft>) => {
     setDraft((d) => ({ ...d, ...patch }));
     setDirty(true);
     setMsg(null);
-  };
-
-  /** Зургийн тэмдэглэгээг курсорын байрлалд, өөрийн мөрөнд нь оруулна.
-   *  `size` нь нийтлэл дээрх өргөнийг тодорхойлно (багана / өргөн /
-   *  дэлгэц дүүрэн) — тэмдэглэгээг гараар ч засаж болно. */
-  const insertImage = (url: string, size: NewsImageSize = "normal") => {
-    const el = bodyRef.current;
-    const markup = newsImageMarkup(url, "", size);
-    setDraft((d) => {
-      const at = el ? el.selectionStart : d.body.length;
-      const head = d.body.slice(0, at).replace(/\s+$/, "");
-      const tail = d.body.slice(at).replace(/^\s+/, "");
-      const body = `${head}${head ? "\n\n" : ""}${markup}${tail ? `\n\n${tail}` : "\n"}`;
-      // Курсорыг оруулсан мөрийн ард нь буцаана.
-      const caret = (head ? head.length + 2 : 0) + markup.length;
-      requestAnimationFrame(() => {
-        el?.focus();
-        el?.setSelectionRange(caret, caret);
-      });
-      return { ...d, body };
-    });
-    setDirty(true);
-    setMsg(null);
-  };
-
-  const addBodyImage = async (file: File, size: NewsImageSize) => {
-    setImgBusy(true);
-    setImgErr(null);
-    const res = await uploadFile(file);
-    if (res.ok) insertImage(res.url, size);
-    else setImgErr(res.error);
-    setImgBusy(false);
   };
 
   useEffect(() => {
@@ -211,55 +172,7 @@ export function NewsEditor({ initial }: { initial: NewsDoc }) {
         </Card>
 
         <Card title="Агуулга">
-          <Field
-            label="Текст"
-            hint="Хоосон мөр = шинэ догол мөр · “## ” = дэд гарчиг · “- ” = жагсаалтын мөр · “![тайлбар](зургийн-хаяг)” = зураг · араас нь “{wide}” эсвэл “{full}” бичвэл зураг өргөсөнө."
-          >
-            <TextArea
-              ref={bodyRef}
-              rows={18}
-              value={draft.body}
-              onChange={(e) => set({ body: e.target.value })}
-              className="font-mono text-[13px] leading-relaxed"
-            />
-          </Field>
-          <div className="mt-3 flex flex-wrap items-center gap-2">
-            <input
-              ref={bodyFileRef}
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={(e) => {
-                const f = e.target.files?.[0];
-                if (f) addBodyImage(f, pendingSize.current);
-                e.target.value = "";
-              }}
-            />
-            {(
-              [
-                ["normal", "Зураг оруулах"],
-                ["wide", "Өргөн зураг"],
-                ["full", "Дэлгэц дүүрэн"],
-              ] as const
-            ).map(([size, label]) => (
-              <Button
-                key={size}
-                type="button"
-                variant="ghost"
-                disabled={imgBusy}
-                onClick={() => {
-                  pendingSize.current = size;
-                  bodyFileRef.current?.click();
-                }}
-              >
-                {imgBusy ? "Байршуулж байна…" : label}
-              </Button>
-            ))}
-            <span className="text-xs text-neutral-400">
-              Курсорын байрлалд — текстийн дурын хооронд — нэмэгдэнэ. Тайлбарыг “![…]” дотор бичнэ.
-            </span>
-          </div>
-          {imgErr && <p className="mt-2 text-xs text-red-500">{imgErr}</p>}
+          <NewsBodyEditor initialBody={initial.body} onChange={(body) => set({ body })} />
         </Card>
 
         <Card title="Урьдчилсан харагдац">
@@ -269,13 +182,21 @@ export function NewsEditor({ initial }: { initial: NewsDoc }) {
             <div className="space-y-4">
               {blocks.map((b, i) =>
                 b.kind === "heading" ? (
-                  <h3 key={i} className="text-lg font-bold text-neutral-900">
-                    {b.text}
-                  </h3>
+                  b.level === 3 ? (
+                    <h4 key={i} className="text-[15px] font-bold text-neutral-900">
+                      {b.text}
+                    </h4>
+                  ) : (
+                    <h3 key={i} className="text-lg font-bold text-neutral-900">
+                      {b.text}
+                    </h3>
+                  )
                 ) : b.kind === "list" ? (
                   <ul key={i} className="list-disc space-y-1 pl-5 text-[15px] text-neutral-700">
                     {b.items.map((li, j) => (
-                      <li key={j}>{li}</li>
+                      <li key={j}>
+                        <NewsText spans={li} />
+                      </li>
                     ))}
                   </ul>
                 ) : b.kind === "image" ? (
@@ -292,7 +213,7 @@ export function NewsEditor({ initial }: { initial: NewsDoc }) {
                   </figure>
                 ) : (
                   <p key={i} className="text-[15px] leading-relaxed text-neutral-700">
-                    {b.text}
+                    <NewsText spans={b.spans} />
                   </p>
                 )
               )}

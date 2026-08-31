@@ -69,26 +69,66 @@ export function newNews(params: {
 /** Нийтлэл доторх зургийн өргөн: багана / өргөн / дэлгэц дүүрэн. */
 export type NewsImageSize = "normal" | "wide" | "full";
 
+/** Мөр доторх хэлбэржүүлэлт. HTML биш, бүтэцлэгдсэн хэсгүүд буцаана —
+ *  тиймээс хэрэглэгчийн текст рендерлэхэд аюулгүй. */
+export type NewsInline =
+  | { kind: "text"; text: string }
+  | { kind: "bold"; text: string }
+  | { kind: "italic"; text: string }
+  | { kind: "bolditalic"; text: string }
+  | { kind: "link"; text: string; href: string };
+
 export type NewsBlock =
-  | { kind: "heading"; text: string }
-  | { kind: "list"; items: string[] }
+  | { kind: "heading"; level: 2 | 3; text: string }
+  | { kind: "list"; items: NewsInline[][] }
   | { kind: "image"; src: string; caption: string; size: NewsImageSize }
-  | { kind: "paragraph"; text: string };
+  | { kind: "paragraph"; spans: NewsInline[] };
 
 /** Нийтлэлийн дунд орох зураг: `![тайлбар](URL)` дангаараа нэг мөр.
  *  Сүүлд нь `{wide}` / `{full}` залгавал өргөнийг өөрчилнө. */
 const IMAGE_LINE = /^!\[([^\]]*)\]\(\s*(\S+?)\s*\)(?:\s*\{(wide|full)\})?$/;
 
-/** Агуулгын мөрөнд оруулах зургийн тэмдэглэгээ (админ талд ашиглана). */
-export function newsImageMarkup(src: string, caption = "", size: NewsImageSize = "normal"): string {
-  return `![${caption}](${src})${size === "normal" ? "" : `{${size}}`}`;
+/** Зөвшөөрөх холбоос: гадаад хаяг, шуудан, утас, сайт доторх зам.
+ *  `javascript:` мэтийг холбоос болгохгүй, энгийн текст болгож үлдээнэ. */
+const SAFE_HREF = /^(https?:\/\/|mailto:|tel:|\/|#)/i;
+
+/* `**тод**` · `*налуу*` · `[текст](хаяг)`.
+   • Доогуур зураас (`_`) ашиглахгүй — файл, хаягийн нэрэнд түгээмэл тул
+     санамсаргүй налуу үүсгэдэг.
+   • Одны хажууд зай байвал тоохгүй: “5 * 3 * 2” гэдэг налуу болохгүй. */
+const EMPH = "[^\\s*](?:[^*\\n]*[^\\s*])?";
+const INLINE = new RegExp(
+  `\\*\\*\\*(${EMPH})\\*\\*\\*|\\*\\*(${EMPH})\\*\\*|\\*(${EMPH})\\*|\\[([^\\]\\n]+)\\]\\(\\s*([^)\\s]+)\\s*\\)`,
+  "g"
+);
+
+/** Нэг мөрийн текстийг хэлбэржүүлэлтийн хэсгүүд болгоно. */
+function parseInline(input: string): NewsInline[] {
+  const out: NewsInline[] = [];
+  let last = 0;
+  INLINE.lastIndex = 0;
+  let m: RegExpExecArray | null;
+  while ((m = INLINE.exec(input))) {
+    // `![тайлбар](URL)` — зураг. Мөр дундах бол холбоос болгохгүй.
+    if (m[4] !== undefined && m.index > 0 && input[m.index - 1] === "!") continue;
+    if (m.index > last) out.push({ kind: "text", text: input.slice(last, m.index) });
+    if (m[1] !== undefined) out.push({ kind: "bolditalic", text: m[1] });
+    else if (m[2] !== undefined) out.push({ kind: "bold", text: m[2] });
+    else if (m[3] !== undefined) out.push({ kind: "italic", text: m[3] });
+    else if (SAFE_HREF.test(m[5])) out.push({ kind: "link", text: m[4], href: m[5] });
+    // Аюулгүй биш хаяг — бичсэн чигээр нь энгийн текст болгож үлдээнэ.
+    else out.push({ kind: "text", text: m[0] });
+    last = m.index + m[0].length;
+  }
+  if (last < input.length) out.push({ kind: "text", text: input.slice(last) });
+  return out;
 }
 
 /** Текст агуулгыг рендерлэхэд бэлэн блокууд болгоно.
  *  HTML оруулахгүй тул хэрэглэгчийн текст аюулгүй рендерлэгдэнэ. */
 export function parseNewsBody(body: string): NewsBlock[] {
   const blocks: NewsBlock[] = [];
-  let list: string[] = [];
+  let list: NewsInline[][] = [];
   let para: string[] = [];
 
   const flushList = () => {
@@ -96,7 +136,7 @@ export function parseNewsBody(body: string): NewsBlock[] {
     list = [];
   };
   const flushPara = () => {
-    if (para.length) blocks.push({ kind: "paragraph", text: para.join(" ") });
+    if (para.length) blocks.push({ kind: "paragraph", spans: parseInline(para.join(" ")) });
     para = [];
   };
 
@@ -105,10 +145,11 @@ export function parseNewsBody(body: string): NewsBlock[] {
     if (!line) {
       flushList();
       flushPara();
-    } else if (line.startsWith("## ")) {
+    } else if (line.startsWith("### ") || line.startsWith("## ")) {
       flushList();
       flushPara();
-      blocks.push({ kind: "heading", text: line.slice(3).trim() });
+      const level = line.startsWith("### ") ? 3 : 2;
+      blocks.push({ kind: "heading", level, text: line.slice(level + 1).trim() });
     } else if (IMAGE_LINE.test(line)) {
       flushList();
       flushPara();
@@ -121,7 +162,7 @@ export function parseNewsBody(body: string): NewsBlock[] {
       });
     } else if (line.startsWith("- ")) {
       flushPara();
-      list.push(line.slice(2).trim());
+      list.push(parseInline(line.slice(2).trim()));
     } else {
       flushList();
       para.push(line);
