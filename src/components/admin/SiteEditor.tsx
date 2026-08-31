@@ -605,7 +605,10 @@ function renderSection(
                       <TextInput value={item.accent} onChange={(e) => set({ accent: e.target.value })} />
                     </Field>
                   </div>
-                  <Field label="Тайлбар">
+                  <Field
+                    label="Тайлбар"
+                    hint="« · » эсвэл « — » тэмдгээр хоёр хуваагдана: өмнөх нь ТОМ ҮСЭГТ нэр томьёо, ард нь энгийн бичвэр. Ж: «айлын орон сууц · 4 блок»."
+                  >
                     <TextArea rows={2} value={item.text} onChange={(e) => set({ text: e.target.value })} />
                   </Field>
                 </>

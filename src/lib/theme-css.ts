@@ -387,7 +387,10 @@ function typeCss(theme: ThemeContent): string {
       `}`
   );
   /* Tailwind-ийн `font-gilroy` утилитыг дарна (layer-гүй тул ялна). */
-  rules.push(`.mono-page .mono-h1,.mono-page .mono-h2{font-family:${display}}`);
+  rules.push(
+    `.mono-page .mono-h1,.mono-page .mono-h2,` +
+      `.mono-page .mono-chapter-title,.mono-page .mono-chapter-head{font-family:${display}}`
+  );
   rules.push(`.mono-page .font-gilroy{font-family:${body}}`);
 
   return rules.join("\n");

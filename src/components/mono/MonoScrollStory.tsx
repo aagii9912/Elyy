@@ -1,51 +1,46 @@
 "use client";
 
-/* /mono — shared full-screen scroll story (three distinct chapters).
-   Pinned viewport; frame-by-frame video placeholder (hero-frame segment)
-   scrubs behind; points activate per scroll quarter with a GSAP
-   crossfade (no hard remounts). Every chapter opens with a centred
-   intro title that gives way to the persistent corner header.
+/* /mono — «01 · Ерөнхий төлөвлөлт» бүлгийн пиннэсэн гүйлтийн түүх.
+   Кадр-кадраар гүйлтэд уягдсан рендерийн дараалал ард нь скраб хийж,
+   тоон үзүүлэлт бүр өөрийн улирал дээр GSAP crossfade-ээр солигдоно
+   (хатуу remount байхгүй). Бүлэг төвд гарах танилцуулга гарчгаар
+   нээгдээд, дараа нь булангийн байнгын толгой руу шилжинэ.
 
-   Variants give each chapter its own visual language:
-     numbers  — blueprint HUD: giant char-rolled figures, drafting
-                chrome (corner brackets, dashed cross, progress rule)
-     letters  — editorial typography: an oversized outlined letter
-                (E·L·Y·S) bleeding off the left edge
-     callouts — engineering annotation: lime ping pinned on the facade,
-                a connector line drawing toward a sharp spec card
+   ЗОХИОН БАЙГУУЛАЛТ — «blueprint спек».
+   Бичвэр бүхэлдээ ЗҮҮН баганад цуглана: дээр нь бүлгийн толгой, доор
+   нь спек блок (индекс → аварга тоо → нэр томьёо → дэлгэрэнгүй), доод
+   ирмэгээр нь явцын зураас. Ингэснээр кадрын баруун тал чөлөөтэй
+   үлдэж, захиалагчийн рендерүүд бүтнээрээ харагдана — өмнө нь аварга
+   тоо рендерийн яг голд буудаг байв.
 
-   The bottom-right rail is clickable — picking an entry jumps the
-   scroll to that point. Frames start loading only when the section
-   nears the viewport. */
+   ХАСАГДСАН: `letters` (ELYS) ба `callouts` (барилгын бүтэц)
+   хувилбарууд. Тэр хоёр бүлэг аль эрт `MonoElys` / `MonoEquip` болж
+   тусдаа компонент болсон тул энэ файл дахь код нь хэрэглээгүй үлдсэн
+   байв. Одоо энэ компонентыг ЗӨВХӨН `MonoStats` дуудна.
 
-import { Fragment, useEffect, useRef, useState } from "react";
+   `tone="dark"` — энэ бүлэг богино хугацаанд `light` байсан (цагаан
+   хөшиг + бараан бичиг), гэвч цагаан хөшиг нь захиалагчийн рендерүүдийг
+   бүдгэрүүлдэг тул буцаав. Хоёр горим хоёулаа ажиллана: бичгийн өнгө
+   нь `data-tone`-оос ирэх `text-fg` семантик токеноор шийдэгдэнэ
+   (`globals.css`), тиймээс энд цагаан/хар өнгө хатуу бичигдээгүй. */
+
+import { Fragment, useEffect, useRef, useState, type CSSProperties } from "react";
 import { useLenis } from "lenis/react";
 import { gsap, type ScrollTrigger as ScrollTriggerType } from "@/lib/gsap";
-import { LogoMark } from "@/components/Logo";
 import { MonoKicker, useScrollAutoplay } from "./shared";
 import type { MediaFilmStyle } from "@/lib/theme-css";
 
 export type StoryPoint = {
   n: string;
   heading: string;
-  accent?: string; // rendered in lime right after the heading (e.g. "%")
+  /** Хэмжих нэгж — тооны ард ногоон өнгөөр (ж: "%"). */
+  accent?: string;
   text: string;
-  /** Optional source link (callouts variant) — e.g. the maker's product page. */
-  link?: string;
-  /** Brand mark under the spec-card text (callouts variant) — a white
-      logo image, or the Elysium diamond when `mark` is set. */
-  logo?: { src?: string; alt: string; mark?: boolean };
-  /** Where the callout pin sits on the footage (viewport %). */
-  anchor?: { x: number; y: number };
 };
 
-export type StoryVariant = "numbers" | "letters" | "callouts";
-
 /** Бүлгийн өнгөний горим. `dark` — бараан кадран дээр цагаан бичиг
- *  (анхны загвар). `light` — цайвар кадран дээр бараан бичиг: бүлэг 01-ийн
- *  мастер төлөвлөгөөний кадрууд өөрөө цайвар тул хуудасны цайвар суурьтай
- *  нэг өнгөнд уншигдана. Кадруудад НЭГ ч градаци хийхгүй — зөвхөн scrim,
- *  бичгийн өнгө солигдоно. */
+ *  (анхны загвар). `light` — цайвар кадран дээр бараан бичиг. Кадруудад
+ *  НЭГ ч градаци хийхгүй — зөвхөн scrim, бичгийн өнгө солигдоно. */
 export type StoryTone = "dark" | "light";
 
 const framePathIn = (dir: string, ext: string) => (i: number) =>
@@ -58,13 +53,60 @@ const framePathIn = (dir: string, ext: string) => (i: number) =>
 const INTRO_OUT = 0.55;
 const EXIT_IN = 0.22;
 
-/* facade anchor positions (viewport %) for the callouts variant */
-const CALLOUT_ANCHORS = [
-  { x: 30, y: 40 },
-  { x: 58, y: 30 },
-  { x: 36, y: 64 },
-  { x: 52, y: 55 },
-];
+/* ---- типографийн туслахууд ------------------------------------------ */
+
+/** Тэмдэгтийн ойролцоо оптик өргөн (бүтэн цифрийг 1 гэж авав). */
+const glyphWidth = (c: string) =>
+  c === " " ? 0.34 : "·•.,:'’".includes(c) ? 0.4 : "Il|".includes(c) ? 0.5 : 1;
+
+/** Хэмжих нэгж (`accent`) 0.34em-ээр буудаг тул бүтэн цифрийн ~0.4. */
+const UNIT_W = 0.4;
+
+/** Аварга тооны хэмжээний коэффициент (0.46–1) — `--stat-fit`.
+ *
+ *  Өмнө нь хэмжээ нь `heading.length > 4 ? 7rem : 11rem` гэсэн ганц
+ *  нөхцлөөр үсэрдэг байв: «506» аварга, «2027 · II» гэнэт бага болж,
+ *  нэг бүлэг дотор хоёр өөр хэмжээ гарч хэмнэл алдагддаг. Энд утгын
+ *  ОПТИК өргөнөөр нь хуваарилна — бүлэг доторх цэгүүд солигдоход
+ *  зүүн баганын масс тогтмол хэвээр үлдэнэ (энэ бүлэг нэг дор ГАНЦ
+ *  үзүүлэлт харуулдаг тул өргөн нь тогтвортой байх нь чухал).
+ *
+ *  Хэмжсэн үр дүн (1280px): 506 → 220px, 85% → 181px, 513 → 220px,
+ *  «2027 · II» → 233px. Өмнө нь сүүлийнх нь 385px хүрдэг байв. */
+const statFit = (heading: string, accent = "") => {
+  const w = [...heading].reduce((a, c) => a + glyphWidth(c), 0) + accent.length * UNIT_W;
+  return Math.round(Math.min(1, Math.max(0.46, 3.15 / w)) * 1000) / 1000;
+};
+
+/** Тайлбар мөрийг салгах тэмдэг — контент дотор АЛЬ ХЭДИЙН байгаа
+ *  ` · ` эсвэл ` — `. Тусдаа талбар нэмээгүй тул админы өгөгдөл,
+ *  `SiteContent` бүтэц хэвээрээ үлдэнэ. */
+const SPEC_SPLIT = /\s+[·•—–-]\s+/;
+
+/** Хэт урт нэр томьёог ТОМ ҮСГЭЭР бичихгүй: кирилл томоор + сул зайтай
+ *  урт өгүүлбэр нь уншигдацын хамгийн муу хослол. */
+const LABEL_MAX = 30;
+
+/** Тайлбарыг «нэр томьёо / дэлгэрэнгүй» хоёр эгнээ болгон салгана.
+ *
+ *  «айлын орон сууц · 4 блок» → АЙЛЫН ОРОН СУУЦ / «4 блок»
+ *  «автомашины зогсоол»        → АВТОМАШИНЫ ЗОГСООЛ (ганц эгнээ)
+ *  Урт өгүүлбэр салгагчгүй бол бүхэлдээ энгийн бичвэр болно. */
+const specOf = (text: string): { label: string; detail: string } => {
+  const m = text.match(SPEC_SPLIT);
+  if (!m || m.index === undefined) {
+    return text.length > LABEL_MAX ? { label: "", detail: text } : { label: text, detail: "" };
+  }
+  const label = text.slice(0, m.index).trim();
+  const detail = text.slice(m.index + m[0].length).trim();
+  return label.length > LABEL_MAX ? { label: "", detail: text } : { label, detail };
+};
+
+/** Зүүн багана — спек блок, суурь зураас, босоо хашлага гурав ЯГ нэг
+ *  ирмэгээс эхэлж, нэг өргөнтэй болно. */
+const COLUMN = "left-5 right-5 md:left-10 md:right-auto md:w-[min(46vw,34rem)]";
+/** Суурь зураасны өндөр — блок үүнээс дээш суудаг. */
+const RULE_BOTTOM = "bottom-[6vh] md:bottom-[7.5vh]";
 
 export function MonoScrollStory({
   id,
@@ -80,7 +122,6 @@ export function MonoScrollStory({
   heightClass = "h-[300vh] md:h-[380vh]",
   exitVeilClass = "bg-ground",
   autoplaySeconds = 0,
-  variant,
   tone = "dark",
   bgKey,
   film,
@@ -111,7 +152,6 @@ export function MonoScrollStory({
   /** Хэрэглэгчийн эхний гүйлтийн дараа бүлгийг өөрөө тоглуулах хугацаа
    *  (сек). 0 — автомат тоглолтгүй, зөвхөн гараар. */
   autoplaySeconds?: number;
-  variant: StoryVariant;
   tone?: StoryTone;
 }) {
   const lenis = useLenis();
@@ -413,33 +453,26 @@ export function MonoScrollStory({
         { autoAlpha: 1, y: 0, duration: 0.7, ease: "power3.out", stagger: 0.06, delay: 0.08, overwrite: true }
       );
     }
-    // char roll (numbers variant)
+    /* char roll — тэмдэгтүүд нийтийн маскаас дээш мултарна.
+       130% — маск нь глифийн орой таслахгүйн тулд дээр/доороо 0.12em
+       нэмэлт зайтай (`.mono-stat-mask`), тиймээс 112% нь тэмдэгтийг
+       бүрэн нуухад хүрэлцэхгүй болсон. */
     const chars = incoming.querySelectorAll("[data-ch]");
     if (chars.length) {
       gsap.fromTo(
         chars,
-        { yPercent: 112 },
+        { yPercent: 130 },
         { yPercent: 0, duration: 0.65, ease: "power4.out", stagger: 0.05, overwrite: true }
-      );
-    }
-    // connector line draw (callouts variant)
-    const line = incoming.querySelector<SVGPathElement>("[data-line]");
-    if (line) {
-      const len = line.getTotalLength();
-      gsap.fromTo(
-        line,
-        { strokeDasharray: len, strokeDashoffset: len },
-        { strokeDashoffset: 0, duration: 0.6, ease: "power2.out", delay: 0.15, overwrite: true }
       );
     }
   }, [active]);
 
-  const railLabel = (p: StoryPoint) =>
-    variant === "letters" ? p.heading.charAt(0).toUpperCase() : p.n;
-
-  /* Цайвар горимд зөвхөн scrim + бичгийн өнгө өөр: кадрууд хэвээрээ.
-     (letters/callouts хувилбарууд одоогоор бараан бүлэгт л ашиглагдана.) */
+  /* Цайвар горимд зөвхөн scrim + бичгийн өнгө өөр: кадрууд хэвээрээ. */
   const light = tone === "light";
+  /** Ногоон өргөлт — цайвар суурьт lime уусдаг тул гүн ногооноор. */
+  const accentText = light ? "text-moss" : "text-lime";
+  const hairline = light ? "bg-night/15" : "bg-white/18";
+  const total = String(points.length).padStart(2, "0");
 
   return (
     <section
@@ -451,26 +484,35 @@ export function MonoScrollStory({
     >
       <div className="sticky top-0 flex h-[100svh] min-h-[560px] w-full overflow-hidden">
         <canvas ref={canvas} className="absolute inset-0 z-0 h-full w-full" />
-        {/* Scrim carries just enough weight for the type over the footage —
-            the dark chapter used to sit at 75/40/85 and read black; the light
-            chapter uses a white wash so the page never dips dark at all.
+
+        {/* Хөшиг — ЗҮҮН тийш жинтэй шаантаг. Бичвэр бүхэлдээ зүүн баганад
+            суудаг тул тодролыг ЯГ ТЭНД өгөөд, баруун тал (рендерийн гол
+            дүр) бараг хөндөгдөхгүй үлдэнэ. Өмнө нь бүх дэлгэцийг дүүрэн
+            шугаман хөшиг + голд радиал эллипс хоёр давхарлаж, кадрын
+            голыг бүдгэрүүлдэг байв.
             Хөшгийн өнгө нь `charcoal` (#16280f) — брэндийн гүн ногоон:
             ELYS самбартай нэг л film ажиллаж, кадрууд хайнга саарал биш
             ногоон дор суудаг. Hero ЭНЭ ДҮРМЭЭС ГАДУУР — тэнд night хэвээр. */}
         <div
-          className={`pointer-events-none absolute inset-0 z-[5] bg-gradient-to-b ${
+          aria-hidden
+          className={`pointer-events-none absolute inset-0 z-[5] ${
             light
-              ? "from-white/70 via-white/30 to-white/75"
-              : "from-charcoal/55 via-charcoal/15 to-charcoal/70"
+              ? "bg-[linear-gradient(96deg,rgba(255,255,255,0.9)_0%,rgba(255,255,255,0.66)_30%,rgba(255,255,255,0.2)_58%,rgba(255,255,255,0)_86%)]"
+              : "bg-[linear-gradient(96deg,rgba(22,40,15,0.88)_0%,rgba(22,40,15,0.62)_30%,rgba(22,40,15,0.18)_58%,rgba(22,40,15,0)_86%)]"
           }`}
         />
-        {/* Мастер төлөвлөгөөний кадрууд өдрийн гэрэлтэй, цайвар — шугаман
-            хөшгийн дунд хэсэг (15%) дээр цагаан тоо уншигдахгүй. Бүх кадрыг
-            бараан болгохын оронд голд нь зөөлөн эллипс нэмнэ: ирмэг нь
-            рендерийн өнгөө хадгалж, зөвхөн бичгийн ард тодрол үүснэ. */}
-        {!light && (
-          <div className="pointer-events-none absolute inset-0 z-[5] bg-[radial-gradient(ellipse_82%_58%_at_50%_50%,rgba(22,40,15,0.5)_0%,rgba(22,40,15,0.28)_46%,transparent_74%)]" />
-        )}
+        {/* Дээд/доод зөөлөн хөшиг — булангийн толгой, рэйл, явцын зураас
+            бүгд өөрийн сүүдэргүйгээр уншигдана. (Өмнө нь эдгээр жижиг
+            бичгүүд тус бүрдээ `text-shadow`-той байсан нь 4 өөр утга
+            болж тарсан.) */}
+        <div
+          aria-hidden
+          className={`pointer-events-none absolute inset-0 z-[5] ${
+            light
+              ? "bg-gradient-to-t from-white/70 via-white/5 to-white/45"
+              : "bg-gradient-to-t from-charcoal/72 via-charcoal/5 to-charcoal/50"
+          }`}
+        />
 
         {/* Админаас сонгосон дэвсгэр — кадрын ДЭЭР. Өгөгдмөл («Auto»)
             үед `null` буюу энэ давхарга огт үүсэхгүй. */}
@@ -481,11 +523,6 @@ export function MonoScrollStory({
             className="pointer-events-none absolute inset-0 z-[6]"
             style={film}
           />
-        )}
-
-        {/* letters chapter reads on the left — extra side scrim for contrast */}
-        {variant === "letters" && (
-          <div className="pointer-events-none absolute inset-0 z-[5] bg-gradient-to-r from-charcoal/60 via-charcoal/20 to-transparent" />
         )}
 
         {/* entry veil — bridge in from the hero. Цайвар бүлэгт veil нь мөн
@@ -499,245 +536,151 @@ export function MonoScrollStory({
         {/* exit veil — hands off to the light page ground */}
         <div data-veil-out aria-hidden className={`pointer-events-none absolute inset-0 z-[7] opacity-0 ${exitVeilClass}`} />
 
-        {/* blueprint HUD chrome — numbers chapter only */}
-        {variant === "numbers" && (
-          <div data-chrome aria-hidden className="pointer-events-none absolute inset-0 z-[6]">
-            <span className={`absolute left-5 top-20 h-6 w-6 border-l border-t md:left-8 ${light ? "border-fg/25" : "border-white/25"}`} />
-            <span className={`absolute right-5 top-20 h-6 w-6 border-r border-t md:right-8 ${light ? "border-fg/25" : "border-white/25"}`} />
-            <span className={`absolute bottom-6 left-5 h-6 w-6 border-b border-l md:left-8 ${light ? "border-fg/25" : "border-white/25"}`} />
-            <span className={`absolute bottom-6 right-5 h-6 w-6 border-b border-r md:right-8 ${light ? "border-fg/25" : "border-white/25"}`} />
-            <span className={`absolute left-1/2 top-0 h-full border-l border-dashed ${light ? "border-fg/[0.08]" : "border-white/[0.07]"}`} />
-            <span className={`absolute left-0 top-1/2 w-full border-t border-dashed ${light ? "border-fg/[0.08]" : "border-white/[0.07]"}`} />
-            <div className="absolute bottom-[7vh] left-5 hidden w-[24%] md:left-10 md:block">
-              <div className={`h-px w-full ${light ? "bg-night/15" : "bg-white/15"}`}>
-                {/* цайвар суурьт lime уусдаг — гүн ногооноор */}
-                <div ref={progFill} className={`h-px w-full origin-left scale-x-0 ${light ? "bg-moss" : "bg-lime"}`} />
-              </div>
-              <p
-                className={`mt-2 text-[10px] font-semibold uppercase tracking-[0.3em] ${
-                  light ? "text-fg/45" : "text-white/55 [text-shadow:0_1px_10px_rgba(0,0,0,0.7)]"
-                }`}
-              >
-                Мастер төлөвлөгөө · явц
-              </p>
+        {/* blueprint HUD — булангийн хаалт, тасархай тэнхлэг, спекийн
+            хашлага. Хашлага ба суурь зураас нь `[data-chrome]` дотор
+            БАЙНГА сууна: цэг бүрд дахин анивчихгүй. */}
+        <div data-chrome aria-hidden className="pointer-events-none absolute inset-0 z-[6]">
+          <span className={`absolute left-5 top-20 h-6 w-6 border-l border-t md:left-8 ${light ? "border-fg/25" : "border-white/25"}`} />
+          <span className={`absolute right-5 top-20 h-6 w-6 border-r border-t md:right-8 ${light ? "border-fg/25" : "border-white/25"}`} />
+          <span className={`absolute bottom-6 left-5 h-6 w-6 border-b border-l md:left-8 ${light ? "border-fg/25" : "border-white/25"}`} />
+          <span className={`absolute bottom-6 right-5 h-6 w-6 border-b border-r md:right-8 ${light ? "border-fg/25" : "border-white/25"}`} />
+          <span className={`absolute left-1/2 top-0 h-full border-l border-dashed ${light ? "border-fg/[0.08]" : "border-white/[0.07]"}`} />
+          <span className={`absolute left-0 top-1/2 w-full border-t border-dashed ${light ? "border-fg/[0.08]" : "border-white/[0.07]"}`} />
+
+          {/* спек блокийн босоо хашлага — «│» */}
+          <span
+            className={`absolute left-5 h-[26vh] w-px md:left-10 ${RULE_BOTTOM} ${
+              light ? "bg-gradient-to-t from-night/20 to-transparent" : "bg-gradient-to-t from-white/28 to-transparent"
+            }`}
+          />
+          {/* суурь зураас + явц — «└────── ▓▓▓░░░» */}
+          <div className={`absolute ${COLUMN} ${RULE_BOTTOM}`}>
+            <div className={`h-px w-full ${hairline}`}>
+              <div ref={progFill} className={`h-px w-full origin-left scale-x-0 ${light ? "bg-moss" : "bg-lime"}`} />
             </div>
           </div>
-        )}
+        </div>
 
-        {/* chapter intro — centred, scrubs away over the first half-screen */}
+        {/* chapter intro — centred, scrubs away over the first half-screen.
+            Өөрийн радиал хөшгийг АВЧ ЯВНА: гарчиг төвд байх богино
+            хугацаанд л төв тодорч, дараа нь хамт бүдгэрнэ. */}
         <div
           data-intro
           aria-hidden
-          className="pointer-events-none absolute inset-0 z-[9] flex flex-col items-center justify-center px-6 text-center"
-        >
-          <p className={`text-[12px] font-bold uppercase tracking-[0.42em] ${light ? "text-moss" : "text-lime"}`}>{chapter}</p>
-          <p className={`mt-4 text-[11px] font-semibold uppercase tracking-[0.3em] ${light ? "text-fg/55" : "text-white/55"}`}>{kicker}</p>
-          <h2
-            className={`mt-4 max-w-3xl text-[clamp(2rem,5.4vw,4.2rem)] font-extrabold leading-[1.04] tracking-tight [text-wrap:balance] ${
-              light ? "text-fg" : "text-white"
-            }`}
-          >
-            {title}
-          </h2>
-        </div>
-
-        {/* persistent corner header — fades in as the intro leaves.
-            Эллипс хөшиг дэлгэцийн голд төвлөрдөг тул булангийн жижиг
-            бичигт өөрийнх нь сүүдэр хэрэгтэй (өдрийн цайвар кадар). */}
-        <div
-          data-head
-          className={`absolute left-5 top-24 z-10 md:left-10 md:top-28 ${
-            light ? "" : "[text-shadow:0_1px_12px_rgba(0,0,0,0.65)]"
+          className={`pointer-events-none absolute inset-0 z-[9] flex flex-col items-center justify-center px-6 text-center ${
+            light
+              ? "bg-[radial-gradient(ellipse_72%_54%_at_50%_50%,rgba(255,255,255,0.82)_0%,rgba(255,255,255,0)_72%)]"
+              : "bg-[radial-gradient(ellipse_72%_54%_at_50%_50%,rgba(22,40,15,0.62)_0%,rgba(22,40,15,0)_72%)]"
           }`}
         >
+          <p className={`mono-hud ${accentText}`}>{chapter}</p>
+          <p className="mono-hud mt-4 text-fg/55">{kicker}</p>
+          {/* `<p>` — ЖИНХЭНЭ гарчиг нь доорх булангийн `<h2>`. Өмнө нь
+              нэг `title` хоёр удаа `<h2>`-оор гарч, баримтын гарчгийн
+              бүтэц давхардуулдаг байв. */}
+          <p className="mono-chapter-title mt-5 max-w-3xl">{title}</p>
+        </div>
+
+        {/* persistent corner header — fades in as the intro leaves */}
+        <div data-head className="absolute left-5 top-24 z-10 md:left-10 md:top-28">
           <MonoKicker tone={light ? "light" : "dark"}>
             {chapter} — {kicker}
           </MonoKicker>
-          <h2
-            className={`mt-3 text-[clamp(1.3rem,2.2vw,1.9rem)] font-extrabold leading-tight tracking-tight ${
-              light ? "text-fg" : "text-white"
-            }`}
-          >
-            {title}
-          </h2>
+          <h2 className="mono-chapter-head mt-3">{title}</h2>
         </div>
 
         {/* point layers — GSAP crossfade between quarters */}
         <div ref={layersWrap} data-layers className="pointer-events-none absolute inset-0 z-[8]">
-          {points.map((p, i) => (
-            <div key={p.n} data-layer className={`absolute inset-0 ${i === 0 ? "" : "opacity-0"}`}>
-              {variant === "numbers" && (
-                <div className="flex h-full items-center justify-center px-6">
-                  <div className="text-center">
-                    <h3
-                      className={`flex items-end justify-center font-extrabold leading-none tracking-tight ${
-                        light
-                          ? "text-fg [text-shadow:0_2px_28px_rgba(255,255,255,0.85)]"
-                          : "text-white drop-shadow-[0_4px_36px_rgba(0,0,0,0.55)]"
-                      } ${
-                        p.heading.length > 4
-                          ? "text-[clamp(2.8rem,9vw,7rem)]"
-                          : "text-[clamp(4.6rem,15vw,11rem)]"
-                      }`}
-                    >
-                      {p.heading.split("").map((c, ci) => (
-                        <span key={ci} className="inline-block overflow-hidden">
-                          <span data-ch className="inline-block">
-                            {c === " " ? " " : c}
-                          </span>
-                        </span>
-                      ))}
-                      {p.accent && (
-                        <span data-sw className={`mb-[0.9em] text-[0.28em] font-bold ${light ? "text-moss" : "text-lime"}`}>
-                          {p.accent}
-                        </span>
-                      )}
-                    </h3>
-                    <p
-                      data-sw
-                      className={`mx-auto mt-6 max-w-md text-[12px] font-semibold uppercase tracking-[0.26em] md:text-[13px] ${
-                        light
-                          ? "text-fg/75 [text-shadow:0_1px_14px_rgba(255,255,255,0.85)]"
-                          : "text-white/80 drop-shadow-[0_1px_12px_rgba(0,0,0,0.6)]"
-                      }`}
-                    >
-                      {p.text}
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {variant === "letters" && (
-                <div className="relative h-full">
-                  <span
-                    data-sw
-                    aria-hidden
-                    className="absolute -left-[2vw] top-1/2 -translate-y-1/2 select-none font-extrabold uppercase leading-none [font-size:clamp(13rem,38vw,30rem)]"
-                    style={{ WebkitTextStroke: "2.5px rgba(255,255,255,0.5)", color: "rgba(21,23,23,0.35)" }}
-                  >
-                    {p.heading.charAt(0)}
-                  </span>
-                  <div className="absolute bottom-[13vh] left-5 right-5 md:bottom-auto md:left-[34vw] md:right-auto md:top-1/2 md:w-[min(420px,34vw)] md:-translate-y-1/2">
-                    <p data-sw className="text-[11px] font-bold uppercase tracking-[0.32em] text-lime">
-                      {p.n} / {String(points.length).padStart(2, "0")}
-                    </p>
-                    <h3 data-sw className="mt-3 text-[clamp(1.9rem,3.4vw,2.9rem)] font-extrabold leading-[1.05] tracking-tight text-white drop-shadow-[0_2px_24px_rgba(0,0,0,0.55)]">
-                      {p.heading}
-                    </h3>
-                    <p data-sw className="mt-4 text-[15px] leading-relaxed text-white/85 drop-shadow-[0_1px_12px_rgba(0,0,0,0.6)]">
-                      {p.text}
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {variant === "callouts" && (() => {
-                const anchor = p.anchor ?? CALLOUT_ANCHORS[i % CALLOUT_ANCHORS.length];
-                return (
-                <div className="relative h-full">
-                  <span
-                    data-sw
-                    aria-hidden
-                    className="green-ping absolute hidden h-3 w-3 rounded-full bg-lime text-lime md:block"
-                    style={{ left: `${anchor.x}%`, top: `${anchor.y}%` }}
-                  />
-                  <svg
-                    aria-hidden
-                    className="absolute inset-0 hidden h-full w-full md:block"
-                    viewBox="0 0 100 100"
-                    preserveAspectRatio="none"
-                  >
-                    <path
-                      data-line
-                      d={`M ${anchor.x} ${anchor.y} L ${anchor.x + 6} ${anchor.y} L 67 66`}
-                      fill="none"
-                      stroke="rgba(180,214,86,0.75)"
-                      strokeWidth="1.25"
-                      vectorEffect="non-scaling-stroke"
-                    />
-                  </svg>
-                  <div className="glass-dark absolute bottom-[10vh] left-4 right-4 rounded-2xl p-6 md:bottom-[13vh] md:left-auto md:right-[6%] md:w-[340px] md:p-7">
-                    <span aria-hidden className="absolute left-0 top-0 h-3 w-3 border-l-2 border-t-2 border-lime" />
-                    <span aria-hidden className="absolute bottom-0 right-0 h-3 w-3 border-b-2 border-r-2 border-lime" />
-                    <p data-sw className="text-[10px] font-bold uppercase tracking-[0.32em] text-lime">
-                      Spec / {p.n}
-                    </p>
-                    <h3 data-sw className="mt-3 text-xl font-extrabold leading-snug tracking-tight text-white md:text-2xl">
-                      {p.heading}
-                    </h3>
-                    <p data-sw className="mt-3 text-[14px] leading-relaxed text-white/75">
-                      {p.text}
-                    </p>
-                    {p.link && (
-                      /* the layer stack is pointer-events-none — opt this back in */
-                      <a
-                        data-sw
-                        data-cursor-hover
-                        href={p.link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="pointer-events-auto mt-4 inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-lime transition-opacity duration-300 hover:opacity-70"
-                      >
-                        Дэлгэрэнгүй <span aria-hidden>↗</span>
-                      </a>
-                    )}
-                    {p.logo && (
-                      <div data-sw className="mt-5 flex items-center border-t border-white/15 pt-4">
-                        {p.logo.mark ? (
-                          <LogoMark className="h-6 w-auto text-white" />
-                        ) : (
-                          /* eslint-disable-next-line @next/next/no-img-element */
-                          <img src={p.logo.src} alt={p.logo.alt} className="h-6 w-auto" />
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </div>
-                );
-              })()}
-            </div>
-          ))}
-        </div>
-
-        {/* clickable point rail — jump to any point (desktop) */}
-        <div data-rail className="absolute bottom-[7vh] right-10 z-10 hidden items-center gap-1.5 md:flex">
           {points.map((p, i) => {
-            const lit = variant === "letters" ? i <= active : i === active;
+            const { label, detail } = specOf(p.text);
+            const fit = statFit(p.heading, p.accent);
             return (
-              <Fragment key={p.n}>
-                {i > 0 && (
-                  <span
-                    aria-hidden
-                    className={`h-px w-6 transition-colors duration-500 ${
-                      i <= active
-                        ? light ? "bg-moss/60" : "bg-lime/70"
-                        : light ? "bg-night/20" : "bg-white/20"
-                    }`}
-                  />
-                )}
-                {/* min-h/w-11 — 44px хүрэх талбай (таблет дээр ч хуруугаар
-                    дарагдана); харагдах тэмдэг нь жижигхэн хэвээр. */}
-                <button
-                  type="button"
-                  onClick={() => goTo(i)}
-                  data-cursor-hover
-                  aria-label={`${p.n} — ${p.heading}`}
-                  aria-current={active === i}
-                  className={`inline-flex min-h-11 min-w-8 items-center justify-center font-bold tracking-[0.08em] transition-all duration-300 ${
-                    variant === "letters" ? "text-sm" : "text-[11px]"
-                  } ${
-                    lit
-                      ? `${light ? "text-moss" : "text-lime"} ${active === i ? "scale-125" : ""}`
-                      : light
-                        ? "text-fg/35 hover:text-fg/75"
-                        : "text-white/40 hover:text-white/80"
-                  }`}
-                >
-                  {railLabel(p)}
-                </button>
-              </Fragment>
+              <div key={p.n} data-layer className={`absolute inset-0 ${i === 0 ? "" : "opacity-0"}`}>
+                <div className={`absolute bottom-[11vh] md:bottom-[13vh] ${COLUMN}`}>
+                  <div className="pl-5 md:pl-6">
+                    <p data-sw className="mono-hud text-fg/55">
+                      {p.n} <span className="opacity-40">/</span> {total}
+                    </p>
+
+                    <p
+                      className="mono-stat mt-4 text-fg"
+                      style={{ "--stat-fit": fit } as CSSProperties}
+                    >
+                      {/* Дэлгэц уншигчид бүтэн утгыг нэг мөрөөр өгнө —
+                          доорх тэмдэгтүүд нь зөвхөн анимацийн маск. */}
+                      <span className="sr-only">
+                        {p.heading}
+                        {p.accent}
+                      </span>
+                      {/* Цифр ба хэмжих нэгж НЭГ маск дотор — суурь
+                          шугам нь энгийн инлайн урсгалаар өөрөө таарна. */}
+                      <span aria-hidden className="mono-stat-mask">
+                        {[...p.heading].map((c, ci) => (
+                          <span key={ci} data-ch className="mono-stat-char">
+                            {/* NBSP — инлайн-блок доторх зай агшихгүй */}
+                            {c === " " ? "\u00A0" : c}
+                          </span>
+                        ))}
+                        {p.accent && (
+                          <span data-ch className={`mono-stat-unit ${accentText}`}>
+                            {p.accent}
+                          </span>
+                        )}
+                      </span>
+                    </p>
+
+                    {label && (
+                      <p data-sw className="mono-stat-label mt-5 text-fg">
+                        {label}
+                      </p>
+                    )}
+                    {detail && (
+                      <p data-sw className={`mono-stat-detail text-fg/70 ${label ? "mt-2" : "mt-5"}`}>
+                        {detail}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
             );
           })}
+        </div>
+
+        {/* clickable point rail — jump to any point (desktop).
+            `translate-y-1/2` — 44px товчнуудын ТӨВ нь суурь зураасны
+            шугам дээр яг таарна. */}
+        <div
+          data-rail
+          className={`absolute right-10 z-10 hidden translate-y-1/2 items-center gap-1.5 md:flex ${RULE_BOTTOM}`}
+        >
+          {points.map((p, i) => (
+            <Fragment key={p.n}>
+              {i > 0 && (
+                <span
+                  aria-hidden
+                  className={`h-px w-6 transition-colors duration-500 ${
+                    i <= active ? (light ? "bg-moss/60" : "bg-lime/70") : hairline
+                  }`}
+                />
+              )}
+              {/* min-h/w-11 — 44px хүрэх талбай (таблет дээр ч хуруугаар
+                  дарагдана); харагдах тэмдэг нь жижигхэн хэвээр. */}
+              <button
+                type="button"
+                onClick={() => goTo(i)}
+                data-cursor-hover
+                aria-label={`${p.n} — ${p.heading}`}
+                aria-current={active === i}
+                className={`mono-hud inline-flex min-h-11 min-w-8 items-center justify-center transition-all duration-300 ${
+                  active === i
+                    ? `${accentText} scale-125`
+                    : "text-fg/40 hover:text-fg/80"
+                }`}
+              >
+                {p.n}
+              </button>
+            </Fragment>
+          ))}
         </div>
       </div>
     </section>

@@ -15,6 +15,11 @@
    болгодог байсан тул буцаав. Одоо кадрууд бүрэн өнгөөрөө харагдаж,
    бичиг цагаанаараа уншигдана.
 
+   ТАЙЛБАРЫН БИЧВЭР: `points[].text` доторх ` · ` эсвэл ` — ` салгагч нь
+   мөрийг «нэр томьёо / дэлгэрэнгүй» болгон хуваана (`MonoScrollStory →
+   specOf`). Ж: «айлын орон сууц · 4 блок» → АЙЛЫН ОРОН СУУЦ + «4 блок».
+   Салгагчгүй бол ганц мөр болж үлдэнэ.
+
    The section runs taller than the default chapter so the last point —
    the 2027 handover date — gets the same dwell as the other three. Тэр
    зайг гараар гүйлгэх нь ядаргаатай тул эхний гүйлтийн дараа бүлэг
@@ -47,7 +52,6 @@ export function MonoStats({ site }: { site: SiteContent }) {
       heightClass="h-[280vh] md:h-[340vh]"
       /* ~2.4 дэлгэц / 13сек — цэг тутамд ~2.4сек уншиж амжина. */
       autoplaySeconds={13}
-      variant="numbers"
       bgKey="stats"
       tone={sectionTone(site.theme, "stats", "dark")}
       film={mediaFilmStyle(site.theme, "stats")}

@@ -264,6 +264,137 @@
       line-height: 1.72;
     }
   }
+
+  /* Бүлгийн ТАНИЛЦУУЛГА гарчиг (пиннэсэн кадрын голд гарч, дараа нь
+     булангийн `.mono-h2` руу шилждэг). `.mono-h2`-той ЯГ нэг токен
+     уншина — зөвхөн хэмжээ нь том. Өмнө нь энэ гарчиг Tailwind-ийн
+     хатуу `clamp` дээр сууж, админы «Дизайн → Типографи» тохиргоог
+     үл тоомсорлодог байв. */
+  .mono-chapter-title {
+    font-size: calc(clamp(2rem, 5.2vw, 4rem) * var(--ely-scale, 1));
+    font-weight: var(--ely-h-weight, 800);
+    line-height: var(--ely-h-leading, 1.06);
+    letter-spacing: var(--ely-h-track, -0.02em);
+    text-transform: var(--ely-h-transform, none);
+    color: var(--ely-fg);
+    text-wrap: balance;
+  }
+
+  /* Булангийн БАЙНГЫН толгой — бүлгийн гарчгийн жижиг хувилбар.
+     Хэсгийн жинхэнэ `<h2>` энэ бөгөөд `.mono-h2`-той ижил токен
+     уншина, зөвхөн хэмжээ нь булангийн шошгонд тохирсон жижиг. */
+  .mono-chapter-head {
+    max-width: 18ch;
+    font-size: calc(clamp(1.25rem, 2.1vw, 1.85rem) * var(--ely-scale, 1));
+    font-weight: var(--ely-h-weight, 800);
+    line-height: var(--ely-h-leading, 1.12);
+    letter-spacing: var(--ely-h-track, -0.02em);
+    text-transform: var(--ely-h-transform, none);
+    color: var(--ely-fg);
+    text-wrap: balance;
+  }
+
+  /* ---- Blueprint HUD / спек типографи ------------------------------
+     «01 · Ерөнхий төлөвлөлт» бүлгийн жижиг бичгүүд өмнө нь 10px/11px,
+     0.3em/0.32em/0.08em гэсэн 5 өөр утгаар тарсан байв. Нэг шат: */
+  .mono-hud {
+    font-size: 0.625rem;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    font-variant-numeric: tabular-nums lining-nums;
+  }
+
+  @media (min-width: 768px) {
+    .mono-hud {
+      font-size: 0.6875rem;
+    }
+  }
+
+  /* Аварга тоо. `--stat-fit` (0.5–1) нь тэмдэгтийн ОПТИК өргөнөөс
+     тооцоологдож ирнэ (`MonoScrollStory`): «506» ба «2027 · II» хоёр
+     нэг бүлэгт ойролцоо өргөнтэй суух ба өмнөх `length > 4 ? 7rem :
+     11rem` гэсэн үсрэлт арилна. `tabular-nums` — тоо солигдоход
+     багана хөдлөхгүй. */
+  .mono-stat {
+    font-size: calc(clamp(3.4rem, 10.5vw, 8.6rem) * var(--stat-fit, 1) * var(--ely-scale, 1));
+    font-weight: 800;
+    line-height: 0.84;
+    letter-spacing: -0.035em;
+    /* Хүснэгтийн (моно өргөнтэй) цифр — тэмдэгтүүд roll анимацийн
+       улмаас тусдаа элемент болсон ч зай нь жигд үлдэнэ, мөн тоо
+       солигдоход багана хөдлөхгүй. */
+    font-variant-numeric: tabular-nums lining-nums;
+  }
+
+  /* Roll анимацийн НЭГ БҮШИЙН маск.
+     Тэмдэгт бүрд тусдаа `overflow:hidden` маск өгөх нь буруу: тийм
+     инлайн-блокийн суурь шугам нь доод ирмэг рүү шилждэг тул цифр ба
+     хэмжих нэгж (%) хоёр өөр шугам дээр суудаг байв. Бүгдийг НЭГ маск
+     дотор энгийн инлайн урсгалаар байрлуулахад суурь шугам нь өөрөө
+     таарна.
+     `padding` — 0.84 мөрийн өндөр нь глифийн хайрцгаас нарийн тул
+     тоонуудын орой таслагдахаас сэргийлнэ; сөрөг зах нь блокийн
+     өндрийг хэвээр үлдээж, доорх шошгын зай тогтвортой байна. */
+  .mono-stat-mask {
+    display: inline-block;
+    overflow: hidden;
+    margin-top: -0.12em;
+    margin-bottom: -0.12em;
+    padding-top: 0.12em;
+    padding-bottom: 0.12em;
+  }
+
+  .mono-stat-char {
+    display: inline-block;
+  }
+
+  /* Хэмжих нэгж (%, м²). Өмнө нь `mb-[0.9em]`-ээр гараар өргөгдөж,
+     clamp өөрчлөгдөх бүрт гулсдаг байв — одоо суурь шугам дээр. */
+  .mono-stat-unit {
+    display: inline-block;
+    margin-left: 0.06em;
+    font-size: 0.34em;
+    font-weight: 700;
+    letter-spacing: 0;
+  }
+
+  /* Гар утсанд `--stat-fit` нь урт утгыг хэт жижигрүүлдэг («2027 · II»
+     → 28px буюу энгийн бичвэрийн хэмжээ). Доод хязгаар тавина —
+     жижиг дэлгэцэд блок бүтэн өргөнөө эзэлдэг тул өргөсөх зай бий. */
+  @media (max-width: 767px) {
+    .mono-stat {
+      font-size: max(
+        2.5rem,
+        calc(clamp(3.4rem, 10.5vw, 8.6rem) * var(--stat-fit, 1) * var(--ely-scale, 1))
+      );
+    }
+  }
+
+  /* Тоо ЮУ болохыг хэлэх нэр томьёо — богино тул том үсэг тохирно,
+     гэхдээ сул зай 0.26em → 0.14em (кирилл томоор бичихэд 0.26em нь
+     үгийн хил үгүй болгодог). */
+  .mono-stat-label {
+    max-width: 26ch;
+    font-size: calc(clamp(0.6875rem, 1.05vw, 0.8125rem) * var(--ely-scale, 1));
+    font-weight: 700;
+    line-height: 1.35;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    text-wrap: balance;
+  }
+
+  /* Дэлгэрэнгүй өгүүлбэр — ЭНГИЙН бичиг. Урт кирилл өгүүлбэрийг
+     томоор, сул зайтай бичих нь энэ хэсгийн гол уншигдацын алдаа байв. */
+  .mono-stat-detail {
+    max-width: 34ch;
+    font-size: calc(clamp(0.9375rem, 1.15vw, 1.0625rem) * var(--ely-scale, 1));
+    font-weight: 400;
+    line-height: 1.55;
+    letter-spacing: 0;
+    text-wrap: pretty;
+  }
 }
 
 html {
