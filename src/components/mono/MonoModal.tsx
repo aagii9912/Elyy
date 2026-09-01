@@ -96,7 +96,7 @@ export function MonoModal({
   if (!open) return null;
 
   const width =
-    size === "full" ? "max-w-[1400px]" : size === "lg" ? "max-w-3xl" : "max-w-lg";
+    size === "full" ? "max-w-wide" : size === "lg" ? "max-w-3xl" : "max-w-lg";
 
   return (
     <div

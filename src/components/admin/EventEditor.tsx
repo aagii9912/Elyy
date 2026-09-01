@@ -236,7 +236,7 @@ export function EventEditor({
                     type="button"
                     onClick={() => patchContent({ theme: t })}
                     className={`flex-1 rounded-lg border px-3 py-2.5 text-sm font-semibold ${
-                      content.theme === t ? "border-[#2a5124] bg-[#2a5124]/5 text-[#2a5124]" : "border-neutral-300 text-neutral-600"
+                      content.theme === t ? "border-ink bg-ink/5 text-ink" : "border-neutral-300 text-neutral-600"
                     }`}
                   >
                     {t === "dark" ? "Бараан" : "Цайвар"}
@@ -364,7 +364,7 @@ export function EventEditor({
               <TextArea rows={2} value={content.form.subtitle} onChange={(e) => patchForm({ subtitle: e.target.value })} />
             </Field>
             <div>
-              <span className="mb-2 block text-[13px] font-semibold text-neutral-700">Нэмэлт талбар</span>
+              <span className="mb-2 block text-body font-semibold text-neutral-700">Нэмэлт талбар</span>
               <div className="flex flex-wrap gap-5 rounded-lg border border-neutral-200 bg-neutral-50 px-4 py-3">
                 <span className="text-sm text-neutral-400">Нэр, Утас (үргэлж)</span>
                 <Toggle checked={content.form.fields.email} onChange={(v) => patchFormFields({ email: v })} label="И-мэйл" />

@@ -108,7 +108,7 @@ export function MonoHeader({
         }`}
       >
         <div
-          className={`mx-auto flex max-w-[1600px] items-center gap-6 px-5 transition-[height] duration-500 md:px-10 ${
+          className={`mx-auto flex max-w-page items-center gap-6 px-5 transition-[height] duration-500 md:px-10 ${
             scrolled ? "h-[58px]" : "h-[80px]"
           }`}
         >
@@ -130,7 +130,7 @@ export function MonoHeader({
                 href={resolve(item.href)}
                 onClick={(e) => go(e, item.href)}
                 data-cursor-hover
-                className={`text-[11px] font-medium uppercase tracking-[0.08em] transition-colors duration-300 ${
+                className={`text-label font-medium uppercase tracking-caps-sm transition-colors duration-300 ${
                   solid ? "text-fg/60 hover:text-fg" : "text-white/70 hover:text-white"
                 }`}
               >
@@ -143,7 +143,7 @@ export function MonoHeader({
             <BrochureButton
               site={site}
               source="elysium/mono#header"
-              className={`hidden items-center gap-2 rounded-full border px-5 py-2 text-[11px] font-medium uppercase tracking-[0.08em] transition-colors duration-300 sm:inline-flex ${
+              className={`hidden items-center gap-2 rounded-full border px-5 py-2 text-label font-medium uppercase tracking-caps-sm transition-colors duration-300 sm:inline-flex ${
                 solid
                   ? "border-fg/25 text-fg hover:bg-night hover:text-white"
                   : "border-white/40 text-white hover:bg-white/10"
@@ -155,7 +155,7 @@ export function MonoHeader({
               href={resolve("#contact")}
               onClick={(e) => go(e, "#contact")}
               data-cursor-hover
-              className={`hidden items-center gap-2 rounded-full px-5 py-2 text-[11px] font-bold uppercase tracking-[0.08em] transition-transform duration-300 hover:-translate-y-0.5 md:inline-flex ${
+              className={`hidden items-center gap-2 rounded-full px-5 py-2 text-label font-bold uppercase tracking-caps-sm transition-transform duration-300 hover:-translate-y-0.5 md:inline-flex ${
                 solid ? "bg-night text-white" : "bg-white text-fg"
               }`}
             >
@@ -190,7 +190,7 @@ export function MonoHeader({
               href={resolve(item.href)}
               onClick={(e) => go(e, item.href)}
               /* Хүрэх талбай 44px-аас багагүй байхаар босоо зай нэмэв. */
-              className="flex min-h-12 items-center py-1.5 text-[1.6rem] font-extrabold leading-tight tracking-[-0.01em]"
+              className="flex min-h-12 items-center py-1.5 text-[1.6rem] font-extrabold leading-tight tracking-display"
             >
               {item.label}
             </Link>

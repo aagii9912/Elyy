@@ -247,7 +247,7 @@ function PanelBody({
         <span
           aria-hidden
           data-elys-letter
-          className="pointer-events-none absolute left-5 top-0 z-[3] flex h-[72px] items-center text-[30px] font-extrabold leading-none tracking-tight text-white"
+          className="pointer-events-none absolute left-5 top-0 z-[3] flex h-[72px] items-center text-3xl font-extrabold leading-none tracking-tight text-white"
         >
           {item.letter}
         </span>
@@ -263,7 +263,7 @@ function PanelBody({
         <span
           aria-hidden
           className={cn(
-            "pointer-events-none absolute bottom-5 left-1/2 z-[2] max-h-[62%] -translate-x-1/2 rotate-180 overflow-hidden whitespace-nowrap text-[12px] font-bold uppercase tracking-[0.18em] text-white transition-opacity duration-300 [writing-mode:vertical-rl]",
+            "pointer-events-none absolute bottom-5 left-1/2 z-[2] max-h-[62%] -translate-x-1/2 rotate-180 overflow-hidden whitespace-nowrap text-xs font-bold uppercase tracking-caps text-white transition-opacity duration-300 [writing-mode:vertical-rl]",
             isActive ? "opacity-0 delay-0" : "opacity-100 delay-200"
           )}
         >
@@ -277,7 +277,7 @@ function PanelBody({
             isActive ? "opacity-0 delay-0" : "opacity-100 delay-200"
           )}
         >
-          <span className="min-w-0 truncate text-[13px] font-bold uppercase tracking-[0.14em] text-white">
+          <span className="min-w-0 truncate text-body font-bold uppercase tracking-caps text-white">
             {item.title}
           </span>
         </span>
@@ -310,13 +310,13 @@ function PanelBody({
             цайвар интерьер дээр уншигдахаа больж байв. Уншигдацыг
             кадрыг харанхуйлж биш, бэхээ нэмж хангана. */}
         {lane === "row" && (
-          <span className="mt-2 line-clamp-2 max-w-md text-[14px] leading-relaxed text-white">
+          <span className="mt-2 line-clamp-2 max-w-md text-sm leading-relaxed text-white">
             {item.body}
           </span>
         )}
         {/* Товч нь ЦАГААН дүүргэлттэй, бичиг нь бараан — өвлөж ирсэн
             `CAPTION_SHADOW` энд бохир болно, тиймээс тэглэнэ. */}
-        <span className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-full bg-white px-5 py-3 text-[12px] font-bold uppercase tracking-[0.1em] text-night [text-shadow:none]">
+        <span className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-full bg-white px-5 py-3 text-xs font-bold uppercase tracking-caps-sm text-night [text-shadow:none]">
           {openLabel}
           <span
             aria-hidden

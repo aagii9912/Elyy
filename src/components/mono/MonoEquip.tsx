@@ -183,7 +183,7 @@ export function MonoEquip({ site }: { site: SiteContent }) {
             data-cursor-hover
             onClick={() => setOpen("list")}
             aria-haspopup="dialog"
-            className="inline-flex min-h-11 items-center gap-2 rounded-full bg-white px-5 py-2.5 text-[12px] font-bold uppercase tracking-[0.1em] text-fg transition-transform duration-300 hover:-translate-y-0.5"
+            className="inline-flex min-h-11 items-center gap-2 rounded-full bg-white px-5 py-2.5 text-xs font-bold uppercase tracking-caps-sm text-fg transition-transform duration-300 hover:-translate-y-0.5"
           >
             {equip.ctaLabel}
             <span aria-hidden>→</span>
@@ -206,14 +206,14 @@ export function MonoEquip({ site }: { site: SiteContent }) {
             ч яг үүнийг найдаж `text-fg` хэрэглэсээр ирсэн). Гараар
             бичвэл админ палитраа солиход самбар дагахаа болино. */}
         <div className="px-6 pb-8 pt-6 sm:px-9 sm:pb-9 sm:pt-[26px]">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.29em] text-fg">
+          <p className="text-label font-semibold uppercase tracking-caps-lg text-fg">
             {equip.title}
           </p>
-          <h3 className="mt-5 text-[clamp(1.4rem,2.6vw,1.9375rem)] font-extrabold leading-tight tracking-[-0.032em] text-fg">
+          <h3 className="mt-5 text-[clamp(1.4rem,2.6vw,1.9375rem)] font-extrabold leading-tight tracking-display text-fg">
             {equip.equipment.title}
           </h3>
           {equip.equipment.body && (
-            <p className="mt-4 max-w-2xl text-[15px] leading-normal text-fg/75 sm:text-[16px]">
+            <p className="mt-4 max-w-2xl text-lead leading-normal text-fg/75 sm:text-base">
               {equip.equipment.body}
             </p>
           )}
@@ -239,14 +239,14 @@ export function MonoEquip({ site }: { site: SiteContent }) {
               className="h-56 w-full object-cover sm:h-72"
             />
             <div className="p-6 sm:p-9">
-              <p className="flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.28em] text-fg/50">
+              <p className="flex items-center gap-3 text-label font-semibold uppercase tracking-caps-lg text-fg/50">
                 <span aria-hidden className="h-px w-8 bg-moss" />
                 {equip.kicker}
               </p>
               <h3 className="mt-4 text-[clamp(1.4rem,3vw,2rem)] font-extrabold leading-tight tracking-tight text-fg">
                 {detail.title}
               </h3>
-              <p className="mt-4 text-[15px] leading-relaxed text-fg/70">{detail.body}</p>
+              <p className="mt-4 text-lead leading-relaxed text-fg/70">{detail.body}</p>
 
               <div className="mt-7 flex flex-wrap items-center justify-between gap-4 border-t border-fg/10 pt-6">
                 <BrandMark title={detail.title} logo={detail.logo} className="h-7" />
@@ -256,7 +256,7 @@ export function MonoEquip({ site }: { site: SiteContent }) {
                     target="_blank"
                     rel="noopener noreferrer"
                     data-cursor-hover
-                    className="inline-flex min-h-11 items-center gap-2 rounded-full bg-night px-6 py-3 text-[12px] font-bold uppercase tracking-[0.1em] text-white transition-transform duration-300 hover:-translate-y-0.5"
+                    className="inline-flex min-h-11 items-center gap-2 rounded-full bg-night px-6 py-3 text-xs font-bold uppercase tracking-caps-sm text-white transition-transform duration-300 hover:-translate-y-0.5"
                   >
                     {equip.sourceLabel} <span aria-hidden>↗</span>
                   </a>

@@ -173,16 +173,16 @@ export function ThemePreview({
   return (
     <div className="rounded-2xl border border-neutral-200 bg-white p-3 shadow-sm">
       <div className="mb-2.5 flex flex-wrap items-center gap-2">
-        <span className="text-[13px] font-bold text-neutral-900">Амьд урьдчилан харалт</span>
+        <span className="text-body font-bold text-neutral-900">Амьд урьдчилан харалт</span>
         <div className="ml-auto flex items-center gap-1.5">
           {(Object.keys(DEVICES) as DeviceId[]).map((id) => (
             <button
               key={id}
               type="button"
               onClick={() => setDevice(id)}
-              className={`rounded-md border px-2.5 py-1 text-[12px] font-semibold transition-colors ${
+              className={`rounded-md border px-2.5 py-1 text-xs font-semibold transition-colors ${
                 device === id
-                  ? "border-[#2a5124] bg-[#2a5124]/5 text-[#2a5124]"
+                  ? "border-ink bg-ink/5 text-ink"
                   : "border-neutral-300 text-neutral-500 hover:bg-neutral-50"
               }`}
             >
@@ -192,7 +192,7 @@ export function ThemePreview({
           <Button
             type="button"
             variant="ghost"
-            className="px-2.5 py-1 text-[12px]"
+            className="px-2.5 py-1 text-xs"
             onClick={() => {
               setReady(false);
               if (frame.current) frame.current.src = "/";
@@ -225,7 +225,7 @@ export function ThemePreview({
         />
       </div>
 
-      <p className="mt-2 text-[11px] leading-relaxed text-neutral-400">
+      <p className="mt-2 text-label leading-relaxed text-neutral-400">
         Өнгө, бичиг, дэвсгэр шууд буудаг. Хадгалаагүй <b>текст, зургийн</b> өөрчлөлт энд
         харагдахгүй — хадгалсны дараа «Дахин ачаалах» дарна уу.
       </p>

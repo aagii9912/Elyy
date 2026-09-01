@@ -98,16 +98,16 @@ export default async function NewsDetailPage({ params, searchParams }: Props) {
                 aria-hidden
                 className="absolute inset-0 -z-10 bg-gradient-to-t from-night/90 via-night/45 to-night/60"
               />
-              <div className="mx-auto w-full max-w-[1100px] px-6 md:px-10">
+              <div className="mx-auto w-full max-w-read px-6 md:px-10">
                 <Link
                   href={NEWS_PATH}
                   data-cursor-hover
-                  className="inline-flex min-h-11 items-center gap-2 text-[11px] font-bold uppercase tracking-[0.14em] text-white/70 transition-colors duration-300 hover:text-white"
+                  className="inline-flex min-h-11 items-center gap-2 text-label font-bold uppercase tracking-caps text-white/70 transition-colors duration-300 hover:text-white"
                 >
                   <span aria-hidden>←</span> {site.news.backLabel}
                 </Link>
 
-                <div className="mt-4 flex flex-wrap items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/75">
+                <div className="mt-4 flex flex-wrap items-center gap-3 text-label font-semibold uppercase tracking-caps text-white/75">
                   {meta}
                 </div>
 
@@ -115,7 +115,7 @@ export default async function NewsDetailPage({ params, searchParams }: Props) {
                   {post.title}
                 </h1>
                 {post.excerpt && (
-                  <p className="mt-5 max-w-2xl text-[17px] leading-relaxed text-white/80">
+                  <p className="mt-5 max-w-2xl text-sub leading-relaxed text-white/80">
                     {post.excerpt}
                   </p>
                 )}
@@ -123,16 +123,16 @@ export default async function NewsDetailPage({ params, searchParams }: Props) {
             </header>
           ) : (
             <header className="border-b border-night/10 bg-ground pb-12 pt-[124px] md:pb-16 md:pt-[148px]">
-              <div className="mx-auto max-w-[1100px] px-6 md:px-10">
+              <div className="mx-auto max-w-read px-6 md:px-10">
                 <Link
                   href={NEWS_PATH}
                   data-cursor-hover
-                  className="inline-flex min-h-11 items-center gap-2 text-[11px] font-bold uppercase tracking-[0.14em] text-night/50 transition-colors duration-300 hover:text-night"
+                  className="inline-flex min-h-11 items-center gap-2 text-label font-bold uppercase tracking-caps text-night/50 transition-colors duration-300 hover:text-night"
                 >
                   <span aria-hidden>←</span> {site.news.backLabel}
                 </Link>
 
-                <div className="mt-4 flex flex-wrap items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-night/50">
+                <div className="mt-4 flex flex-wrap items-center gap-3 text-label font-semibold uppercase tracking-caps text-night/50">
                   {meta}
                 </div>
 
@@ -140,14 +140,14 @@ export default async function NewsDetailPage({ params, searchParams }: Props) {
                   {post.title}
                 </h1>
                 {post.excerpt && (
-                  <p className="mt-5 text-[17px] leading-relaxed text-night/65">{post.excerpt}</p>
+                  <p className="mt-5 text-sub leading-relaxed text-night/65">{post.excerpt}</p>
                 )}
               </div>
             </header>
           )}
 
           {/* Агуулга */}
-          <div className="mx-auto max-w-[1100px] px-6 py-12 md:px-10 md:py-16">
+          <div className="mx-auto max-w-read px-6 py-12 md:px-10 md:py-16">
             {blocks.map((block, i) =>
               block.kind === "heading" ? (
                 block.level === 3 ? (
@@ -168,7 +168,7 @@ export default async function NewsDetailPage({ params, searchParams }: Props) {
               ) : block.kind === "list" ? (
                 <ul key={i} className="mt-5 space-y-2.5">
                   {block.items.map((li, j) => (
-                    <li key={j} className="flex gap-3 text-[16px] leading-relaxed text-night/75">
+                    <li key={j} className="flex gap-3 text-base leading-relaxed text-night/75">
                       <span aria-hidden className="mt-2.5 h-1.5 w-1.5 shrink-0 rounded-full bg-moss" />
                       <span>
                         <NewsText spans={li} />
@@ -186,7 +186,7 @@ export default async function NewsDetailPage({ params, searchParams }: Props) {
                     block.size === "full"
                       ? "relative left-1/2 w-screen -translate-x-1/2"
                       : block.size === "wide"
-                        ? "relative left-1/2 w-[92vw] max-w-[1400px] -translate-x-1/2"
+                        ? "relative left-1/2 w-[92vw] max-w-wide -translate-x-1/2"
                         : ""
                   }`}
                 >
@@ -205,8 +205,8 @@ export default async function NewsDetailPage({ params, searchParams }: Props) {
                   />
                   {block.caption && (
                     <figcaption
-                      className={`mt-3 text-[13px] leading-relaxed text-night/50 ${
-                        block.size === "full" ? "mx-auto max-w-[1100px] px-6 md:px-10" : ""
+                      className={`mt-3 text-body leading-relaxed text-night/50 ${
+                        block.size === "full" ? "mx-auto max-w-read px-6 md:px-10" : ""
                       }`}
                     >
                       {block.caption}
@@ -214,7 +214,7 @@ export default async function NewsDetailPage({ params, searchParams }: Props) {
                   )}
                 </figure>
               ) : (
-                <p key={i} className="mt-5 text-[16px] leading-relaxed text-night/75 first:mt-0">
+                <p key={i} className="mt-5 text-base leading-relaxed text-night/75 first:mt-0">
                   <NewsText spans={block.spans} />
                 </p>
               )
@@ -242,7 +242,7 @@ export default async function NewsDetailPage({ params, searchParams }: Props) {
 
         {others.length > 0 && (
           <section className="border-t border-night/10 bg-ground py-14 md:py-20">
-            <div className="mx-auto max-w-[1500px] px-6 md:px-10">
+            <div className="mx-auto max-w-page px-6 md:px-10">
               <h2
                 data-reveal="heading"
                 className="text-[clamp(1.5rem,3vw,2.2rem)] font-extrabold tracking-tight text-night"

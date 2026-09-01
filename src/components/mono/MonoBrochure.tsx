@@ -101,14 +101,14 @@ export function BrochureButton({
         <div className="p-6 sm:p-9">
           {status === "done" ? (
             <div>
-              <p className="flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.28em] text-night/50">
+              <p className="flex items-center gap-3 text-label font-semibold uppercase tracking-caps-lg text-night/50">
                 <span aria-hidden className="h-px w-8 bg-moss" />
                 {brochure.title}
               </p>
               <h3 className="mt-4 text-2xl font-extrabold leading-tight tracking-tight text-night">
                 {brochure.successTitle}
               </h3>
-              <p className="mt-3 text-[15px] leading-relaxed text-night/65">{brochure.successBody}</p>
+              <p className="mt-3 text-lead leading-relaxed text-night/65">{brochure.successBody}</p>
               <a
                 href={brand.brochureUrl}
                 target="_blank"
@@ -122,17 +122,17 @@ export function BrochureButton({
           ) : (
             <form onSubmit={onSubmit} className="flex flex-col gap-6">
               <div>
-                <p className="flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.28em] text-night/50">
+                <p className="flex items-center gap-3 text-label font-semibold uppercase tracking-caps-lg text-night/50">
                   <span aria-hidden className="h-px w-8 bg-moss" />
                   {brochure.title}
                 </p>
-                <p className="mt-4 text-[15px] leading-relaxed text-night/65">{brochure.sub}</p>
+                <p className="mt-4 text-lead leading-relaxed text-night/65">{brochure.sub}</p>
               </div>
 
               <input type="text" name="website" tabIndex={-1} autoComplete="off" aria-hidden="true" className="hidden" />
 
               <label className="block">
-                <span className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.18em] text-night/45">
+                <span className="mb-2 block text-label font-semibold uppercase tracking-caps text-night/45">
                   {brochure.name}
                 </span>
                 <input
@@ -145,7 +145,7 @@ export function BrochureButton({
               </label>
 
               <label className="block">
-                <span className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.18em] text-night/45">
+                <span className="mb-2 block text-label font-semibold uppercase tracking-caps text-night/45">
                   {brochure.phone}
                 </span>
                 <input
@@ -159,7 +159,7 @@ export function BrochureButton({
               </label>
 
               <label className="block">
-                <span className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.18em] text-night/45">
+                <span className="mb-2 block text-label font-semibold uppercase tracking-caps text-night/45">
                   {brochure.email}
                 </span>
                 <input
@@ -178,7 +178,7 @@ export function BrochureButton({
                 </p>
               )}
 
-              <p className="text-[12px] leading-relaxed text-night/45">{brochure.consent}</p>
+              <p className="text-xs leading-relaxed text-night/45">{brochure.consent}</p>
 
               <button
                 type="submit"

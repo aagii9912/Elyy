@@ -183,7 +183,7 @@ export function NewsEditor({ initial }: { initial: NewsDoc }) {
               {blocks.map((b, i) =>
                 b.kind === "heading" ? (
                   b.level === 3 ? (
-                    <h4 key={i} className="text-[15px] font-bold text-neutral-900">
+                    <h4 key={i} className="text-lead font-bold text-neutral-900">
                       {b.text}
                     </h4>
                   ) : (
@@ -192,7 +192,7 @@ export function NewsEditor({ initial }: { initial: NewsDoc }) {
                     </h3>
                   )
                 ) : b.kind === "list" ? (
-                  <ul key={i} className="list-disc space-y-1 pl-5 text-[15px] text-neutral-700">
+                  <ul key={i} className="list-disc space-y-1 pl-5 text-lead text-neutral-700">
                     {b.items.map((li, j) => (
                       <li key={j}>
                         <NewsText spans={li} />
@@ -212,7 +212,7 @@ export function NewsEditor({ initial }: { initial: NewsDoc }) {
                     )}
                   </figure>
                 ) : (
-                  <p key={i} className="text-[15px] leading-relaxed text-neutral-700">
+                  <p key={i} className="text-lead leading-relaxed text-neutral-700">
                     <NewsText spans={b.spans} />
                   </p>
                 )

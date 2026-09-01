@@ -85,7 +85,7 @@ export function MonoChatbot({ site }: { site: SiteContent }) {
           <span className="flex h-8 w-8 items-center justify-center rounded-full bg-lime text-sm font-bold text-night">E</span>
           <div>
             <p className="text-sm font-bold text-white">{chatbot.title}</p>
-            <p className="text-[11px] text-white/55">{chatbot.subtitle}</p>
+            <p className="text-label text-white/55">{chatbot.subtitle}</p>
           </div>
         </div>
 
@@ -93,7 +93,7 @@ export function MonoChatbot({ site }: { site: SiteContent }) {
           {msgs.map((m, i) => (
             <div
               key={i}
-              className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-[13.5px] leading-relaxed ${
+              className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-body leading-relaxed ${
                 m.from === "bot"
                   ? "self-start rounded-bl-md bg-night/5 text-night"
                   : "self-end rounded-br-md bg-night font-medium text-white"
@@ -122,7 +122,7 @@ export function MonoChatbot({ site }: { site: SiteContent }) {
               type="button"
               onClick={() => send(q)}
               data-cursor-hover
-              className="rounded-full border border-night/20 px-3 py-1.5 text-[12px] font-medium text-night/70 transition-colors duration-300 hover:border-night hover:text-night"
+              className="rounded-full border border-night/20 px-3 py-1.5 text-xs font-medium text-night/70 transition-colors duration-300 hover:border-night hover:text-night"
             >
               {q}
             </button>

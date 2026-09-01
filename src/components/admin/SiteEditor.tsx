@@ -154,10 +154,10 @@ function ListEditor<T>({
       {items.map((item, i) => (
         <div key={i} className="rounded-xl border border-neutral-200 bg-neutral-50/60 p-4">
           <div className="mb-3 flex items-center gap-2">
-            <span className="rounded-md bg-neutral-200 px-2 py-0.5 text-[11px] font-bold text-neutral-600">
+            <span className="rounded-md bg-neutral-200 px-2 py-0.5 text-label font-bold text-neutral-600">
               {String(i + 1).padStart(2, "0")}
             </span>
-            <span className="min-w-0 flex-1 truncate text-[13px] font-semibold text-neutral-700">
+            <span className="min-w-0 flex-1 truncate text-body font-semibold text-neutral-700">
               {title(item, i)}
             </span>
             <button
@@ -383,9 +383,9 @@ export function SiteEditor({ initial }: { initial: SiteContent }) {
                 <button
                   type="button"
                   onClick={() => setSection(s.id)}
-                  className={`w-full whitespace-nowrap rounded-lg px-3 py-2.5 text-left text-[13px] font-semibold transition-colors lg:whitespace-normal ${
+                  className={`w-full whitespace-nowrap rounded-lg px-3 py-2.5 text-left text-body font-semibold transition-colors lg:whitespace-normal ${
                     section === s.id
-                      ? "bg-[#2a5124] text-white"
+                      ? "bg-ink text-white"
                       : "text-neutral-600 hover:bg-neutral-200/60"
                   }`}
                 >
@@ -402,7 +402,7 @@ export function SiteEditor({ initial }: { initial: SiteContent }) {
                     )}
                   </span>
                   <span
-                    className={`hidden text-[11px] font-medium lg:block ${
+                    className={`hidden text-label font-medium lg:block ${
                       section === s.id ? "text-white/70" : "text-neutral-400"
                     }`}
                   >
@@ -412,7 +412,7 @@ export function SiteEditor({ initial }: { initial: SiteContent }) {
               </li>
             ))}
           </ul>
-          <p className="mt-3 hidden text-[11px] leading-relaxed text-neutral-400 lg:block">
+          <p className="mt-3 hidden text-label leading-relaxed text-neutral-400 lg:block">
             <span aria-hidden className="mr-1 inline-block h-1.5 w-1.5 rounded-full bg-amber-500 align-middle" />
             Өгөгдмөлөөс өөрчлөгдсөн хэсэг. Шинэ өгөгдмөл текстийг татах бол
             тухайн хэсэг дээр “Өгөгдмөл рүү буцаах” дараад хадгална уу.
@@ -1338,7 +1338,7 @@ function renderSection(
                       hint="Аксонометрын жижиг хувилбар. Хоосон бол эхний өнцгийн зургийг ашиглана."
                     />
                     <div>
-                      <span className="mb-1.5 block text-[13px] font-semibold text-neutral-700">
+                      <span className="mb-1.5 block text-body font-semibold text-neutral-700">
                         Томруулж үзэх өнцгүүд
                       </span>
                       <div className="grid gap-3 sm:grid-cols-2">
@@ -1989,7 +1989,7 @@ function renderSection(
           <Card
             title="Мэдээний хуудас"
             right={
-              <Link href="/admin/news" className="text-[13px] font-semibold text-[#2a5124] hover:underline">
+              <Link href="/admin/news" className="text-body font-semibold text-ink hover:underline">
                 Нийтлэлүүд →
               </Link>
             }

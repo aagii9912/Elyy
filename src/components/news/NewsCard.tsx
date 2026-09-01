@@ -23,12 +23,12 @@ export function NewsCard({ item, readMore }: { item: NewsDoc; readMore: string }
               className="aspect-[16/10] w-full object-cover transition-transform duration-700 group-hover:scale-105"
             />
           ) : (
-            <div className="flex aspect-[16/10] w-full items-center justify-center text-[11px] font-semibold uppercase tracking-[0.2em] text-night/25">
+            <div className="flex aspect-[16/10] w-full items-center justify-center text-label font-semibold uppercase tracking-caps text-night/25">
               Elysium
             </div>
           )}
           {item.tag && (
-            <span className="absolute left-4 top-4 rounded-full bg-night px-3 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-white">
+            <span className="absolute left-4 top-4 rounded-full bg-night px-3 py-1 text-label font-bold uppercase tracking-caps-sm text-white">
               {item.tag}
             </span>
           )}
@@ -36,7 +36,7 @@ export function NewsCard({ item, readMore }: { item: NewsDoc; readMore: string }
 
         <div className="flex flex-1 flex-col p-6">
           {item.date && (
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-mist">
+            <p className="text-label font-semibold uppercase tracking-caps text-mist">
               {formatNewsDate(item.date)}
             </p>
           )}
@@ -46,7 +46,7 @@ export function NewsCard({ item, readMore }: { item: NewsDoc; readMore: string }
           {item.excerpt && (
             <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-night/60">{item.excerpt}</p>
           )}
-          <p className="mt-5 inline-flex items-center gap-2 text-[12px] font-bold uppercase tracking-[0.08em] text-night">
+          <p className="mt-5 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-caps-sm text-night">
             {readMore} <span aria-hidden className="transition-transform duration-300 group-hover:translate-x-1">→</span>
           </p>
         </div>

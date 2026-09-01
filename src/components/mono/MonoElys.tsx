@@ -108,7 +108,7 @@ export function MonoElys({ site }: { site: SiteContent }) {
       data-tone={flatSectionTone(site.theme, "elys")}
       className="border-b border-fg/10 bg-ground text-fg"
     >
-      <div className="mx-auto max-w-[1500px] px-5 pb-20 pt-20 md:px-10 md:pb-28 md:pt-32">
+      <div className="mx-auto max-w-page px-5 pb-20 pt-20 md:px-10 md:pb-28 md:pt-32">
         {/* Гарчгийн блок — тайлбар нь баруун талын багана биш, гарчгийн ЯГ
             доор. Баруун талд байхад bottom-align-аас болж гарчгаас дээш
             гарч, хэсгийн навигацитай мөргөлддөг байв (MonoDeveloper-ийг
@@ -134,7 +134,7 @@ export function MonoElys({ site }: { site: SiteContent }) {
             aria-hidden
             data-reveal="up"
             data-reveal-delay="0.2"
-            className="mt-4 text-[11px] font-bold uppercase tracking-[0.4em] text-fg/40"
+            className="mt-4 text-label font-bold uppercase tracking-caps-xl text-fg/40"
           >
             {acronym}
           </p>
@@ -171,13 +171,13 @@ export function MonoElys({ site }: { site: SiteContent }) {
                 decoding="async"
                 className="h-56 w-full object-cover sm:h-72"
               />
-              <span className="glass glass-chip absolute bottom-4 left-6 flex h-11 w-11 items-center justify-center rounded-full text-[15px] font-extrabold tracking-[0.06em] text-fg">
+              <span className="glass glass-chip absolute bottom-4 left-6 flex h-11 w-11 items-center justify-center rounded-full text-lead font-extrabold tracking-wider text-fg">
                 {letterOf(current.title)}
               </span>
             </div>
 
             <div className="p-6 sm:p-9">
-              <p className="flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.28em] text-fg/50">
+              <p className="flex items-center gap-3 text-label font-semibold uppercase tracking-caps-lg text-fg/50">
                 <span aria-hidden className="h-px w-8 bg-moss" />
                 {elys.kicker}
               </p>
@@ -188,7 +188,7 @@ export function MonoElys({ site }: { site: SiteContent }) {
                 <h3 className="mt-4 text-[clamp(1.4rem,3vw,2rem)] font-extrabold leading-tight tracking-tight text-fg">
                   {current.title}
                 </h3>
-                <p className="mt-4 text-[15px] leading-relaxed text-fg/70">{current.body}</p>
+                <p className="mt-4 text-lead leading-relaxed text-fg/70">{current.body}</p>
               </div>
 
               <div className="mt-7 flex flex-wrap items-center justify-between gap-4 border-t border-fg/10 pt-6">
@@ -196,7 +196,7 @@ export function MonoElys({ site }: { site: SiteContent }) {
                     pop-up дотор давтан хэлнэ. Дэлгэц уншигчид үсэг биш
                     бүтэн нэрийг сонсоно (`aria-label`). */}
                 <div className="flex items-center gap-3">
-                  <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-fg/50">
+                  <span className="text-label font-bold uppercase tracking-caps-sm text-fg/50">
                     {String(open + 1).padStart(2, "0")} /{" "}
                     {String(elys.items.length).padStart(2, "0")}
                   </span>
@@ -209,7 +209,7 @@ export function MonoElys({ site }: { site: SiteContent }) {
                           onClick={() => setOpen(i)}
                           aria-label={item.title}
                           aria-current={i === open ? "true" : undefined}
-                          className={`flex h-11 w-11 items-center justify-center rounded-full text-[13px] font-extrabold tracking-[0.14em] transition-colors duration-300 ${
+                          className={`flex h-11 w-11 items-center justify-center rounded-full text-body font-extrabold tracking-caps transition-colors duration-300 ${
                             /* Идэвхгүй үсэг өмнө нь `text-fg/35` байсан нь
                                цагаан дээр ~1.5:1 — уншигдахгүй. /85 нь ~5:1.
                                "Сонгогдоогүй" гэдгийг дүүргэсэн товч биш
@@ -230,7 +230,7 @@ export function MonoElys({ site }: { site: SiteContent }) {
                   href="#contact"
                   data-cursor-hover
                   onClick={goContact}
-                  className="inline-flex min-h-11 items-center gap-2 rounded-full bg-night px-6 py-3 text-[12px] font-bold uppercase tracking-[0.1em] text-white transition-transform duration-300 hover:-translate-y-0.5"
+                  className="inline-flex min-h-11 items-center gap-2 rounded-full bg-night px-6 py-3 text-xs font-bold uppercase tracking-caps-sm text-white transition-transform duration-300 hover:-translate-y-0.5"
                 >
                   {site.nav.ctaLabel} <span aria-hidden>↗</span>
                 </a>

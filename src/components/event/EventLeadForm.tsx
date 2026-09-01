@@ -59,7 +59,7 @@ export function EventLeadForm({ slug, eventName, form }: Props) {
     return (
       <div className="mono-fade-up rounded-2xl border border-white/20 bg-white/5 p-8 backdrop-blur">
         <p className="text-2xl font-extrabold text-white">{form.successTitle}</p>
-        <p className="mt-3 text-[15px] leading-relaxed text-white/70">{form.successBody}</p>
+        <p className="mt-3 text-lead leading-relaxed text-white/70">{form.successBody}</p>
       </div>
     );
   }

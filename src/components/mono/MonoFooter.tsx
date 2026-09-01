@@ -111,7 +111,7 @@ const menuIcon = (href: string, brochureUrl: string): IconName => {
 /** Багана бүрийн гарчиг — жижиг lime icon-той (харанхуй суурин дээрх акцент). */
 function ColumnTitle({ icon, children }: { icon: IconName; children: React.ReactNode }) {
   return (
-    <p className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-fg/45">
+    <p className="flex items-center gap-2 text-label font-semibold uppercase tracking-caps text-fg/45">
       <FooterIcon name={icon} className="h-3.5 w-3.5 shrink-0 text-lime/80" />
       {children}
     </p>
@@ -142,7 +142,7 @@ export function MonoFooter({
       data-tone={flatSectionTone(site.theme, "footer", "dark")}
       className="bg-night font-gilroy text-fg"
     >
-      <div className="mx-auto max-w-[1500px] px-6 py-16 md:px-10 md:py-20">
+      <div className="mx-auto max-w-page px-6 py-16 md:px-10 md:py-20">
         <div
           className={`grid gap-10 sm:grid-cols-2 ${
             socials.length ? "md:grid-cols-[1.4fr_1fr_1fr_1fr]" : "md:grid-cols-[1.4fr_1fr_1fr]"
@@ -249,7 +249,7 @@ export function MonoFooter({
           )}
         </div>
 
-        <div className="mt-14 flex flex-col gap-3 border-t border-fg/10 pt-6 text-[12px] text-fg/40 md:flex-row md:items-center md:justify-between">
+        <div className="mt-14 flex flex-col gap-3 border-t border-fg/10 pt-6 text-xs text-fg/40 md:flex-row md:items-center md:justify-between">
           <p>© {new Date().getFullYear()} {brand.line} · {developer.name}</p>
           <p>{footer.note}</p>
         </div>

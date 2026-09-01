@@ -155,7 +155,7 @@ function GradientBuilder({
               step={5}
               value={value.angle}
               onChange={(e) => set({ angle: Number(e.target.value) })}
-              className="w-full accent-[#2a5124]"
+              className="w-full accent-ink"
             />
             <div className="mt-1.5 flex flex-wrap gap-1">
               {ANGLE_PRESETS.map((a) => (
@@ -163,9 +163,9 @@ function GradientBuilder({
                   key={a}
                   type="button"
                   onClick={() => set({ angle: a })}
-                  className={`rounded-md border px-2 py-1 text-[11px] font-semibold ${
+                  className={`rounded-md border px-2 py-1 text-label font-semibold ${
                     value.angle === a
-                      ? "border-[#2a5124] bg-[#2a5124]/5 text-[#2a5124]"
+                      ? "border-ink bg-ink/5 text-ink"
                       : "border-neutral-300 text-neutral-600 hover:bg-neutral-50"
                   }`}
                 >
@@ -188,7 +188,7 @@ function GradientBuilder({
       </div>
 
       <div>
-        <span className="mb-1.5 block text-[13px] font-semibold text-neutral-700">
+        <span className="mb-1.5 block text-body font-semibold text-neutral-700">
           Өнгөний зогсоолууд
         </span>
         <div className="space-y-2">
@@ -212,7 +212,7 @@ function GradientBuilder({
                 max={100}
                 value={s.at}
                 onChange={(e) => setStop(i, { at: Number(e.target.value) })}
-                className="min-w-0 flex-1 accent-[#2a5124]"
+                className="min-w-0 flex-1 accent-ink"
               />
               <span className="w-11 shrink-0 text-right text-xs font-semibold tabular-nums text-neutral-500">
                 {s.at}%
@@ -392,7 +392,7 @@ export function BackgroundField({
           />
         )}
         <span
-          className="relative text-[11px] font-semibold uppercase tracking-[0.28em]"
+          className="relative text-label font-semibold uppercase tracking-caps-lg"
           style={{ color: dark ? "rgba(255,255,255,0.62)" : "#8a8d8c" }}
         >
           Жишээ шошго
@@ -412,9 +412,9 @@ export function BackgroundField({
             key={t.id}
             type="button"
             onClick={() => setMode(t.id)}
-            className={`rounded-lg border px-3 py-2 text-[13px] font-semibold transition-colors ${
+            className={`rounded-lg border px-3 py-2 text-body font-semibold transition-colors ${
               mode === t.id
-                ? "border-[#2a5124] bg-[#2a5124]/5 text-[#2a5124]"
+                ? "border-ink bg-ink/5 text-ink"
                 : "border-neutral-300 text-neutral-600 hover:bg-neutral-50"
             }`}
           >
@@ -424,14 +424,14 @@ export function BackgroundField({
       </div>
 
       {mode === "default" && (
-        <p className="rounded-lg bg-neutral-50 px-3.5 py-2.5 text-[12px] leading-relaxed text-neutral-500">
+        <p className="rounded-lg bg-neutral-50 px-3.5 py-2.5 text-xs leading-relaxed text-neutral-500">
           Энэ хэсэг кодод бичсэн өнгөөрөө үлдэнэ — дизайны тохиргоо түүнд хүрэхгүй.
         </p>
       )}
 
       {mode === "color" && (
         <div>
-          <span className="mb-1.5 block text-[13px] font-semibold text-neutral-700">
+          <span className="mb-1.5 block text-body font-semibold text-neutral-700">
             Палитраас
           </span>
           <div className="flex flex-wrap gap-1.5">
@@ -443,9 +443,9 @@ export function BackgroundField({
                   key={s.token}
                   type="button"
                   onClick={() => set({ kind: "token", token: s.token })}
-                  className={`flex items-center gap-2 rounded-lg border px-2.5 py-1.5 text-[12px] font-semibold transition-colors ${
+                  className={`flex items-center gap-2 rounded-lg border px-2.5 py-1.5 text-xs font-semibold transition-colors ${
                     on
-                      ? "border-[#2a5124] bg-[#2a5124]/5 text-[#2a5124]"
+                      ? "border-ink bg-ink/5 text-ink"
                       : "border-neutral-300 text-neutral-600 hover:bg-neutral-50"
                   }`}
                 >
@@ -463,7 +463,7 @@ export function BackgroundField({
               );
             })}
           </div>
-          <p className="mt-1.5 text-[11px] leading-relaxed text-neutral-400">
+          <p className="mt-1.5 text-label leading-relaxed text-neutral-400">
             Палитраас сонгосон өнгө нь палитраа <b>дагаж</b> өөрчлөгдөнө. Доорх дурын өнгө
             бол палитраас хамааралгүй тогтмол утга.
           </p>
@@ -546,7 +546,7 @@ export function BackgroundField({
               max={24}
               value={value.image.blur}
               onChange={(e) => set({ image: { ...value.image, blur: Number(e.target.value) } })}
-              className="w-full accent-[#2a5124]"
+              className="w-full accent-ink"
             />
           </Field>
         </div>
@@ -557,10 +557,10 @@ export function BackgroundField({
           хөшиг огт үүсэхгүй» гэсэн тайлбар худал болно — тэнд 0% нь
           «өгөгдмөл 55%» гэсэн үг). */}
       <div className="rounded-xl border border-neutral-200 p-4">
-        <p className="mb-1 text-[13px] font-bold text-neutral-800">
+        <p className="mb-1 text-body font-bold text-neutral-800">
           {film ? "Кадрын дээрх өнгөт хальс" : "Хөшиг — дэвсгэр дээр давхарлах"}
         </p>
-        <p className="mb-3 text-[12px] leading-relaxed text-neutral-500">
+        <p className="mb-3 text-xs leading-relaxed text-neutral-500">
           {film
             ? "Бичлэгийг бараантуулж, дээрх бичгийг уншигдахуйц болгоно."
             : "Зураг эсвэл градиентийг бараантуулж, бичгийг уншигдахуйц болгоно."}
@@ -590,7 +590,7 @@ export function BackgroundField({
               max={100}
               value={value.overlay.opacity}
               onChange={(e) => set({ overlay: { ...value.overlay, opacity: Number(e.target.value) } })}
-              className="w-full accent-[#2a5124]"
+              className="w-full accent-ink"
             />
           </Field>
         </div>
@@ -616,7 +616,7 @@ export function BackgroundField({
           </Select>
         </Field>
       ) : (
-        <p className="text-[12px] leading-relaxed text-neutral-400">
+        <p className="text-xs leading-relaxed text-neutral-400">
           Бичгийн өнгө <b>автоматаар</b> тодорхойлогдоно — дэвсгэрийг хартай болгоход бичиг
           цайрч, цайвар болгоход бараантана.
         </p>
@@ -689,7 +689,7 @@ function stackOf(list: FontOption[], id: string): string {
 
 function CyrillicBadge() {
   return (
-    <span className="inline-flex items-center rounded-full bg-green-50 px-2 py-0.5 text-[10px] font-bold tracking-[0.04em] text-green-700">
+    <span className="inline-flex items-center rounded-full bg-green-50 px-2 py-0.5 text-2xs font-bold tracking-wider text-green-700">
       КИРИЛЛ ✓
     </span>
   );
@@ -716,25 +716,25 @@ function FontList({
             type="button"
             onClick={() => onChange(f.id)}
             className={`flex items-center gap-3.5 rounded-xl border px-4 py-3 text-left transition-colors ${
-              on ? "border-2 border-[#2a5124] bg-[#2a5124]/5 px-[15px] py-[11px]" : "border-neutral-300 bg-white hover:bg-neutral-50"
+              on ? "border-2 border-ink bg-ink/5 px-[15px] py-[11px]" : "border-neutral-300 bg-white hover:bg-neutral-50"
             }`}
           >
             <span
               aria-hidden
               className={`h-4 w-4 shrink-0 rounded-full ${
-                on ? "border-[5px] border-[#2a5124]" : "border border-neutral-300"
+                on ? "border-[5px] border-ink" : "border border-neutral-300"
               }`}
             />
             <span className="min-w-0 flex-1">
               <span className="flex flex-wrap items-center gap-2">
-                <span className="text-[14px] font-bold text-neutral-900">{f.label}</span>
+                <span className="text-sm font-bold text-neutral-900">{f.label}</span>
                 <CyrillicBadge />
               </span>
-              <span className="mt-0.5 block text-[12px] text-neutral-500">{f.note}</span>
+              <span className="mt-0.5 block text-xs text-neutral-500">{f.note}</span>
             </span>
             <span className="shrink-0 text-right leading-[1.15]" style={{ fontFamily: f.stack }}>
-              <span className="block text-[21px] text-neutral-900">Elysium</span>
-              <span className="block text-[15px] text-neutral-500">Орон сууц</span>
+              <span className="block text-xl text-neutral-900">Elysium</span>
+              <span className="block text-lead text-neutral-500">Орон сууц</span>
             </span>
           </button>
         );
@@ -759,9 +759,9 @@ function Segmented({
           key={o}
           type="button"
           onClick={() => onChange(o)}
-          className={`rounded-lg border px-3.5 py-2 text-[13px] font-semibold transition-colors ${
+          className={`rounded-lg border px-3.5 py-2 text-body font-semibold transition-colors ${
             o === value
-              ? "border-[#2a5124] bg-[#2a5124]/5 text-[#2a5124]"
+              ? "border-ink bg-ink/5 text-ink"
               : "border-neutral-300 text-neutral-500 hover:bg-neutral-50"
           }`}
         >
@@ -778,9 +778,9 @@ function TypePreview({ t }: { t: TypeContent }) {
   const body = stackOf(BODY_FONTS, t.bodyFont);
   const custom = t.mode === "custom";
   return (
-    <div className="overflow-hidden rounded-2xl bg-[#151717] px-5 py-6">
+    <div className="overflow-hidden rounded-2xl bg-night px-5 py-6">
       <p
-        className="text-[10px] font-medium uppercase tracking-[0.34em] text-white/55"
+        className="text-2xs font-medium uppercase tracking-caps-xl text-white/55"
         style={{ fontFamily: custom ? body : undefined }}
       >
         Бизнес зэрэглэлийн орон сууц
@@ -809,7 +809,7 @@ function TypePreview({ t }: { t: TypeContent }) {
         шийдэлтэй орон сууц.
       </p>
       <span
-        className="mt-5 inline-flex items-center rounded-full bg-white px-5 py-2.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#151717]"
+        className="mt-5 inline-flex items-center rounded-full bg-white px-5 py-2.5 text-label font-semibold uppercase tracking-caps text-night"
         style={{ fontFamily: custom ? body : undefined }}
       >
         Уулзалт товлох
@@ -850,7 +850,7 @@ export function TypePanel({
       </Card>
 
       <Card title="Бэлэн хослол">
-        <p className="mb-3.5 text-[13px] leading-relaxed text-neutral-500">
+        <p className="mb-3.5 text-body leading-relaxed text-neutral-500">
           Нэг товчоор фонт, жин, үсэг хоорондын зайг хамт сольж, дараа нь доор гараар засна.
         </p>
         <div className="flex flex-wrap gap-2.5">
@@ -864,11 +864,11 @@ export function TypePanel({
                 type="button"
                 onClick={() => onChange({ ...p.value })}
                 className={`flex flex-col gap-2 rounded-xl border px-4 py-3 text-left transition-colors ${
-                  on ? "border-2 border-[#2a5124] bg-[#2a5124]/5 px-[15px] py-[11px]" : "border-neutral-300 bg-white hover:bg-neutral-50"
+                  on ? "border-2 border-ink bg-ink/5 px-[15px] py-[11px]" : "border-neutral-300 bg-white hover:bg-neutral-50"
                 }`}
               >
                 <span
-                  className="text-[24px] leading-none text-neutral-900"
+                  className="text-2xl leading-none text-neutral-900"
                   style={{
                     fontFamily: d,
                     fontWeight: p.value.headingWeight,
@@ -878,10 +878,10 @@ export function TypePanel({
                 >
                   Elysium
                 </span>
-                <span className="text-[12px] text-neutral-500" style={{ fontFamily: b }}>
+                <span className="text-xs text-neutral-500" style={{ fontFamily: b }}>
                   Орон сууц
                 </span>
-                <span className={`text-[12px] font-bold ${on ? "text-[#2a5124]" : "text-neutral-700"}`}>
+                <span className={`text-xs font-bold ${on ? "text-ink" : "text-neutral-700"}`}>
                   {p.label}
                 </span>
               </button>
@@ -926,7 +926,7 @@ export function TypePanel({
               step={0.005}
               value={value.headingTracking}
               onChange={(e) => set({ headingTracking: Number(e.target.value) })}
-              className="w-full accent-[#2a5124]"
+              className="w-full accent-ink"
             />
           </Field>
           <Field label={`Мөрийн өндөр — ${value.headingLeading}`}>
@@ -937,7 +937,7 @@ export function TypePanel({
               step={0.01}
               value={value.headingLeading}
               onChange={(e) => set({ headingLeading: Number(e.target.value) })}
-              className="w-full accent-[#2a5124]"
+              className="w-full accent-ink"
             />
           </Field>
           <Field label="Хэлбэр">
@@ -964,7 +964,7 @@ export function TypePanel({
             step={0.01}
             value={value.scale}
             onChange={(e) => set({ scale: Number(e.target.value) })}
-            className="w-full accent-[#2a5124]"
+            className="w-full accent-ink"
           />
         </Field>
         <div className="mt-4 flex flex-wrap gap-4 border-t border-neutral-200 pt-3.5 text-xs text-neutral-500">
@@ -1024,15 +1024,15 @@ function GlassPreview({ g }: { g: GlassContent }) {
       <div className="h-[128px] w-full bg-[linear-gradient(115deg,#2a5124_0%,#b4d656_28%,#f4f4f1_52%,#151717_78%,#3f6a33_100%)]" />
       <div className="absolute inset-0 flex items-center justify-center gap-3">
         <span
-          className={`rounded-full px-4 py-2 text-[12px] font-bold uppercase tracking-[0.1em] text-neutral-900 ${
+          className={`rounded-full px-4 py-2 text-xs font-bold uppercase tracking-caps-sm text-neutral-900 ${
             off ? "bg-white/96" : "glass glass-chip"
           }`}
         >
           Цайвар шил
         </span>
         <span
-          className={`rounded-full px-4 py-2 text-[12px] font-bold uppercase tracking-[0.1em] text-white ${
-            off ? "bg-[#151717]/[0.86]" : "glass-dark glass-chip"
+          className={`rounded-full px-4 py-2 text-xs font-bold uppercase tracking-caps-sm text-white ${
+            off ? "bg-night/[0.86]" : "glass-dark glass-chip"
           }`}
         >
           Хар шил
@@ -1059,7 +1059,7 @@ export function GlassPanel({
       title="Шилэн гадаргуу"
       right={<span className="text-xs text-neutral-400">Толгой, тэмдэг, товч, pop-up</span>}
     >
-      <p className="mb-3.5 text-[13px] leading-relaxed text-neutral-500">
+      <p className="mb-3.5 text-body leading-relaxed text-neutral-500">
         Зураг, кадрын дээр суудаг гадаргуунуудын тунгалаг байдал. Ханалт нь хамгийн чухал: зөвхөн
         бүдгэрүүлэлт бол манан, ханалт нэмэхэд шил болно.
       </p>
@@ -1072,9 +1072,9 @@ export function GlassPanel({
             key={p.id}
             type="button"
             onClick={() => onChange({ ...p.value })}
-            className={`rounded-lg border px-3.5 py-2 text-[13px] font-semibold transition-colors ${
+            className={`rounded-lg border px-3.5 py-2 text-body font-semibold transition-colors ${
               active === p.id
-                ? "border-[#2a5124] bg-[#2a5124]/5 text-[#2a5124]"
+                ? "border-ink bg-ink/5 text-ink"
                 : "border-neutral-300 text-neutral-500 hover:bg-neutral-50"
             }`}
           >
@@ -1093,7 +1093,7 @@ export function GlassPanel({
               step={1}
               value={value.blur}
               onChange={(e) => onChange({ ...value, mode: "custom", blur: Number(e.target.value) })}
-              className="w-full accent-[#2a5124]"
+              className="w-full accent-ink"
             />
           </Field>
           <Field label={`Ханалт — ${value.saturation}%`} hint="100% = өнгө нэмэхгүй (манан). 165% = шил.">
@@ -1106,7 +1106,7 @@ export function GlassPanel({
               onChange={(e) =>
                 onChange({ ...value, mode: "custom", saturation: Number(e.target.value) })
               }
-              className="w-full accent-[#2a5124]"
+              className="w-full accent-ink"
             />
           </Field>
         </div>
@@ -1235,17 +1235,17 @@ function PaletteRow({
       />
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
-          <span className="text-[14px] font-bold text-neutral-900">{role.label}</span>
+          <span className="text-sm font-bold text-neutral-900">{role.label}</span>
           {role.contrast && (
             <ContrastNote fg={palette[role.contrast.fg]} bg={palette[role.contrast.bg]} />
           )}
         </div>
-        <p className="mt-0.5 text-[12px] leading-relaxed text-neutral-500">{role.where}</p>
+        <p className="mt-0.5 text-xs leading-relaxed text-neutral-500">{role.where}</p>
         <TextInput
           value={value}
           placeholder="#f4f4f1"
           onChange={(e) => onChange(e.target.value)}
-          className="mt-2 max-w-[150px] py-1.5 text-[13px]"
+          className="mt-2 max-w-[150px] py-1.5 text-body"
         />
       </div>
     </div>
@@ -1327,18 +1327,18 @@ export function DesignPanel({
                 onClick={() => setTab(t.id)}
                 className={`rounded-lg border px-2.5 py-2 text-left transition-colors ${
                   tab === t.id
-                    ? "border-[#2a5124] bg-[#2a5124]/5"
+                    ? "border-ink bg-ink/5"
                     : "border-neutral-200 hover:bg-neutral-50"
                 }`}
               >
                 <span
-                  className={`block text-[13px] font-bold ${
-                    tab === t.id ? "text-[#2a5124]" : "text-neutral-700"
+                  className={`block text-body font-bold ${
+                    tab === t.id ? "text-ink" : "text-neutral-700"
                   }`}
                 >
                   {t.label}
                 </span>
-                <span className="mt-0.5 block text-[11px] leading-tight text-neutral-400">
+                <span className="mt-0.5 block text-label leading-tight text-neutral-400">
                   {t.hint}
                 </span>
               </button>
@@ -1346,7 +1346,7 @@ export function DesignPanel({
           </div>
 
           <div className="mt-2.5 flex flex-wrap items-center gap-2 border-t border-neutral-200 pt-2.5">
-            <span className="text-[12px] text-neutral-500">
+            <span className="text-xs text-neutral-500">
               {diff.length ? (
                 <>
                   Өгөгдмөлөөс өөрчлөгдсөн: <b className="text-neutral-800">{diff.join(" · ")}</b>
@@ -1359,7 +1359,7 @@ export function DesignPanel({
               <Button
                 type="button"
                 variant="ghost"
-                className="ml-auto px-2.5 py-1 text-[12px]"
+                className="ml-auto px-2.5 py-1 text-xs"
                 onClick={() => {
                   if (confirm("Дизайны БҮХ тохиргоог өгөгдмөл рүү буцаах уу?")) {
                     onChange(structuredClone(DEFAULT_THEME));
@@ -1379,7 +1379,7 @@ export function DesignPanel({
         {tab === "color" && (
           <>
             <Card title="Бэлэн палитр">
-              <p className="mb-3 text-[13px] leading-relaxed text-neutral-500">
+              <p className="mb-3 text-body leading-relaxed text-neutral-500">
                 Нэг товчоор бүх өнгийг сольж, дараа нь доор гараар засна.
               </p>
               <div className="flex flex-wrap gap-2">
@@ -1390,9 +1390,9 @@ export function DesignPanel({
                       key={preset.id}
                       type="button"
                       onClick={() => onChange({ ...theme, palette: preset.palette })}
-                      className={`flex items-center gap-2 rounded-xl border px-3 py-2 text-[13px] font-semibold transition-colors ${
+                      className={`flex items-center gap-2 rounded-xl border px-3 py-2 text-body font-semibold transition-colors ${
                         on
-                          ? "border-[#2a5124] bg-[#2a5124]/5 text-[#2a5124]"
+                          ? "border-ink bg-ink/5 text-ink"
                           : "border-neutral-300 text-neutral-700 hover:bg-neutral-50"
                       }`}
                     >
@@ -1443,7 +1443,7 @@ export function DesignPanel({
 
         {tab === "sections" && (
           <Card title="Хэсэг тус бүрийн дэвсгэр">
-            <p className="mb-4 text-[13px] leading-relaxed text-neutral-500">
+            <p className="mb-4 text-body leading-relaxed text-neutral-500">
               Хэсгийг дарахад баруун талын preview тийш нь гүйж, хүрээгээр тэмдэглэнэ.
               «Өгөгдмөл» үед тухайн хэсэг кодод бичсэн өнгөөрөө үлдэнэ.
             </p>
@@ -1458,7 +1458,7 @@ export function DesignPanel({
                       type="button"
                       onClick={() => setOpen(isOpen ? null : s.id)}
                       className={`flex w-full items-center gap-3 px-4 py-3 text-left transition-colors ${
-                        isOpen ? "bg-[#2a5124]/5" : "bg-neutral-50 hover:bg-neutral-100"
+                        isOpen ? "bg-ink/5" : "bg-neutral-50 hover:bg-neutral-100"
                       }`}
                     >
                       <span
@@ -1467,7 +1467,7 @@ export function DesignPanel({
                         className="h-8 w-12 shrink-0 rounded-md border border-neutral-300 bg-white"
                       />
                       <span className="min-w-0 flex-1">
-                        <span className="flex flex-wrap items-center gap-1.5 text-[14px] font-bold text-neutral-900">
+                        <span className="flex flex-wrap items-center gap-1.5 text-sm font-bold text-neutral-900">
                           {s.label}
                           {changed(bg) && (
                             <span
@@ -1477,12 +1477,12 @@ export function DesignPanel({
                             />
                           )}
                           {isFilm && (
-                            <span className="rounded-full bg-neutral-200 px-1.5 py-0.5 text-[10px] font-bold tracking-[0.02em] text-neutral-600">
+                            <span className="rounded-full bg-neutral-200 px-1.5 py-0.5 text-2xs font-bold tracking-wide text-neutral-600">
                               БИЧЛЭГ ДЭЭР
                             </span>
                           )}
                         </span>
-                        {s.hint && <span className="block text-[11px] text-neutral-400">{s.hint}</span>}
+                        {s.hint && <span className="block text-label text-neutral-400">{s.hint}</span>}
                       </span>
                       <span aria-hidden className="shrink-0 text-neutral-400">
                         {isOpen ? "▾" : "▸"}
@@ -1491,7 +1491,7 @@ export function DesignPanel({
                     {isOpen && (
                       <div className="border-t border-neutral-200 p-4">
                         {isFilm && (
-                          <p className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-3.5 py-2.5 text-[12px] leading-relaxed text-amber-800">
+                          <p className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-3.5 py-2.5 text-xs leading-relaxed text-amber-800">
                             Энэ хэсгийг бичлэг/кадар бүтэн бүрхдэг. Сонгосон өнгө, градиент
                             нь <b>кадрын ДЭЭР</b> буух өнгөт хальс болж буунa (өгөгдмөл тун
                             55%). Тунг «Хүч» гүйлгүүрээр тохируулна.
@@ -1518,7 +1518,7 @@ export function DesignPanel({
             <GlassPanel value={theme.glass} onChange={(glass) => onChange({ ...theme, glass })} />
 
             <Card title="Хуудасны суурь өнгө">
-              <p className="mb-4 text-[13px] leading-relaxed text-neutral-500">
+              <p className="mb-4 text-body leading-relaxed text-neutral-500">
                 Хуудсыг эхлэл эсвэл төгсгөлөөс нь цааш чангаахад (bounce) хормын зуур
                 харагддаг өнгө. Ихэвчлэн хуудасны дэвсгэртэй ижил байлгана.
               </p>

@@ -72,7 +72,7 @@ export function MonoManagers({ site }: { site: SiteContent }) {
       {/* Хэмжээ нь доорх FAQ-тэй ижил 1100px — 1500px дээр мөрийн нэр,
           дугаар хоёрын хооронд эзгүй талбай үлддэг. Ингэснээр хуудас
           #contact (1500) → #managers → #faq (1100) гэж зөөлөн нарийсна. */}
-      <div className="mx-auto max-w-[1100px] px-6 md:px-10">
+      <div className="mx-auto max-w-read px-6 md:px-10">
         {/* тайлбар нь гарчгийн доор — баруун талын багана нь гарчгаас дээш
             гарч, хэсгийн навигацитай мөргөлддөг байв */}
         <div className="max-w-2xl">
@@ -85,7 +85,7 @@ export function MonoManagers({ site }: { site: SiteContent }) {
           </p>
           {showHours && (
             <div data-reveal="up" data-reveal-delay="0.2" className="mt-5 border-t border-fg/10 pt-4">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-fg/45">
+              <p className="text-label font-semibold uppercase tracking-caps text-fg/45">
                 {managers.hoursLabel}
               </p>
               <p className="mt-1 text-sm font-bold text-fg">{managers.hours}</p>
@@ -129,8 +129,8 @@ export function MonoManagers({ site }: { site: SiteContent }) {
               </span>
 
               <div className="min-w-0">
-                <h3 className="text-lg font-extrabold tracking-tight text-fg lg:text-[22px]">{m.name}</h3>
-                <p className="mt-1 text-[11px] font-semibold uppercase leading-snug tracking-[0.14em] text-fg/50">
+                <h3 className="text-lg font-extrabold tracking-tight text-fg lg:text-h6">{m.name}</h3>
+                <p className="mt-1 text-label font-semibold uppercase leading-snug tracking-caps text-fg/50">
                   {m.role}
                 </p>
               </div>
@@ -145,7 +145,7 @@ export function MonoManagers({ site }: { site: SiteContent }) {
                   href={`tel:+${digits(m.phone)}`}
                   aria-label={`${m.name} — ${managers.callLabel} ${m.phone}`}
                   data-cursor-hover
-                  className="inline-flex min-h-11 items-center gap-2.5 whitespace-nowrap text-xl font-extrabold tracking-tight text-fg transition-opacity duration-300 hover:opacity-60 lg:text-[22px]"
+                  className="inline-flex min-h-11 items-center gap-2.5 whitespace-nowrap text-xl font-extrabold tracking-tight text-fg transition-opacity duration-300 hover:opacity-60 lg:text-h6"
                 >
                   <PhoneIcon />
                   {m.phone}
@@ -154,7 +154,7 @@ export function MonoManagers({ site }: { site: SiteContent }) {
                   href={`viber://chat?number=%2B${digits(m.phone)}`}
                   aria-label={`${m.name} — ${managers.viberLabel}`}
                   data-cursor-hover
-                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-fg/25 px-5 text-[12px] font-bold uppercase tracking-[0.08em] text-fg transition-colors duration-300 hover:bg-night hover:text-white lg:w-full lg:px-0"
+                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-fg/25 px-5 text-xs font-bold uppercase tracking-caps-sm text-fg transition-colors duration-300 hover:bg-night hover:text-white lg:w-full lg:px-0"
                 >
                   <ChatIcon />
                   {managers.viberLabel}

@@ -249,7 +249,7 @@ export function PortraitShowcase({
         <div className="flex flex-col gap-6 sm:gap-8">
           <p
             key={slide.id}
-            className="ui-fade-in max-w-[46ch] text-[16px] font-medium leading-relaxed text-white/80 sm:text-[19px] sm:leading-[1.6]"
+            className="ui-fade-in max-w-[46ch] text-base font-medium leading-relaxed text-white/80 sm:text-lg sm:leading-[1.6]"
           >
             {slide.description}
           </p>
@@ -303,7 +303,7 @@ export function PortraitShowcase({
               «дэлгэрэнгүй»), баруунд байрлал ба CTA. Өмнө нь дөрвөн зүйл
               `justify-between`-ээр тарж, зай нь санамсаргүй харагддаг
               байв. Слайдын нэр энд БАЙХГҮЙ — тэр нь дээр гарчиг болсон. */}
-          <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-4 border-t border-white/20 pt-5 text-[13px] font-medium sm:text-sm">
+          <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-4 border-t border-white/20 pt-5 text-body font-medium sm:text-sm">
             <span className="flex items-center gap-4">
               {slide.logo && (
                 <span
@@ -327,7 +327,7 @@ export function PortraitShowcase({
                   onClick={() => onSlideOpen(index)}
                   aria-haspopup="dialog"
                   aria-label={`${slide.name} — ${openLabel}`}
-                  className="group inline-flex min-h-11 items-center text-[11px] font-bold uppercase tracking-[0.12em] text-white/70 transition-colors duration-300 hover:text-white"
+                  className="group inline-flex min-h-11 items-center text-label font-bold uppercase tracking-caps-sm text-white/70 transition-colors duration-300 hover:text-white"
                 >
                   {openLabel}
                   <span aria-hidden className="ml-1.5 inline-block transition-transform duration-300 group-hover:translate-x-0.5">

@@ -80,7 +80,7 @@ export function LeadsTable({ events }: { events: EventDoc[] }) {
           <select
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
-            className="rounded-lg border border-neutral-300 bg-white px-3 py-2.5 text-sm font-medium text-neutral-700 outline-none focus:border-[#2a5124]"
+            className="rounded-lg border border-neutral-300 bg-white px-3 py-2.5 text-sm font-medium text-neutral-700 outline-none focus:border-ink"
           >
             <option value="all">Бүх эх сурвалж</option>
             <option value="site">Үндсэн сайт</option>
@@ -112,7 +112,7 @@ export function LeadsTable({ events }: { events: EventDoc[] }) {
       {shown.length > 0 && (
         <div className="overflow-x-auto rounded-2xl border border-neutral-200 bg-white shadow-sm">
           <table className="w-full min-w-[720px] text-left text-sm">
-            <thead className="border-b border-neutral-200 bg-neutral-50 text-[12px] uppercase tracking-wide text-neutral-500">
+            <thead className="border-b border-neutral-200 bg-neutral-50 text-xs uppercase tracking-wide text-neutral-500">
               <tr>
                 <th className="px-4 py-3 font-semibold">Огноо</th>
                 <th className="px-4 py-3 font-semibold">Нэр</th>
@@ -128,7 +128,7 @@ export function LeadsTable({ events }: { events: EventDoc[] }) {
                   <td className="px-4 py-3 font-semibold text-neutral-900">{l.name}</td>
                   <td className="whitespace-nowrap px-4 py-3">
                     {l.phone ? (
-                      <a href={`tel:${l.phone}`} className="font-medium text-[#2a5124] hover:underline">{l.phone}</a>
+                      <a href={`tel:${l.phone}`} className="font-medium text-ink hover:underline">{l.phone}</a>
                     ) : (
                       <span className="text-neutral-300">—</span>
                     )}

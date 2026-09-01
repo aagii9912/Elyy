@@ -53,7 +53,7 @@ export function MonoContact({ site }: { site: SiteContent }) {
       data-tone={flatSectionTone(site.theme, "contact")}
       className="border-b border-fg/10 bg-ground py-24 font-gilroy text-fg md:py-28"
     >
-      <div className="mx-auto max-w-[1500px] px-6 md:px-10">
+      <div className="mx-auto max-w-page px-6 md:px-10">
         <div className="grid gap-12 lg:grid-cols-2 lg:gap-20">
           <div>
             <MonoKicker reveal>{contact.kicker}</MonoKicker>
@@ -64,7 +64,7 @@ export function MonoContact({ site }: { site: SiteContent }) {
 
             <dl className="mt-10 space-y-6 border-t border-fg/10 pt-8">
               <div data-reveal="up">
-                <dt className="text-[11px] font-semibold uppercase tracking-[0.18em] text-fg/45">{contact.labels.phone}</dt>
+                <dt className="text-label font-semibold uppercase tracking-caps text-fg/45">{contact.labels.phone}</dt>
                 <dd className="mt-1.5">
                   <a
                     href={`tel:+976${contact.phone.replace(/[^0-9]/g, "")}`}
@@ -76,15 +76,15 @@ export function MonoContact({ site }: { site: SiteContent }) {
                 </dd>
               </div>
               <div data-reveal="up">
-                <dt className="text-[11px] font-semibold uppercase tracking-[0.18em] text-fg/45">{contact.labels.hours}</dt>
+                <dt className="text-label font-semibold uppercase tracking-caps text-fg/45">{contact.labels.hours}</dt>
                 <dd className="mt-1.5 text-lg font-semibold">{contact.hours}</dd>
               </div>
               <div data-reveal="up">
-                <dt className="text-[11px] font-semibold uppercase tracking-[0.18em] text-fg/45">{contact.labels.office}</dt>
+                <dt className="text-label font-semibold uppercase tracking-caps text-fg/45">{contact.labels.office}</dt>
                 <dd className="mt-1.5 max-w-sm text-lg font-semibold leading-snug text-fg/85">{contact.location}</dd>
               </div>
               <div data-reveal="up">
-                <dt className="text-[11px] font-semibold uppercase tracking-[0.18em] text-fg/45">{contact.labels.email}</dt>
+                <dt className="text-label font-semibold uppercase tracking-caps text-fg/45">{contact.labels.email}</dt>
                 <dd className="mt-1.5">
                   <a
                     href={`mailto:${brand.email}`}
@@ -135,7 +135,7 @@ export function MonoContact({ site }: { site: SiteContent }) {
                   className="border-b border-fg/20 bg-transparent pb-3 pt-2 text-lg font-semibold text-fg placeholder:text-fg/35 focus:border-fg focus:outline-none"
                 />
                 <label className="block">
-                  <span className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.18em] text-fg/45">
+                  <span className="mb-2 block text-label font-semibold uppercase tracking-caps text-fg/45">
                     {f.dateLabel}
                   </span>
                   <input

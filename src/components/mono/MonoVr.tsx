@@ -58,21 +58,21 @@ export function MonoVr({ site }: { site: SiteContent }) {
               <path d="M8 5.5v13l11-6.5-11-6.5Z" />
             </svg>
           ) : (
-            <span className="relative text-[15px] font-extrabold tracking-tight">360°</span>
+            <span className="relative text-lead font-extrabold tracking-tight">360°</span>
           )}
         </span>
-        <span className="text-[13px] font-bold uppercase tracking-[0.22em] text-white drop-shadow-[0_1px_12px_rgba(0,0,0,0.6)]">
+        <span className="text-body font-bold uppercase tracking-caps text-white drop-shadow-[0_1px_12px_rgba(0,0,0,0.6)]">
           {ready ? vr.ctaLabel : vr.soonLabel}
         </span>
         {!ready && (
-          <span className="inline-flex min-h-11 items-center rounded-full bg-white px-6 py-3 text-[12px] font-bold uppercase tracking-[0.1em] text-fg transition-transform duration-300 group-hover:-translate-y-0.5">
+          <span className="inline-flex min-h-11 items-center rounded-full bg-white px-6 py-3 text-xs font-bold uppercase tracking-caps-sm text-fg transition-transform duration-300 group-hover:-translate-y-0.5">
             {vr.soonCta}
           </span>
         )}
       </span>
 
       {ready && vr.note && (
-        <span className="absolute bottom-4 left-4 right-4 text-[11px] font-medium text-white/70 sm:left-6 sm:right-auto">
+        <span className="absolute bottom-4 left-4 right-4 text-label font-medium text-white/70 sm:left-6 sm:right-auto">
           {vr.note}
         </span>
       )}
@@ -86,7 +86,7 @@ export function MonoVr({ site }: { site: SiteContent }) {
       data-tone={flatSectionTone(site.theme, "vr")}
       className="border-b border-fg/10 bg-ground py-24 md:py-28"
     >
-      <div className="mx-auto max-w-[1500px] px-6 md:px-10">
+      <div className="mx-auto max-w-page px-6 md:px-10">
         {/* тайлбар нь гарчгийн доор — баруун талын багана нь гарчгаас дээш
             гарч, хэсгийн навигацитай мөргөлддөг байв */}
         <div className="max-w-2xl">

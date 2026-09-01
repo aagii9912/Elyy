@@ -10,7 +10,7 @@ import { EventLeadForm } from "./EventLeadForm";
 
 function Kicker({ children }: { children: React.ReactNode }) {
   return (
-    <p className="flex items-center gap-3 text-[11px] font-bold uppercase tracking-[0.22em] text-[var(--accent)]">
+    <p className="flex items-center gap-3 text-label font-bold uppercase tracking-caps text-[var(--accent)]">
       <span aria-hidden className="h-px w-8 bg-[var(--accent)]" />
       {children}
     </p>
@@ -35,7 +35,7 @@ function SectionView({ s }: { s: Section }) {
               )}
             </div>
             <div className="md:col-span-7 md:col-start-6">
-              <p className="whitespace-pre-line text-[17px] leading-relaxed text-night/70">{s.body}</p>
+              <p className="whitespace-pre-line text-sub leading-relaxed text-night/70">{s.body}</p>
             </div>
           </div>
         </section>
@@ -50,7 +50,7 @@ function SectionView({ s }: { s: Section }) {
                 <div className="text-[clamp(2.2rem,5vw,3.6rem)] font-extrabold leading-none tracking-tight text-[var(--accent)]">
                   {it.value}
                 </div>
-                <div className="mt-2 text-[13px] font-semibold uppercase tracking-wide text-white/55">
+                <div className="mt-2 text-body font-semibold uppercase tracking-wide text-white/55">
                   {it.label}
                 </div>
               </div>
@@ -72,7 +72,7 @@ function SectionView({ s }: { s: Section }) {
                   </div>
                   <div className="md:col-span-10">
                     <div className="text-xl font-bold">{it.title}</div>
-                    {it.desc && <div className="mt-1 text-[15px] text-night/60">{it.desc}</div>}
+                    {it.desc && <div className="mt-1 text-lead text-night/60">{it.desc}</div>}
                   </div>
                 </div>
               ))}
@@ -124,11 +124,11 @@ function SectionView({ s }: { s: Section }) {
                   <div className="p-6">
                     <div className="text-lg font-extrabold">{it.title}</div>
                     {it.subtitle && (
-                      <div className="mt-0.5 text-[13px] font-semibold uppercase tracking-wide text-[var(--accent)]">
+                      <div className="mt-0.5 text-body font-semibold uppercase tracking-wide text-[var(--accent)]">
                         {it.subtitle}
                       </div>
                     )}
-                    {it.desc && <p className="mt-3 text-[15px] leading-relaxed text-night/65">{it.desc}</p>}
+                    {it.desc && <p className="mt-3 text-lead leading-relaxed text-night/65">{it.desc}</p>}
                   </div>
                 </div>
               ))}
@@ -144,7 +144,7 @@ function SectionView({ s }: { s: Section }) {
             <h2 className="mx-auto max-w-3xl text-[clamp(2rem,4.6vw,3.6rem)] font-extrabold leading-[1.03] tracking-tight">
               {s.heading}
             </h2>
-            {s.body && <p className="mx-auto mt-5 max-w-xl text-[17px] leading-relaxed text-white/65">{s.body}</p>}
+            {s.body && <p className="mx-auto mt-5 max-w-xl text-sub leading-relaxed text-white/65">{s.body}</p>}
             <a
               href="#register"
               data-cursor-hover
@@ -195,7 +195,7 @@ export function EventLanding({ event }: { event: EventDoc }) {
           <a
             href="#register"
             data-cursor-hover
-            className="rounded-full bg-[var(--accent)] px-5 py-2.5 text-[13px] font-extrabold uppercase tracking-wide text-night transition-transform hover:-translate-y-0.5"
+            className="rounded-full bg-[var(--accent)] px-5 py-2.5 text-body font-extrabold uppercase tracking-wide text-night transition-transform hover:-translate-y-0.5"
           >
             {c.hero.ctaLabel}
           </a>
@@ -253,7 +253,7 @@ export function EventLanding({ event }: { event: EventDoc }) {
             <dl className="mt-10 space-y-6 border-t border-white/10 pt-8">
               {c.contact.phone && (
                 <div>
-                  <dt className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/45">Утас</dt>
+                  <dt className="text-label font-semibold uppercase tracking-caps text-white/45">Утас</dt>
                   <dd className="mt-1.5">
                     <a href={`tel:+976${c.contact.phone.replace(/[^0-9]/g, "")}`} data-cursor-hover className="text-2xl font-extrabold hover:opacity-70">
                       {c.contact.phone}
@@ -263,7 +263,7 @@ export function EventLanding({ event }: { event: EventDoc }) {
               )}
               {c.contact.note && (
                 <div>
-                  <dt className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/45">Мэдээлэл</dt>
+                  <dt className="text-label font-semibold uppercase tracking-caps text-white/45">Мэдээлэл</dt>
                   <dd className="mt-1.5 max-w-sm text-lg font-semibold leading-snug text-white/90">{c.contact.note}</dd>
                 </div>
               )}

@@ -175,7 +175,7 @@ export function Dashboard({
                 <div className="flex items-center gap-2">
                   <h2 className="truncate text-lg font-bold text-neutral-900">{ev.name}</h2>
                   <span
-                    className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-bold ${
+                    className={`shrink-0 rounded-full px-2 py-0.5 text-label font-bold ${
                       ev.status === "published" ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"
                     }`}
                   >
@@ -183,7 +183,7 @@ export function Dashboard({
                   </span>
                 </div>
                 <div className="mt-0.5 flex flex-wrap items-center gap-x-3 text-sm text-neutral-400">
-                  <a href={`/${ev.slug}?preview=1`} target="_blank" rel="noreferrer" className="font-medium text-[#2a5124] hover:underline">
+                  <a href={`/${ev.slug}?preview=1`} target="_blank" rel="noreferrer" className="font-medium text-ink hover:underline">
                     /{ev.slug} ↗
                   </a>
                   <span>Шинэчилсэн: {fmtDate(ev.updatedAt)}</span>

@@ -88,7 +88,7 @@ export function PinMapEditor({
 
   return (
     <div>
-      <div className="mb-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px]">
+      <div className="mb-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-body">
         <span className="font-semibold text-neutral-700">
           {active ? `Сонгосон: ${sel + 1} · ${active.place}` : "Цэг алга"}
         </span>
@@ -133,7 +133,7 @@ export function PinMapEditor({
               e.preventDefault();
               nudge(i, hit[0], hit[1]);
             }}
-            className={`absolute grid h-7 w-7 -translate-x-1/2 -translate-y-1/2 cursor-grab place-items-center rounded-full text-[11px] font-bold tabular-nums text-white ring-2 transition-[background-color,box-shadow] active:cursor-grabbing ${
+            className={`absolute grid h-7 w-7 -translate-x-1/2 -translate-y-1/2 cursor-grab place-items-center rounded-full text-label font-bold tabular-nums text-white ring-2 transition-[background-color,box-shadow] active:cursor-grabbing ${
               sel === i
                 ? "bg-[#6a9652] ring-white shadow-[0_0_0_3px_rgba(106,150,82,0.35)]"
                 : "bg-[#7ea86a]/85 ring-white/70 hover:bg-[#7ea86a]"

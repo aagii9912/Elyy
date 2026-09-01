@@ -113,7 +113,7 @@ export function NewsDashboard({ initialNews }: { initialNews: NewsDoc[] }) {
                   className="h-14 w-20 shrink-0 rounded-lg object-cover"
                 />
               ) : (
-                <div className="flex h-14 w-20 shrink-0 items-center justify-center rounded-lg bg-neutral-100 text-[10px] text-neutral-400">
+                <div className="flex h-14 w-20 shrink-0 items-center justify-center rounded-lg bg-neutral-100 text-2xs text-neutral-400">
                   зураггүй
                 </div>
               )}
@@ -121,7 +121,7 @@ export function NewsDashboard({ initialNews }: { initialNews: NewsDoc[] }) {
                 <div className="flex items-center gap-2">
                   <h2 className="truncate text-lg font-bold text-neutral-900">{item.title}</h2>
                   <span
-                    className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-bold ${
+                    className={`shrink-0 rounded-full px-2 py-0.5 text-label font-bold ${
                       item.status === "published"
                         ? "bg-green-100 text-green-700"
                         : "bg-amber-100 text-amber-700"
@@ -135,7 +135,7 @@ export function NewsDashboard({ initialNews }: { initialNews: NewsDoc[] }) {
                     href={`/news/${item.slug}${item.status === "published" ? "" : "?preview=1"}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="font-medium text-[#2a5124] hover:underline"
+                    className="font-medium text-ink hover:underline"
                   >
                     /news/{item.slug} ↗
                   </a>

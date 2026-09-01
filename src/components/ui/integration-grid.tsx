@@ -148,7 +148,7 @@ export function IntegrationGrid({
                 item.image && "lg:max-w-[53%]"
               )}
             >
-              <span className="block text-[15px] font-bold leading-tight tracking-tight text-night sm:text-[17px]">
+              <span className="block text-lead font-bold leading-tight tracking-tight text-night sm:text-sub">
                 {item.category}
               </span>
 
@@ -171,7 +171,7 @@ export function IntegrationGrid({
                     />
                   )}
                   {item.meta && (
-                    <span className="text-[11px] font-bold uppercase leading-none tracking-[0.167em] text-night/50 sm:text-[12px]">
+                    <span className="text-label font-bold uppercase leading-none tracking-caps text-night/50 sm:text-xs">
                       {item.meta}
                     </span>
                   )}
@@ -181,7 +181,7 @@ export function IntegrationGrid({
               {/* Тайлбар нь улсын мөрөөс ХАМААРАХГҮЙ — хоёулаа байвал
                   доор нь нэмэгдэж, карт өндөрсөнө. */}
               {item.note && (
-                <span className="mt-2 line-clamp-2 block text-[13px] leading-relaxed text-night/60">
+                <span className="mt-2 line-clamp-2 block text-body leading-relaxed text-night/60">
                   {item.note}
                 </span>
               )}
@@ -218,7 +218,7 @@ export function IntegrationGrid({
               item.brand && (
                 <span
                   className={cn(
-                    "relative ml-4 min-w-0 max-w-[45%] text-right text-[15px] font-extrabold leading-tight tracking-tight sm:ml-6 sm:text-[17px]",
+                    "relative ml-4 min-w-0 max-w-[45%] text-right text-lead font-extrabold leading-tight tracking-tight sm:ml-6 sm:text-sub",
                     /* Зурагтай картад нэр нь дээрх бараан хөшиг дээр
                        сууна — бараан бичвэр зураг дээр уншигдахгүй. */
                     item.image ? "text-white" : "text-night/75"

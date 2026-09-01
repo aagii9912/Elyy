@@ -80,7 +80,7 @@ export function MonoMap({ site }: { site: SiteContent }) {
             />
             <span
               style={{ backgroundColor: pin === i ? PIN_ON : PIN }}
-              className={`relative grid h-6 w-6 place-items-center rounded-full text-[10px] font-bold tabular-nums text-white transition-transform duration-300 sm:h-8 sm:w-8 sm:text-[12px] md:h-9 md:w-9 md:text-[13px] ${
+              className={`relative grid h-6 w-6 place-items-center rounded-full text-2xs font-bold tabular-nums text-white transition-transform duration-300 sm:h-8 sm:w-8 sm:text-xs md:h-9 md:w-9 md:text-body ${
                 pin === i ? "scale-110" : ""
               }`}
             >
@@ -103,7 +103,7 @@ export function MonoMap({ site }: { site: SiteContent }) {
               style={{ backgroundColor: RULE }}
               className="w-[3px] shrink-0 rounded-full"
             />
-            <span className="text-sm font-semibold leading-relaxed text-fg/70 md:text-[15px]">
+            <span className="text-sm font-semibold leading-relaxed text-fg/70 md:text-lead">
               <span className="sr-only">{location.addressLabel}: </span>
               {project.address}
             </span>
@@ -127,13 +127,13 @@ export function MonoMap({ site }: { site: SiteContent }) {
                 <div className="min-w-0 flex-1">
                   <p className="text-lg font-extrabold leading-tight text-fg">{active.place}</p>
                   {active.description && (
-                    <p className="mt-1.5 text-[13px] leading-snug text-fg/65">{active.description}</p>
+                    <p className="mt-1.5 text-body leading-snug text-fg/65">{active.description}</p>
                   )}
                 </div>
                 {active.distance && (
                   <span className="shrink-0 text-xl font-extrabold tabular-nums leading-none text-fg">
                     {active.distance}
-                    <span className="ml-1 text-[11px] font-bold text-fg/55">{active.unit}</span>
+                    <span className="ml-1 text-label font-bold text-fg/55">{active.unit}</span>
                   </span>
                 )}
               </div>
@@ -145,7 +145,7 @@ export function MonoMap({ site }: { site: SiteContent }) {
             target="_blank"
             rel="noopener"
             data-cursor-hover
-            className="inline-flex min-h-[3.25rem] items-center justify-center rounded-full bg-night px-9 text-[12px] font-bold uppercase tracking-[0.1em] text-white transition-transform duration-300 hover:-translate-y-0.5"
+            className="inline-flex min-h-[3.25rem] items-center justify-center rounded-full bg-night px-9 text-xs font-bold uppercase tracking-caps-sm text-white transition-transform duration-300 hover:-translate-y-0.5"
           >
             {location.directionsLabel}
           </a>

@@ -120,7 +120,7 @@ export function MonoApartments({ site }: { site: SiteContent }) {
 
   const tabClass = (on: boolean) =>
     /* min-h-11 — хүрэх талбайн 44px доод хязгаар. */
-    `min-h-11 rounded-full px-5 py-2 text-[12px] font-bold uppercase tracking-[0.1em] transition-colors duration-300 ${
+    `min-h-11 rounded-full px-5 py-2 text-xs font-bold uppercase tracking-caps-sm transition-colors duration-300 ${
       on ? "bg-night text-white" : "text-fg/55 hover:text-fg"
     }`;
 
@@ -131,7 +131,7 @@ export function MonoApartments({ site }: { site: SiteContent }) {
       data-tone={flatSectionTone(site.theme, "apartments")}
       className="border-b border-fg/10 bg-ground py-24 md:py-28"
     >
-      <div className="mx-auto max-w-[1500px] px-6 md:px-10">
+      <div className="mx-auto max-w-page px-6 md:px-10">
         {/* тайлбар нь гарчгийн доор — баруун талын багана нь гарчгаас дээш
             гарч, хэсгийн навигацитай мөргөлддөг байв */}
         <div className="max-w-2xl">
@@ -205,17 +205,17 @@ export function MonoApartments({ site }: { site: SiteContent }) {
                     className="aspect-[4/3] w-full object-contain transition-transform duration-700 group-hover:scale-105"
                   />
                   <span className="absolute left-4 top-4 flex flex-wrap items-center gap-1.5">
-                    <span className="rounded-full bg-night px-3 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-white">
+                    <span className="rounded-full bg-night px-3 py-1 text-label font-bold uppercase tracking-caps-sm text-white">
                       {unit.title}
                     </span>
                     {showBlocks && unit.block?.trim() && (
-                      <span className="rounded-full bg-moss px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-white">
+                      <span className="rounded-full bg-moss px-2.5 py-1 text-label font-bold uppercase tracking-caps-sm text-white">
                         {unit.block}
                       </span>
                     )}
                   </span>
                   {unit.views.length > 0 && (
-                    <span className="glass glass-chip absolute bottom-4 right-4 rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-[0.1em] text-fg">
+                    <span className="glass glass-chip absolute bottom-4 right-4 rounded-full px-3 py-1 text-label font-bold uppercase tracking-caps-sm text-fg">
                       {unit.views.length} {apartments.viewsWord}
                     </span>
                   )}
@@ -231,7 +231,7 @@ export function MonoApartments({ site }: { site: SiteContent }) {
                     onClick={() => setInquiry(unit)}
                     aria-haspopup="dialog"
                     aria-label={`${unit.title} — ${apartments.cardCta}`}
-                    className="inline-flex min-h-11 shrink-0 items-center rounded-full border border-fg/25 px-5 text-[11px] font-bold uppercase tracking-[0.08em] text-fg transition-colors duration-300 hover:border-fg hover:bg-night hover:text-white"
+                    className="inline-flex min-h-11 shrink-0 items-center rounded-full border border-fg/25 px-5 text-label font-bold uppercase tracking-caps-sm text-fg transition-colors duration-300 hover:border-fg hover:bg-night hover:text-white"
                   >
                     {apartments.cardCta}
                   </button>
@@ -247,7 +247,7 @@ export function MonoApartments({ site }: { site: SiteContent }) {
             data-reveal="zoom"
             className="flex w-[80vw] shrink-0 snap-start flex-col items-start justify-between gap-8 rounded-2xl bg-night p-6 text-white sm:w-[46vw] lg:w-[30vw] xl:w-[23vw]"
           >
-            <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-white/60">{apartments.ctaCard.kicker}</p>
+            <p className="text-label font-bold uppercase tracking-caps text-white/60">{apartments.ctaCard.kicker}</p>
             <div>
               <p className="text-2xl font-extrabold leading-tight tracking-tight">
                 {apartments.ctaCard.title}
@@ -279,7 +279,7 @@ export function MonoApartments({ site }: { site: SiteContent }) {
         >
           <div className="flex items-start justify-between gap-4 px-5 py-5 md:px-10" onClick={(e) => e.stopPropagation()}>
             <div>
-              <p className="flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.28em] text-fg/50">
+              <p className="flex items-center gap-3 text-label font-semibold uppercase tracking-caps-lg text-fg/50">
                 <span aria-hidden className="h-px w-8 bg-moss" />
                 {current.unit.title}
                 {showBlocks && current.unit.block?.trim() && (
@@ -294,7 +294,7 @@ export function MonoApartments({ site }: { site: SiteContent }) {
               data-cursor-hover
               onClick={close}
               aria-label="Хаах"
-              className="min-h-11 rounded-full border border-fg/25 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.08em] text-fg transition-colors duration-300 hover:bg-night hover:text-white"
+              className="min-h-11 rounded-full border border-fg/25 px-4 py-2 text-label font-bold uppercase tracking-caps-sm text-fg transition-colors duration-300 hover:bg-night hover:text-white"
             >
               Хаах ✕
             </button>
@@ -339,7 +339,7 @@ export function MonoApartments({ site }: { site: SiteContent }) {
             >
               ←
             </button>
-            <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-fg/50">
+            <p className="text-label font-bold uppercase tracking-caps-sm text-fg/50">
               {apartments.viewsWord} {current.viewIndex + 1}/{current.unit.views.length} · {(open ?? 0) + 1}/{slides.length}
             </p>
             <button
@@ -419,28 +419,28 @@ function UnitInquiry({
       <div className="p-6 sm:p-9">
         {sent ? (
           <div>
-            <p className="flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.28em] text-fg/50">
+            <p className="flex items-center gap-3 text-label font-semibold uppercase tracking-caps-lg text-fg/50">
               <span aria-hidden className="h-px w-8 bg-moss" />
               {label}
             </p>
             <h3 className="mt-4 text-2xl font-extrabold leading-tight tracking-tight text-fg">{q.successTitle}</h3>
-            <p className="mt-3 text-[15px] leading-relaxed text-fg/65">{q.successBody}</p>
+            <p className="mt-3 text-lead leading-relaxed text-fg/65">{q.successBody}</p>
           </div>
         ) : (
           <form onSubmit={onSubmit} className="flex flex-col gap-6">
             <div>
-              <p className="flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.28em] text-fg/50">
+              <p className="flex items-center gap-3 text-label font-semibold uppercase tracking-caps-lg text-fg/50">
                 <span aria-hidden className="h-px w-8 bg-moss" />
                 {q.title}
               </p>
               <h3 className="mt-4 text-2xl font-extrabold leading-tight tracking-tight text-fg">{label}</h3>
-              <p className="mt-3 text-[15px] leading-relaxed text-fg/65">{q.sub}</p>
+              <p className="mt-3 text-lead leading-relaxed text-fg/65">{q.sub}</p>
             </div>
 
             <input type="text" name="website" tabIndex={-1} autoComplete="off" aria-hidden="true" className="hidden" />
 
             <label className="block">
-              <span className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.18em] text-fg/45">{q.name}</span>
+              <span className="mb-2 block text-label font-semibold uppercase tracking-caps text-fg/45">{q.name}</span>
               <input
                 type="text"
                 name="name"
@@ -451,7 +451,7 @@ function UnitInquiry({
             </label>
 
             <label className="block">
-              <span className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.18em] text-fg/45">{q.phone}</span>
+              <span className="mb-2 block text-label font-semibold uppercase tracking-caps text-fg/45">{q.phone}</span>
               <input
                 type="tel"
                 name="phone"
@@ -463,7 +463,7 @@ function UnitInquiry({
             </label>
 
             <label className="block">
-              <span className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.18em] text-fg/45">{q.note}</span>
+              <span className="mb-2 block text-label font-semibold uppercase tracking-caps text-fg/45">{q.note}</span>
               <textarea
                 name="note"
                 rows={2}
@@ -507,7 +507,7 @@ function UnitPlanPanel({ plan }: { plan: UnitPlan }) {
 
   return (
     <aside className="w-full shrink-0 border-t border-fg/10 pt-6 lg:w-[340px] lg:overflow-y-auto lg:border-l lg:border-t-0 lg:pl-10 lg:pt-0">
-      <p className="flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.28em] text-fg/50">
+      <p className="flex items-center gap-3 text-label font-semibold uppercase tracking-caps-lg text-fg/50">
         <span aria-hidden className="h-px w-8 bg-moss" />
         Төлөвлөгөөний тайлбар
       </p>
@@ -515,30 +515,30 @@ function UnitPlanPanel({ plan }: { plan: UnitPlan }) {
       <dl className="mt-5 grid grid-cols-2 gap-x-5 gap-y-4 sm:grid-cols-4 lg:grid-cols-2">
         {facts.map(([label, value]) => (
           <div key={label}>
-            <dt className="text-[10px] font-bold uppercase tracking-[0.16em] text-fg/40">{label}</dt>
+            <dt className="text-2xs font-bold uppercase tracking-caps text-fg/40">{label}</dt>
             <dd className="mt-1 text-sm font-extrabold tracking-tight text-fg">{value}</dd>
           </div>
         ))}
       </dl>
 
-      <p className="mt-5 text-[13px] leading-relaxed text-fg/60">{plan.spot}</p>
+      <p className="mt-5 text-body leading-relaxed text-fg/60">{plan.spot}</p>
 
-      <p className="mt-7 text-[10px] font-bold uppercase tracking-[0.16em] text-fg/40">Өрөөний задаргаа</p>
+      <p className="mt-7 text-2xs font-bold uppercase tracking-caps text-fg/40">Өрөөний задаргаа</p>
       <ul className="mt-3 border-t border-fg/10">
         {plan.list.map((r) => (
           <li key={r.no} className="flex items-baseline justify-between gap-4 border-b border-fg/10 py-2.5">
-            <span className="text-[13px] leading-snug text-fg/70">
+            <span className="text-body leading-snug text-fg/70">
               <span aria-hidden className="mr-2 tabular-nums text-fg/35">
                 {r.no}.
               </span>
               {r.name}
             </span>
-            <span className="shrink-0 text-[13px] font-bold tabular-nums text-fg">{r.area} м²</span>
+            <span className="shrink-0 text-body font-bold tabular-nums text-fg">{r.area} м²</span>
           </li>
         ))}
       </ul>
 
-      <p className="mt-4 pb-2 text-[11px] leading-relaxed text-fg/40">
+      <p className="mt-4 pb-2 text-label leading-relaxed text-fg/40">
         Хэмжээ нь зураг төслийн утга — Elysium танилцуулга. Ашиглалтад орох үед бага зэрэг зөрөх боломжтой.
       </p>
     </aside>

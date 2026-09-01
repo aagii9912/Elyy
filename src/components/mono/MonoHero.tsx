@@ -177,7 +177,7 @@ export function MonoHero({ site }: { site: SiteContent }) {
 
         <div data-mh-copy className="relative z-10 flex h-full w-full flex-col items-center px-6">
           <div className="flex flex-1 flex-col items-center justify-center text-center">
-            <p className="mono-fade-up mb-5 text-[11px] font-semibold uppercase tracking-[0.42em] text-lime md:mb-6 md:text-[12px]" style={{ animationDelay: "0.4s" }}>
+            <p className="mono-fade-up mb-5 text-label font-semibold uppercase tracking-caps-xl text-lime md:mb-6 md:text-xs" style={{ animationDelay: "0.4s" }}>
               {brand.tag}
             </p>
             <h1 className="mono-h1 text-white drop-shadow-[0_2px_30px_rgba(0,0,0,0.4)]">
@@ -191,7 +191,7 @@ export function MonoHero({ site }: { site: SiteContent }) {
                 </Fragment>
               ))}
             </h1>
-            <p className="mono-fade-up mt-5 max-w-md text-[15px] font-medium leading-relaxed text-white/80 md:text-base" style={{ animationDelay: "0.7s" }}>
+            <p className="mono-fade-up mt-5 max-w-md text-lead font-medium leading-relaxed text-white/80 md:text-base" style={{ animationDelay: "0.7s" }}>
               {hero.sub}
             </p>
           </div>
@@ -201,7 +201,7 @@ export function MonoHero({ site }: { site: SiteContent }) {
               href="#contact"
               onClick={(e) => go(e, "#contact")}
               data-cursor-hover
-              className="mono-fade-up inline-flex w-full items-center justify-center gap-2 rounded-[50px] bg-white px-6 py-4 text-[14px] font-bold uppercase tracking-[-0.2px] text-fg transition-transform duration-300 hover:-translate-y-0.5 sm:w-auto"
+              className="mono-fade-up inline-flex w-full items-center justify-center gap-2 rounded-[50px] bg-white px-6 py-4 text-sm font-bold uppercase tracking-display text-fg transition-transform duration-300 hover:-translate-y-0.5 sm:w-auto"
               style={{ animationDelay: "0.85s" }}
             >
               {nav.ctaLabel}
@@ -210,7 +210,7 @@ export function MonoHero({ site }: { site: SiteContent }) {
               <BrochureButton
                 site={site}
                 source="elysium/mono#hero"
-                className="glass-dark inline-flex w-full items-center justify-center gap-2 rounded-[50px] px-6 py-4 text-[14px] font-medium uppercase tracking-[-0.2px] text-white transition-colors duration-300 hover:bg-white/15 sm:w-auto"
+                className="glass-dark inline-flex w-full items-center justify-center gap-2 rounded-[50px] px-6 py-4 text-sm font-medium uppercase tracking-display text-white transition-colors duration-300 hover:bg-white/15 sm:w-auto"
               >
                 {nav.brochureLabel}
               </BrochureButton>

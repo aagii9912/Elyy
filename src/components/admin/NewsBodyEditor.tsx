@@ -41,15 +41,15 @@ const IMAGE_SIZES: { value: NewsImageSize; label: string }[] = [
 /** Засварлагчийн бичвэрийн хэв маяг — нийтлэлийн хуудсыг ойролцоогоор дуурайна. */
 const EDITOR_CLASS = [
   "min-h-[460px] w-full rounded-b-lg border border-t-0 border-neutral-300 bg-white px-5 py-4",
-  "text-[15px] leading-relaxed text-neutral-900 outline-none",
-  "[&_h2]:mt-7 [&_h2]:text-[22px] [&_h2]:font-extrabold [&_h2]:leading-snug [&_h2]:tracking-tight",
-  "[&_h3]:mt-6 [&_h3]:text-[17px] [&_h3]:font-bold [&_h3]:leading-snug",
+  "text-lead leading-relaxed text-neutral-900 outline-none",
+  "[&_h2]:mt-7 [&_h2]:text-h6 [&_h2]:font-extrabold [&_h2]:leading-snug [&_h2]:tracking-tight",
+  "[&_h3]:mt-6 [&_h3]:text-sub [&_h3]:font-bold [&_h3]:leading-snug",
   "[&_p]:mt-3 [&_ul]:mt-3 [&_ul]:list-disc [&_ul]:pl-6 [&_li]:mt-1 [&_li>p]:mt-0",
   "[&_strong]:font-bold [&_em]:italic",
-  "[&_a]:font-semibold [&_a]:text-[#2a5124] [&_a]:underline [&_a]:underline-offset-2",
+  "[&_a]:font-semibold [&_a]:text-ink [&_a]:underline [&_a]:underline-offset-2",
   "[&_img]:mt-4 [&_img]:w-full [&_img]:rounded-lg [&_img]:border [&_img]:border-neutral-200",
-  "[&_img.ProseMirror-selectednode]:border-[#2a5124] [&_img.ProseMirror-selectednode]:ring-2",
-  "[&_img.ProseMirror-selectednode]:ring-[#2a5124]/25",
+  "[&_img.ProseMirror-selectednode]:border-ink [&_img.ProseMirror-selectednode]:ring-2",
+  "[&_img.ProseMirror-selectednode]:ring-ink/25",
   "[&>*:first-child]:mt-0",
 ].join(" ");
 
@@ -76,9 +76,9 @@ function Tool({
       /* Товч дарахад засварлагчийн сонголт алдагдахгүй байх — фокус хөдлөхгүй. */
       onMouseDown={(e) => e.preventDefault()}
       onClick={onClick}
-      className={`rounded-md px-2.5 py-1.5 text-[13px] font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
+      className={`rounded-md px-2.5 py-1.5 text-body font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
         active
-          ? "bg-[#2a5124] text-white"
+          ? "bg-ink text-white"
           : "border border-neutral-300 bg-white text-neutral-700 hover:bg-neutral-100"
       } ${className}`}
     >

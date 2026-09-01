@@ -18,7 +18,7 @@ export function MonoFaq({ site }: { site: SiteContent }) {
       data-tone={flatSectionTone(site.theme, "faq")}
       className="border-b border-fg/10 bg-ground py-24 md:py-28"
     >
-      <div className="mx-auto max-w-[1100px] px-6 md:px-10">
+      <div className="mx-auto max-w-read px-6 md:px-10">
         <MonoKicker reveal>{faq.kicker}</MonoKicker>
         <h2 data-reveal="heading" className="mt-4 mono-h2">
           {faq.title}
@@ -53,7 +53,7 @@ export function MonoFaq({ site }: { site: SiteContent }) {
                   }`}
                 >
                   <div className="overflow-hidden">
-                    <p className="max-w-2xl pb-6 text-[15px] leading-relaxed text-fg/65">{item.a}</p>
+                    <p className="max-w-2xl pb-6 text-lead leading-relaxed text-fg/65">{item.a}</p>
                   </div>
                 </div>
               </div>

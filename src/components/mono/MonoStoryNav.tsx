@@ -93,7 +93,7 @@ export function MonoStoryNav({ site }: { site: SiteContent }) {
           {/* mix-blend-difference — суурь гэрэлтэй үед бараан, бараан үед
               цайвар болж уншигдана (арын бөмбөлөггүй болсон учир). */}
           <span
-            className={`whitespace-nowrap text-[11px] font-semibold uppercase tracking-[0.1em] mix-blend-difference transition-colors duration-300 ${
+            className={`whitespace-nowrap text-label font-semibold uppercase tracking-caps-sm mix-blend-difference transition-colors duration-300 ${
               active === i ? "text-white" : "text-white/60 group-hover:text-white/85"
             }`}
           >
