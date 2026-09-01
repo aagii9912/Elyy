@@ -53,7 +53,12 @@ export function MonoContact({ site }: { site: SiteContent }) {
       data-tone={flatSectionTone(site.theme, "contact")}
       className="border-b border-fg/10 bg-ground section-y font-gilroy text-fg"
     >
-      <div className="mx-auto max-w-page px-6 md:px-10">
+      {/* Хаалтын гурвал (#contact → #managers → #faq) НЭГ ижил 1100px-ийн
+          баганад суудаг. Өмнө нь энэ хэсэг ганцаараа 1500px байсан нь
+          дараагийн хоёр хэсэгтэйгээ 200px-ээр зөрж, ирмэг нь харагдтал
+          шилждэг байв. 1100px дээр зүүн мэдээлэл ба маягтын карт хоёр
+          хоорондоо ойртож, хэсэг бүхэлдээ нягт болно. */}
+      <div className="mx-auto max-w-read px-6 md:px-10">
         <div className="grid gap-12 lg:grid-cols-2 lg:gap-20">
           <div>
             <MonoKicker reveal>{contact.kicker}</MonoKicker>
