@@ -9,9 +9,23 @@
      • нээгдэхэд фокусыг дотогш, хаагдахад буцаан өгнө (Tab дотор эргэлдэнэ),
      • prefers-reduced-motion үед нээлтийн хөдөлгөөнийг хийхгүй.
    Гар утсанд доороос гарч ирдэг хуудас (sheet), дэлгэц томрох тусам
-   голлосон карт болно. */
+   голлосон карт болно.
+
+   САМБАРЫГ ХУУДСЫН ҮНДЭС РҮҮ ЗӨӨНӨ (portal). `position: fixed` нь
+   transform / filter / perspective-тэй өвөг элемент дотор ДЭЛГЭЦ рүү
+   биш, тухайн өвөг рүү харьяалагддаг (CSS Transforms §3). Hero-гийн
+   «Танилцуулга татах» товч нь `.mono-fade-up` (animation: transform)
+   дотор сууж байсан тул pop-up нь бүтэн дэлгэц эзлэхийн оронд товчны
+   181px-ийн нарийхан хайрцагт шахагдаж эвдэрдэг байв; GSAP-ийн
+   scrub хийдэг `[data-mh-copy]` ч мөн адил хайрцаг үүсгэдэг.
+
+   `document.body` руу биш `.mono-page` руу зөөх нь чухал: өнгө,
+   фонт, `glass` зэрэг дизайны бүх дүрмийг `buildThemeCss` нь
+   `.mono-page` доор л тавьдаг тул body руу зөөвөл самбар загвараа
+   алдана. */
 
 import { useCallback, useEffect, useId, useRef } from "react";
+import { createPortal } from "react-dom";
 import { useLenis } from "lenis/react";
 
 const FOCUSABLE =
@@ -93,12 +107,16 @@ export function MonoModal({
     };
   }, [open, lenis, close]);
 
-  if (!open) return null;
+  if (!open || typeof document === "undefined") return null;
 
   const width =
     size === "full" ? "max-w-wide" : size === "lg" ? "max-w-3xl" : "max-w-lg";
 
-  return (
+  /* Дуудагч аль хэсэгт сууж байгаагаас үл хамааран `fixed` нь ҮРГЭЛЖ
+     дэлгэцээр хэмжигдэхийн тулд самбарыг хуудсын үндэс рүү зөөнө. */
+  const host = document.querySelector<HTMLElement>(".mono-page") ?? document.body;
+
+  return createPortal(
     <div
       role="dialog"
       aria-modal="true"
@@ -135,6 +153,7 @@ export function MonoModal({
 
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">{children}</div>
       </div>
-    </div>
+    </div>,
+    host
   );
 }
