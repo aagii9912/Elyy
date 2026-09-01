@@ -232,31 +232,51 @@ export function MonoDeveloper({ site }: { site: SiteContent }) {
           </div>
         )}
 
-        {/* header — kicker, name, then the company blurb directly beneath it
-            (it used to sit off to the right, where it collided with the
-            timeline and the backdrop mark) */}
-        <div className="relative z-10 mx-auto w-full max-w-[1500px] px-6 md:px-10">
+        {/* header — kicker, тэгээд ширээний компьютерт ХОЁР багана: нэр +
+            тоонууд зүүн талд, компанийн тайлбар баруун талд өргөн
+            зурвасаар. Өмнө нь бүгд дээрээс доош овоорч ~410px өндөр
+            болж, пиннэсэн 100svh кадрын доод ирмэгээр төслийн
+            картуудыг тайрдаг байв. Хажуу тийш нь дэлгэхэд толгой
+            хоёр дахин намсаж, хэсэг нэг дэлгэцэд багтана. Гар
+            утсанд хуучин овоолсон дараалал хэвээр. */}
+        <div className="relative z-10 mx-auto w-full max-w-page px-6 md:px-10">
           <MonoKicker reveal>{d.kicker}</MonoKicker>
-          <div className="mt-4 flex flex-col gap-4">
-            <h2 data-reveal="heading" className="max-w-xl mono-h2">
+          <div className="mt-4 flex flex-col gap-4 md:mt-5 md:grid md:grid-cols-[0.85fr_1.15fr] md:items-start md:gap-x-12 md:gap-y-5">
+            <h2
+              data-reveal="heading"
+              className="max-w-xl mono-h2 md:col-start-1 md:row-start-1 md:max-w-none"
+            >
               {d.name}
             </h2>
-            <p data-reveal="up" className="mono-lead">{d.body}</p>
-          </div>
-          <div data-reveal="up" className="mt-6 flex gap-10">
-            <div>
-              <p className="text-2xl font-extrabold text-fg md:text-3xl">{d.since}</p>
-              <p className="mt-1 text-[11px] font-medium uppercase tracking-[0.14em] text-fg/45">{d.sinceLabel}</p>
-            </div>
-            <div>
-              <p className="text-2xl font-extrabold text-fg md:text-3xl">{d.projectCount}</p>
-              <p className="mt-1 text-[11px] font-medium uppercase tracking-[0.14em] text-fg/45">{d.projectCountLabel}</p>
+            {/* `.mono-lead`-ийн 46ch хэмжүүр нэг баганад зөв, гэхдээ энд
+                6 мөр болж өндрөө иднэ. Ширээний компьютерт хязгаарыг нь
+                тайлж, баруун баганын өргөнөөр (≈75ch, max-w-page-аар
+                таглагдсан) сунгав — 4 мөр болж багасна. Утилит нь
+                components давхаргыг дардаг тул `max-w-none` хүчинтэй. */}
+            <p
+              data-reveal="up"
+              className="mono-lead md:col-start-2 md:row-span-2 md:row-start-1 md:max-w-none"
+            >
+              {d.body}
+            </p>
+            <div data-reveal="up" className="mt-2 flex gap-10 md:col-start-1 md:row-start-2 md:mt-0">
+              <div>
+                <p className="text-2xl font-extrabold text-fg md:text-3xl">{d.since}</p>
+                <p className="mt-1 text-label font-medium uppercase tracking-caps text-fg/45">{d.sinceLabel}</p>
+              </div>
+              <div>
+                <p className="text-2xl font-extrabold text-fg md:text-3xl">{d.projectCount}</p>
+                <p className="mt-1 text-label font-medium uppercase tracking-caps text-fg/45">{d.projectCountLabel}</p>
+              </div>
             </div>
           </div>
         </div>
 
         {/* timeline */}
-        <div className="relative z-10 mt-12 md:mt-14">
+        {/* Толгой ба цаг хугацааны шугамын хоорондох зай — намхан дэлгэц
+            дээр 56px тогтмол зай картуудыг доороос нь тайрдаг байсан тул
+            svh-д уясан clamp. Картуудын өндөр аль хэдийн svh-тэй. */}
+        <div className="relative z-10 mt-12 md:mt-[clamp(1.5rem,4.5svh,3.5rem)]">
           {/* Гар утсанд ХЭВТЭЭ snap-карусель (`overflow-x-auto`), ширээний
               компьютерт GSAP-аар зөөгддөг эгнээ (`md:overflow-visible`). */}
           <div
@@ -283,7 +303,7 @@ export function MonoDeveloper({ site }: { site: SiteContent }) {
                     {p.years.split("–")[0]}
                     <span className="text-fg/35">–{p.years.split("–")[1]}</span>
                   </p>
-                  <span className="pb-1 text-[11px] font-bold text-fg/30">0{i + 1}</span>
+                  <span className="pb-1 text-label font-bold text-fg/30">0{i + 1}</span>
                 </div>
 
                 {/* rail segment + node (mobile: left rail handled per-card) */}
@@ -312,9 +332,9 @@ export function MonoDeveloper({ site }: { site: SiteContent }) {
                   <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-charcoal/85 via-charcoal/10 to-transparent" />
                   <div className="absolute inset-x-0 bottom-0 p-5">
                     <h3 className="text-lg font-extrabold tracking-tight text-white md:text-xl">{p.title}</h3>
-                    <p className="mt-1 text-[13px] text-white/65">{p.meta}</p>
+                    <p className="mt-1 text-body text-white/65">{p.meta}</p>
                   </div>
-                  <span className="glass-dark glass-chip absolute right-4 top-4 rounded-full px-3 py-1 text-[11px] font-bold text-white/85">
+                  <span className="glass-dark glass-chip absolute right-4 top-4 rounded-full px-3 py-1 text-label font-bold text-white/85">
                     {p.units}
                   </span>
                 </article>
@@ -329,7 +349,7 @@ export function MonoDeveloper({ site }: { site: SiteContent }) {
           <div className="mt-5 flex items-center gap-4 px-6 md:hidden">
             {/* Тоолуур ЗҮҮН талд — баруун доод буланг чатботын бөмбөлөг
                 эзэлдэг тул тэнд бичиг тавьж болохгүй. */}
-            <span className="shrink-0 text-[10px] font-semibold uppercase tracking-[0.24em] text-fg/45">
+            <span className="shrink-0 text-2xs font-semibold uppercase tracking-caps-lg text-fg/45">
               {stations.length} төсөл →
             </span>
             <span aria-hidden className="h-px flex-1 bg-fg/15">
@@ -342,7 +362,7 @@ export function MonoDeveloper({ site }: { site: SiteContent }) {
           </div>
         </div>
 
-        <p className="relative z-10 mt-6 hidden px-10 text-[11px] font-medium uppercase tracking-[0.24em] text-fg/45 md:block">
+        <p className="relative z-10 mt-6 hidden px-10 text-label font-medium uppercase tracking-caps-lg text-fg/45 md:block">
           {d.scrollHint}
         </p>
       </div>
