@@ -147,8 +147,22 @@ const SCRIM_ACTIVE =
    ӨӨР ҮГЭЭР: доорх alpha-нууд нь AA-гийн ЯГ ШАЛ дээр сууж байна.
    Үүнээс цаашид ногоонг сулруулах цорын ганц зам бол панел дээрх
    2 мөр тайлбарыг pop-up руу нь буулгаж, зөвхөн гарчиг үлдээх. */
+/* 2026-09-01 — ЗАХИАЛАГЧИЙН ШААРДЛАГА: caption хөшгийг ч 10% болгов.
+   Бүх зогсоолыг 10/86 = 0.116 коэффициентээр хуваасан тул уусалтын
+   ХЭЛБЭР (доод захаас дээш жигд буурах, 100%-д тэглэх) хэвээр, зөвхөн
+   гүн нь буурсан. Дээрх §7 хүснэгт ҮҮНД ХАМААРАХАА БОЛЬСОН: гэрэлт
+   интерьер дээр гарчиг/тайлбарын контраст ≈2.2:1 хүртэл унана.
+
+   Тиймээс уншигдацыг ХӨШГӨӨР биш, бичвэрийн СҮҮДРЭЭР хангана
+   (`CAPTION_SHADOW`) — 01 ба 03 бүлэгт хэрэглэсэнтэй яг ижил утга.
+   Сүүдэр нь зургийн ӨНГИЙГ огт хөнддөггүй тул «хөшиг буцаж ирсэн»
+   гэсэн үр дүн гарахгүй. */
 const CAPTION_SCRIM =
-  "bg-[linear-gradient(to_top,rgba(18,22,17,0.86)_0%,rgba(18,22,17,0.85)_26%,rgba(18,22,17,0.84)_40%,rgba(18,22,17,0.82)_50%,rgba(18,22,17,0.79)_54%,rgba(18,22,17,0.68)_60%,rgba(18,22,17,0.52)_68%,rgba(18,22,17,0.36)_76%,rgba(18,22,17,0.22)_84%,rgba(18,22,17,0.11)_91%,rgba(18,22,17,0.04)_96%,rgba(18,22,17,0)_100%)]";
+  "bg-[linear-gradient(to_top,rgba(18,22,17,0.100)_0%,rgba(18,22,17,0.099)_26%,rgba(18,22,17,0.098)_40%,rgba(18,22,17,0.095)_50%,rgba(18,22,17,0.092)_54%,rgba(18,22,17,0.079)_60%,rgba(18,22,17,0.060)_68%,rgba(18,22,17,0.042)_76%,rgba(18,22,17,0.026)_84%,rgba(18,22,17,0.013)_91%,rgba(18,22,17,0.005)_96%,rgba(18,22,17,0)_100%)]";
+
+/** Хөшиг 10% болсны дараа бичвэрийг барих цорын ганц зүйл. */
+const CAPTION_SHADOW =
+  "[text-shadow:0_1px_2px_rgba(9,14,7,0.45),0_2px_22px_rgba(9,14,7,0.55)]";
 
 /** Самбарын дотоод — хоёр урсгалд хуваалцана. */
 function PanelBody({
@@ -269,6 +283,7 @@ function PanelBody({
         className={cn(
           "absolute inset-x-0 bottom-0 z-[2] block transition-[opacity,transform] duration-300 ease-out",
           CAPTION_SCRIM,
+          CAPTION_SHADOW,
           pad,
           isActive
             ? "translate-y-0 opacity-100 delay-200"
@@ -282,13 +297,19 @@ function PanelBody({
         </span>
         {/* Гар утсанд тайлбарыг харуулахгүй: 320px самбар дээр бичвэрийн
             блок өндрийн 2/3-ыг эзэлж, рендер бараг харагдахгүй болно.
-            Бүтэн тайлбарыг pop-up агуулна. */}
+            Бүтэн тайлбарыг pop-up агуулна.
+
+            БҮТЭН ЦАГААН (өмнө нь `white/85`): хөшиг 10% болсны дараа
+            цайвар интерьер дээр уншигдахаа больж байв. Уншигдацыг
+            кадрыг харанхуйлж биш, бэхээ нэмж хангана. */}
         {lane === "row" && (
-          <span className="mt-2 line-clamp-2 max-w-md text-[14px] leading-relaxed text-white/85">
+          <span className="mt-2 line-clamp-2 max-w-md text-[14px] leading-relaxed text-white">
             {item.body}
           </span>
         )}
-        <span className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-full bg-white px-5 py-3 text-[12px] font-bold uppercase tracking-[0.1em] text-night">
+        {/* Товч нь ЦАГААН дүүргэлттэй, бичиг нь бараан — өвлөж ирсэн
+            `CAPTION_SHADOW` энд бохир болно, тиймээс тэглэнэ. */}
+        <span className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-full bg-white px-5 py-3 text-[12px] font-bold uppercase tracking-[0.1em] text-night [text-shadow:none]">
           {openLabel}
           <span
             aria-hidden
