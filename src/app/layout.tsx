@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Fraunces, Inter, Instrument_Sans, Lora, Mulish, JetBrains_Mono } from "next/font/google";
+import { Inter } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
 import { LangProvider } from "@/components/LangProvider";
@@ -8,11 +8,6 @@ import { Cursor } from "@/components/Cursor";
 import { ScrollProgress } from "@/components/ScrollProgress";
 import { DICT, SITE } from "@/lib/content";
 
-const fraunces = Fraunces({
-  variable: "--font-fraunces",
-  subsets: ["latin"],
-  display: "swap",
-});
 
 const inter = Inter({
   variable: "--font-inter",
@@ -20,40 +15,11 @@ const inter = Inter({
   display: "swap",
 });
 
-/* FIND-style display/UI sans — used by the cinematic v2 experience. */
-const instrumentSans = Instrument_Sans({
-  variable: "--font-instrument-sans",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  display: "swap",
-});
 
-/* Editorial serif accent (cyrillic included for the /daylight display headings). */
-const lora = Lora({
-  variable: "--font-lora-serif",
-  subsets: ["latin", "cyrillic"],
-  weight: ["400", "500", "600"],
-  style: ["normal", "italic"],
-  display: "swap",
-});
 
-/* Mono labels for the /daylight experience (cyrillic-capable). */
-const jetbrainsMono = JetBrains_Mono({
-  variable: "--font-jetbrains-mono",
-  subsets: ["latin", "cyrillic"],
-  weight: ["400", "500"],
-  display: "swap",
-});
 
-/* LAGOM-style geometric display sans (cream/orange "version 2" at /v2). */
-const mulish = Mulish({
-  variable: "--font-mulish",
-  subsets: ["latin"],
-  weight: ["400", "600", "700", "800", "900"],
-  display: "swap",
-});
 
-/* Gilroy — rounded geometric display sans for the /final experience. Client-supplied files. */
+/* Gilroy — үндсэн display sans. Харилцагчийн өгсөн файлууд. */
 const gilroy = localFont({
   variable: "--font-gilroy",
   display: "swap",
@@ -100,7 +66,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="mn" className={`${fraunces.variable} ${inter.variable} ${instrumentSans.variable} ${lora.variable} ${mulish.variable} ${gilroy.variable} ${jetbrainsMono.variable}`}>
+    <html lang="mn" className={`${inter.variable} ${gilroy.variable}`}>
       <body className="min-h-dvh bg-bone text-ink">
         <noscript>
           <style>{`.fade-up,.clip-reveal{opacity:1!important;transform:none!important;clip-path:none!important}`}</style>
