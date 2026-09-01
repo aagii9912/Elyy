@@ -108,7 +108,7 @@ export function MonoElys({ site }: { site: SiteContent }) {
       data-tone={flatSectionTone(site.theme, "elys")}
       className="border-b border-fg/10 bg-ground text-fg"
     >
-      <div className="mx-auto max-w-page px-5 pb-20 pt-20 md:px-10 md:pb-28 md:pt-32">
+      <div className="mx-auto max-w-page px-5 section-y md:px-10">
         {/* Гарчгийн блок — тайлбар нь баруун талын багана биш, гарчгийн ЯГ
             доор. Баруун талд байхад bottom-align-аас болж гарчгаас дээш
             гарч, хэсгийн навигацитай мөргөлддөг байв (MonoDeveloper-ийг

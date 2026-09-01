@@ -142,7 +142,7 @@ export function MonoFooter({
       data-tone={flatSectionTone(site.theme, "footer", "dark")}
       className="bg-night font-gilroy text-fg"
     >
-      <div className="mx-auto max-w-page px-6 py-16 md:px-10 md:py-20">
+      <div className="mx-auto max-w-page px-6 section-y-sm md:px-10">
         <div
           className={`grid gap-10 sm:grid-cols-2 ${
             socials.length ? "md:grid-cols-[1.4fr_1fr_1fr_1fr]" : "md:grid-cols-[1.4fr_1fr_1fr]"

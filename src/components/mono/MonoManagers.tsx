@@ -67,7 +67,7 @@ export function MonoManagers({ site }: { site: SiteContent }) {
       id="managers"
       data-bg="managers"
       data-tone={flatSectionTone(site.theme, "managers")}
-      className="border-b border-fg/10 bg-ground py-24 md:py-28"
+      className="border-b border-fg/10 bg-ground section-y"
     >
       {/* Хэмжээ нь доорх FAQ-тэй ижил 1100px — 1500px дээр мөрийн нэр,
           дугаар хоёрын хооронд эзгүй талбай үлддэг. Ингэснээр хуудас

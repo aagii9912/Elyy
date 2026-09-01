@@ -51,7 +51,7 @@ export function MonoContact({ site }: { site: SiteContent }) {
       id="contact"
       data-bg="contact"
       data-tone={flatSectionTone(site.theme, "contact")}
-      className="border-b border-fg/10 bg-ground py-24 font-gilroy text-fg md:py-28"
+      className="border-b border-fg/10 bg-ground section-y font-gilroy text-fg"
     >
       <div className="mx-auto max-w-page px-6 md:px-10">
         <div className="grid gap-12 lg:grid-cols-2 lg:gap-20">

@@ -129,7 +129,7 @@ export function MonoApartments({ site }: { site: SiteContent }) {
       id="apartments"
       data-bg="apartments"
       data-tone={flatSectionTone(site.theme, "apartments")}
-      className="border-b border-fg/10 bg-ground py-24 md:py-28"
+      className="border-b border-fg/10 bg-ground section-y"
     >
       <div className="mx-auto max-w-page px-6 md:px-10">
         {/* тайлбар нь гарчгийн доор — баруун талын багана нь гарчгаас дээш

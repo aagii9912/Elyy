@@ -25,7 +25,7 @@ function SectionView({ s }: { s: Section }) {
   switch (s.type) {
     case "richText":
       return (
-        <section className="bg-white py-20 text-night md:py-28">
+        <section className="bg-white section-y text-night">
           <div className={`${wrap} grid gap-8 md:grid-cols-12`}>
             <div className="md:col-span-4">
               {s.heading && (
@@ -43,7 +43,7 @@ function SectionView({ s }: { s: Section }) {
 
     case "stats":
       return (
-        <section className="bg-night py-16 text-white md:py-20">
+        <section className="bg-night section-y-sm text-white">
           <div className={`${wrap} grid grid-cols-2 gap-8 md:grid-cols-4`}>
             {s.items.map((it, i) => (
               <div key={i} className="text-center md:text-left">
@@ -61,7 +61,7 @@ function SectionView({ s }: { s: Section }) {
 
     case "agenda":
       return (
-        <section className="bg-paper py-20 text-night md:py-28">
+        <section className="bg-paper section-y text-night">
           <div className={wrap}>
             {s.heading && <Kicker>{s.heading}</Kicker>}
             <div className="mt-10 divide-y divide-night/10 border-y border-night/10">
@@ -84,7 +84,7 @@ function SectionView({ s }: { s: Section }) {
     case "gallery":
       if (!s.images.length) return null;
       return (
-        <section className="bg-white py-16 md:py-24">
+        <section className="bg-white section-y">
           <div className={`${wrap} grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-4`}>
             {s.images.map((img, i) => (
               <div key={i} className="aspect-[4/3] overflow-hidden rounded-lg bg-paper">
@@ -98,7 +98,7 @@ function SectionView({ s }: { s: Section }) {
     case "image":
       if (!s.url) return null;
       return (
-        <section className="bg-white py-10 md:py-16">
+        <section className="bg-white section-y-xs">
           <div className={wrap}>
             <div className="overflow-hidden rounded-2xl bg-paper">
               <img src={s.url} alt={s.caption || ""} loading="lazy" className="h-full w-full object-cover" />
@@ -110,7 +110,7 @@ function SectionView({ s }: { s: Section }) {
 
     case "cards":
       return (
-        <section className="bg-white py-20 text-night md:py-28">
+        <section className="bg-white section-y text-night">
           <div className={wrap}>
             {s.heading && <Kicker>{s.heading}</Kicker>}
             <div className="mt-10 grid gap-6 md:grid-cols-3">
@@ -139,7 +139,7 @@ function SectionView({ s }: { s: Section }) {
 
     case "cta":
       return (
-        <section className="bg-night py-20 text-white md:py-28">
+        <section className="bg-night section-y text-white">
           <div className={`${wrap} text-center`}>
             <h2 className="mx-auto max-w-3xl text-[clamp(2rem,4.6vw,3.6rem)] font-extrabold leading-[1.03] tracking-tight">
               {s.heading}
@@ -243,7 +243,7 @@ export function EventLanding({ event }: { event: EventDoc }) {
       ))}
 
       {/* ---------- REGISTER (lead capture) ---------- */}
-      <section id="register" className="scroll-mt-6 bg-night py-20 text-white md:py-28">
+      <section id="register" className="scroll-mt-6 bg-night section-y text-white">
         <div className={`${wrap} grid gap-12 lg:grid-cols-2 lg:gap-20`}>
           <div>
             <Kicker>{c.form.title}</Kicker>

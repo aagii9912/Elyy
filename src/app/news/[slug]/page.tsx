@@ -147,7 +147,7 @@ export default async function NewsDetailPage({ params, searchParams }: Props) {
           )}
 
           {/* Агуулга */}
-          <div className="mx-auto max-w-read px-6 py-12 md:px-10 md:py-16">
+          <div className="mx-auto max-w-read px-6 section-y-xs md:px-10">
             {blocks.map((block, i) =>
               block.kind === "heading" ? (
                 block.level === 3 ? (
@@ -241,7 +241,7 @@ export default async function NewsDetailPage({ params, searchParams }: Props) {
         </article>
 
         {others.length > 0 && (
-          <section className="border-t border-night/10 bg-ground py-14 md:py-20">
+          <section className="border-t border-night/10 bg-ground section-y-sm">
             <div className="mx-auto max-w-page px-6 md:px-10">
               <h2
                 data-reveal="heading"

@@ -37,7 +37,7 @@ export default async function NewsListPage() {
       <MonoHeader site={site} variant="page" />
 
       <main className="pt-[104px] md:pt-[124px]">
-        <section className="border-b border-night/10 bg-ground py-14 md:py-20">
+        <section className="border-b border-night/10 bg-ground section-y-sm">
           <div className="mx-auto max-w-page px-6 md:px-10">
             <MonoKicker reveal>{site.news.kicker}</MonoKicker>
             <h1
@@ -52,7 +52,7 @@ export default async function NewsListPage() {
           </div>
         </section>
 
-        <section className="py-14 md:py-20">
+        <section className="section-y-sm">
           <div className="mx-auto max-w-page px-6 md:px-10">
             {news.length === 0 ? (
               <div className="rounded-2xl border border-dashed border-night/20 py-20 text-center">

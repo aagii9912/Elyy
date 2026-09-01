@@ -12,7 +12,7 @@ export function MonoGallery({ site }: { site: SiteContent }) {
     <section
       data-bg="gallery"
       data-tone={flatSectionTone(site.theme, "gallery")}
-      className="overflow-hidden border-b border-fg/10 bg-ground py-24 md:py-28"
+      className="overflow-hidden border-b border-fg/10 bg-ground section-y"
     >
       <div className="mx-auto max-w-page px-6 md:px-10">
         <MonoKicker reveal>{gallery.kicker}</MonoKicker>
