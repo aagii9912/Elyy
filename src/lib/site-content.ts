@@ -131,13 +131,26 @@ export type Background = {
  *  `film: true` — тухайн хэсгийг бичлэг/кадар БҮТЭН бүрхдэг тул дэвсгэр
  *  нь ард нь сууж харагддаггүй. Эдгээрт сонгосон өнгө, градиент нь
  *  кадрын ДЭЭР буух өнгөт хальс болж буунa (`lib/theme-css.ts` →
- *  `mediaFilmStyle`). */
+ *  `buildThemeCss` → `[data-bg="…"] [data-theme-film]`).
+ *
+ *  `manualTone: true` — бичгийн өнгийг ГАРААР сонгох ёстой хэсгүүд.
+ *  Эдгээр нь `sectionTone`-оор уншигддаг (дэвсгэр нь бичлэг/кадар,
+ *  эсвэл тунгалаг толгой) тул гэрэлтэлтээс нь тооцоолох боломжгүй.
+ *  Үлдсэн хэсгүүд `flatSectionTone`-оор дэвсгэрээсээ өөрсдөө тооцдог
+ *  тул админ дээр тоныг харуулах шаардлагагүй — зөвхөн ЗУРАГ сонгосон
+ *  үед л гараар хэрэгтэй болно.
+ *
+ *  `ownTone: "dark"` — админ юу ч сонгоогүй үеийн тухайн хэсгийн ӨӨРИЙН
+ *  бичгийн горим (компонент дотор `sectionTone`/`flatSectionTone`-д
+ *  дамжуулдаг нөөц утга). Админы амьд preview `data-tone`-ыг дахин
+ *  тооцоолоход хэрэгтэй — эс бөгөөс дэвсгэрийг хартай болгоход бичиг
+ *  цайрахыг preview дээр харж чадахгүй. Бичээгүй бол `"light"`. */
 export const THEME_SECTIONS = [
-  { id: "header", label: "Толгой хэсэг", hint: "Дээд навигац (тунгалаг → цагаан)" },
-  { id: "hero", label: "Нүүр дэлгэц", hint: "Кадрын ДЭЭР буух өнгөт хальс", film: true },
-  { id: "stats", label: "01 · Ерөнхий төлөвлөлт", hint: "Кадрын ДЭЭР буух өнгөт хальс", film: true },
+  { id: "header", label: "Толгой хэсэг", hint: "Дээд навигац (тунгалаг → цагаан)", manualTone: true },
+  { id: "hero", label: "Нүүр дэлгэц", hint: "Кадрын ДЭЭР буух өнгөт хальс", film: true, manualTone: true, ownTone: "dark" },
+  { id: "stats", label: "01 · Ерөнхий төлөвлөлт", hint: "Кадрын ДЭЭР буух өнгөт хальс", film: true, manualTone: true, ownTone: "dark" },
   { id: "elys", label: "02 · ELYS консепц", hint: "" },
-  { id: "equip", label: "03 · Үндсэн бүтээц", hint: "Кадрын ДЭЭР буух өнгөт хальс", film: true },
+  { id: "equip", label: "03 · Үндсэн бүтээц", hint: "Кадрын ДЭЭР буух өнгөт хальс", film: true, manualTone: true, ownTone: "dark" },
   { id: "marquee", label: "Уриа (гүйдэг мөр)", hint: "" },
   { id: "apartments", label: "Өрөөний сонголт", hint: "" },
   { id: "developer", label: "Төсөл хэрэгжүүлэгч", hint: "" },
@@ -147,7 +160,7 @@ export const THEME_SECTIONS = [
   { id: "contact", label: "Холбоо барих", hint: "" },
   { id: "managers", label: "Борлуулалтын баг", hint: "" },
   { id: "faq", label: "Түгээмэл асуулт", hint: "" },
-  { id: "footer", label: "Хөл хэсэг", hint: "" },
+  { id: "footer", label: "Хөл хэсэг", hint: "", ownTone: "dark" },
 ] as const;
 
 export type ThemeSectionId = (typeof THEME_SECTIONS)[number]["id"];
@@ -409,6 +422,11 @@ export type SiteContent = {
         brand: string;
         /** Улс, эсвэл бусад товч тэмдэглэгээ. */
         meta: string;
+        /** Улсын далбаа — картан дээр улсын нэрийн зүүн талд гарна.
+         *  Хоосон бол `meta`-гийн улсын нэрээр `public/flags/*`-аас
+         *  дотоод далбаа таарна (Турк, Франц, Герман, Солонгос, Япон).
+         *  Танихгүй улсад далбаагүй, зөвхөн нэр үлдэнэ. */
+        flag: string;
         /** Брэндийн лого. Хоосон бол нэр нь wordmark болно. */
         logo: string;
         /** Тоноглолын зураг — картын толгойд бүтэн өргөнөөр гарна.
@@ -814,15 +832,16 @@ export const DEFAULT_SITE_CONTENT: SiteContent = {
          түүнийг хадгалсан бүх тоноглол руу хуулна. Админ зүйл бүрд
          өөрийн зургийг `/admin/site`-аас оруулна. */
       items: [
-        { category: "Радиатор", brand: "E.C.A.", meta: "Турк", logo: "", image: "", note: "" },
-        { category: "Ханын залгуур", brand: "Legrand", meta: "Франц", logo: "", image: "", note: "" },
-        { category: "Паркет", brand: "Egger", meta: "Герман", logo: "", image: "", note: "" },
-        { category: "Ханын цаас", brand: "LX Hausys", meta: "Солонгос", logo: "", image: "", note: "" },
-        { category: "Цонх", brand: "Veka", meta: "Герман", logo: "", image: "", note: "" },
+        { category: "Радиатор", brand: "E.C.A.", meta: "Турк", flag: "", logo: "", image: "", note: "" },
+        { category: "Ханын залгуур", brand: "Legrand", meta: "Франц", flag: "", logo: "", image: "", note: "" },
+        { category: "Паркет", brand: "Egger", meta: "Герман", flag: "", logo: "", image: "", note: "" },
+        { category: "Ханын цаас", brand: "LX Hausys", meta: "Солонгос", flag: "", logo: "", image: "", note: "" },
+        { category: "Цонх", brand: "Veka", meta: "Герман", flag: "", logo: "", image: "", note: "" },
         {
           category: "Ариун цэврийн өрөөний тоноглол",
           brand: "Lixil",
           meta: "Япон",
+          flag: "",
           logo: "",
           image: "",
           note: "",
@@ -831,6 +850,7 @@ export const DEFAULT_SITE_CONTENT: SiteContent = {
           category: "Цахилгаан шат",
           brand: "Desenk",
           meta: "",
+          flag: "",
           logo: "",
           image: "",
           note: "Аюулгүй байдал болон тав тухыг хослуулсан эрчим хүчний хэмнэлттэй цахилгаан шат.",
@@ -839,6 +859,7 @@ export const DEFAULT_SITE_CONTENT: SiteContent = {
           category: "Агаар сэлгэлтийн систем",
           brand: "",
           meta: "",
+          flag: "",
           logo: "",
           image: "",
           note: "Цэвэр агаарыг тасралтгүй хангаж, чийг, үнэрийг гадагшлуулна.",

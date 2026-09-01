@@ -61,6 +61,7 @@ export function MonoCursor() {
     <div
       ref={mark}
       aria-hidden
+      data-chrome="cursor"
       className="pointer-events-none fixed left-0 top-0 z-[9999] hidden h-[26px] w-[26px] mix-blend-difference md:block"
     >
       <svg viewBox="696.5 -1 29 30" className="h-full w-full">

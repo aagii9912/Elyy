@@ -28,7 +28,6 @@ import { Fragment, useEffect, useRef, useState, type CSSProperties } from "react
 import { useLenis } from "lenis/react";
 import { gsap, type ScrollTrigger as ScrollTriggerType } from "@/lib/gsap";
 import { MonoKicker, useScrollAutoplay } from "./shared";
-import type { MediaFilmStyle } from "@/lib/theme-css";
 
 export type StoryPoint = {
   n: string;
@@ -124,15 +123,10 @@ export function MonoScrollStory({
   autoplaySeconds = 0,
   tone = "dark",
   bgKey,
-  film,
 }: {
   id?: string;
   /** Админаас дэвсгэрийг нь удирдах түлхүүр (`theme.sections`). */
   bgKey?: string;
-  /** Кадрын ДЭЭР буух өнгөт хальс (`mediaFilmStyle`). Хэсгийн өөрийн
-   *  `background` нь кадрын АРД сууж харагддаггүй тул админы «Өнгө /
-   *  Градиент» сонголт эндээс л нүдэнд буунa. `undefined` = хальсгүй. */
-  film?: MediaFilmStyle | null;
   /** Chapter index label, e.g. "01". */
   chapter: string;
   kicker: string;
@@ -482,48 +476,49 @@ export function MonoScrollStory({
       data-tone={tone}
       className={`relative ${light ? "bg-ground" : "bg-night"} ${heightClass}`}
     >
-      <div className="sticky top-0 flex h-[100svh] min-h-[560px] w-full overflow-hidden">
+      {/* Бараан тонд бичвэр бүхэлдээ нимгэн сүүдэртэй: ногоон хөшиг
+          хасагдсан тул (доорх тайлбарыг үз) цайвар кадар дээр цагаан
+          бичиг уусахаас зөвхөн энэ сүүдэр хамгаална. Сүүдэр нь кадрын
+          ӨНГИЙГ хөнддөггүй — хөшиг буцаж ирээгүй. */}
+      <div
+        className={`sticky top-0 flex h-[100svh] min-h-[560px] w-full overflow-hidden ${
+          light ? "" : "[text-shadow:0_1px_2px_rgba(9,14,7,0.45),0_2px_22px_rgba(9,14,7,0.55)]"
+        }`}
+      >
         <canvas ref={canvas} className="absolute inset-0 z-0 h-full w-full" />
 
-        {/* Хөшиг — ЗҮҮН тийш жинтэй шаантаг. Бичвэр бүхэлдээ зүүн баганад
-            суудаг тул тодролыг ЯГ ТЭНД өгөөд, баруун тал (рендерийн гол
-            дүр) бараг хөндөгдөхгүй үлдэнэ. Өмнө нь бүх дэлгэцийг дүүрэн
-            шугаман хөшиг + голд радиал эллипс хоёр давхарлаж, кадрын
-            голыг бүдгэрүүлдэг байв.
-            Хөшгийн өнгө нь `charcoal` (#16280f) — брэндийн гүн ногоон:
-            ELYS самбартай нэг л film ажиллаж, кадрууд хайнга саарал биш
-            ногоон дор суудаг. Hero ЭНЭ ДҮРМЭЭС ГАДУУР — тэнд night хэвээр. */}
-        <div
-          aria-hidden
-          className={`pointer-events-none absolute inset-0 z-[5] ${
-            light
-              ? "bg-[linear-gradient(96deg,rgba(255,255,255,0.9)_0%,rgba(255,255,255,0.66)_30%,rgba(255,255,255,0.2)_58%,rgba(255,255,255,0)_86%)]"
-              : "bg-[linear-gradient(96deg,rgba(22,40,15,0.88)_0%,rgba(22,40,15,0.62)_30%,rgba(22,40,15,0.18)_58%,rgba(22,40,15,0)_86%)]"
-          }`}
-        />
-        {/* Дээд/доод зөөлөн хөшиг — булангийн толгой, рэйл, явцын зураас
-            бүгд өөрийн сүүдэргүйгээр уншигдана. (Өмнө нь эдгээр жижиг
-            бичгүүд тус бүрдээ `text-shadow`-той байсан нь 4 өөр утга
-            болж тарсан.) */}
-        <div
-          aria-hidden
-          className={`pointer-events-none absolute inset-0 z-[5] ${
-            light
-              ? "bg-gradient-to-t from-white/70 via-white/5 to-white/45"
-              : "bg-gradient-to-t from-charcoal/72 via-charcoal/5 to-charcoal/50"
-          }`}
-        />
+        {/* Хөшиг — ЗҮҮН тийш жинтэй шаантаг + дээд/доод зөөлөн хөшиг.
+            Бичвэр бүхэлдээ зүүн баганад суудаг тул тодролыг ЯГ ТЭНД
+            өгөөд, баруун тал (рендерийн гол дүр) бараг хөндөгдөхгүй
+            үлдэнэ.
 
-        {/* Админаас сонгосон дэвсгэр — кадрын ДЭЭР. Өгөгдмөл («Auto»)
-            үед `null` буюу энэ давхарга огт үүсэхгүй. */}
-        {film && (
-          <div
-            aria-hidden
-            data-theme-film
-            className="pointer-events-none absolute inset-0 z-[6]"
-            style={film}
-          />
+            ⚠️ ЗӨВХӨН `light` тоны үед. Бараан тоны ногоон (`charcoal`
+            #16280f) хөшгийг захиалагчийн шаардлагаар БҮРЭН ХАССАН
+            (2026-09-01): кадрууд ногоон хальсгүй, жинхэнэ өнгөөрөө
+            харагдана. Тиймээс бараан тонд бичвэр нь хөшиггүй, зөвхөн
+            кадрын өөрийн бараан хэсэг дээр тулгуурлана — хэрэв цайвар
+            кадар дээр уншигдац муудвал ЭНД хөшиг нэмэхийн оронд
+            бичвэрийн бэхийг (эсвэл `text-shadow`) нэмнэ. */}
+        {light && (
+          <>
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-0 z-[5] bg-[linear-gradient(96deg,rgba(255,255,255,0.9)_0%,rgba(255,255,255,0.66)_30%,rgba(255,255,255,0.2)_58%,rgba(255,255,255,0)_86%)]"
+            />
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-0 z-[5] bg-gradient-to-t from-white/70 via-white/5 to-white/45"
+            />
+          </>
         )}
+
+        {/* Админаас сонгосон дэвсгэр — кадрын ДЭЭР буух өнгөт хальс.
+            Өнгийг нь `buildThemeCss` (`[data-bg="…"] [data-theme-film]`)
+            өгнө; өгөгдмөл («Auto») үед дүрэм үүсэхгүй тул давхарга
+            тунгалаг үлдэнэ. Элементийг ҮРГЭЛЖ рендерлэх нь админы амьд
+            preview-д чухал: iframe нь зөвхөн CSS-ээ солино, байхгүй
+            элементэд хальс буулгах аргагүй. */}
+        <div aria-hidden data-theme-film className="pointer-events-none absolute inset-0 z-[6]" />
 
         {/* entry veil — bridge in from the hero. Цайвар бүлэгт veil нь мөн
             цайвар: бараан hero-гоос цагаан руу нэг алхамд шилжинэ, эс бөгөөс
@@ -562,15 +557,17 @@ export function MonoScrollStory({
         </div>
 
         {/* chapter intro — centred, scrubs away over the first half-screen.
-            Өөрийн радиал хөшгийг АВЧ ЯВНА: гарчиг төвд байх богино
-            хугацаанд л төв тодорч, дараа нь хамт бүдгэрнэ. */}
+            Цайвар тонд өөрийн радиал хөшгийг АВЧ ЯВНА: гарчиг төвд байх
+            богино хугацаанд л төв тодорч, дараа нь хамт бүдгэрнэ.
+            Бараан тонд хөшиггүй — ногоон хальсыг бүхэлд нь хассан
+            (дээрх тайлбарыг үз). */}
         <div
           data-intro
           aria-hidden
           className={`pointer-events-none absolute inset-0 z-[9] flex flex-col items-center justify-center px-6 text-center ${
             light
               ? "bg-[radial-gradient(ellipse_72%_54%_at_50%_50%,rgba(255,255,255,0.82)_0%,rgba(255,255,255,0)_72%)]"
-              : "bg-[radial-gradient(ellipse_72%_54%_at_50%_50%,rgba(22,40,15,0.62)_0%,rgba(22,40,15,0)_72%)]"
+              : ""
           }`}
         >
           <p className={`mono-hud ${accentText}`}>{chapter}</p>

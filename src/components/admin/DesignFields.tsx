@@ -1,19 +1,23 @@
 "use client";
 
-/* Админы дизайн (theme) засварлагч — палитр, хэсэг тус бүрийн дэвсгэр
-   (өнгө / градиент / зураг), хөшиг, бичгийн горим.
+/* Админы дизайн (theme) засварлагч — палитр, типографи, хэсэг тус
+   бүрийн дэвсгэр, шилэн гадаргуу.
 
    Бүх утга `SiteContent.theme`-д хадгалагдаж, `lib/theme-css.ts` нь
-   түүнээс public хуудасны `<style>`-ийг үүсгэнэ. */
+   түүнээс public хуудасны `<style>`-ийг үүсгэнэ.
 
-import { useState } from "react";
+   Зохион байгуулалт: ЗҮҮН талд дөрвөн алхмын хөшүүрэг, БАРУУН талд
+   жинхэнэ нүүр хуудсыг ачаалсан амьд preview (`ThemePreview`). Өнгө,
+   фонтын нэрийг үгээр тайлбарлах гэж оролдохын оронд үр дүнг нь шууд
+   харуулах нь энэ самбарын гол зарчим. */
+
+import { useMemo, useState } from "react";
 import {
   type GlassContent,
   BODY_FONTS,
   DISPLAY_FONTS,
   type FontOption,
   type TypeContent,
-  BACKGROUND_TOKENS,
   BG_ATTACHMENTS,
   BG_POSITIONS,
   BG_REPEATS,
@@ -25,9 +29,11 @@ import {
   defaultBackground,
   type Background,
   type ThemeContent,
+  type ThemeSectionId,
 } from "@/lib/site-content";
 import { backgroundFilmStyle, backgroundStyle } from "@/lib/theme-css";
 import { Button, Card, Field, ImageField, Select, TextInput, Toggle } from "./ui";
+import { ThemePreview } from "./ThemePreview";
 
 /* ------------------------------------------------------------------ */
 /* Өнгөний туслахууд                                                   */
@@ -240,9 +246,8 @@ function GradientBuilder({
     </div>
   );
 }
-
 /* ------------------------------------------------------------------ */
-/* Дэвсгэрийн бүрэн засварлагч                                         */
+/* Дэвсгэрийн засварлагч                                               */
 /* ------------------------------------------------------------------ */
 
 /** Кадрын оронд тавих дүрс — хальс ямар өнгөтэй буухыг харуулах
@@ -250,21 +255,40 @@ function GradientBuilder({
 const FRAME_STANDIN =
   "linear-gradient(158deg,#4d5a63 0%,#8f9aa1 34%,#cdd3d6 58%,#6f7a82 100%)";
 
-const KIND_TABS: { id: string; label: string }[] = [
-  { id: "token", label: "Токен" },
-  { id: "solid", label: "Өнгө" },
+/* Админд харагдах ДӨРВӨН төрөл. Кодын `kind` + `token` хосыг нэг
+   ойлгомжтой мөр болгож нэгтгэв — «токен» гэдэг үг админд гарахгүй:
+
+     Өгөгдмөл → kind "token"    + token "auto"
+     Өнгө     → kind "token"    + палитрын өнгө   (палитраа дагана)
+                ЭСВЭЛ kind "solid" + дурын hex     (тогтмол)
+     Градиент → kind "gradient"
+     Зураг    → kind "image"                                          */
+type BgMode = "default" | "color" | "gradient" | "image";
+
+const MODE_TABS: { id: BgMode; label: string }[] = [
+  { id: "default", label: "Өгөгдмөл" },
+  { id: "color", label: "Өнгө" },
   { id: "gradient", label: "Градиент" },
   { id: "image", label: "Зураг" },
 ];
 
-const TOKEN_LABEL: Record<string, string> = {
-  auto: "Өгөгдмөл (кодоор — өөрчлөхгүй)",
-  ground: "Хуудасны суурь",
-  surface: "Карт / цагаан гадаргуу",
-  dark: "Хар",
-  accent: "Тодруулга",
-  transparent: "Тунгалаг",
-};
+function bgModeOf(v: Background): BgMode {
+  if (v.kind === "gradient") return "gradient";
+  if (v.kind === "image") return "image";
+  if (v.kind === "solid") return "color";
+  return v.token && v.token !== "auto" ? "color" : "default";
+}
+
+/** «Өнгө» дотор санал болгох палитрын өнгө. Эдгээрийг сонгоход тухайн
+ *  хэсэг палитраа ДАГАЖ өөрчлөгддөг болно (доорх «дурын өнгө» бол
+ *  палитраас хамааралгүй тогтмол утга). */
+const SWATCHES: { token: string; label: string }[] = [
+  { token: "ground", label: "Хуудасны дэвсгэр" },
+  { token: "surface", label: "Карт / цагаан" },
+  { token: "dark", label: "Хар" },
+  { token: "accent", label: "Тодруулга" },
+  { token: "transparent", label: "Тунгалаг" },
+];
 
 const TONE_LABEL: Record<string, string> = {
   auto: "Авто (кодын өгөгдмөл)",
@@ -286,12 +310,24 @@ const REPEAT_LABEL: Record<string, string> = {
   "no-repeat": "Давтахгүй", repeat: "Давтах", "repeat-x": "Хэвтээ давтах", "repeat-y": "Босоо давтах",
 };
 
+/** Палитрын өнгийг ЖИНХЭНЭ hex рүү — swatch-ийг зөв будахад. */
+function swatchColor(token: string, palette: ThemeContent["palette"]): string {
+  switch (token) {
+    case "ground": return palette.ground;
+    case "surface": return palette.surface;
+    case "dark": return palette.dark;
+    case "accent": return palette.accent;
+    default: return "transparent";
+  }
+}
+
 export function BackgroundField({
   value,
   onChange,
   palette,
   hint,
   film = false,
+  manualTone = false,
 }: {
   value: Background;
   onChange: (next: Background) => void;
@@ -299,18 +335,33 @@ export function BackgroundField({
   palette: ThemeContent["palette"];
   hint?: React.ReactNode;
   /** Кадраар бүрхэгдсэн хэсэг үү — тийм бол дэвсгэр нь кадрын ДЭЭР буух
-   *  хальс болно (`lib/theme-css.ts` → `mediaFilmStyle`). Урьдчилан
+   *  хальс болно (`lib/theme-css.ts` → `backgroundFilmStyle`). Урьдчилан
    *  харахад ч мөн хальс болгож үзүүлнэ. */
   film?: boolean;
+  /** Бичгийн өнгийг ГАРААР сонгох ёстой хэсэг үү. Үлдсэн хэсгүүд
+   *  дэвсгэрийнхээ гэрэлтэлтээс өөрсдөө тооцдог тул тоныг харуулахгүй
+   *  (`lib/theme-css.ts` → `flatSectionTone`). */
+  manualTone?: boolean;
 }) {
   const set = (patch: Partial<Background>) => onChange({ ...value, ...patch });
-  const kind = value.kind || "token";
+  const mode = bgModeOf(value);
   const preview = backgroundStyle(value, palette);
   const dark = value.tone === "dark";
-  const blurred = kind === "image" && value.image.blur > 0 && Boolean(value.image.url);
+  const blurred = value.kind === "image" && value.image.blur > 0 && Boolean(value.image.url);
   /* Кадртай хэсэгт дэвсгэр нь ард нь биш, кадрын ДЭЭР хальс болж
      буудаг — урьдчилан харахыг ч яг тэр дарааллаар нь угсарна. */
   const filmLayer = film ? backgroundFilmStyle(value, palette) : null;
+  /* Зурган дэвсгэрийн гэрэлтэлтийг код мэдэх аргагүй тул тэнд ямагт
+     гараар. Бусад тохиолдолд дэвсгэрээс автоматаар тодорхойлогдоно. */
+  const showTone = manualTone || mode === "image";
+
+  /** Төрөл солиход утгыг ЗӨВ хосолол руу шилжүүлнэ. */
+  const setMode = (next: BgMode) => {
+    if (next === "default") set({ kind: "token", token: "auto" });
+    else if (next === "color") set({ kind: "token", token: "surface" });
+    else if (next === "gradient") set({ kind: "gradient" });
+    else set({ kind: "image" });
+  };
 
   return (
     <div className="space-y-4">
@@ -354,15 +405,15 @@ export function BackgroundField({
         </span>
       </div>
 
-      {/* Төрлийн таб */}
+      {/* Төрөл */}
       <div className="flex flex-wrap gap-1.5">
-        {KIND_TABS.map((t) => (
+        {MODE_TABS.map((t) => (
           <button
             key={t.id}
             type="button"
-            onClick={() => set({ kind: t.id })}
+            onClick={() => setMode(t.id)}
             className={`rounded-lg border px-3 py-2 text-[13px] font-semibold transition-colors ${
-              kind === t.id
+              mode === t.id
                 ? "border-[#2a5124] bg-[#2a5124]/5 text-[#2a5124]"
                 : "border-neutral-300 text-neutral-600 hover:bg-neutral-50"
             }`}
@@ -372,27 +423,71 @@ export function BackgroundField({
         ))}
       </div>
 
-      {kind === "token" && (
-        <Field label="Дизайн системийн өнгө" hint="«Өгөгдмөл» үед энэ хэсэг кодод бичсэн өнгөөрөө үлдэнэ.">
-          <Select value={value.token} onChange={(e) => set({ token: e.target.value })}>
-            {BACKGROUND_TOKENS.map((t) => (
-              <option key={t} value={t}>
-                {TOKEN_LABEL[t]}
-              </option>
-            ))}
-          </Select>
-        </Field>
+      {mode === "default" && (
+        <p className="rounded-lg bg-neutral-50 px-3.5 py-2.5 text-[12px] leading-relaxed text-neutral-500">
+          Энэ хэсэг кодод бичсэн өнгөөрөө үлдэнэ — дизайны тохиргоо түүнд хүрэхгүй.
+        </p>
       )}
 
-      {kind === "solid" && (
-        <ColorField label="Дэвсгэр өнгө" value={value.color} onChange={(color) => set({ color })} />
+      {mode === "color" && (
+        <div>
+          <span className="mb-1.5 block text-[13px] font-semibold text-neutral-700">
+            Палитраас
+          </span>
+          <div className="flex flex-wrap gap-1.5">
+            {SWATCHES.map((s) => {
+              const on = value.kind === "token" && value.token === s.token;
+              const c = swatchColor(s.token, palette);
+              return (
+                <button
+                  key={s.token}
+                  type="button"
+                  onClick={() => set({ kind: "token", token: s.token })}
+                  className={`flex items-center gap-2 rounded-lg border px-2.5 py-1.5 text-[12px] font-semibold transition-colors ${
+                    on
+                      ? "border-[#2a5124] bg-[#2a5124]/5 text-[#2a5124]"
+                      : "border-neutral-300 text-neutral-600 hover:bg-neutral-50"
+                  }`}
+                >
+                  <span
+                    aria-hidden
+                    style={
+                      s.token === "transparent"
+                        ? { backgroundImage: "linear-gradient(45deg,#ddd 25%,transparent 25%,transparent 75%,#ddd 75%),linear-gradient(45deg,#ddd 25%,#fff 25%,#fff 75%,#ddd 75%)", backgroundSize: "8px 8px", backgroundPosition: "0 0,4px 4px" }
+                        : { background: c }
+                    }
+                    className="h-5 w-5 rounded-md border border-black/10"
+                  />
+                  {s.label}
+                </button>
+              );
+            })}
+          </div>
+          <p className="mt-1.5 text-[11px] leading-relaxed text-neutral-400">
+            Палитраас сонгосон өнгө нь палитраа <b>дагаж</b> өөрчлөгдөнө. Доорх дурын өнгө
+            бол палитраас хамааралгүй тогтмол утга.
+          </p>
+
+          <div className="mt-3.5">
+            <ColorField
+              label="Эсвэл дурын өнгө"
+              value={value.color}
+              onChange={(color) => set({ kind: "solid", color })}
+              hint={
+                value.kind === "solid"
+                  ? "Идэвхтэй — палитр өөрчлөгдөхөд энэ хэсэг дагахгүй."
+                  : "Өнгө сонгомогц энэ утга идэвхжинэ."
+              }
+            />
+          </div>
+        </div>
       )}
 
-      {kind === "gradient" && (
+      {mode === "gradient" && (
         <GradientBuilder value={value.gradient} onChange={(gradient) => set({ gradient })} />
       )}
 
-      {kind === "image" && (
+      {mode === "image" && (
         <div className="space-y-4">
           <ImageField
             label="Дэвсгэр зураг"
@@ -462,8 +557,13 @@ export function BackgroundField({
           хөшиг огт үүсэхгүй» гэсэн тайлбар худал болно — тэнд 0% нь
           «өгөгдмөл 55%» гэсэн үг). */}
       <div className="rounded-xl border border-neutral-200 p-4">
-        <p className="mb-3 text-[13px] font-bold text-neutral-800">
-          {film ? "Хальсны тун" : "Хөшиг (дэвсгэр дээр давхарлана)"}
+        <p className="mb-1 text-[13px] font-bold text-neutral-800">
+          {film ? "Кадрын дээрх өнгөт хальс" : "Хөшиг — дэвсгэр дээр давхарлах"}
+        </p>
+        <p className="mb-3 text-[12px] leading-relaxed text-neutral-500">
+          {film
+            ? "Бичлэгийг бараантуулж, дээрх бичгийг уншигдахуйц болгоно."
+            : "Зураг эсвэл градиентийг бараантуулж, бичгийг уншигдахуйц болгоно."}
         </p>
         <div className="grid gap-4 sm:grid-cols-2">
           <ColorField
@@ -503,17 +603,24 @@ export function BackgroundField({
         </div>
       </div>
 
-      {/* Бичгийн горим */}
-      <Field
-        label="Бичгийн өнгө"
-        hint="Дэвсгэрийг хартай болгосон бол «Хар дэвсгэр» болгож бичгээ цайруулна."
-      >
-        <Select value={value.tone} onChange={(e) => set({ tone: e.target.value })}>
-          {Object.entries(TONE_LABEL).map(([k, label]) => (
-            <option key={k} value={k}>{label}</option>
-          ))}
-        </Select>
-      </Field>
+      {/* Бичгийн горим — зөвхөн ГАРААР тохируулах шаардлагатай үед. */}
+      {showTone ? (
+        <Field
+          label="Бичгийн өнгө"
+          hint="Дэвсгэрийг хартай болгосон бол «Хар дэвсгэр» болгож бичгээ цайруулна."
+        >
+          <Select value={value.tone} onChange={(e) => set({ tone: e.target.value })}>
+            {Object.entries(TONE_LABEL).map(([k, label]) => (
+              <option key={k} value={k}>{label}</option>
+            ))}
+          </Select>
+        </Field>
+      ) : (
+        <p className="text-[12px] leading-relaxed text-neutral-400">
+          Бичгийн өнгө <b>автоматаар</b> тодорхойлогдоно — дэвсгэрийг хартай болгоход бичиг
+          цайрч, цайвар болгоход бараантана.
+        </p>
+      )}
 
       <div className="flex flex-wrap items-center gap-2">
         <Button type="button" variant="ghost" onClick={() => onChange(defaultBackground())}>
@@ -671,7 +778,7 @@ function TypePreview({ t }: { t: TypeContent }) {
   const body = stackOf(BODY_FONTS, t.bodyFont);
   const custom = t.mode === "custom";
   return (
-    <div className="overflow-hidden rounded-2xl bg-[#151717] px-8 py-7">
+    <div className="overflow-hidden rounded-2xl bg-[#151717] px-5 py-6">
       <p
         className="text-[10px] font-medium uppercase tracking-[0.34em] text-white/55"
         style={{ fontFamily: custom ? body : undefined }}
@@ -682,7 +789,7 @@ function TypePreview({ t }: { t: TypeContent }) {
         className="mt-3.5 text-white"
         style={{
           fontFamily: custom ? display : undefined,
-          fontSize: `${Math.round(54 * (custom ? t.scale : 1))}px`,
+          fontSize: `${Math.round(38 * (custom ? t.scale : 1))}px`,
           fontWeight: custom ? t.headingWeight : 500,
           letterSpacing: custom ? `${t.headingTracking}em` : "-0.2px",
           lineHeight: custom ? t.headingLeading : 1.05,
@@ -732,18 +839,15 @@ export function TypePanel({
       {/* eslint-disable-next-line @next/next/no-page-custom-font */}
       <link rel="stylesheet" href={SPECIMEN_HREF} />
 
-      {/* Preview нь ДЭЭРЭЭ, гүйлгэхэд дагаж наалдана — хөшүүрэг
-          тохируулж байхад үр дүн үргэлж нүдний өмнө байх ёстой. */}
-      <div className="sticky top-4 z-10">
-        <Card title="Амьд preview" right={<span className="text-xs text-neutral-400">Нүүр дэлгэц</span>}>
-          <TypePreview t={value} />
-          <p className="mt-3.5 text-xs leading-relaxed text-neutral-400">
-            Латин ба кирилл хоёулаа харагдана — сонгосон фонт монгол бичигт хэрхэн буухыг эндээс
-            шалгана.
-            {!custom && " Одоо кодын өгөгдмөл хэвээр: сайт дээр нэмэлт CSS, нэмэлт фонт татагдахгүй."}
-          </p>
-        </Card>
-      </div>
+      {/* Фонтын дээж. Жинхэнэ хуудсыг хажуугийн амьд preview харуулдаг
+          тул энэ нь зөвхөн үсгийн ХЭЛБЭРИЙГ томоор үзүүлэх үүрэгтэй. */}
+      <Card title="Фонтын дээж" right={<span className="text-xs text-neutral-400">Латин + кирилл</span>}>
+        <TypePreview t={value} />
+        <p className="mt-3.5 text-xs leading-relaxed text-neutral-400">
+          Сонгосон фонт монгол бичигт хэрхэн буухыг эндээс шалгана.
+          {!custom && " Одоо кодын өгөгдмөл хэвээр: сайт дээр нэмэлт CSS, нэмэлт фонт татагдахгүй."}
+        </p>
+      </Card>
 
       <Card title="Бэлэн хослол">
         <p className="mb-3.5 text-[13px] leading-relaxed text-neutral-500">
@@ -1054,8 +1158,116 @@ export const PALETTE_PRESETS: { id: string; label: string; palette: ThemeContent
 ];
 
 /* ------------------------------------------------------------------ */
+/* Палитрын мөр                                                        */
+/* ------------------------------------------------------------------ */
+
+/** Палитрын нэг өнгө. Нэрийг нь ойлгуулах гол зүйл бол ХААНА
+ *  хэрэглэгддгийг нь бичих — «Гүн тодруулга» гэдэг үг өөрөө юу ч
+ *  хэлэхгүй. Үлдсэнийг хажуугийн амьд preview харуулна. */
+type PaletteRole = {
+  key: keyof ThemeContent["palette"];
+  label: string;
+  where: string;
+  /** Тодролыг шалгах хос: энэ өнгө дээр ямар өнгө буудаг вэ. */
+  contrast?: { fg: keyof ThemeContent["palette"]; bg: keyof ThemeContent["palette"] };
+};
+
+const PALETTE_ROLES: PaletteRole[] = [
+  {
+    key: "ground",
+    label: "Хуудасны дэвсгэр",
+    where: "Бараг бүх хэсгийн цаад өнгө — цайвар «цаас».",
+    contrast: { fg: "dark", bg: "ground" },
+  },
+  {
+    key: "surface",
+    label: "Карт, самбарын өнгө",
+    where: "Өрөөний карт, менежерийн карт, pop-up, маягтын талбар.",
+    contrast: { fg: "dark", bg: "surface" },
+  },
+  {
+    key: "dark",
+    label: "Бичиг ба хар хэсэг",
+    where: "Гарчиг, үндсэн бичвэр, хар товч, хөл хэсгийн дэвсгэр.",
+  },
+  {
+    key: "muted",
+    label: "Туслах бүдэг бичиг",
+    where: "Тайлбар, шошго, тоон нэгж — гол биш, дэмжих бичиг.",
+    contrast: { fg: "muted", bg: "ground" },
+  },
+  {
+    key: "accent",
+    label: "Тодруулга (тод ногоон)",
+    where: "Гарчгийн өмнөх зураас, идэвхтэй цэг, гүйдэг мөр, hover.",
+  },
+  {
+    key: "accentDeep",
+    label: "Гүн тодруулга",
+    where: "Ногоон товч, холбоос, диаграмын гүн өнгө.",
+    contrast: { fg: "accentDeep", bg: "ground" },
+  },
+  {
+    key: "film",
+    label: "Бичлэгийн хөшиг",
+    where: "Нүүр дэлгэц, 01 ба 03-ын кадрын дээр буух өнгөт хальс.",
+  },
+];
+
+function PaletteRow({
+  role,
+  palette,
+  onChange,
+}: {
+  role: PaletteRole;
+  palette: ThemeContent["palette"];
+  onChange: (next: string) => void;
+}) {
+  const value = palette[role.key];
+  return (
+    <div className="flex items-start gap-3 rounded-xl border border-neutral-200 p-3">
+      <input
+        type="color"
+        aria-label={role.label}
+        value={normalizeHex(value)}
+        onChange={(e) => onChange(e.target.value)}
+        className="h-11 w-11 shrink-0 cursor-pointer rounded-lg border border-neutral-300 bg-white p-1"
+      />
+      <div className="min-w-0 flex-1">
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+          <span className="text-[14px] font-bold text-neutral-900">{role.label}</span>
+          {role.contrast && (
+            <ContrastNote fg={palette[role.contrast.fg]} bg={palette[role.contrast.bg]} />
+          )}
+        </div>
+        <p className="mt-0.5 text-[12px] leading-relaxed text-neutral-500">{role.where}</p>
+        <TextInput
+          value={value}
+          placeholder="#f4f4f1"
+          onChange={(e) => onChange(e.target.value)}
+          className="mt-2 max-w-[150px] py-1.5 text-[13px]"
+        />
+      </div>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
 /* Дизайны бүрэн самбар                                                */
 /* ------------------------------------------------------------------ */
+
+/* Дөрвөн алхам — дизайнерын бодох дараалал:
+   өнгө → бичиг → хэсэг тус бүрийн дэвсгэр → эффект.
+   (Өмнө нь «Дэвсгэр» табанд шил, хуудасны суурь, 15 хэсэг гурвуулаа
+   хамт байсан нь юуг нь эхлэхийг ойлгомжгүй болгож байв.) */
+const DESIGN_TABS = [
+  { id: "color", label: "1 · Өнгө", hint: "Брэндийн палитр" },
+  { id: "type", label: "2 · Бичиг", hint: "Фонт, гарчгийн шинж" },
+  { id: "sections", label: "3 · Хэсгүүд", hint: "Хэсэг бүрийн дэвсгэр" },
+  { id: "effects", label: "4 · Эффект", hint: "Шил, хуудасны суурь" },
+] as const;
+
+type DesignTab = (typeof DESIGN_TABS)[number]["id"];
 
 export function DesignPanel({
   theme,
@@ -1064,213 +1276,261 @@ export function DesignPanel({
   theme: ThemeContent;
   onChange: (next: ThemeContent) => void;
 }) {
-  const [open, setOpen] = useState<string | null>(null);
-  const [tab, setTab] = useState<"color" | "type" | "bg">("color");
+  const [open, setOpen] = useState<ThemeSectionId | null>(null);
+  const [tab, setTab] = useState<DesignTab>("color");
   const p = theme.palette;
 
   const setPalette = (patch: Partial<ThemeContent["palette"]>) =>
     onChange({ ...theme, palette: { ...p, ...patch } });
 
-  const setSection = (id: keyof ThemeContent["sections"], bg: Background) =>
+  const setSection = (id: ThemeSectionId, bg: Background) =>
     onChange({ ...theme, sections: { ...theme.sections, [id]: bg } });
 
   /** Тухайн хэсэг өгөгдмөлөөсөө өөрчлөгдсөн эсэх — жагсаалтад тэмдэглэнэ. */
   const changed = (bg: Background) =>
     JSON.stringify(bg) !== JSON.stringify(defaultBackground());
 
-  const TABS = [
-    { id: "color", label: "Өнгө" },
-    { id: "type", label: "Типографи" },
-    { id: "bg", label: "Дэвсгэр" },
-  ] as const;
+  /* Юу нь өгөгдмөлөөс салсныг НЭГ мөрөнд. Дизайны тохиргоо олон
+     давхаргатай тул «би юу өөрчилсөн бэ?» гэдэг хамгийн түгээмэл
+     төөрөгдөл байдаг. */
+  const diff = useMemo(() => {
+    const out: string[] = [];
+    const same = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b);
+    if (!same(theme.palette, DEFAULT_THEME.palette)) out.push("өнгө");
+    if (theme.type.mode !== "default") out.push("бичиг");
+    const n = THEME_SECTIONS.filter((s) => changed(theme.sections[s.id])).length;
+    if (n) out.push(`${n} хэсгийн дэвсгэр`);
+    if (theme.glass.mode !== "default") out.push("шил");
+    if (changed(theme.page)) out.push("хуудасны суурь");
+    return out;
+  }, [theme]);
+
+  /* Хэсэг сонгосон үед preview тийш нь гүйнэ. Бусад табд эхнээс нь. */
+  const focus = tab === "sections" ? open : null;
 
   return (
-    <>
-      <div className="flex flex-wrap gap-1.5">
-        {TABS.map((t) => (
-          <button
-            key={t.id}
-            type="button"
-            onClick={() => setTab(t.id)}
-            className={`rounded-lg border px-3.5 py-2 text-[13px] font-semibold transition-colors ${
-              tab === t.id
-                ? "border-2 border-[#2a5124] bg-[#2a5124]/5 px-[13px] py-[7px] text-[#2a5124]"
-                : "border-neutral-300 bg-white text-neutral-500 hover:bg-neutral-50"
-            }`}
-          >
-            {t.label}
-          </button>
-        ))}
+    <div className="grid min-w-0 gap-6 xl:grid-cols-[minmax(340px,400px)_minmax(0,1fr)] xl:items-start">
+      {/* Preview — нарийн дэлгэцэд ДЭЭРЭЭ, өргөнд баруун талд наалдана. */}
+      <div className="min-w-0 xl:sticky xl:top-[84px] xl:order-2">
+        <ThemePreview theme={theme} focus={focus} />
       </div>
 
-      {tab === "type" && (
-        <TypePanel
-          value={theme.type}
-          onChange={(type) => onChange({ ...theme, type })}
-        />
-      )}
-
-      {tab === "color" && (
-      <>
-      <Card title="Бэлэн палитр">
-        <p className="mb-3 text-[13px] leading-relaxed text-neutral-500">
-          Нэг товчоор бүх өнгийг сольж, дараа нь доор гараар засна. Хэсэг тус
-          бүрийн дэвсгэрийг өөрчлөхгүй.
-        </p>
-        <div className="flex flex-wrap gap-2">
-          {PALETTE_PRESETS.map((preset) => (
-            <button
-              key={preset.id}
-              type="button"
-              onClick={() => onChange({ ...theme, palette: preset.palette })}
-              className="flex items-center gap-2 rounded-xl border border-neutral-300 px-3 py-2 text-[13px] font-semibold text-neutral-700 transition-colors hover:bg-neutral-50"
-            >
-              <span className="flex">
-                {[preset.palette.ground, preset.palette.surface, preset.palette.dark, preset.palette.accent].map(
-                  (c) => (
-                    <span
-                      key={c}
-                      style={{ background: c }}
-                      className="h-5 w-5 rounded-full border border-black/10 [&:not(:first-child)]:-ml-1.5"
-                    />
-                  )
-                )}
-              </span>
-              {preset.label}
-            </button>
-          ))}
-        </div>
-      </Card>
-
-      <Card title="Палитр">
-        <div className="grid gap-4 sm:grid-cols-2">
-          <ColorField
-            label="Хуудасны суурь"
-            value={p.ground}
-            onChange={(ground) => setPalette({ ground })}
-            hint={<ContrastNote fg={p.dark} bg={p.ground} />}
-          />
-          <ColorField
-            label="Карт / гадаргуу"
-            value={p.surface}
-            onChange={(surface) => setPalette({ surface })}
-            hint={<ContrastNote fg={p.dark} bg={p.surface} />}
-          />
-          <ColorField
-            label="Үндсэн бичиг ба хар хэсэг"
-            value={p.dark}
-            onChange={(dark) => setPalette({ dark })}
-          />
-          <ColorField
-            label="Бүдэг туслах бичиг"
-            value={p.muted}
-            onChange={(muted) => setPalette({ muted })}
-            hint={<ContrastNote fg={p.muted} bg={p.ground} />}
-          />
-          <ColorField
-            label="Тодруулга"
-            value={p.accent}
-            onChange={(accent) => setPalette({ accent })}
-          />
-          <ColorField
-            label="Гүн тодруулга"
-            value={p.accentDeep}
-            onChange={(accentDeep) => setPalette({ accentDeep })}
-            hint={<ContrastNote fg={p.accentDeep} bg={p.ground} />}
-          />
-          <ColorField
-            label="Кино хэсгийн хөшиг"
-            value={p.film}
-            onChange={(film) => setPalette({ film })}
-            hint="Бичлэгийн кадруудын дээрх өнгөт хөшиг."
-          />
-        </div>
-        <div className="mt-4 border-t border-neutral-200 pt-4">
-          <Button
-            type="button"
-            variant="ghost"
-            onClick={() => onChange({ ...theme, palette: DEFAULT_THEME.palette })}
-          >
-            Палитрыг өгөгдмөл рүү буцаах
-          </Button>
-        </div>
-      </Card>
-
-      </>
-      )}
-
-      {tab === "bg" && (
-      <>
-      <GlassPanel value={theme.glass} onChange={(glass) => onChange({ ...theme, glass })} />
-
-      <Card title="Хуудасны суурь дэвсгэр" right={<span className="text-xs text-neutral-400">html</span>}>
-        <p className="mb-4 text-[13px] leading-relaxed text-neutral-500">
-          Гүйлтийн хязгаараас хальсан үед (overscroll) харагдах өнгө.
-        </p>
-        <BackgroundField
-          value={theme.page}
-          palette={p}
-          onChange={(page) => onChange({ ...theme, page })}
-        />
-      </Card>
-
-      <Card title="Хэсэг тус бүрийн дэвсгэр">
-        <p className="mb-4 text-[13px] leading-relaxed text-neutral-500">
-          Хэсэг бүрийг дарж дэвсгэр өнгө, градиент эсвэл зургийг нь тусад нь
-          тохируулна. «Өгөгдмөл» үед тухайн хэсэг кодод бичсэн өнгөөрөө үлдэнэ.
-        </p>
-        <ul className="space-y-2">
-          {THEME_SECTIONS.map((s) => {
-            const bg = theme.sections[s.id];
-            const isOpen = open === s.id;
-            return (
-              <li key={s.id} className="overflow-hidden rounded-xl border border-neutral-200">
-                <button
-                  type="button"
-                  onClick={() => setOpen(isOpen ? null : s.id)}
-                  className="flex w-full items-center gap-3 bg-neutral-50 px-4 py-3 text-left transition-colors hover:bg-neutral-100"
+      <div className="min-w-0 space-y-5 xl:order-1">
+        <div className="rounded-2xl border border-neutral-200 bg-white p-3 shadow-sm">
+          {/* Хоёр багана — хөшүүргийн багана нарийн (≈360px) тул дөрөв
+              багтахгүй. `sm:` нь дэлгэцээр хэмждэг тул энд ашиглахгүй. */}
+          <div className="grid grid-cols-2 gap-1.5">
+            {DESIGN_TABS.map((t) => (
+              <button
+                key={t.id}
+                type="button"
+                onClick={() => setTab(t.id)}
+                className={`rounded-lg border px-2.5 py-2 text-left transition-colors ${
+                  tab === t.id
+                    ? "border-[#2a5124] bg-[#2a5124]/5"
+                    : "border-neutral-200 hover:bg-neutral-50"
+                }`}
+              >
+                <span
+                  className={`block text-[13px] font-bold ${
+                    tab === t.id ? "text-[#2a5124]" : "text-neutral-700"
+                  }`}
                 >
-                  <span
-                    aria-hidden
-                    style={{ ...backgroundStyle(bg, p), backgroundSize: "cover" }}
-                    className="h-8 w-12 shrink-0 rounded-md border border-neutral-300 bg-white"
+                  {t.label}
+                </span>
+                <span className="mt-0.5 block text-[11px] leading-tight text-neutral-400">
+                  {t.hint}
+                </span>
+              </button>
+            ))}
+          </div>
+
+          <div className="mt-2.5 flex flex-wrap items-center gap-2 border-t border-neutral-200 pt-2.5">
+            <span className="text-[12px] text-neutral-500">
+              {diff.length ? (
+                <>
+                  Өгөгдмөлөөс өөрчлөгдсөн: <b className="text-neutral-800">{diff.join(" · ")}</b>
+                </>
+              ) : (
+                "Бүх тохиргоо өгөгдмөл — сайт кодод бичсэн дүр төрхөөрөө."
+              )}
+            </span>
+            {diff.length > 0 && (
+              <Button
+                type="button"
+                variant="ghost"
+                className="ml-auto px-2.5 py-1 text-[12px]"
+                onClick={() => {
+                  if (confirm("Дизайны БҮХ тохиргоог өгөгдмөл рүү буцаах уу?")) {
+                    onChange(structuredClone(DEFAULT_THEME));
+                  }
+                }}
+              >
+                Бүгдийг өгөгдмөл рүү
+              </Button>
+            )}
+          </div>
+        </div>
+
+        {tab === "type" && (
+          <TypePanel value={theme.type} onChange={(type) => onChange({ ...theme, type })} />
+        )}
+
+        {tab === "color" && (
+          <>
+            <Card title="Бэлэн палитр">
+              <p className="mb-3 text-[13px] leading-relaxed text-neutral-500">
+                Нэг товчоор бүх өнгийг сольж, дараа нь доор гараар засна.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {PALETTE_PRESETS.map((preset) => {
+                  const on = JSON.stringify(preset.palette) === JSON.stringify(p);
+                  return (
+                    <button
+                      key={preset.id}
+                      type="button"
+                      onClick={() => onChange({ ...theme, palette: preset.palette })}
+                      className={`flex items-center gap-2 rounded-xl border px-3 py-2 text-[13px] font-semibold transition-colors ${
+                        on
+                          ? "border-[#2a5124] bg-[#2a5124]/5 text-[#2a5124]"
+                          : "border-neutral-300 text-neutral-700 hover:bg-neutral-50"
+                      }`}
+                    >
+                      <span className="flex">
+                        {[
+                          preset.palette.ground,
+                          preset.palette.surface,
+                          preset.palette.dark,
+                          preset.palette.accent,
+                        ].map((c) => (
+                          <span
+                            key={c}
+                            style={{ background: c }}
+                            className="h-5 w-5 rounded-full border border-black/10 [&:not(:first-child)]:-ml-1.5"
+                          />
+                        ))}
+                      </span>
+                      {preset.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </Card>
+
+            <Card title="Өнгө бүр хаана хэрэглэгддэг вэ">
+              <div className="space-y-2">
+                {PALETTE_ROLES.map((role) => (
+                  <PaletteRow
+                    key={role.key}
+                    role={role}
+                    palette={p}
+                    onChange={(v) => setPalette({ [role.key]: v })}
                   />
-                  <span className="min-w-0 flex-1">
-                    <span className="flex items-center gap-1.5 text-[14px] font-bold text-neutral-900">
-                      {s.label}
-                      {changed(bg) && (
-                        <span aria-hidden title="Өөрчлөгдсөн" className="h-1.5 w-1.5 rounded-full bg-amber-500" />
-                      )}
-                    </span>
-                    {s.hint && <span className="block text-[11px] text-neutral-400">{s.hint}</span>}
-                  </span>
-                  <span aria-hidden className="shrink-0 text-neutral-400">{isOpen ? "▾" : "▸"}</span>
-                </button>
-                {isOpen && (
-                  <div className="border-t border-neutral-200 p-4">
-                    {"film" in s && s.film && (
-                      <p className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-3.5 py-2.5 text-[12px] leading-relaxed text-amber-800">
-                        Энэ хэсгийг бичлэг/кадар бүтэн бүрхдэг. Сонгосон өнгө, градиент
-                        нь <b>кадрын ДЭЭР</b> буух өнгөт хальс болж буунa (өгөгдмөл тун
-                        55%). Тунг «Хөшиг → Хүч» гүйлгүүрээр тохируулна. «Өгөгдмөл»
-                        үед хальс үүсэхгүй — хэсэг хэвээрээ үлдэнэ.
-                      </p>
+                ))}
+              </div>
+              <div className="mt-4 border-t border-neutral-200 pt-4">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => onChange({ ...theme, palette: DEFAULT_THEME.palette })}
+                >
+                  Палитрыг өгөгдмөл рүү буцаах
+                </Button>
+              </div>
+            </Card>
+          </>
+        )}
+
+        {tab === "sections" && (
+          <Card title="Хэсэг тус бүрийн дэвсгэр">
+            <p className="mb-4 text-[13px] leading-relaxed text-neutral-500">
+              Хэсгийг дарахад баруун талын preview тийш нь гүйж, хүрээгээр тэмдэглэнэ.
+              «Өгөгдмөл» үед тухайн хэсэг кодод бичсэн өнгөөрөө үлдэнэ.
+            </p>
+            <ul className="space-y-2">
+              {THEME_SECTIONS.map((s) => {
+                const bg = theme.sections[s.id];
+                const isOpen = open === s.id;
+                const isFilm = "film" in s && Boolean(s.film);
+                return (
+                  <li key={s.id} className="overflow-hidden rounded-xl border border-neutral-200">
+                    <button
+                      type="button"
+                      onClick={() => setOpen(isOpen ? null : s.id)}
+                      className={`flex w-full items-center gap-3 px-4 py-3 text-left transition-colors ${
+                        isOpen ? "bg-[#2a5124]/5" : "bg-neutral-50 hover:bg-neutral-100"
+                      }`}
+                    >
+                      <span
+                        aria-hidden
+                        style={{ ...backgroundStyle(bg, p), backgroundSize: "cover" }}
+                        className="h-8 w-12 shrink-0 rounded-md border border-neutral-300 bg-white"
+                      />
+                      <span className="min-w-0 flex-1">
+                        <span className="flex flex-wrap items-center gap-1.5 text-[14px] font-bold text-neutral-900">
+                          {s.label}
+                          {changed(bg) && (
+                            <span
+                              aria-hidden
+                              title="Өөрчлөгдсөн"
+                              className="h-1.5 w-1.5 rounded-full bg-amber-500"
+                            />
+                          )}
+                          {isFilm && (
+                            <span className="rounded-full bg-neutral-200 px-1.5 py-0.5 text-[10px] font-bold tracking-[0.02em] text-neutral-600">
+                              БИЧЛЭГ ДЭЭР
+                            </span>
+                          )}
+                        </span>
+                        {s.hint && <span className="block text-[11px] text-neutral-400">{s.hint}</span>}
+                      </span>
+                      <span aria-hidden className="shrink-0 text-neutral-400">
+                        {isOpen ? "▾" : "▸"}
+                      </span>
+                    </button>
+                    {isOpen && (
+                      <div className="border-t border-neutral-200 p-4">
+                        {isFilm && (
+                          <p className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-3.5 py-2.5 text-[12px] leading-relaxed text-amber-800">
+                            Энэ хэсгийг бичлэг/кадар бүтэн бүрхдэг. Сонгосон өнгө, градиент
+                            нь <b>кадрын ДЭЭР</b> буух өнгөт хальс болж буунa (өгөгдмөл тун
+                            55%). Тунг «Хүч» гүйлгүүрээр тохируулна.
+                          </p>
+                        )}
+                        <BackgroundField
+                          value={bg}
+                          palette={p}
+                          film={isFilm}
+                          manualTone={"manualTone" in s ? Boolean(s.manualTone) : false}
+                          onChange={(next) => setSection(s.id, next)}
+                        />
+                      </div>
                     )}
-                    <BackgroundField
-                      value={bg}
-                      palette={p}
-                      film={"film" in s ? Boolean(s.film) : false}
-                      onChange={(next) => setSection(s.id, next)}
-                    />
-                  </div>
-                )}
-              </li>
-            );
-          })}
-        </ul>
-      </Card>
-      </>
-      )}
-    </>
+                  </li>
+                );
+              })}
+            </ul>
+          </Card>
+        )}
+
+        {tab === "effects" && (
+          <>
+            <GlassPanel value={theme.glass} onChange={(glass) => onChange({ ...theme, glass })} />
+
+            <Card title="Хуудасны суурь өнгө">
+              <p className="mb-4 text-[13px] leading-relaxed text-neutral-500">
+                Хуудсыг эхлэл эсвэл төгсгөлөөс нь цааш чангаахад (bounce) хормын зуур
+                харагддаг өнгө. Ихэвчлэн хуудасны дэвсгэртэй ижил байлгана.
+              </p>
+              <BackgroundField
+                value={theme.page}
+                palette={p}
+                onChange={(page) => onChange({ ...theme, page })}
+              />
+            </Card>
+          </>
+        )}
+      </div>
+    </div>
   );
 }

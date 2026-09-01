@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 600" width="900" height="600" role="img" aria-label="Турк">
+  <rect width="900" height="600" fill="#e30a17"/>
+  <circle cx="300" cy="300" r="150" fill="#ffffff"/>
+  <circle cx="345" cy="300" r="120" fill="#e30a17"/>
+  <polygon fill="#ffffff" points="468.00,300.00 517.75,283.83 517.75,231.52 548.50,273.84 598.25,257.68 567.50,300.00 598.25,342.32 548.50,326.16 517.75,368.48 517.75,316.17"/>
+</svg>

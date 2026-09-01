@@ -56,6 +56,8 @@ export function MonoChatbot({ site }: { site: SiteContent }) {
         aria-label={open ? "Чатыг хаах" : "Чат нээх"}
         onClick={() => setOpen((v) => !v)}
         data-cursor-hover
+        /* Админы дизайн preview энэ тэмдгээр хөвөгч хэсгүүдийг нуудаг. */
+        data-chrome="chatbot"
         className="fixed bottom-5 right-5 z-[70] flex items-center justify-center rounded-full bg-night text-white shadow-[0_8px_30px_rgba(0,0,0,0.3)] transition-transform duration-300 hover:-translate-y-1 md:bottom-7 md:right-7"
         style={{ height: 52, width: 52 }}
       >
@@ -72,6 +74,7 @@ export function MonoChatbot({ site }: { site: SiteContent }) {
 
       {/* Panel */}
       <div
+        data-chrome="chatbot"
         className={`fixed bottom-[86px] right-4 z-[70] flex w-[calc(100vw-2rem)] max-w-sm flex-col overflow-hidden rounded-2xl border border-night/10 bg-white shadow-2xl transition-all duration-300 md:right-7 ${
           open ? "visible translate-y-0 opacity-100" : "invisible translate-y-3 opacity-0"
         }`}

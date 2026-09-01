@@ -334,8 +334,12 @@ export function SiteEditor({ initial }: { initial: SiteContent }) {
   const body = useMemo(() => renderSection(section, content, edit), [section, content, edit]);
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8">
-      <header className="mb-6 flex flex-wrap items-center gap-3">
+    /* Дизайны хэсэг нь хөшүүрэг + амьд preview хоёрыг зэрэгцүүлдэг тул
+       илүү өргөн зай авна; бусад хэсэг уншихад тохиромжтой нарийхан. */
+    <div className={`mx-auto px-4 py-8 ${section === "design" ? "max-w-[1700px]" : "max-w-6xl"}`}>
+      {/* Наалдмал — дизайны самбар урт тул «Хадгалах» доош гүйхэд алга
+          болох ёсгүй. `-mx-4 px-4` нь савны хажуугийн зайг нөхнө. */}
+      <header className="sticky top-0 z-30 -mx-4 mb-6 flex flex-wrap items-center gap-3 border-b border-neutral-200 bg-neutral-50/95 px-4 py-3 backdrop-blur">
         <div>
           <h1 className="text-2xl font-extrabold tracking-tight text-neutral-900">Сайтын контент</h1>
           <p className="text-sm text-neutral-500">Үндсэн хуудасны бүх текст, зураг</p>
@@ -372,7 +376,7 @@ export function SiteEditor({ initial }: { initial: SiteContent }) {
 
       <div className="grid gap-6 lg:grid-cols-[240px_1fr]">
         {/* Хэсгүүдийн жагсаалт */}
-        <nav className="lg:sticky lg:top-6 lg:self-start">
+        <nav className="lg:sticky lg:top-[84px] lg:self-start">
           <ul className="flex gap-2 overflow-x-auto pb-2 lg:flex-col lg:gap-1 lg:overflow-visible lg:pb-0">
             {SECTIONS.map((s) => (
               <li key={s.id} className="shrink-0 lg:shrink">
@@ -835,7 +839,7 @@ function renderSection(
                 <ListEditor
                   items={c.equip.equipment.items}
                   onChange={(next) => edit((d) => void (d.equip.equipment.items = next))}
-                  blank={() => ({ category: "Тоноглол", brand: "", meta: "", logo: "", image: "", note: "" })}
+                  blank={() => ({ category: "Тоноглол", brand: "", meta: "", flag: "", logo: "", image: "", note: "" })}
                   title={(item) => [item.category, item.brand].filter(Boolean).join(" · ")}
                   addLabel="Тоноглол нэмэх"
                 >
@@ -851,7 +855,10 @@ function renderSection(
                         <Field label="Брэнд" hint="Хоосон бол картан дээр зөвхөн ангилал гарна.">
                           <TextInput value={item.brand} onChange={(e) => set({ brand: e.target.value })} />
                         </Field>
-                        <Field label="Улс" hint="Ж: Герман">
+                        <Field
+                          label="Улс"
+                          hint="Ж: Герман. Турк / Франц / Герман / Солонгос / Япон гэж бичвэл далбаа нь автоматаар гарна."
+                        >
                           <TextInput value={item.meta} onChange={(e) => set({ meta: e.target.value })} />
                         </Field>
                       </div>
@@ -870,7 +877,7 @@ function renderSection(
                           }
                           ratio="4/3"
                           maxEdge={900}
-                          hint="Картын БАРУУН талд суугаад зүүн тийшээ дэвсгэр рүү уусна. Тунгалаг дэвсгэртэй PNG хамгийн зөв; цагаан дэвсгэртэй зураг ч болно (уусалт нь цагааныг нуудаг). Бараан эсвэл өнгөт дэвсгэртэй зураг ТОХИРОХГҮЙ — уусахдаа бохир ирмэг үлдээнэ. Бүтээгдэхүүн голдоо, тайрагдахгүй. Лого ЭНД БҮҮ оруул — хажууд нь тусдаа талбар бий. Хоосон бол карт зөвхөн бичвэрээр үлдэнэ (өндөр нь хэвээр)."
+                          hint="Картыг БҮТНЭЭР дүүргэж, зүүн тал нь цагаан руу уусна (бичвэр уншигдана). Материалын бүтэц/өнгө харагдуулсан ӨРГӨН хэвтээ зураг тохиромжтой — гол зүйл нь БАРУУН талдаа байг, зүүн тал нь хөшигдөнө. Лого ЭНД БҮҮ оруул — хажууд нь тусдаа талбар бий. Хоосон бол карт цагаан суурьтай үлдэнэ (өндөр нь хэвээр)."
                         />
                         <ImageField
                           label="Лого (заавал биш)"
@@ -884,7 +891,22 @@ function renderSection(
                           ratio="16/9"
                           maxEdge={600}
                           fit="contain"
-                          hint="Тунгалаг дэвсгэртэй PNG/SVG тохиромжтой. Хоосон бол брэндийн нэр өөрөө тэмдэг болно."
+                          hint="Картын БАРУУН талд, материалын зураг дээр сууна — тиймээс ЦАГААН (цайвар) тунгалаг PNG/SVG тохиромжтой. Зураггүй карт дээр цагаан лого алга болохгүйн тулд бараан тавцан дээр суудаг. Хоосон бол брэндийн нэр өөрөө тэмдэг болно."
+                        />
+                      </div>
+                      <div className="mt-4 sm:w-1/2 sm:pr-2">
+                        <ImageField
+                          label="Улсын далбаа (заавал биш)"
+                          value={item.flag}
+                          onChange={(url) =>
+                            edit((d) => {
+                              const it = d.equip.equipment.items[itemIndex];
+                              if (it) it.flag = url;
+                            })
+                          }
+                          ratio="3/2"
+                          maxEdge={240}
+                          hint="Зөвхөн дээрх 5 улсаас ГАДУУР улс бичсэн үед хэрэгтэй. Картан дээр 3:2 хайрцагт ТАЙРАГДАЖ сууна (энэ талбарын харагдац ч мөн адил) — тиймээс 3:2-т ойрхон далбаа тавь. Улсын нэр бичээгүй байсан ч далбаа гарна. Хоосон бол улсын нэрээр дотоод далбаа таарна."
                         />
                       </div>
                     </>

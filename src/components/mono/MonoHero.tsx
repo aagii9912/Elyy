@@ -27,7 +27,7 @@ import { useLenis } from "lenis/react";
 import { gsap } from "@/lib/gsap";
 import type { SiteContent } from "@/lib/site-content";
 import { BrochureButton } from "./MonoBrochure";
-import { mediaFilmStyle, sectionTone } from "@/lib/theme-css";
+import { sectionTone } from "@/lib/theme-css";
 
 const CLIP = {
   desktop: { src: "/video/hero-loop-desktop.mp4", poster: "/video/hero-loop-desktop.jpg" },
@@ -105,7 +105,6 @@ export function MonoHero({ site }: { site: SiteContent }) {
     return () => ctx.revert();
   }, []);
 
-  const film = mediaFilmStyle(site.theme, "hero");
   const clip = variant && variant !== "still" ? CLIP[variant] : null;
 
   return (
@@ -166,16 +165,15 @@ export function MonoHero({ site }: { site: SiteContent }) {
 
         {/* Админаас сонгосон дэвсгэр — клипийн ДЭЭР буух өнгөт хальс.
             Хэсгийн `background` нь бичлэгийн АРД сууж харагддаггүй тул
-            «Өнгө / Градиент» сонголт эндээс л нүдэнд буунa. Өгөгдмөл
-            («Auto») үед `null` — hero нэг ч пиксел хөдлөхгүй. */}
-        {film && (
-          <div
-            aria-hidden
-            data-theme-film
-            className="pointer-events-none absolute inset-0 z-[6]"
-            style={film}
-          />
-        )}
+            «Өнгө / Градиент» сонголт эндээс л нүдэнд буунa.
+
+            Элемент нь ҮРГЭЛЖ рендерлэгдэнэ, өнгийг нь `buildThemeCss`
+            (`[data-bg="hero"] [data-theme-film]`) өгнө. Өгөгдмөл
+            («Auto») үед дүрэм үүсэхгүй тул давхарга тунгалаг үлдэж,
+            hero нэг ч пиксел хөдлөхгүй. Өмнө нь inline `style`-аар
+            нөхцөлт рендерлэгддэг байсан нь админы амьд preview дээр
+            хальсыг харах боломжгүй болгож байв. */}
+        <div aria-hidden data-theme-film className="pointer-events-none absolute inset-0 z-[6]" />
 
         <div data-mh-copy className="relative z-10 flex h-full w-full flex-col items-center px-6">
           <div className="flex flex-1 flex-col items-center justify-center text-center">

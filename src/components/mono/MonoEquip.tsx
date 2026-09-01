@@ -34,7 +34,7 @@ import { MonoKicker } from "./shared";
 import { MonoModal } from "./MonoModal";
 import { PortraitShowcase, type ShowcaseSlide } from "@/components/ui/portrait-showcase";
 import { IntegrationGrid, type IntegrationItem } from "@/components/ui/integration-grid";
-import { mediaFilmStyle, sectionTone } from "@/lib/theme-css";
+import { sectionTone } from "@/lib/theme-css";
 
 /* Брэндийн тэмдэг — материалын нэрээр таарна. Танихгүй зүйл дээр
    Elysium-ийн ромб тавина, ингэснээр админ дурын материал нэмж болно. */
@@ -138,6 +138,7 @@ export function MonoEquip({ site }: { site: SiteContent }) {
     category: item.category,
     brand: item.brand,
     meta: item.meta,
+    flag: item.flag,
     logo: item.logo,
     image: item.image,
     note: item.note,
@@ -164,7 +165,6 @@ export function MonoEquip({ site }: { site: SiteContent }) {
         slides={slides}
         active={index}
         onActiveChange={setActive}
-        film={mediaFilmStyle(site.theme, "equip")}
         /* Шошго нь ХЭСГИЙН нэр («Барилгын бүтэц») — өмнө нь энэ нь
            display гарчиг байсан ч ангиллын нэр учраас мессеж болж
            чаддаггүй байв. Гарчгийн байрыг слайдын нэр эзэлнэ. */
@@ -198,21 +198,27 @@ export function MonoEquip({ site }: { site: SiteContent }) {
         label={equip.equipment.title}
         size="full"
       >
-        <div className="p-6 sm:p-9">
-          <p className="flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.28em] text-fg/50">
-            <span aria-hidden className="h-px w-8 bg-moss" />
-            {equip.kicker}
+        {/* Өнгө нь `fg` ТОКЕНООР. Pop-up нь `data-tone="dark"` section
+            дотор сууж байгаа ч `MonoModal`-ийн самбар `bg-surface`
+            класстай бөгөөд `globals.css` нь `.bg-surface:not([data-bg])`
+            бүрд `--ely-fg`-ийг бараан руу буцаан тогтоодог — тиймээс
+            өнгийг гараар бичих шаардлагагүй (доорх дэлгэрэнгүй pop-up
+            ч яг үүнийг найдаж `text-fg` хэрэглэсээр ирсэн). Гараар
+            бичвэл админ палитраа солиход самбар дагахаа болино. */}
+        <div className="px-6 pb-8 pt-6 sm:px-9 sm:pb-9 sm:pt-[26px]">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.29em] text-fg">
+            {equip.title}
           </p>
-          <h3 className="mt-4 text-[clamp(1.4rem,3vw,2rem)] font-extrabold leading-tight tracking-tight text-fg">
+          <h3 className="mt-5 text-[clamp(1.4rem,2.6vw,1.9375rem)] font-extrabold leading-tight tracking-[-0.032em] text-fg">
             {equip.equipment.title}
           </h3>
           {equip.equipment.body && (
-            <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-fg/60">
+            <p className="mt-4 max-w-2xl text-[15px] leading-normal text-fg/75 sm:text-[16px]">
               {equip.equipment.body}
             </p>
           )}
 
-          <IntegrationGrid items={equipment} className="mt-8" />
+          <IntegrationGrid items={equipment} className="mt-8 sm:mt-10" />
         </div>
       </MonoModal>
 

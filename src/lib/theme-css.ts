@@ -262,7 +262,7 @@ export type MediaFilmStyle = {
 };
 
 /** Бичлэг/кадраар БҮРЭН бүрхэгдсэн хэсгүүдэд (hero · 01 · 03) зориулсан
- *  давхарга.
+ *  давхаргын CSS шинжүүд. Хоосон мөр = хальсгүй.
  *
  *  Эдгээр хэсгийн `background` нь кадрын АРД сууна — тиймээс админаас
  *  өнгө, градиент сонгоход дэлгэц дээр нэг ч пиксел өөрчлөгддөггүй байв.
@@ -273,15 +273,25 @@ export type MediaFilmStyle = {
  *    • «Өгөгдмөл (auto)» ба «Зураг» — хальс үүсэхгүй; зөвхөн «Хөшиг»
  *      тохируулсан үед тэр нь хальс болж буунa.
  *
- *  `null` = хальсгүй, хэсэг кодод бичсэн дүр төрхөөрөө хэвээр үлдэнэ. */
-export function mediaFilmStyle(
-  theme: ThemeContent | undefined,
-  id: ThemeSectionId
-): MediaFilmStyle | null {
-  return backgroundFilmStyle(theme?.sections?.[id]);
+ *  ⚠️ Энэ нь өмнө нь React-ийн inline `style` байсан бөгөөд тэр нь
+ *  админы АМЬД PREVIEW-д огт буудаггүй байв: preview нь iframe доторх
+ *  `<style id="site-theme">`-ийг л дарж бичдэг тул inline шинж хөдөлдөггүй,
+ *  түүнчлэн хальсгүй үед `<div data-theme-film>` элемент өөрөө
+ *  рендерлэгддэггүй тул дарах юм ч байхгүй байсан. Одоо хальс нь
+ *  CSS болж `buildThemeCss`-ээр дамжина — өнгө, градиент, хүч гурвуулаа
+ *  гүйлгүүр хөдөлмөгц preview дээр шууд харагдана. */
+function filmDecls(bg: Background): string {
+  const film = backgroundFilmStyle(bg);
+  if (!film) return "";
+  const style: Record<string, string> = {};
+  if (film.backgroundColor) style.backgroundColor = film.backgroundColor;
+  if (film.backgroundImage) style.backgroundImage = film.backgroundImage;
+  if (typeof film.opacity === "number") style.opacity = String(film.opacity);
+  return declText(style);
 }
 
-/** `mediaFilmStyle`-ийн цөм — нэг дэвсгэрээс хальс гаргана. `palette`
+/** Хальсны цөм — нэг дэвсгэрээс хальс гаргана. `filmDecls` (нийтийн
+ *  сайтын CSS) ба админы урьдчилан харалт хоёулаа үүнийг дуудна. `palette`
  *  өгвөл токеныг ЖИНХЭНЭ hex-ээр (админы урьдчилан харахад
  *  `--color-*` хувьсагч байхгүй тул). */
 export function backgroundFilmStyle(
@@ -547,11 +557,18 @@ export function buildThemeCss(theme: ThemeContent | undefined): string {
   if (page.body) rules.push(`html{${page.body}}`);
 
   /* 3) Хэсэг тус бүр. */
-  for (const { id } of THEME_SECTIONS) {
-    const bg = t.sections?.[id] ?? defaultBackground();
+  for (const s of THEME_SECTIONS) {
+    const bg = t.sections?.[s.id] ?? defaultBackground();
     const { body, before } = backgroundDecls(bg);
-    if (body) rules.push(`.mono-page [data-bg="${id}"]{${body}}`);
-    if (before) rules.push(`.mono-page [data-bg="${id}"]::before{${before}}`);
+    if (body) rules.push(`.mono-page [data-bg="${s.id}"]{${body}}`);
+    if (before) rules.push(`.mono-page [data-bg="${s.id}"]::before{${before}}`);
+    /* Кадраар бүрхэгдсэн хэсэгт дэвсгэр нь кадрын ДЭЭР буух хальс
+       болно. Компонентууд `<div data-theme-film>`-ийг ҮРГЭЛЖ рендерлэдэг
+       (хоосон = тунгалаг) тул энэ дүрэм preview дээр ч шууд ажиллана. */
+    if ("film" in s && s.film) {
+      const film = filmDecls(bg);
+      if (film) rules.push(`.mono-page [data-bg="${s.id}"] [data-theme-film]{${film}}`);
+    }
   }
 
   /* 4) Типографи — `default` горимд юу ч үүсэхгүй. */

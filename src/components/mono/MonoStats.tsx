@@ -27,7 +27,7 @@
 
 import type { SiteContent } from "@/lib/site-content";
 import { MonoScrollStory } from "./MonoScrollStory";
-import { mediaFilmStyle, sectionTone } from "@/lib/theme-css";
+import { sectionTone } from "@/lib/theme-css";
 
 export function MonoStats({ site }: { site: SiteContent }) {
   const points = site.plan.points.map((p, i) => ({
@@ -54,7 +54,6 @@ export function MonoStats({ site }: { site: SiteContent }) {
       autoplaySeconds={13}
       bgKey="stats"
       tone={sectionTone(site.theme, "stats", "dark")}
-      film={mediaFilmStyle(site.theme, "stats")}
     />
   );
 }
