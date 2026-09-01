@@ -1617,68 +1617,92 @@ function renderSection(
             <ListEditor
               items={c.location.pins}
               onChange={(next) => edit((d) => void (d.location.pins = next))}
-              blank={() => ({ place: "Шинэ цэг", description: "", distance: "", unit: "м", x: 50, y: 50 })}
+              blank={() => ({
+                place: "Шинэ цэг",
+                description: "",
+                distance: "",
+                unit: "м",
+                image: "",
+                x: 50,
+                y: 50,
+              })}
               title={(item) =>
                 item.distance ? `${item.place} · ${item.distance}${item.unit}` : item.place
               }
               addLabel="Цэг нэмэх"
             >
-              {(item, set) => (
-                <div className="space-y-4">
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <Field label="Нэршил" hint="Картын гарчиг болон цэгийн тайлбар">
-                      <TextInput
-                        value={item.place}
-                        onChange={(e) => set({ place: e.target.value })}
-                      />
-                    </Field>
-                    <div className="grid grid-cols-[1fr_7rem] gap-3">
-                      <Field label="Elysium-ээс хол зай" hint="Зөвхөн тоо — ж: 450 эсвэл 1.2">
+              {(item, set, i) => (
+                <div className="grid gap-4 sm:grid-cols-[200px_1fr]">
+                  <ImageField
+                    label="Байршлын зураг"
+                    value={item.image}
+                    onChange={(url) =>
+                      edit((d) => {
+                        // Байршуулалт async тул хамгийн сүүлийн төлөв дээр индексээр бичнэ.
+                        const pin = d.location.pins[i];
+                        if (pin) pin.image = url;
+                      })
+                    }
+                    ratio="1/1"
+                    maxEdge={800}
+                    hint="Курсор цэг дээр очиход картын баруун талд гарна. Хоосон бол карт зөвхөн бичигтэй үлдэнэ."
+                  />
+                  <div className="space-y-4">
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <Field label="Нэршил" hint="Картын гарчиг болон цэгийн тайлбар">
                         <TextInput
-                          inputMode="decimal"
-                          value={item.distance}
-                          onChange={(e) => set({ distance: e.target.value })}
+                          value={item.place}
+                          onChange={(e) => set({ place: e.target.value })}
                         />
                       </Field>
-                      <Field label="Нэгж">
-                        <Select
-                          value={item.unit}
-                          onChange={(e) => set({ unit: e.target.value })}
-                        >
-                          <option value="м">м</option>
-                          <option value="км">км</option>
-                        </Select>
+                      <div className="grid grid-cols-[1fr_7rem] gap-3">
+                        <Field label="Elysium-ээс хол зай" hint="Зөвхөн тоо — ж: 450 эсвэл 1.2">
+                          <TextInput
+                            inputMode="decimal"
+                            value={item.distance}
+                            onChange={(e) => set({ distance: e.target.value })}
+                          />
+                        </Field>
+                        <Field label="Нэгж">
+                          <Select
+                            value={item.unit}
+                            onChange={(e) => set({ unit: e.target.value })}
+                          >
+                            <option value="м">м</option>
+                            <option value="км">км</option>
+                          </Select>
+                        </Field>
+                      </div>
+                    </div>
+                    <Field label="Тайлбар" hint="Нэрний доор гарна — хоосон бол огт харагдахгүй">
+                      <TextArea
+                        rows={2}
+                        value={item.description}
+                        onChange={(e) => set({ description: e.target.value })}
+                      />
+                    </Field>
+                    <div className="grid grid-cols-2 gap-3 sm:max-w-xs">
+                      <Field label="X (%)" hint="Зүүн ирмэгээс">
+                        <TextInput
+                          type="number"
+                          min={0}
+                          max={100}
+                          step={0.1}
+                          value={item.x}
+                          onChange={(e) => set({ x: pct(e.target.value) })}
+                        />
+                      </Field>
+                      <Field label="Y (%)" hint="Дээд ирмэгээс">
+                        <TextInput
+                          type="number"
+                          min={0}
+                          max={100}
+                          step={0.1}
+                          value={item.y}
+                          onChange={(e) => set({ y: pct(e.target.value) })}
+                        />
                       </Field>
                     </div>
-                  </div>
-                  <Field label="Тайлбар" hint="Нэрний доор гарна — хоосон бол огт харагдахгүй">
-                    <TextArea
-                      rows={2}
-                      value={item.description}
-                      onChange={(e) => set({ description: e.target.value })}
-                    />
-                  </Field>
-                  <div className="grid grid-cols-2 gap-3 sm:max-w-xs">
-                    <Field label="X (%)" hint="Зүүн ирмэгээс">
-                      <TextInput
-                        type="number"
-                        min={0}
-                        max={100}
-                        step={0.1}
-                        value={item.x}
-                        onChange={(e) => set({ x: pct(e.target.value) })}
-                      />
-                    </Field>
-                    <Field label="Y (%)" hint="Дээд ирмэгээс">
-                      <TextInput
-                        type="number"
-                        min={0}
-                        max={100}
-                        step={0.1}
-                        value={item.y}
-                        onChange={(e) => set({ y: pct(e.target.value) })}
-                      />
-                    </Field>
                   </div>
                 </div>
               )}

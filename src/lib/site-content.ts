@@ -539,6 +539,8 @@ export type SiteContent = {
   location: {
     directionsLabel: string;
     addressLabel: string;
+    /** Зайны өмнөх богино шошго — картад «Төслөөс · 450 м» болж гарна. */
+    distanceLabel: string;
     /** Зөвхөн төслийн байршил. Борлуулалтын оффисын таб хасагдсан ч
      *  `tabs` бүтэц нь хадгалсан контенттой нийцэхийн тулд үлдэв. */
     tabs: {
@@ -552,12 +554,15 @@ export type SiteContent = {
      *  ХУВЬ (0–100) — ингэснээр зураг ямар ч хэмжээтэй байсан цэг нэг
      *  газраа үлдэнэ. `distance` нь ЗӨВХӨН тоо, нэгжийг `unit` дээр
      *  тусад нь сонгоно (м / км) — тоо нь томоор, нэгж нь жижгээр гарна.
-     *  Хоосон талбарууд карт дээр огт харагдахгүй. */
+     *  `image` нь тухайн байршлын гэрэл зураг — курсор цэг дээр очиход
+     *  картын баруун талд гарна. Хоосон талбарууд карт дээр огт
+     *  харагдахгүй (зураггүй бол карт зөвхөн бичигтэй үлдэнэ). */
     pins: {
       place: string;
       description: string;
       distance: string;
       unit: string;
+      image: string;
       x: number;
       y: number;
     }[];
@@ -1075,6 +1080,7 @@ export const DEFAULT_SITE_CONTENT: SiteContent = {
   location: {
     directionsLabel: "Чиглэл авах",
     addressLabel: "Хаяг",
+    distanceLabel: "Төслөөс",
     tabs: {
       project: {
         label: "Төслийн байршил",
@@ -1084,15 +1090,19 @@ export const DEFAULT_SITE_CONTENT: SiteContent = {
       },
     },
     mapImage: "/images/location-aerial.jpg",
+    /* `image` нь ЗААВАЛ хоосон: `mergeValue` эхний элементийг бүх
+       хадгалсан цэгийн загвар болгодог тул энд зураг бичвэл түүнийг
+       админаас нэмсэн БҮХ цэг рүү тарааж бичнэ. Зургийг `/admin/site →
+       Байршил → Зураг дээрх цэгүүд` дээр цэг бүрт нь оруулна. */
     pins: [
-      { place: "Эрэл Групп", description: "", distance: "", unit: "м", x: 41.6, y: 80.5 },
-      { place: "Поларис их дэлгүүр", description: "", distance: "", unit: "м", x: 65.1, y: 83.9 },
-      { place: "Анун төв", description: "", distance: "", unit: "м", x: 90.3, y: 82.2 },
-      { place: "Таван Богд", description: "", distance: "", unit: "м", x: 80.7, y: 55.9 },
-      { place: "Мишээл экспо", description: "", distance: "", unit: "м", x: 95.7, y: 51 },
-      { place: "Номин Юнайтед", description: "", distance: "", unit: "м", x: 67.7, y: 49.6 },
-      { place: "Нарны гүүр", description: "", distance: "", unit: "м", x: 72.8, y: 44.7 },
-      { place: "Талбай", description: "", distance: "", unit: "м", x: 80.8, y: 13.8 },
+      { place: "Эрэл Групп", description: "", distance: "", unit: "м", image: "", x: 41.6, y: 80.5 },
+      { place: "Поларис их дэлгүүр", description: "", distance: "", unit: "м", image: "", x: 65.1, y: 83.9 },
+      { place: "Анун төв", description: "", distance: "", unit: "м", image: "", x: 90.3, y: 82.2 },
+      { place: "Таван Богд", description: "", distance: "", unit: "м", image: "", x: 80.7, y: 55.9 },
+      { place: "Мишээл экспо", description: "", distance: "", unit: "м", image: "", x: 95.7, y: 51 },
+      { place: "Номин Юнайтед", description: "", distance: "", unit: "м", image: "", x: 67.7, y: 49.6 },
+      { place: "Нарны гүүр", description: "", distance: "", unit: "м", image: "", x: 72.8, y: 44.7 },
+      { place: "Талбай", description: "", distance: "", unit: "м", image: "", x: 80.8, y: 13.8 },
     ],
   },
 
