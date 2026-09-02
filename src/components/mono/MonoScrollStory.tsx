@@ -118,6 +118,7 @@ export function MonoScrollStory({
   frameDir = "/hero-frames",
   frameExt = "jpg",
   stillAt = 0.6,
+  pointImages,
   heightClass = "h-[300vh] md:h-[380vh]",
   exitVeilClass = "bg-ground",
   autoplaySeconds = 0,
@@ -139,6 +140,11 @@ export function MonoScrollStory({
   frameExt?: string;
   /** Where in the sequence the mobile / reduced-motion still is taken from (0–1). */
   stillAt?: number;
+  /** МОБАЙЛ: кадрын дарааллын оронд цэг бүрд харуулах зураг — индексээрээ
+   *  `points`-т харгалзана. Өгвөл мобайл дээр canvas огт ажиллахгүй
+   *  (нэг ч кадр татахгүй), идэвхтэй цэг солигдоход зургууд crossfade
+   *  хийнэ. Өгөхгүй бол хуучин ганц still-кадр хэвээр. */
+  pointImages?: string[];
   /** Section height — controls how much scroll each point gets. */
   heightClass?: string;
   /** Colour the chapter dips to on the way out — match the next section. */
@@ -151,6 +157,7 @@ export function MonoScrollStory({
   const lenis = useLenis();
   const root = useRef<HTMLElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
+  const stillsWrap = useRef<HTMLDivElement>(null);
   const layersWrap = useRef<HTMLDivElement>(null);
   const progFill = useRef<HTMLDivElement>(null);
   const st = useRef<ScrollTriggerType | null>(null);
@@ -158,6 +165,7 @@ export function MonoScrollStory({
   /** Progress window the points share, minus the intro / exit run-outs. */
   const slot = useRef({ lead: 0, span: 1 });
   const [active, setActive] = useState(0);
+  const stillCount = pointImages?.length ?? 0;
 
   /* Эхний гүйлтийн дараа бүлэг өөрөө үргэлжилнэ — 3 дэлгэц гүйлгэж
      байж дуусдаг бүлгийг гараар татах шаардлагагүй болно. */
@@ -184,6 +192,9 @@ export function MonoScrollStory({
 
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const isMobile = window.matchMedia("(max-width: 767px)").matches;
+    /* Мобайл + цэгийн зургууд → canvas хэрэггүй: кадр татахгүй,
+       дэвсгэрийг доорх `stillsWrap` зургууд бүрэн хариуцна. */
+    const skipFrames = isMobile && stillCount > 0;
     const framePath = framePathIn(frameDir, frameExt);
     const count = frameEnd - frameStart + 1;
     const framesToLoad = !reduce && !isMobile ? count : 1;
@@ -228,7 +239,7 @@ export function MonoScrollStory({
       },
       { rootMargin: "120% 0px" }
     );
-    io.observe(sec);
+    if (!skipFrames) io.observe(sec);
 
     resize();
     const onResize = () => { resize(); draw(); };
@@ -407,7 +418,20 @@ export function MonoScrollStory({
       st.current = null;
       ctx.revert();
     };
-  }, [frameStart, frameEnd, frameDir, frameExt, stillAt, points.length]);
+  }, [frameStart, frameEnd, frameDir, frameExt, stillAt, points.length, stillCount]);
+
+  /* ---- мобайлын цэгийн зургууд — идэвхтэй цэгээ дагаж crossfade ------ */
+  useEffect(() => {
+    const wrap = stillsWrap.current;
+    if (!wrap) return;
+    const imgs = Array.from(wrap.querySelectorAll<HTMLElement>("[data-still]"));
+    if (!imgs.length) return;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    imgs.forEach((el, i) => {
+      if (reduce) gsap.set(el, { autoAlpha: i === active ? 1 : 0 });
+      else gsap.to(el, { autoAlpha: i === active ? 1 : 0, duration: 0.55, ease: "power2.inOut", overwrite: true });
+    });
+  }, [active]);
 
   /* ---- point crossfade engine (no remounts) ------------------------- */
   useEffect(() => {
@@ -485,7 +509,27 @@ export function MonoScrollStory({
           light ? "" : "[text-shadow:0_1px_2px_rgba(9,14,7,0.45),0_2px_22px_rgba(9,14,7,0.55)]"
         }`}
       >
-        <canvas ref={canvas} className="absolute inset-0 z-0 h-full w-full" />
+        {/* мобайл: кадрын оронд цэг бүрийн рендер — тоо нь өөрийн
+            зургаа дээр нь бууна (506 → агаараас, 85% → хашаа, 513 →
+            гудамж/зогсоол, 2027 → фасад) */}
+        {stillCount > 0 && (
+          <div ref={stillsWrap} aria-hidden className="absolute inset-0 z-0 md:hidden">
+            {pointImages!.map((src, i) => (
+              <img
+                key={src}
+                data-still
+                src={src}
+                alt=""
+                loading="lazy"
+                className={`absolute inset-0 h-full w-full object-cover ${i === 0 ? "" : "opacity-0"}`}
+              />
+            ))}
+          </div>
+        )}
+        <canvas
+          ref={canvas}
+          className={`absolute inset-0 z-0 h-full w-full ${stillCount > 0 ? "hidden md:block" : ""}`}
+        />
 
         {/* Хөшиг — ЗҮҮН тийш жинтэй шаантаг + дээд/доод зөөлөн хөшиг.
             Бичвэр бүхэлдээ зүүн баганад суудаг тул тодролыг ЯГ ТЭНД

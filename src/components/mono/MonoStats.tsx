@@ -29,6 +29,17 @@ import type { SiteContent } from "@/lib/site-content";
 import { MonoScrollStory } from "./MonoScrollStory";
 import { sectionTone } from "@/lib/theme-css";
 
+/* МОБАЙЛ: кадрын дарааллын оронд цэг бүрд нэг рендер (индексээрээ
+   `plan.points`-т харгалзана). Эх нь `public/images` дахь бүрэн
+   хэмжээтэй рендерүүд — эндхийнх нь 1400px өндөртэй, шахсан хуулбар
+   (`plan-mobile/`), учир нь мобайл 4 зургийг зэрэг татна. */
+const PLAN_STILLS = [
+  "/images/plan-mobile/plan-01.jpg", // 506 айл — 4 блокийг агаараас
+  "/images/plan-mobile/plan-02.jpg", // 85% — гаднах ногоон талбай
+  "/images/plan-mobile/plan-03.jpg", // 513 зогсоол — оролцын гудамж, зогсоолын хэсэг
+  "/images/plan-mobile/plan-04.jpg", // 2027·II — фасадын үндсэн өнцөг
+];
+
 export function MonoStats({ site }: { site: SiteContent }) {
   const points = site.plan.points.map((p, i) => ({
     n: String(i + 1).padStart(2, "0"),
@@ -49,6 +60,7 @@ export function MonoStats({ site }: { site: SiteContent }) {
       frameDir="/plan-frames"
       frameExt="webp"
       stillAt={0.12}
+      pointImages={PLAN_STILLS}
       heightClass="h-[280vh] md:h-[340vh]"
       /* ~2.4 дэлгэц / 13сек — цэг тутамд ~2.4сек уншиж амжина. */
       autoplaySeconds={13}
