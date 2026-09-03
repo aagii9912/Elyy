@@ -19,56 +19,21 @@
     * { box-sizing: border-box; }
   </style>
 </helmet>
-<div style="position: relative; width: 100%; min-height: 100vh; overflow: hidden; background: #151717; color: #ffffff;">
-  <sc-if value="{{ isDay }}" hint-placeholder-val="{{ true }}"><div aria-hidden="true" style="position: absolute; inset: 0; background-image: url(&quot;hero-day.jpg&quot;); background-size: cover; background-position: center;"></div></sc-if>
-  <sc-if value="{{ isDusk }}" hint-placeholder-val="{{ false }}"><div aria-hidden="true" style="position: absolute; inset: 0; background-image: url(&quot;hero-dusk.jpg&quot;); background-size: cover; background-position: center;"></div></sc-if>
-  <sc-if value="{{ isGold }}" hint-placeholder-val="{{ false }}"><div aria-hidden="true" style="position: absolute; inset: 0; background-image: url(&quot;hero-gold.jpg&quot;); background-size: cover; background-position: center;"></div></sc-if>
-  <div aria-hidden="true" style="position: absolute; inset: 0; background: linear-gradient(90deg, rgba(21,23,23,0.74) 0%, rgba(21,23,23,0.5) 32%, rgba(21,23,23,0.16) 58%, rgba(21,23,23,0) 74%);"></div>
-  <div aria-hidden="true" style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(21,23,23,0.42) 0%, rgba(21,23,23,0) 24%, rgba(21,23,23,0) 60%, rgba(21,23,23,0.56) 100%);"></div>
-  <div style="position: relative; z-index: 10; display: flex; flex-direction: column; min-height: 100vh; padding: 0 72px;">
-    <div style="position: absolute; top: 0; left: 40px; right: 40px; z-index: 20; display: flex; align-items: center; gap: 24px; height: 80px;">
-      <span style="display: flex; align-items: center; gap: 10px; color: #ffffff;"><svg viewBox="696.5 -1 29 30" fill="currentColor" style="height: 18px; width: auto;" aria-hidden><path d="M724.7627131503,1.6928812257l-1.5571644463-1.5571639374c-.1809564854-.1809564263-.4743448685-.1809563783-.6553012947.0000001071l-10.9339166573,10.9339202305c-.0868983404.0868983688-.1357173084.2047578379-.1357172883.3276506695l.0000002984,1.8262380573c.0000000201.1228928316.0488190266.2407522848.1357173954.3276506252l1.5571644463,1.5571639374c.1809564854.1809564262.4743448685.1809563783.6553012947-.0000001071l10.9339166573-10.9339202304c.0868983404-.0868983688.1357173084-.2047578379.1357172883-.3276506695l-.0000002984-1.8262380573c-.0000000201-.1228928316-.0488190266-.2407522848-.1357173954-.3276506252Z"/><path d="M710.6956105802,6.3674608853l-1.5571644462-1.5571639374c-.1809564854-.1809564262-.4743448685-.1809563783-.6553012947.0000001071l-10.9339166573,10.9339202304c-.0868983404.0868983688-.1357173084.2047578379-.1357172883.3276506695l.0000002984,1.8262380573c.0000000201.1228928316.0488190266.2407522848.1357173954.3276506252l1.5571644463,1.5571639374c.1809564854.1809564262.4743448685.1809563783.6553012947-.0000001071l10.9339166573-10.9339202304c.0868983404-.0868983688.1357173084-.2047578379.1357172883-.3276506695l-.0000002984-1.8262380573c-.0000000201-.1228928316-.0488190266-.2407522848-.1357173954-.3276506252Z"/></svg><svg viewBox="0 -1 146 33" fill="currentColor" style="height: 12px; width: auto;" aria-hidden><g>
-<path d="M14.6551469059,30.6464374324H0V.1786129951h14.2337458385c.2327333831,0,.4214010674.1886676843.4214010674.4214010674v.9147425533H4.2768437607v12.6953380206h9.487211794v1.3361436207H4.2768437607v13.7640555547h10.3783031452v1.3361436207Z"/>
-<path d="M34.4356749206,30.6464374324h-15.4574251655V.1786129951h3.8554426933c.2327333831,0,.4214010674.1886676843.4214010674.4214010674v28.7102797493h11.1805814049v1.3361436207Z"/>
-<path d="M54.2866077699.1786129951l-9.0875528824,15.1446057211v15.3232187162h-4.2758569486v-15.4495306685L31.9461680148.1786129951h4.6347519077c.1509544457,0,.2903780701.0807448173.3655057145.2116764091l7.6783045922,13.3816606475L52.678104002.1756525587l1.6085037679.0029604364Z"/>
-<path d="M74.6159478028,22.2279431725c0,2.553869786-.8841836663,4.6399906236-2.6505773745,6.2583625128s-3.9413276373,2.4275578337-6.5248017872,2.4275578337c-4.6034785749,0-7.5727962666-2.1532240623-8.9089398873-6.4596721868l1.3805501664-.356239178c1.4851522519,3.6531784961,3.7419915876,5.478780932,6.7705180069,5.478780932,1.7219871625,0,3.1479306868-.525970864,4.2768437607-1.5779125919,1.1279262618-1.0529285401,1.6923827987-2.4393995792,1.6923827987-4.1594131175,0-2.638735629-1.2029239835-4.6991993513-3.6077851382-6.1813911668-2.2272349718-1.1565438135-4.4544699436-2.298285445-6.6817049155-3.4252248946-2.4058479669-1.5719917192-3.6077851382-3.7952794425-3.6077851382-6.6708499821,0-2.3130876269.890104539-4.1663208024,2.6722872413-5.5596995265C61.0591227949.6680718103,63.064325038,0,65.4405686411,0,68.8845429662,0,71.4828192979,1.4851522519,73.2353976364,4.4544699436l-1.6035697072.6680718103c-.4756434455-1.0687175341-1.2700272081-1.9667165702-2.383151288-2.6949839203-1.1131240799-.727280538-2.2499316508-1.091414213-3.4074622763-1.091414213-1.4851522519,0-2.7837970117.5200499912-3.8979079037,1.5591631615-1.1131240798,1.0400999824-1.6696861198,2.2874305116-1.6696861198,3.7419915876,0,1.7525783385,1.2463437171,3.2515459602,3.7410047754,4.4988764894,1.7219871625.8012914476,3.4449611372,1.6183718891,5.1669482997,2.4502545126,1.7821827023.9503000788,3.0739197772,1.9894132491,3.8752112248,3.1173395109,1.0391131703,1.4259435243,1.5591631615,3.2673349542,1.5591631615,5.5241742899Z"/>
-<path d="M83.1924433118,30.6464374324h-4.2768437607V.1786129951h3.8554426933c.2327333831,0,.4214010674.1886676843.4214010674.4214010674v30.0464233699Z"/>
-<path d="M107.2836368005,22.8960149828c0,2.4650566946-.8318826235,4.4248655798-2.4946610584,5.8794266558-1.663765247,1.4555478881-3.7419915876,2.1828284261-6.2366526459,2.1828284261-2.4936742463,0-4.572887399-.6828739923-6.2356658338-2.0496087889-1.8117870661-1.454561076-2.7176805992-3.3995677793-2.7176805992-5.8350201101V.1786129951h3.8554426933c.2327333831,0,.4214010674.1886676843.4214010674.4214010674v22.4736271033c0,1.7525783385.5486675429,3.2150339115,1.647976253,4.387366719,1.0983218979,1.1733196196,2.5232786101,1.7594860234,4.2758569486,1.7594860234,1.7821827023,0,3.2584536451-.6009685857,4.4327600768-1.8038925691,1.1723328075-1.2029239835,1.7594860234-2.6949839203,1.7594860234-4.4761798105V.1786129951h.8703360076c.2327333831,0,.4214010674.1886676843.4214010674.4214010674v22.2960009204Z"/>
-<path d="M141.7246534145,30.6464374324h-4.2758569486V4.6330829387l-11.0917683134,26.6360329461-12.3825185762-26.635046134v26.0123676815h-1.3815369785V.1786129951h3.7549154174c.1642026944,0,.313451545.0953803421.3824235099.2443950826l10.7625373862,23.2525884859L138.0004244452.1786129951h3.3028279019c.2327333831,0,.4214010674.1886676843.4214010674.4214010674v30.0464233699Z"/>
-</g></svg></span>
-      <span style="display: flex; align-items: center; gap: 28px; margin-left: 16px;"><span style="font-size: 11px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.8);">Төслийн тухай</span><span style="font-size: 11px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.8);">Давуу тал</span><span style="font-size: 11px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.8);">Өрөөний сонголт</span><span style="font-size: 11px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.8);">Төсөл хэрэгжүүлэгч</span><span style="font-size: 11px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.8);">Байршил</span><span style="font-size: 11px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.8);">FAQ</span></span>
-      <span style="display: flex; align-items: center; gap: 10px; margin-left: auto;">
-        <span style="display: inline-flex; align-items: center; height: 36px; padding: 0 20px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.4); font-size: 11px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: #ffffff;">Танилцуулга татах ↓</span>
-        <span style="display: inline-flex; align-items: center; height: 36px; padding: 0 20px; border-radius: 999px; background: #ffffff; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #151717;">Уулзалт товлох</span>
-      </span>
-    </div>
-    <div style="display: flex; flex: 1; flex-direction: column; justify-content: center; align-items: flex-start; padding: 60px 0 40px;">
-      <p style="display: flex; align-items: center; gap: 18px; margin: 0; font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.4em; color: rgba(255,255,255,0.82);">
-        <span aria-hidden="true" style="display: block; width: 32px; height: 1px; background: rgba(250,172,50,0.92);"></span>Бизнес зэрэглэлийн орон сууц
-      </p>
-      <h1 style="display: flex; flex-direction: column; align-items: stretch; width: fit-content; margin: 32px 0 0; font-weight: 300; text-transform: uppercase; color: #ffffff;">
-        <span style="display: block; font-size: 156px; font-weight: 300; line-height: 0.86; letter-spacing: 0.05em; margin-left: -0.04em;">Elysium</span>
-        <span style="display: flex; align-items: center; gap: 26px; margin-top: 28px;">
-          <span style="display: block; font-size: 26px; font-weight: 400; line-height: 1; letter-spacing: 0.48em; text-indent: 0.02em; color: rgba(255,255,255,0.96);">Residence</span>
-          <span aria-hidden="true" style="display: block; flex: 1 1 0; height: 1px; margin-right: 0.48em; background: rgba(255,255,255,0.38);"></span>
-        </span>
-      </h1>
-      <p style="margin: 42px 0 0; max-width: 44ch; font-size: 16px; font-weight: 400; line-height: 1.72; color: rgba(255,255,255,0.88); text-wrap: pretty;">Туул голын салхи илбэсэн бүсэд байршилтай, архитектур болон инженерингийн эргономик шийдэлтэй орон сууц.</p>
-      <div style="display: flex; align-items: center; gap: 14px; margin-top: 44px;">
-        <span style="display: inline-flex; align-items: center; justify-content: center; height: 54px; padding: 0 36px; border-radius: 999px; background: #ffffff; font-size: 12px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: #151717;">Уулзалт товлох</span>
-        <span style="display: inline-flex; align-items: center; justify-content: center; height: 54px; padding: 0 32px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.5); background: rgba(21,23,23,0.18); font-size: 12px; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; color: #ffffff;">Танилцуулга татах</span>
-      </div>
-    </div>
+<div style="width: 100%; min-height: 100vh; padding: 40px 48px; background: #151717; color: #ffffff;">
+  <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 32px; margin-bottom: 22px;">
+    <p style="margin: 0; font-size: 22px; font-weight: 300; letter-spacing: 0.02em;">Ар талын клип — 16 секунд, камер хөдөлгөөнгүй, өдрөөс үдэш рүү, дахин өдөр</p>
+    <p style="margin: 0; font-size: 11px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.55);">hero-loop-desktop.mp4 · 2.6 сек тутамд нэг кадар</p>
   </div>
-  <div style="position: absolute; right: 72px; bottom: 40px; z-index: 10; display: flex; flex-direction: column; align-items: center; gap: 14px;"><span style="font-size: 10px; font-weight: 500; letter-spacing: 0.32em; text-transform: uppercase; color: rgba(255,255,255,0.7); writing-mode: vertical-rl;">Гүйлгэх</span><span aria-hidden="true" style="display: block; width: 1px; height: 44px; background: linear-gradient(180deg, rgba(255,255,255,0.8), rgba(255,255,255,0));"></span></div>
+  <img src="hero-loop-strip.jpg" alt="" style="display: block; width: 100%; height: auto; border-radius: 4px;">
+  <div style="display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 0; margin-top: 12px;">
+    <span style="font-size: 11px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.7);">0 с · Өдөр</span>
+    <span style="font-size: 11px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.7);">2.6 с</span>
+    <span style="font-size: 11px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.7);">5.2 с · Үдэш</span>
+    <span style="font-size: 11px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.7);">7.8 с</span>
+    <span style="font-size: 11px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.7);">10.4 с · Алтлаг</span>
+    <span style="font-size: 11px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.7);">13 с · Өдөр</span>
+  </div>
 </div></x-dc>
-<script data-dc-script data-props='{"frame":{"editor":"enum","options":["day","dusk","gold"],"default":"day","section":"Кадар"}}'>
-class Component extends DCLogic {
-  renderVals() {
-    const f = this.props.frame ?? 'day';
-    return { isDay: f === 'day', isDusk: f === 'dusk', isGold: f === 'gold' };
-  }
-}
-</script>
+
 </body>
 </html>
