@@ -16,6 +16,7 @@
 | `Logo.dc.html` | A · Брэндийн ELYSIUM лого (SVG) нь гарчиг (өмнөх санал) |
 | `Current.dc.html` | Одоогийн харагдац |
 | `Mobile.dc.html` | Гар утас · Санал |
+| `Headline.dc.html`, `MobileHeadline.dc.html` | E · «Бизнес зэрэглэлийн орон сууц» нь гол гарчиг, брэндийн нэр нь kicker |
 | `Loop.dc.html` | Ар талын клипийн 16 секундыг 6 кадраар харуулсан зурвас |
 | `hero-{day,dusk,gold}.jpg`, `hero-m-*.jpg` | `public/video/hero-loop-*.mp4`-ийн 0.5 / 6.2 / 10.2 секундын кадрууд (багасгасан) |
 | `hero-loop-strip.jpg` | Клипийн 6 кадрын зурвас |
