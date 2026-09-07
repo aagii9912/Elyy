@@ -1291,7 +1291,16 @@ function renderSection(
             <ListEditor
               items={c.apartments.units}
               onChange={(next) => edit((d) => void (d.apartments.units = next))}
-              blank={() => ({ title: "Шинэ тип", rooms: "1 өрөө", area: "", block: "", thumb: "", views: [] })}
+              blank={() => ({
+                title: "Шинэ тип",
+                rooms: "1 өрөө",
+                area: "",
+                block: "",
+                thumb: "",
+                views: [],
+                floorPlan: "",
+                plan: { code: "", floors: "", facing: "", spot: "", rooms: [] },
+              })}
               title={(item) => `${item.title} · ${item.rooms}`}
               addLabel="Тип нэмэх"
             >
@@ -1371,6 +1380,96 @@ function renderSection(
                         onClick={() => editUnit((u) => void u.views.push(""))}
                       >
                         + Өнцөг нэмэх
+                      </Button>
+                    </div>
+
+                    {/* Lightbox-ын хажуугийн самбар — сайт дээр зургийн
+                        баруун талд яг энэ дарааллаар гарна. */}
+                    <div className="rounded-lg border border-neutral-200 bg-white p-3">
+                      <span className="mb-1.5 block text-body font-semibold text-neutral-700">
+                        Төлөвлөгөөний тайлбар (томруулсан зургийн хажууд)
+                      </span>
+                      <p className="mb-3 text-label text-neutral-500">
+                        Бүх талбар хоосон бол самбар огт гарахгүй, зураг бүтэн зайг эзэлнэ.
+                      </p>
+                      <ImageField
+                        label="Давхрын хуваалт"
+                        value={item.floorPlan}
+                        onChange={(url) => editUnit((u) => void (u.floorPlan = url))}
+                        ratio="7/6"
+                        maxEdge={1400}
+                        fit="contain"
+                        hint="Тухайн айлыг тодруулсан бүтэн давхрын зураг — тайлбарын дээр гарна."
+                      />
+                      <div className="mt-3 grid gap-3 sm:grid-cols-3">
+                        <Field label="Хуваалтын дугаар">
+                          <TextInput
+                            value={item.plan.code}
+                            placeholder="E-3"
+                            onChange={(e) => editUnit((u) => void (u.plan.code = e.target.value))}
+                          />
+                        </Field>
+                        <Field label="Давхар">
+                          <TextInput
+                            value={item.plan.floors}
+                            placeholder="3–23 давхар"
+                            onChange={(e) => editUnit((u) => void (u.plan.floors = e.target.value))}
+                          />
+                        </Field>
+                        <Field label="Цонхны чиг">
+                          <TextInput
+                            value={item.plan.facing}
+                            placeholder="Зүүн, хойд"
+                            onChange={(e) => editUnit((u) => void (u.plan.facing = e.target.value))}
+                          />
+                        </Field>
+                      </div>
+                      <div className="mt-3">
+                        <Field label="Байрлалын тайлбар" hint="Нэг өгүүлбэр — барилга дээрх байрлал.">
+                          <TextArea
+                            rows={2}
+                            value={item.plan.spot}
+                            onChange={(e) => editUnit((u) => void (u.plan.spot = e.target.value))}
+                          />
+                        </Field>
+                      </div>
+                      <span className="mb-1.5 mt-4 block text-body font-semibold text-neutral-700">
+                        Өрөөний задаргаа
+                      </span>
+                      <div className="space-y-2">
+                        {item.plan.rooms.map((room, ri) => (
+                          <div key={ri} className="flex items-center gap-2">
+                            <span className="w-6 shrink-0 text-label font-bold text-neutral-400">{ri + 1}.</span>
+                            <TextInput
+                              value={room.name}
+                              placeholder="Зочны өрөө"
+                              onChange={(e) => editUnit((u) => void (u.plan.rooms[ri].name = e.target.value))}
+                            />
+                            <TextInput
+                              value={room.area}
+                              placeholder="19.91"
+                              className="w-28 shrink-0"
+                              onChange={(e) => editUnit((u) => void (u.plan.rooms[ri].area = e.target.value))}
+                            />
+                            <span className="shrink-0 text-label text-neutral-500">м²</span>
+                            <button
+                              type="button"
+                              onClick={() => editUnit((u) => void u.plan.rooms.splice(ri, 1))}
+                              aria-label="Өрөө устгах"
+                              className="rounded-md px-2 py-1 text-sm font-semibold text-red-500 hover:bg-red-50"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        className="mt-3"
+                        onClick={() => editUnit((u) => void u.plan.rooms.push({ name: "", area: "" }))}
+                      >
+                        + Өрөө нэмэх
                       </Button>
                     </div>
                   </>

@@ -6,7 +6,8 @@ import { LangProvider } from "@/components/LangProvider";
 import { SmoothScroll } from "@/components/SmoothScroll";
 import { Cursor } from "@/components/Cursor";
 import { ScrollProgress } from "@/components/ScrollProgress";
-import { DICT, SITE } from "@/lib/content";
+import { SITE } from "@/lib/content";
+import { DEFAULT_SITE_CONTENT } from "@/lib/site-content";
 
 
 const inter = Inter({
@@ -47,16 +48,20 @@ const gilroy = localFont({
   ],
 });
 
+/* Үндсэн хуудас (`/`) өөрийн `generateMetadata`-аар админы SEO утгыг
+   (гарчиг, тайлбар, OG) давхарлан бичнэ — энд зөвхөн бусад хуудасны
+   нөөц утга. Урьд нь OG гарчиг `DICT.mn.hero.title` ("Эв найрамдалтай,
+   төгс амьдрал") байсан тул холбоос хуваалцахад тэр гарч ирдэг байв. */
 export const metadata: Metadata = {
   metadataBase: new URL("https://elysium.mn"),
   title: {
-    default: `${SITE.name} — ${DICT.mn.hero.title}`,
+    default: DEFAULT_SITE_CONTENT.seo.title,
     template: `%s — ${SITE.name}`,
   },
-  description: DICT.mn.hero.subtitle,
+  description: DEFAULT_SITE_CONTENT.seo.description,
   openGraph: {
-    title: `${SITE.name} — ${DICT.mn.hero.title}`,
-    description: DICT.mn.hero.subtitle,
+    title: DEFAULT_SITE_CONTENT.seo.title,
+    description: DEFAULT_SITE_CONTENT.seo.description,
     images: ["/images/hero-sunset.png"],
     type: "website",
   },

@@ -11,13 +11,13 @@
        болохыг хэн ч мэдэхгүй байсан. Одоо тухайн типийн нэр, өрөө,
        талбайг агуулсан хүсэлтийн pop-up нээж /api/contact руу илгээнэ.
 
-   Типүүд, зураг, текст бүгд админаас (`/admin/site` → Өрөөний сонголт)
-   удирдагдана. */
+   Типүүд, зураг, текст, мөн lightbox-ын хажуугийн "Төлөвлөгөөний
+   тайлбар" (давхрын хуваалт + өрөөний задаргаа) бүгд админаас
+   (`/admin/site` → Орон сууцны типүүд) удирдагдана. */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLenis } from "lenis/react";
 import type { SiteContent } from "@/lib/site-content";
-import { unitPlanFor, type UnitPlan } from "@/lib/unit-plans";
 import { MonoKicker, useDragScroll } from "./shared";
 import { MonoModal } from "./MonoModal";
 import { flatSectionTone } from "@/lib/theme-css";
@@ -114,9 +114,9 @@ export function MonoApartments({ site }: { site: SiteContent }) {
   }, [isOpen, close, step]);
 
   const current = open === null ? null : slides[open];
-  /* Тухайн өнцгийн зурагт харгалзах брошурын хуваалт (олдоогүй бол
-     lightbox нь урьдын адил зөвхөн зургаа харуулна). */
-  const plan = current ? unitPlanFor(current.view) : null;
+  /* Хажуугийн самбар — тайлбар, хуваалтын аль нэг нь байвал л гарна
+     (үгүй бол lightbox зөвхөн зургаа бүтэн зайд харуулна). */
+  const panel = current ? hasPlanPanel(current.unit) : false;
 
   const tabClass = (on: boolean) =>
     /* min-h-11 — хүрэх талбайн 44px доод хязгаар. */
@@ -196,14 +196,25 @@ export function MonoApartments({ site }: { site: SiteContent }) {
                   className="relative block w-full cursor-zoom-in overflow-hidden bg-[#dbe3ef] disabled:cursor-default"
                   aria-label={`${unit.title} — аксонометр зургийг томруулж үзэх`}
                 >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={unit.thumb || unit.views[0]}
-                    alt={alt(unit, 0)}
-                    loading="lazy"
-                    decoding="async"
-                    className="aspect-[4/3] w-full object-contain transition-transform duration-700 group-hover:scale-105"
-                  />
+                  {unit.thumb || unit.views[0] ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img
+                      src={unit.thumb || unit.views[0]}
+                      alt={alt(unit, 0)}
+                      loading="lazy"
+                      decoding="async"
+                      className="aspect-[4/3] w-full object-contain transition-transform duration-700 group-hover:scale-105"
+                    />
+                  ) : (
+                    /* Зураггүй тип (админд дөнгөж нэмсэн) — эвдэрсэн зургийн
+                       оронд хоосон плейт. */
+                    <span
+                      aria-hidden
+                      className="flex aspect-[4/3] w-full items-center justify-center text-label font-bold uppercase tracking-caps text-night/35"
+                    >
+                      {apartments.viewsWord}
+                    </span>
+                  )}
                   <span className="absolute left-4 top-4 flex flex-wrap items-center gap-1.5">
                     <span className="rounded-full bg-night px-3 py-1 text-label font-bold uppercase tracking-caps-sm text-white">
                       {unit.title}
@@ -311,7 +322,7 @@ export function MonoApartments({ site }: { site: SiteContent }) {
                 байдлаараа бүтэн зайг эзэлж төвлөрнө. */}
             <div
               className={`flex min-h-0 items-center justify-center ${
-                plan ? "shrink-0 lg:flex-1 lg:shrink" : "flex-1"
+                panel ? "shrink-0 lg:flex-1 lg:shrink" : "flex-1"
               }`}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -321,12 +332,12 @@ export function MonoApartments({ site }: { site: SiteContent }) {
                 alt={alt(current.unit, current.viewIndex)}
                 decoding="async"
                 className={`max-w-full rounded-2xl object-contain lg:max-h-full ${
-                  plan ? "max-h-[46vh]" : "max-h-full"
+                  panel ? "max-h-[46vh]" : "max-h-full"
                 }`}
               />
             </div>
 
-            {plan && <UnitPlanPanel plan={plan} />}
+            {panel && <UnitPlanPanel unit={current.unit} />}
           </div>
 
           <div className="flex items-center justify-between gap-4 px-5 py-5 md:px-10" onClick={(e) => e.stopPropagation()}>
@@ -494,49 +505,82 @@ function UnitInquiry({
 }
 
 /* ------------------------------------------------------------------ */
-/* Lightbox доторх төлөвлөгөөний тайлбар — танилцуулгын өгөгдөл.        */
+/* Lightbox доторх төлөвлөгөөний тайлбар — админаас засагдах өгөгдөл.    */
 /* ------------------------------------------------------------------ */
 
-function UnitPlanPanel({ plan }: { plan: UnitPlan }) {
-  const facts: [string, string][] = [
-    ["Хуваалт", plan.code],
-    ["Давхар", plan.floors],
-    ["Өрөөний тоо", plan.rooms],
-    ["Цонхны чиг", plan.facing],
-  ];
+function hasPlanPanel(u: Unit) {
+  const p = u.plan;
+  return Boolean(u.floorPlan || p.code || p.floors || p.facing || p.spot || p.rooms.length);
+}
+
+function UnitPlanPanel({ unit }: { unit: Unit }) {
+  const { plan, floorPlan } = unit;
+  const facts = (
+    [
+      ["Хуваалт", plan.code],
+      ["Давхар", plan.floors],
+      ["Өрөөний тоо", unit.rooms],
+      ["Цонхны чиг", plan.facing],
+    ] as [string, string][]
+  ).filter(([, v]) => v);
 
   return (
-    <aside className="w-full shrink-0 border-t border-fg/10 pt-6 lg:w-[340px] lg:overflow-y-auto lg:border-l lg:border-t-0 lg:pl-10 lg:pt-0">
+    <aside className="w-full shrink-0 border-t border-fg/10 pt-6 lg:w-[380px] lg:overflow-y-auto lg:border-l lg:border-t-0 lg:pl-10 lg:pt-0">
       <p className="flex items-center gap-3 text-label font-semibold uppercase tracking-caps-lg text-fg/50">
         <span aria-hidden className="h-px w-8 bg-moss" />
         Төлөвлөгөөний тайлбар
       </p>
 
-      <dl className="mt-5 grid grid-cols-2 gap-x-5 gap-y-4 sm:grid-cols-4 lg:grid-cols-2">
-        {facts.map(([label, value]) => (
-          <div key={label}>
-            <dt className="text-2xs font-bold uppercase tracking-caps text-fg/40">{label}</dt>
-            <dd className="mt-1 text-sm font-extrabold tracking-tight text-fg">{value}</dd>
-          </div>
-        ))}
-      </dl>
+      {/* Давхрын хуваалт — тухайн айл тодруулагдсан, бусад нь цайвар.
+          Зураг өөрөө цагаан дэвсгэртэй тул бараан тонд ч цагаан
+          хавтан дээр үлдээнэ. */}
+      {floorPlan && (
+        <figure className="mt-5 overflow-hidden rounded-xl border border-fg/10 bg-white">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={floorPlan}
+            alt={`${unit.title} — давхрын хуваалт дээрх байрлал`}
+            decoding="async"
+            className="w-full object-contain"
+          />
+          <figcaption className="flex items-center justify-between gap-3 border-t border-fg/10 px-3 py-2 text-2xs font-bold uppercase tracking-caps text-fg/45">
+            <span>Давхрын хуваалт</span>
+            {plan.code && <span className="text-fg">{plan.code}</span>}
+          </figcaption>
+        </figure>
+      )}
 
-      <p className="mt-5 text-body leading-relaxed text-fg/60">{plan.spot}</p>
+      {facts.length > 0 && (
+        <dl className="mt-5 grid grid-cols-2 gap-x-5 gap-y-4 sm:grid-cols-4 lg:grid-cols-2">
+          {facts.map(([label, value]) => (
+            <div key={label}>
+              <dt className="text-2xs font-bold uppercase tracking-caps text-fg/40">{label}</dt>
+              <dd className="mt-1 text-sm font-extrabold tracking-tight text-fg">{value}</dd>
+            </div>
+          ))}
+        </dl>
+      )}
 
-      <p className="mt-7 text-2xs font-bold uppercase tracking-caps text-fg/40">Өрөөний задаргаа</p>
-      <ul className="mt-3 border-t border-fg/10">
-        {plan.list.map((r) => (
-          <li key={r.no} className="flex items-baseline justify-between gap-4 border-b border-fg/10 py-2.5">
-            <span className="text-body leading-snug text-fg/70">
-              <span aria-hidden className="mr-2 tabular-nums text-fg/35">
-                {r.no}.
-              </span>
-              {r.name}
-            </span>
-            <span className="shrink-0 text-body font-bold tabular-nums text-fg">{r.area} м²</span>
-          </li>
-        ))}
-      </ul>
+      {plan.spot && <p className="mt-5 text-body leading-relaxed text-fg/60">{plan.spot}</p>}
+
+      {plan.rooms.length > 0 && (
+        <>
+          <p className="mt-7 text-2xs font-bold uppercase tracking-caps text-fg/40">Өрөөний задаргаа</p>
+          <ul className="mt-3 border-t border-fg/10">
+            {plan.rooms.map((r, i) => (
+              <li key={`${r.name}-${i}`} className="flex items-baseline justify-between gap-4 border-b border-fg/10 py-2.5">
+                <span className="text-body leading-snug text-fg/70">
+                  <span aria-hidden className="mr-2 tabular-nums text-fg/35">
+                    {i + 1}.
+                  </span>
+                  {r.name}
+                </span>
+                {r.area && <span className="shrink-0 text-body font-bold tabular-nums text-fg">{r.area} м²</span>}
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
 
       <p className="mt-4 pb-2 text-label leading-relaxed text-fg/40">
         Хэмжээ нь зураг төслийн утга — Elysium танилцуулга. Ашиглалтад орох үед бага зэрэг зөрөх боломжтой.

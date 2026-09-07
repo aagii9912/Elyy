@@ -28,7 +28,15 @@ export const revalidate = 300;
 
 export async function generateMetadata(): Promise<Metadata> {
   const site = await loadSiteContent();
-  return { title: site.seo.title, description: site.seo.description };
+  const { title, description } = site.seo;
+  /* OG-г энд давхарлахгүй бол `layout.tsx`-ийн нөөц гарчиг холбоос
+     хуваалцахад (Facebook, Messenger г.м.) гарч ирнэ. */
+  return {
+    title: { absolute: title },
+    description,
+    openGraph: { title, description, images: ["/images/hero-sunset.png"], type: "website" },
+    twitter: { card: "summary_large_image", title, description, images: ["/images/hero-sunset.png"] },
+  };
 }
 
 /* Black & white experience — brand green kept to a ~5% accent budget

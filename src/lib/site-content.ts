@@ -14,9 +14,36 @@
    код (fs, supabase г.м.) БАЙХГҮЙ.
    ============================================================ */
 
+import { UNIT_PLANS, unitKeyFor, type UnitPlan } from "./unit-plans";
+
 export type NavLink = { label: string; href: string };
 export type StoryPointContent = { heading: string; accent: string; text: string };
 export type TitledItem = { title: string; body: string };
+/** Орон сууцны типийн төлөвлөгөөний тайлбар (lightbox-ын хажуугийн самбар). */
+export type UnitPlanContent = {
+  /** Танилцуулга дахь айлын дугаар (ж: "E-3"). */
+  code: string;
+  /** Аль давхруудад байдаг (ж: "3–23 давхар"). */
+  floors: string;
+  /** Цонх харсан зүгүүд. */
+  facing: string;
+  /** Барилга дээрх байрлал — нэг өгүүлбэр. */
+  spot: string;
+  /** Өрөөний задаргаа — дугаарлалт нь дарааллаараа. `area` нь "м²"-гүй тоо. */
+  rooms: { name: string; area: string }[];
+};
+
+/** `unit-plans.ts`-ийн эх баримтаас админд засагдах хэлбэр рүү. */
+export function unitPlanContent(plan: UnitPlan | null | undefined): UnitPlanContent {
+  if (!plan) return { code: "", floors: "", facing: "", spot: "", rooms: [] };
+  return {
+    code: plan.code,
+    floors: plan.floors,
+    facing: plan.facing,
+    spot: plan.spot,
+    rooms: plan.list.map((r) => ({ name: r.name, area: r.area })),
+  };
+}
 /** Гадаад эх сурвалж руу заасан карт (ж: үйлдвэрлэгчийн хуудас). */
 export type LinkedItem = TitledItem & { link: string };
 /** Сошиал холбоос. `icon` — facebook | instagram | youtube | tiktok |
@@ -510,8 +537,15 @@ export type SiteContent = {
       block: string;
       /** Карт дээрх жижиг зураг. */
       thumb: string;
-      /** Lightbox-д гүйлгэх өнцгүүд. */
+      /** Lightbox-д гүйлгэх өнцгүүд. Хоосон бол `mergeSiteContent`
+       *  зургийн түлхүүрээр (`unit-plans.ts`) өгөгдмөл рендерүүдийг нөхнө. */
       views: string[];
+      /** Давхрын хуваалт — тухайн айлыг тодруулсан бүтэн давхрын зураг.
+       *  Lightbox-ын хажуугийн тайлбарын дээр гарна. Хоосон бол гарахгүй. */
+      floorPlan: string;
+      /** Lightbox-ын хажуугийн "Төлөвлөгөөний тайлбар" — танилцуулгын
+       *  өгөгдөл. Бүх талбар хоосон бол самбар огт гарахгүй. */
+      plan: UnitPlanContent;
     }[];
   };
 
@@ -962,6 +996,8 @@ export const DEFAULT_SITE_CONTENT: SiteContent = {
         block: "B1",
         thumb: "/images/axono/a-01-sm.jpg",
         views: ["/images/axono/a-01.jpg", "/images/axono/a-02.jpg"],
+        floorPlan: UNIT_PLANS.a.floorPlan,
+        plan: unitPlanContent(UNIT_PLANS.a),
       },
       {
         title: "B тип",
@@ -970,6 +1006,8 @@ export const DEFAULT_SITE_CONTENT: SiteContent = {
         block: "B1",
         thumb: "/images/axono/b-01-sm.jpg",
         views: ["/images/axono/b-01.jpg", "/images/axono/b-02.jpg"],
+        floorPlan: UNIT_PLANS.b.floorPlan,
+        plan: unitPlanContent(UNIT_PLANS.b),
       },
       {
         title: "C тип",
@@ -978,6 +1016,8 @@ export const DEFAULT_SITE_CONTENT: SiteContent = {
         block: "B1",
         thumb: "/images/axono/c-01-sm.jpg",
         views: ["/images/axono/c-01.jpg", "/images/axono/c-02.jpg"],
+        floorPlan: UNIT_PLANS.c.floorPlan,
+        plan: unitPlanContent(UNIT_PLANS.c),
       },
       {
         title: "D тип",
@@ -986,6 +1026,8 @@ export const DEFAULT_SITE_CONTENT: SiteContent = {
         block: "B1",
         thumb: "/images/axono/d-01-sm.jpg",
         views: ["/images/axono/d-01.jpg", "/images/axono/d-02.jpg"],
+        floorPlan: UNIT_PLANS.d.floorPlan,
+        plan: unitPlanContent(UNIT_PLANS.d),
       },
       {
         title: "D тип · 2 давхар",
@@ -994,6 +1036,8 @@ export const DEFAULT_SITE_CONTENT: SiteContent = {
         block: "B1",
         thumb: "/images/axono/d2f-01-sm.jpg",
         views: ["/images/axono/d2f-01.jpg", "/images/axono/d2f-02.jpg"],
+        floorPlan: UNIT_PLANS.d2f.floorPlan,
+        plan: unitPlanContent(UNIT_PLANS.d2f),
       },
       {
         title: "E тип",
@@ -1002,6 +1046,8 @@ export const DEFAULT_SITE_CONTENT: SiteContent = {
         block: "B2",
         thumb: "/images/axono/e-01-sm.jpg",
         views: ["/images/axono/e-01.jpg", "/images/axono/e-02.jpg"],
+        floorPlan: UNIT_PLANS.e.floorPlan,
+        plan: unitPlanContent(UNIT_PLANS.e),
       },
       {
         title: "E тип · 2 давхар",
@@ -1010,6 +1056,8 @@ export const DEFAULT_SITE_CONTENT: SiteContent = {
         block: "B2",
         thumb: "/images/axono/e2f-01-sm.jpg",
         views: ["/images/axono/e2f-01.jpg", "/images/axono/e2f-02.jpg"],
+        floorPlan: UNIT_PLANS.e2f.floorPlan,
+        plan: unitPlanContent(UNIT_PLANS.e2f),
       },
     ],
   },
@@ -1293,7 +1341,43 @@ function mergeValue<T>(def: T, val: unknown): T {
 
 /** Хадгалсан (эсвэл хагас дутуу) өгөгдлөөс бүрэн `SiteContent` гаргана. */
 export function mergeSiteContent(stored: unknown): SiteContent {
-  return mergeValue(DEFAULT_SITE_CONTENT, stored);
+  const merged = mergeValue(DEFAULT_SITE_CONTENT, stored);
+  fillUnitPlans(merged, stored);
+  return merged;
+}
+
+const isRecord = (v: unknown): v is Record<string, unknown> =>
+  v !== null && typeof v === "object" && !Array.isArray(v);
+
+/** Орон сууцны типүүдийн `views` / `plan` / `floorPlan`-ыг нөхнө.
+ *
+ *  `mergeValue` нь массивын элементийн дутуу түлхүүрийг ЭХНИЙ өгөгдмөл
+ *  элементээс (A тип) нөхдөг тул `plan`, `floorPlan` талбар нэмэгдэхээс
+ *  өмнө хадгалагдсан контентод бүх тип A-гийн тайлбар авах байсан.
+ *  Тиймээс түүхий хадгалсан элементэд тухайн түлхүүр БАЙХГҮЙ бол
+ *  зургийн замын түлхүүрээр (`/images/axono/d2f-01-sm.jpg` → "d2f")
+ *  `unit-plans.ts`-аас зөв тайлбарыг нь олж өгнө; танихгүй зурагтай
+ *  бол хоосон үлдээнэ. Админаас хоосон үлдээсэн `views`-ийг мөн
+ *  өгөгдмөл рендерүүдээр нөхнө — эс бөгөөс карт дарагдахгүй болдог. */
+function fillUnitPlans(site: SiteContent, stored: unknown) {
+  const rawUnits =
+    isRecord(stored) && isRecord(stored.apartments) && Array.isArray(stored.apartments.units)
+      ? (stored.apartments.units as unknown[])
+      : null;
+
+  site.apartments.units.forEach((unit, i) => {
+    const raw = rawUnits?.[i];
+    const rawUnit = isRecord(raw) ? raw : null;
+    unit.views = unit.views.filter((v) => v.trim());
+    const key = unitKeyFor(unit.views[0] || unit.thumb);
+    const ref = key ? UNIT_PLANS[key] : null;
+
+    if (unit.views.length === 0 && ref) unit.views = ref.views.slice();
+    /* Хадгалсан элементэд талбар байхгүй → template-ээс ирсэн (A-гийн)
+       утга биш, өөрийнх нь зургаар олдсон утга. */
+    if (!rawUnit || !isRecord(rawUnit.plan)) unit.plan = unitPlanContent(ref);
+    if (!rawUnit || typeof rawUnit.floorPlan !== "string") unit.floorPlan = ref?.floorPlan ?? "";
+  });
 }
 
 /** Гүн хуулбар — засварлагчид өгөгдмөл рүү буцаахад ашиглана. */

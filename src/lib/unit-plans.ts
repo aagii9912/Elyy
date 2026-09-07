@@ -4,14 +4,14 @@
    хуваалт) буулгав.
 
    Яагаад тусдаа файл вэ:
-     • Өрөөний жагсаалт нь зураг төслийн баримт — борлуулалтын багийн
-       засдаг маркетингийн текст биш тул `site-content`-д ОРУУЛААГҮЙ.
-       (`mergeSiteContent` нь массивын дутуу түлхүүрийг ЭХНИЙ өгөгдмөл
-       элементээс нөхдөг тул хадгалсан контентод шинэ талбар нэмбэл
-       бүх тип нэг ижил утга авах эрсдэлтэй.)
-     • Түлхүүр нь зургийн замын угтвар (`/images/axono/a-01.jpg` → "a")
-       — админаас зураг сольсон ч буруу тайлбар наалдахгүй, зүгээр л
-       алга болно.
+     • Энэ нь зураг төслийн ЭХ баримт. `site-content`-ын өгөгдмөл типүүд
+       эндээс `plan` / `floorPlan` / `views`-ээ авдаг бөгөөд админ дээр
+       тип бүрийн тайлбарыг цаашид засаж болно.
+     • `mergeSiteContent` нь массивын дутуу түлхүүрийг ЭХНИЙ өгөгдмөл
+       элементээс нөхдөг тул хадгалсан хуучин контентод `plan` байхгүй
+       бол бүх тип A-гийн тайлбар авах байсан — тиймээс merge-ийн дараа
+       зургийн түлхүүрээр (`/images/axono/a-01.jpg` → "a") эндээс дахин
+       нөхдөг (`site-content.ts` → `fillUnitPlans`).
 
    Тип ↔ брошурын дугаарын харгалзаа нь рендер бүрийн зохион
    байгуулалт, давхрын хуваалт дээрх байрлалаар тогтоогдсон:
@@ -35,6 +35,12 @@ export type PlanRoom = {
 export type UnitPlan = {
   /** Танилцуулга дахь айлын дугаар (ж: "E-3"). */
   code: string;
+  /** Өгөгдмөл аксонометр рендерүүд — админд `views` хоосон үлдсэн
+   *  типэд lightbox-ыг ажиллуулахын тулд `mergeSiteContent` эндээс нөхнө. */
+  views: string[];
+  /** Давхрын хуваалт — тухайн айлыг тодруулсан бүтэн давхрын зураг
+   *  (брошурын 2-р, 3-р хуудаснаас; `public/images/floorplan/`). */
+  floorPlan: string;
   /** Аль давхруудад байдаг. */
   floors: string;
   rooms: string;
@@ -54,6 +60,8 @@ const room = (no: number, name: string, area: string): PlanRoom => ({ no, name, 
 export const UNIT_PLANS: Record<string, UnitPlan> = {
   a: {
     code: "E-3",
+    views: ["/images/axono/a-01.jpg", "/images/axono/a-02.jpg"],
+    floorPlan: "/images/floorplan/e3.jpg",
     floors: "3–23 давхар",
     rooms: "3 өрөө",
     area: "84.66 м²",
@@ -73,6 +81,8 @@ export const UNIT_PLANS: Record<string, UnitPlan> = {
   },
   b: {
     code: "E-4",
+    views: ["/images/axono/b-01.jpg", "/images/axono/b-02.jpg"],
+    floorPlan: "/images/floorplan/e4.jpg",
     floors: "3–23 давхар",
     rooms: "4 өрөө",
     area: "133.61 м²",
@@ -96,6 +106,8 @@ export const UNIT_PLANS: Record<string, UnitPlan> = {
   },
   c: {
     code: "E-5",
+    views: ["/images/axono/c-01.jpg", "/images/axono/c-02.jpg"],
+    floorPlan: "/images/floorplan/e5.jpg",
     floors: "3–23 давхар",
     rooms: "3 өрөө",
     area: "80.32 м²",
@@ -115,6 +127,8 @@ export const UNIT_PLANS: Record<string, UnitPlan> = {
   },
   d: {
     code: "E-6",
+    views: ["/images/axono/d-01.jpg", "/images/axono/d-02.jpg"],
+    floorPlan: "/images/floorplan/e6.jpg",
     floors: "3–23 давхар",
     rooms: "2 өрөө",
     area: "51.72 м²",
@@ -132,6 +146,8 @@ export const UNIT_PLANS: Record<string, UnitPlan> = {
   },
   d2f: {
     code: "E-1",
+    views: ["/images/axono/d2f-01.jpg", "/images/axono/d2f-02.jpg"],
+    floorPlan: "/images/floorplan/e1.jpg",
     floors: "2 давхар",
     rooms: "2 өрөө",
     area: "49.19 м²",
@@ -147,6 +163,8 @@ export const UNIT_PLANS: Record<string, UnitPlan> = {
   },
   e: {
     code: "E-7",
+    views: ["/images/axono/e-01.jpg", "/images/axono/e-02.jpg"],
+    floorPlan: "/images/floorplan/e7.jpg",
     floors: "3–23 давхар",
     rooms: "3 өрөө",
     area: "89.73 м²",
@@ -166,6 +184,8 @@ export const UNIT_PLANS: Record<string, UnitPlan> = {
   },
   e2f: {
     code: "E-2",
+    views: ["/images/axono/e2f-01.jpg", "/images/axono/e2f-02.jpg"],
+    floorPlan: "/images/floorplan/e2.jpg",
     floors: "2 давхар",
     rooms: "2 өрөө",
     area: "64.16 м²",
@@ -183,12 +203,19 @@ export const UNIT_PLANS: Record<string, UnitPlan> = {
   },
 };
 
-/** `/images/axono/d2f-01.jpg` → `UNIT_PLANS.d2f`. Танихгүй зам → null. */
-export function unitPlanFor(src: string | undefined): UnitPlan | null {
+/** `/images/axono/d2f-01-sm.jpg` → `"d2f"`. Танихгүй зам → null. */
+export function unitKeyFor(src: string | undefined): string | null {
   if (!src) return null;
   const file = src.split("/").pop();
   if (!file) return null;
-  /* basename-ийн "-NN" өнцгийн дагаварыг таслана: "d2f-01.jpg" → "d2f". */
+  /* basename-ийн "-NN" өнцөг, "-sm" жижиг хувилбарын дагаварыг таслана:
+     "d2f-01-sm.jpg" → "d2f". */
   const key = file.replace(/\.[a-z]+$/i, "").replace(/-\d+(-sm)?$/i, "");
-  return UNIT_PLANS[key] ?? null;
+  return key in UNIT_PLANS ? key : null;
+}
+
+/** `/images/axono/d2f-01.jpg` → `UNIT_PLANS.d2f`. Танихгүй зам → null. */
+export function unitPlanFor(src: string | undefined): UnitPlan | null {
+  const key = unitKeyFor(src);
+  return key ? UNIT_PLANS[key] : null;
 }
