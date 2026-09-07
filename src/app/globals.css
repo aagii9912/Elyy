@@ -282,6 +282,25 @@
      Дизайн → Типографи`-аас ирнэ (`lib/theme-css.ts`). h1 ба h2 нь
      ӨӨР ӨӨР нөөц утгатай: админ юу ч тохируулаагүй үед тус бүр өөрийн
      кодын өгөгдмөлөөрөө үлдэж, тохируулмагц хоёулаа нэг системд орно. */
+  /* Hero-гийн гарчиг — урд блокуудын АРД суудаг тул ердийн h1-ээс том,
+     зузаан; веб дээр нэг мөр (блокуудын дээгүүр сунана), гар утсанд
+     хоёр мөр. Админы `--ely-h-weight`-ийг ЗОРИУД дарна: нарийн үсэг
+     блокуудын ард алга болно. */
+  /* `.mono-h1.mono-h1-hero` — доорх `.mono-h1`-ээс өндөр specificity,
+     эс бөгөөс дараа бичигдсэн `.mono-h1` дарна. */
+  .mono-h1.mono-h1-hero {
+    font-size: calc(clamp(3rem, 8.4vw, 8rem) * var(--ely-scale, 1));
+    font-weight: 900;
+    line-height: 0.98;
+    letter-spacing: -0.015em;
+    text-transform: uppercase;
+    filter: drop-shadow(0 4px 24px rgba(0, 0, 0, 0.25));
+  }
+  @media (min-width: 768px) {
+    .mono-h1.mono-h1-hero {
+      white-space: nowrap;
+    }
+  }
   .mono-h1 {
     font-size: calc(clamp(2.6rem, 7.5vw, 4.6rem) * var(--ely-scale, 1));
     font-weight: var(--ely-h-weight, 500);
