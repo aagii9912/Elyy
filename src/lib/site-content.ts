@@ -510,6 +510,9 @@ export type SiteContent = {
     body: string;
     /** Карт дээрх "N өнцөг" гэсний дараах үг. */
     viewsWord: string;
+    /** Картын товч — аксонометрийн дэлгэрэнгүйг нээнэ. */
+    detailCta: string;
+    /** Дэлгэрэнгүй дотор гарах хүсэлтийн товч (lead capture). */
     cardCta: string;
     /** B1/B2 шүүлтүүрийн "бүгд" таб. */
     allLabel: string;
@@ -967,6 +970,7 @@ export const DEFAULT_SITE_CONTENT: SiteContent = {
     title: "Танд тохирох орон зай",
     body: "Уужим, ашигтай, минимал орон сууцны сонголтоос та өөрт тохирохыг сонгоорой.",
     viewsWord: "өнцөг",
+    detailCta: "Дэлгэрэнгүй үзэх",
     cardCta: "Сонирхох",
     allLabel: "Бүх тип",
     inquiry: {
@@ -1373,6 +1377,12 @@ function fillUnitPlans(site: SiteContent, stored: unknown) {
     const ref = key ? UNIT_PLANS[key] : null;
 
     if (unit.views.length === 0 && ref) unit.views = ref.views.slice();
+    /* Админаас байршуулсан ШИНЭ рендер (`/images/axono/…` биш, storage-ийн
+       URL) нь `UNIT_PLANS`-ийн түлхүүрт таарахгүй тул дээрх нөхөлт
+       ажиллахгүй. Ийм үед `views` хоосон үлдэж, картын зураг дарагдахгүй
+       болж (`disabled`) дэлгэрэнгүй огт нээгддэггүй байв — картын
+       thumb-ыг өөрийг нь ганц өнцөг болгож өгнө. */
+    if (unit.views.length === 0 && unit.thumb.trim()) unit.views = [unit.thumb.trim()];
     /* Хадгалсан элементэд талбар байхгүй → template-ээс ирсэн (A-гийн)
        утга биш, өөрийнх нь зургаар олдсон утга. */
     if (!rawUnit || !isRecord(rawUnit.plan)) unit.plan = unitPlanContent(ref);

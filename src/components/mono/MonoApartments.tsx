@@ -28,7 +28,12 @@ const ALL = "__all__";
 
 export function MonoApartments({ site }: { site: SiteContent }) {
   const { apartments } = site;
-  const drag = useDragScroll<HTMLDivElement>();
+  /* Каруселийн эгнээ — чирэлт (`useDragScroll`) БОЛОН хажуугийн
+     сумнууд нэг л ref дээр ажиллана. */
+  const rail = useRef<HTMLDivElement>(null);
+  const drag = useDragScroll<HTMLDivElement>(rail);
+  /** Хажуугийн сум харагдах эсэх — эгнээний хоёр үзүүрт нуугдана. */
+  const [arrows, setArrows] = useState({ prev: false, next: false });
   const [open, setOpen] = useState<number | null>(null);
   const [block, setBlock] = useState<string>(ALL);
   const [inquiry, setInquiry] = useState<Unit | null>(null);
@@ -90,20 +95,32 @@ export function MonoApartments({ site }: { site: SiteContent }) {
     setBlock(next);
   };
 
-  /* Lightbox нээлттэй үед хуудасны гүйлтийг зогсоож, фокусыг барина. */
+  /* Lightbox нээлттэй үед хуудасны гүйлтийг зогсооно.
+     `inquiry` нь хамаарал: дотроос хүсэлтийн pop-up (`MonoModal`)
+     нээгдээд хаагдахад тэр нь цэвэрлэгээндээ `lenis.start()` дууддаг —
+     lightbox нээлттэй хэвээр атал хуудас ард нь гүйж эхэлнэ. */
   useEffect(() => {
     if (!isOpen) return;
     lenis?.stop();
-    closeRef.current?.focus();
     return () => {
       lenis?.start();
-      restoreRef.current?.focus?.();
     };
-  }, [isOpen, lenis]);
+  }, [isOpen, lenis, inquiry]);
 
-  /* Esc — хаах, сум — өнцөг солих. */
+  /* Фокус — гүйлтээс ТУСДАА: `inquiry` солигдох бүрд булаахгүй. */
   useEffect(() => {
     if (!isOpen) return;
+    closeRef.current?.focus();
+    return () => {
+      restoreRef.current?.focus?.();
+    };
+  }, [isOpen]);
+
+  /* Esc — хаах, сум — өнцөг солих. Хүсэлтийн pop-up нээлттэй үед
+     УНТРААНА: эс бөгөөс Esc хоёуланг зэрэг хааж, маягт бөглөж байхад
+     сум дарахад ард нь зураг солигдоно. */
+  useEffect(() => {
+    if (!isOpen || inquiry) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") close();
       else if (e.key === "ArrowRight") step(1);
@@ -111,12 +128,49 @@ export function MonoApartments({ site }: { site: SiteContent }) {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [isOpen, close, step]);
+  }, [isOpen, inquiry, close, step]);
 
   const current = open === null ? null : slides[open];
   /* Хажуугийн самбар — тайлбар, хуваалтын аль нэг нь байвал л гарна
      (үгүй бол lightbox зөвхөн зургаа бүтэн зайд харуулна). */
   const panel = current ? hasPlanPanel(current.unit) : false;
+
+  /* Сумны төлөв — гүйлгэх, хэмжээ өөрчлөгдөх, шүүлтүүр солигдох бүрд. */
+  const syncArrows = useCallback(() => {
+    const el = rail.current;
+    if (!el) return;
+    const max = el.scrollWidth - el.clientWidth;
+    /* 2px тэвчээр — subpixel-ийн улмаас төгсгөлд ч `next` идэвхтэй
+       үлдэж, дарахад юу ч болдоггүй байхаас сэргийлнэ. */
+    setArrows({ prev: el.scrollLeft > 2, next: el.scrollLeft < max - 2 });
+  }, []);
+
+  useEffect(() => {
+    const el = rail.current;
+    if (!el) return;
+    syncArrows();
+    el.addEventListener("scroll", syncArrows, { passive: true });
+    const ro = new ResizeObserver(syncArrows);
+    ro.observe(el);
+    return () => {
+      el.removeEventListener("scroll", syncArrows);
+      ro.disconnect();
+    };
+  }, [syncArrows, units.length]);
+
+  /** Нэг картын өргөнөөр (+ `gap-5` = 20px) алхана. */
+  const nudge = (dir: number) => {
+    const el = rail.current;
+    if (!el) return;
+    const card = el.firstElementChild as HTMLElement | null;
+    const step = card ? card.offsetWidth + 20 : el.clientWidth * 0.8;
+    el.scrollBy({ left: dir * step, behavior: "smooth" });
+  };
+
+  const arrowClass = (on: boolean) =>
+    `absolute top-1/2 z-10 hidden h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-fg/15 bg-surface/90 text-lg font-bold text-fg shadow-[0_12px_32px_-14px_rgba(21,23,23,0.55)] backdrop-blur transition duration-300 hover:border-fg hover:bg-night hover:text-white md:flex ${
+      on ? "opacity-100" : "pointer-events-none opacity-0"
+    }`;
 
   const tabClass = (on: boolean) =>
     /* min-h-11 — хүрэх талбайн 44px доод хязгаар. */
@@ -174,100 +228,131 @@ export function MonoApartments({ site }: { site: SiteContent }) {
           </div>
         )}
 
-        <div
-          {...drag}
-          className="mt-10 flex snap-x snap-mandatory gap-5 overflow-x-auto pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:mt-12"
-        >
-          {units.map((unit, unitIndex) => {
-            const firstSlide = slides.findIndex((s) => s.unitIndex === unitIndex);
-            return (
-              <article
-                key={`${unit.title}-${unitIndex}`}
-                data-reveal="up"
-                className="group flex w-[80vw] shrink-0 snap-start flex-col overflow-hidden rounded-2xl border border-fg/10 bg-surface transition-colors duration-300 hover:border-fg/30 sm:w-[46vw] lg:w-[30vw] xl:w-[23vw]"
-              >
-                <button
-                  type="button"
-                  data-cursor-hover
-                  onClick={() => firstSlide >= 0 && openAt(firstSlide)}
-                  disabled={firstSlide < 0}
-                  /* Плейт өнгө = рендерийн студийн дэвсгэр, ингэснээр
-                     object-contain-ий хажуугийн зай нь салангид харагдахгүй. */
-                  className="relative block w-full cursor-zoom-in overflow-hidden bg-[#dbe3ef] disabled:cursor-default"
-                  aria-label={`${unit.title} — аксонометр зургийг томруулж үзэх`}
+        {/* Хэвтээ карусель + хажуугийн гүйлгэх сумнууд. Гар утсанд
+            хуруугаараа шудрах нь илүү байгалийн тул сумыг ЗӨВХӨН
+            `md`-ээс дээш гаргана (`arrowClass` → `md:flex`). */}
+        <div className="relative mt-10 md:mt-12">
+          <div
+            {...drag}
+            className="flex snap-x snap-mandatory gap-5 overflow-x-auto pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          >
+            {units.map((unit, unitIndex) => {
+              const firstSlide = slides.findIndex((s) => s.unitIndex === unitIndex);
+              return (
+                <article
+                  key={`${unit.title}-${unitIndex}`}
+                  data-reveal="up"
+                  className="group flex w-[80vw] shrink-0 snap-start flex-col overflow-hidden rounded-2xl border border-fg/10 bg-surface transition-colors duration-300 hover:border-fg/30 sm:w-[46vw] lg:w-[30vw] xl:w-[23vw]"
                 >
-                  {unit.thumb || unit.views[0] ? (
-                    /* eslint-disable-next-line @next/next/no-img-element */
-                    <img
-                      src={unit.thumb || unit.views[0]}
-                      alt={alt(unit, 0)}
-                      loading="lazy"
-                      decoding="async"
-                      className="aspect-[4/3] w-full object-contain transition-transform duration-700 group-hover:scale-105"
-                    />
-                  ) : (
-                    /* Зураггүй тип (админд дөнгөж нэмсэн) — эвдэрсэн зургийн
-                       оронд хоосон плейт. */
-                    <span
-                      aria-hidden
-                      className="flex aspect-[4/3] w-full items-center justify-center text-label font-bold uppercase tracking-caps text-night/35"
-                    >
-                      {apartments.viewsWord}
-                    </span>
-                  )}
-                  <span className="absolute left-4 top-4 flex flex-wrap items-center gap-1.5">
-                    <span className="rounded-full bg-night px-3 py-1 text-label font-bold uppercase tracking-caps-sm text-white">
-                      {unit.title}
-                    </span>
-                    {showBlocks && unit.block?.trim() && (
-                      <span className="rounded-full bg-moss px-2.5 py-1 text-label font-bold uppercase tracking-caps-sm text-white">
-                        {unit.block}
-                      </span>
-                    )}
-                  </span>
-                  {unit.views.length > 0 && (
-                    <span className="glass glass-chip absolute bottom-4 right-4 rounded-full px-3 py-1 text-label font-bold uppercase tracking-caps-sm text-fg">
-                      {unit.views.length} {apartments.viewsWord}
-                    </span>
-                  )}
-                </button>
-                <div className="mt-auto flex items-end justify-between gap-3 border-t border-fg/10 p-6">
-                  <div>
-                    <h3 className="text-2xl font-extrabold tracking-tight text-fg">{unit.rooms}</h3>
-                    <p className="mt-1 text-sm font-semibold text-fg/55">{unit.area}</p>
-                  </div>
                   <button
                     type="button"
                     data-cursor-hover
-                    onClick={() => setInquiry(unit)}
-                    aria-haspopup="dialog"
-                    aria-label={`${unit.title} — ${apartments.cardCta}`}
-                    className="inline-flex min-h-11 shrink-0 items-center rounded-full border border-fg/25 px-5 text-label font-bold uppercase tracking-caps-sm text-fg transition-colors duration-300 hover:border-fg hover:bg-night hover:text-white"
+                    onClick={() => firstSlide >= 0 && openAt(firstSlide)}
+                    disabled={firstSlide < 0}
+                    /* Плейт өнгө = рендерийн студийн дэвсгэр, ингэснээр
+                       object-contain-ий хажуугийн зай нь салангид харагдахгүй. */
+                    className="relative block w-full cursor-zoom-in overflow-hidden bg-[#dbe3ef] disabled:cursor-default"
+                    aria-label={`${unit.title} — аксонометр зургийг томруулж үзэх`}
                   >
-                    {apartments.cardCta}
+                    {unit.thumb || unit.views[0] ? (
+                      /* eslint-disable-next-line @next/next/no-img-element */
+                      <img
+                        src={unit.thumb || unit.views[0]}
+                        alt={alt(unit, 0)}
+                        loading="lazy"
+                        decoding="async"
+                        className="aspect-[4/3] w-full object-contain transition-transform duration-700 group-hover:scale-105"
+                      />
+                    ) : (
+                      /* Зураггүй тип (админд дөнгөж нэмсэн) — эвдэрсэн зургийн
+                         оронд хоосон плейт. */
+                      <span
+                        aria-hidden
+                        className="flex aspect-[4/3] w-full items-center justify-center text-label font-bold uppercase tracking-caps text-night/35"
+                      >
+                        {apartments.viewsWord}
+                      </span>
+                    )}
+                    <span className="absolute left-4 top-4 flex flex-wrap items-center gap-1.5">
+                      <span className="rounded-full bg-night px-3 py-1 text-label font-bold uppercase tracking-caps-sm text-white">
+                        {unit.title}
+                      </span>
+                      {showBlocks && unit.block?.trim() && (
+                        <span className="rounded-full bg-moss px-2.5 py-1 text-label font-bold uppercase tracking-caps-sm text-white">
+                          {unit.block}
+                        </span>
+                      )}
+                    </span>
+                    {/* «N өнцөг» — ганц зурагтай үед мэдээлэл өгөхгүй тул
+                        зөвхөн ХОЁРООС дээш өнцөгтэй типэд гарна. */}
+                    {unit.views.length > 1 && (
+                      <span className="glass glass-chip absolute bottom-4 right-4 rounded-full px-3 py-1 text-label font-bold uppercase tracking-caps-sm text-fg">
+                        {unit.views.length} {apartments.viewsWord}
+                      </span>
+                    )}
                   </button>
-                </div>
-              </article>
-            );
-          })}
+                  <div className="mt-auto flex items-end justify-between gap-3 border-t border-fg/10 p-6">
+                    <div>
+                      <h3 className="text-2xl font-extrabold tracking-tight text-fg">{unit.rooms}</h3>
+                      <p className="mt-1 text-sm font-semibold text-fg/55">{unit.area}</p>
+                    </div>
+                    {/* Зургийн товчтой ижил зүйл хийнэ — аксонометрийн
+                        дэлгэрэнгүйг нээнэ. Хүсэлтийн маягт (lead capture)
+                        нь дэлгэрэнгүйн ДОТОР гарна. */}
+                    <button
+                      type="button"
+                      data-cursor-hover
+                      onClick={() => firstSlide >= 0 && openAt(firstSlide)}
+                      disabled={firstSlide < 0}
+                      aria-label={`${unit.title} — ${apartments.detailCta}`}
+                      className="inline-flex min-h-11 shrink-0 items-center whitespace-nowrap rounded-full border border-fg/25 px-5 text-label font-bold uppercase tracking-caps-sm text-fg transition-colors duration-300 hover:border-fg hover:bg-night hover:text-white disabled:pointer-events-none disabled:opacity-40"
+                    >
+                      {apartments.detailCta}
+                    </button>
+                  </div>
+                </article>
+              );
+            })}
 
-          {/* closing card — pushes to contact */}
-          <a
-            href="#contact"
+            {/* closing card — pushes to contact */}
+            <a
+              href="#contact"
+              data-cursor-hover
+              data-reveal="zoom"
+              className="flex w-[80vw] shrink-0 snap-start flex-col items-start justify-between gap-8 rounded-2xl bg-night p-6 text-white sm:w-[46vw] lg:w-[30vw] xl:w-[23vw]"
+            >
+              <p className="text-label font-bold uppercase tracking-caps text-white/60">{apartments.ctaCard.kicker}</p>
+              <div>
+                <p className="text-2xl font-extrabold leading-tight tracking-tight">
+                  {apartments.ctaCard.title}
+                </p>
+                <p className="mt-3 inline-flex items-center gap-2 text-sm font-bold">
+                  {apartments.ctaCard.link} <span aria-hidden>→</span>
+                </p>
+              </div>
+            </a>
+          </div>
+
+          <button
+            type="button"
             data-cursor-hover
-            data-reveal="zoom"
-            className="flex w-[80vw] shrink-0 snap-start flex-col items-start justify-between gap-8 rounded-2xl bg-night p-6 text-white sm:w-[46vw] lg:w-[30vw] xl:w-[23vw]"
+            onClick={() => nudge(-1)}
+            disabled={!arrows.prev}
+            aria-label="Өмнөх типүүд рүү гүйлгэх"
+            className={`${arrowClass(arrows.prev)} left-0`}
           >
-            <p className="text-label font-bold uppercase tracking-caps text-white/60">{apartments.ctaCard.kicker}</p>
-            <div>
-              <p className="text-2xl font-extrabold leading-tight tracking-tight">
-                {apartments.ctaCard.title}
-              </p>
-              <p className="mt-3 inline-flex items-center gap-2 text-sm font-bold">
-                {apartments.ctaCard.link} <span aria-hidden>→</span>
-              </p>
-            </div>
-          </a>
+            <span aria-hidden>←</span>
+          </button>
+          <button
+            type="button"
+            data-cursor-hover
+            onClick={() => nudge(1)}
+            disabled={!arrows.next}
+            aria-label="Дараах типүүд рүү гүйлгэх"
+            className={`${arrowClass(arrows.next)} right-0`}
+          >
+            <span aria-hidden>→</span>
+          </button>
         </div>
       </div>
 
@@ -340,27 +425,47 @@ export function MonoApartments({ site }: { site: SiteContent }) {
             {panel && <UnitPlanPanel unit={current.unit} />}
           </div>
 
-          <div className="flex items-center justify-between gap-4 px-5 py-5 md:px-10" onClick={(e) => e.stopPropagation()}>
+          {/* Доод мөр: зүүнд хуудаслалт, баруунд хүсэлтийн товч —
+              дэлгэрэнгүйг ҮЗСЭНИЙ дараах лид цуглуулах гол цэг. */}
+          <div
+            className="flex flex-wrap items-center justify-between gap-4 px-5 py-5 md:px-10"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                data-cursor-hover
+                onClick={() => step(-1)}
+                disabled={slides.length < 2}
+                aria-label="Өмнөх зураг"
+                className="flex h-11 w-11 items-center justify-center rounded-full border border-fg/25 text-sm font-bold text-fg transition-colors duration-300 hover:bg-night hover:text-white disabled:pointer-events-none disabled:opacity-30"
+              >
+                ←
+              </button>
+              <p className="text-label font-bold uppercase tracking-caps-sm text-fg/50">
+                {apartments.viewsWord} {current.viewIndex + 1}/{current.unit.views.length} · {(open ?? 0) + 1}/{slides.length}
+              </p>
+              <button
+                type="button"
+                data-cursor-hover
+                onClick={() => step(1)}
+                disabled={slides.length < 2}
+                aria-label="Дараах зураг"
+                className="flex h-11 w-11 items-center justify-center rounded-full border border-fg/25 text-sm font-bold text-fg transition-colors duration-300 hover:bg-night hover:text-white disabled:pointer-events-none disabled:opacity-30"
+              >
+                →
+              </button>
+            </div>
+
             <button
               type="button"
               data-cursor-hover
-              onClick={() => step(-1)}
-              aria-label="Өмнөх зураг"
-              className="flex h-11 w-11 items-center justify-center rounded-full border border-fg/25 text-sm font-bold text-fg transition-colors duration-300 hover:bg-night hover:text-white"
+              onClick={() => setInquiry(current.unit)}
+              aria-haspopup="dialog"
+              aria-label={`${current.unit.title} — ${apartments.cardCta}`}
+              className="inline-flex min-h-12 items-center justify-center rounded-full bg-night px-8 text-label font-bold uppercase tracking-caps-sm text-white transition-transform duration-300 hover:-translate-y-0.5"
             >
-              ←
-            </button>
-            <p className="text-label font-bold uppercase tracking-caps-sm text-fg/50">
-              {apartments.viewsWord} {current.viewIndex + 1}/{current.unit.views.length} · {(open ?? 0) + 1}/{slides.length}
-            </p>
-            <button
-              type="button"
-              data-cursor-hover
-              onClick={() => step(1)}
-              aria-label="Дараах зураг"
-              className="flex h-11 w-11 items-center justify-center rounded-full border border-fg/25 text-sm font-bold text-fg transition-colors duration-300 hover:bg-night hover:text-white"
-            >
-              →
+              {apartments.cardCta}
             </button>
           </div>
         </div>

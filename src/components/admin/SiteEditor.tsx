@@ -1163,7 +1163,13 @@ function renderSection(
               </Field>
             </div>
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
-              <Field label="Картын товч" hint="Ж: Сонирхох">
+              <Field label="Картын товч" hint="Аксонометрийн дэлгэрэнгүйг нээнэ. Ж: Дэлгэрэнгүй үзэх">
+                <TextInput
+                  value={c.apartments.detailCta}
+                  onChange={(e) => edit((d) => void (d.apartments.detailCta = e.target.value))}
+                />
+              </Field>
+              <Field label="Дэлгэрэнгүй доторх хүсэлтийн товч" hint="Ж: Сонирхох">
                 <TextInput
                   value={c.apartments.cardCta}
                   onChange={(e) => edit((d) => void (d.apartments.cardCta = e.target.value))}
@@ -1186,8 +1192,8 @@ function renderSection(
 
           <Card title="“Сонирхох” хүсэлтийн pop-up">
             <p className="mb-4 text-xs text-neutral-500">
-              Карт дээрх “Сонирхох” дарахад гарах маягт. Илгээхэд сонгосон типийн нэр, блок,
-              өрөө, талбай автоматаар хүсэлтэд бичигдэнэ.
+              Аксонометрийн дэлгэрэнгүй дотор “Сонирхох” дарахад гарах маягт. Илгээхэд сонгосон
+              типийн нэр, блок, өрөө, талбай автоматаар хүсэлтэд бичигдэнэ.
             </p>
             <div className="grid gap-4 sm:grid-cols-2">
               <Field label="Гарчиг">
