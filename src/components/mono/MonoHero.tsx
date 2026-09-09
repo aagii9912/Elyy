@@ -221,7 +221,9 @@ export function MonoHero({ site }: { site: SiteContent }) {
         </div>
 
         {/* УРД БЛОКУУД — alpha cutout. Постер (webp) нь клип ирэх хүртэл,
-            мөн хөдөлгөөнгүй горимд; клип нь хоёулаа тоглосны дараа. */}
+            мөн хөдөлгөөнгүй горимд; клип нь хоёулаа тоглосны дараа.
+            `mono-hero-fg` — доод ирмэгийг уусгах маск: chroma key-ийн
+            шулуун тайрдас «хүрээ» болж мэдэгдэхийг зогсооно (globals.css). */}
         <picture>
           <source media={DESKTOP_QUERY} srcSet={CLIP.desktop.fgPoster} type="image/webp" />
           <img
@@ -229,7 +231,7 @@ export function MonoHero({ site }: { site: SiteContent }) {
             alt=""
             aria-hidden
             fetchPriority="high"
-            className={`absolute inset-0 z-[3] h-full w-full object-cover transition-opacity duration-700 ease-out ${
+            className={`mono-hero-fg absolute inset-0 z-[3] h-full w-full object-cover transition-opacity duration-700 ease-out ${
               playing ? "opacity-0" : "opacity-100"
             }`}
           />
@@ -249,7 +251,7 @@ export function MonoHero({ site }: { site: SiteContent }) {
             onCanPlay={(e) => {
               void e.currentTarget.play().catch(() => {});
             }}
-            className={`absolute inset-0 z-[3] h-full w-full object-cover transition-opacity duration-700 ease-out ${
+            className={`mono-hero-fg absolute inset-0 z-[3] h-full w-full object-cover transition-opacity duration-700 ease-out ${
               playing ? "opacity-100" : "opacity-0"
             }`}
           >
@@ -313,8 +315,11 @@ function HeroCopy({
       {/* Бүлгийг дээш — гарчиг блокуудын ОРОЙН түвшинд (тэнгэрийн урд,
           блокуудын ард) суух ёстой; төвд байвал блокууд бүрэн халхална. */}
       <div className="flex flex-1 -translate-y-[7vh] flex-col items-center justify-center text-center">
+        {/* Kicker — өмнө 11px + өтгөн blur сүүдэртэй байсан нь тэнгэр
+            дээр «халтартаж» харагддаг байв. Хэмжээг нэмж, сүүдрийг
+            бүрмөсөн авав; уншигдац нь одоо хэмжээ, зайнаас гарна. */}
         <p
-          className={`mono-fade-up mb-5 text-label font-semibold uppercase tracking-caps-xl text-lime drop-shadow-[0_1px_8px_rgba(0,0,0,0.6)] md:mb-6 md:text-xs ${rest}`}
+          className={`mono-fade-up mb-5 text-sm font-semibold uppercase tracking-caps text-lime md:mb-7 md:text-base md:tracking-caps-lg ${rest}`}
           style={restStyle("0.4s")}
         >
           {brand.tag}

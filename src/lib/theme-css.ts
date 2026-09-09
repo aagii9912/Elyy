@@ -484,9 +484,13 @@ function typeCss(theme: ThemeContent): string {
       `font-family:${body};` +
       `}`
   );
-  /* Tailwind-ийн `font-gilroy` утилитыг дарна (layer-гүй тул ялна). */
+  /* Tailwind-ийн `font-gilroy` утилитыг дарна (layer-гүй тул ялна).
+     `:not(.mono-h1-hero)` — hero-гийн «ELYSIUM RESIDENCE» гарчиг нь
+     ЗОРИУД Bebas Neue дээр тогтсон (globals.css). Энэ дүрэм layer-гүй
+     тул `@layer components`-ийг дардаг бөгөөд үл хамааруулахгүй бол
+     админы display фонт hero-г буцаагаад дардаг. */
   rules.push(
-    `.mono-page .mono-h1,.mono-page .mono-h2,` +
+    `.mono-page .mono-h1:not(.mono-h1-hero),.mono-page .mono-h2,` +
       `.mono-page .mono-chapter-title,.mono-page .mono-chapter-head{font-family:${display}}`
   );
   rules.push(`.mono-page .font-gilroy{font-family:${body}}`);

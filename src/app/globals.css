@@ -26,9 +26,14 @@
   --color-gold: #faac32; /* amber — decorative accent (rules, icons, bar) */
   --color-lime: #b4d656; /* lime — sparing pop */
 
-  /* Typography — ХОЁРХОН гэр бүл. Өөр фонт нэмэхгүй. */
+  /* Typography — Inter (бие) + Gilroy (display). Гуравдахь нь ЗӨВХӨН
+     hero-гийн гарчигт зориулсан Bebas Neue; өөр газар БҮҮ хэрэглэ.
+     Bebas-д кирилл байхгүй тул стекийн ард Gilroy зогсоно — гарчгийг
+     кирилл болгоход үсэг алдагдахгүй. */
   --font-sans: var(--font-inter); /* body / UI */
   --font-gilroy: var(--font-gilroy), ui-sans-serif, system-ui, sans-serif; /* display */
+  --font-bebas: var(--font-bebas-neue), "Bebas Neue", var(--font-gilroy), ui-sans-serif,
+    sans-serif; /* hero display — condensed caps */
 
   /* Neutral monochrome palette — /-ийн үндсэн саарал */
   --color-night: #151717; /* near-black — ink, CTAs, footer */
@@ -282,19 +287,27 @@
      Дизайн → Типографи`-аас ирнэ (`lib/theme-css.ts`). h1 ба h2 нь
      ӨӨР ӨӨР нөөц утгатай: админ юу ч тохируулаагүй үед тус бүр өөрийн
      кодын өгөгдмөлөөрөө үлдэж, тохируулмагц хоёулаа нэг системд орно. */
-  /* Hero-гийн гарчиг — урд блокуудын АРД суудаг тул ердийн h1-ээс том,
-     зузаан; веб дээр нэг мөр (блокуудын дээгүүр сунана), гар утсанд
-     хоёр мөр. Админы `--ely-h-weight`-ийг ЗОРИУД дарна: нарийн үсэг
-     блокуудын ард алга болно. */
+  /* Hero-гийн гарчиг — урд блокуудын АРД суудаг тул ердийн h1-ээс
+     хамаагүй том; веб дээр нэг мөр (блокуудын дээгүүр сунана), гар
+     утсанд хоёр мөр. Bebas Neue нь Gilroy Black-аас ~40% нарийн тул
+     ижил өргөнд ӨНДӨР нь нэмэгдэнэ. Админы `--ely-h-weight` /
+     `--ely-h-track`-ыг ЗОРИУД дарна: Bebas нэг жинтэй бөгөөд сөрөг
+     tracking өгвөл үсэг наалдана. */
   /* `.mono-h1.mono-h1-hero` — доорх `.mono-h1`-ээс өндөр specificity,
      эс бөгөөс дараа бичигдсэн `.mono-h1` дарна. */
   .mono-h1.mono-h1-hero {
-    font-size: calc(clamp(3rem, 8.4vw, 8rem) * var(--ely-scale, 1));
-    font-weight: 900;
-    line-height: 0.98;
-    letter-spacing: -0.015em;
+    font-family: var(--font-bebas);
+    font-size: calc(clamp(3.6rem, 11.6vw, 11rem) * var(--ely-scale, 1));
+    /* Bebas нэг л жинтэй (400). `font-weight` өгвөл хөтөч синтетик
+       тодруулга хийж нарийн зэгзгэр хэлбэрийг нь алдагдуулна. */
+    font-weight: 400;
+    /* Caps-only тул мөр хоорондын зайг үсгийн өндрөөр нь чангална. */
+    line-height: 0.86;
+    letter-spacing: 0.005em;
     text-transform: uppercase;
-    filter: drop-shadow(0 4px 24px rgba(0, 0, 0, 0.25));
+    /* Нарийн үсэгт өмнөх өтгөн сүүдэр «халтар» болж наалддаг —
+       зөвхөн тэнгэрээс ялгарах хэмжээний зөөлөн тод. */
+    filter: drop-shadow(0 2px 16px rgba(0, 0, 0, 0.28));
   }
   @media (min-width: 768px) {
     .mono-h1.mono-h1-hero {
@@ -598,6 +611,22 @@ body:has(.mono-page) .ely-cursor {
 .mono-float {
   animation: mono-float 2.4s ease-in-out infinite;
 }
+/* Урд блокуудын alpha давхарга (`hero-fg-*`) — ДООД ирмэгээ уусгана.
+   Chroma key-ээс гарсан маск нь блокуудаас гадна подиум, зогсоол,
+   замын нэг хэсгийг барьж авдаг бөгөөд ирмэг нь шулуун тайрдастай.
+   Урд давхарга ар давхаргаас ХАВЬГҮЙ бага bitrate-тай (CRF 42 ба 31)
+   тул тэр тайрдас нь дүрс дээр «хүрээ» болж мэдэгдэнэ — ялангуяа
+   баруун доод булангийн харвайсан хэл.
+
+   Гарчиг блокуудын ард орох ЭФФЕКТ нь зөвхөн цамхгуудын ОРОЙ дээр
+   хэрэгтэй (гарчиг hero-гийн ~28–40%-д суудаг). Түүнээс доош урд
+   давхарга нь арынхаа ЯГ ижил кадрыг давхарлаж байгаа тул унтраахад
+   зураг өчүүхэн ч өөрчлөгдөхгүй — зөвхөн хүрээ нь алга болно. */
+.mono-hero-fg {
+  -webkit-mask-image: linear-gradient(to bottom, #000 40%, rgba(0, 0, 0, 0) 58%);
+  mask-image: linear-gradient(to bottom, #000 40%, rgba(0, 0, 0, 0) 58%);
+}
+
 /* Hero headline — per-word mask rise */
 @keyframes mono-word-up {
   from { transform: translateY(112%); }

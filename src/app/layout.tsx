@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Bebas_Neue, Inter } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
 import { LangProvider } from "@/components/LangProvider";
@@ -13,6 +13,18 @@ import { DEFAULT_SITE_CONTENT } from "@/lib/site-content";
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin", "cyrillic"],
+  display: "swap",
+});
+
+/* Bebas Neue — ЗӨВХӨН hero-гийн «ELYSIUM RESIDENCE» гарчигт. Өндөр,
+   нарийн condensed тул блокуудын ард орсон ч Gilroy Black шиг «бүдүүн
+   цагаан цулгуй» болохгүй. Латин үсэг л байдаг (кирилл ДЭМЖИХГҮЙ) тул
+   `--font-bebas` стек нь Gilroy руу уначихдаг — админ гарчгийг кирилл
+   болговол хуучин фонтоороо гарна (globals.css → `--font-bebas`). */
+const bebas = Bebas_Neue({
+  variable: "--font-bebas-neue",
+  subsets: ["latin"],
+  weight: "400",
   display: "swap",
 });
 
@@ -71,7 +83,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="mn" className={`${inter.variable} ${gilroy.variable}`}>
+    <html lang="mn" className={`${inter.variable} ${gilroy.variable} ${bebas.variable}`}>
       <body className="min-h-dvh bg-bone text-ink">
         <noscript>
           <style>{`.fade-up,.clip-reveal{opacity:1!important;transform:none!important;clip-path:none!important}`}</style>
