@@ -21,7 +21,9 @@
  * (mix 0.5, expand 0 — ар видеотой тулгахад өнгөний зөрүү ~4/255,
  * ногоон үлдэгдэл ~0). Гар утас — ижил эхээс төвийн 9:16 кроп.
  *
- *   node scripts/build-hero-layers.mjs [desktop|mobile]
+ *   node scripts/build-hero-layers.mjs [desktop|mobile] [--fg]
+ *
+ * `--fg` — зөвхөн урд (alpha) давхаргыг дахин гаргана; ар нь хэвээр.
  */
 
 import { execFileSync } from "node:child_process";
@@ -60,16 +62,37 @@ const VARIANTS = {
   },
 };
 
-const KEY = "format=yuv444p,chromakey=0x00FD00:0.12:0.05,despill=type=green:mix=0.5:expand=0";
+/* Chroma key + alpha ирмэгийн ЭРОЗИ.
+ *
+ * `chromakey` нь ногоон дэвсгэрийг авдаг ч ирмэгийн зөөлрүүлсэн
+ * (anti-aliased) пикселүүдэд ногоон/бараан үлдэгдэл суудаг. Тэр нь
+ * цайвар тэнгэр болон цагаан гарчгийн дээр тултал БАРААН ХҮРЭЭ болж
+ * мэдэгддэг — «маскийн хар ирмэг».
+ *
+ * `despill`-ийн mix-ийг өсгөвөл ирмэг цэвэрлэгддэг ч БҮХ кадрын өнгө
+ * гажина (цонхнууд ягаан болно) тул 0.5 хэвээр. Оронд нь alpha-г
+ * 3 пикселээр хорогдуулна: урд давхарга нь ар давхаргатайгаа ЯГ ижил
+ * кадар тул хорогдсон 3px-ийг ар нь өөрөө нөхөж, зураг өчүүхэн ч
+ * өөрчлөгдөхгүй — зөвхөн бохир ирмэг таслагдана. */
+const KEY =
+  "format=yuv444p,chromakey=0x00FD00:0.12:0.05,despill=type=green:mix=0.5:expand=0,format=rgba";
+/** Нэг `erosion` = 1px. Ирмэгийн бохир зурвас ~2–3px. */
+const ERODE = "erosion,erosion,erosion";
+
+/** Урд давхаргын бүтэн график. `format` нь гаралтын пиксел формат. */
+const fgGraph = (scale, pixfmt) =>
+  `[0:v]${scale},${KEY},split[c][m];[m]alphaextract,${ERODE}[a];[c][a]alphamerge,format=${pixfmt}`;
 
 function run(args) {
   execFileSync(ffmpeg, ["-y", "-v", "error", ...args], { stdio: ["ignore", "inherit", "inherit"] });
 }
 const kb = (f) => `${Math.round(statSync(f).size / 1024)} KB`;
 
-function build(name) {
+function build(name, fgOnly = false) {
   const v = VARIANTS[name];
   if (!v) throw new Error(`unknown variant: ${name}`);
+
+  if (fgOnly) return buildFg(name, v);
 
   /* Ар — H.264 */
   const bg = join(OUT, `hero-loop-${name}.mp4`);
@@ -84,10 +107,16 @@ function build(name) {
   run(["-ss", String(POSTER_AT), "-i", BG, "-frames:v", "1", "-vf", v.bg, "-q:v", "4", poster]);
   console.log(`[${name}] bg poster — ${kb(poster)}`);
 
+  buildFg(name, v);
+}
+
+/** Зөвхөн урд (alpha) давхарга — key/erode тохируулга солиход ар нь
+ *  дахин 30 секунд кодлох шаардлагагүй (`--fg`). */
+function buildFg(name, v) {
   /* Урд — VP9 alpha (webm) */
   const webm = join(OUT, `hero-fg-${name}.webm`);
   run([
-    "-i", FG, "-an", "-vf", `${v.fg},${KEY},format=yuva420p`,
+    "-i", FG, "-an", "-filter_complex", fgGraph(v.fg, "yuva420p"),
     "-c:v", "libvpx-vp9", "-pix_fmt", "yuva420p",
     "-crf", String(v.fgCrf), "-b:v", "0", "-deadline", "good", "-cpu-used", "2",
     "-row-mt", "1", "-auto-alt-ref", "0", "-g", String(GOP), webm,
@@ -97,7 +126,7 @@ function build(name) {
   /* Урд — HEVC alpha (mov, Safari). VideoToolbox — зөвхөн macOS дээр. */
   const mov = join(OUT, `hero-fg-${name}.mov`);
   run([
-    "-i", FG, "-an", "-vf", `${v.fg},${KEY},format=bgra`,
+    "-i", FG, "-an", "-filter_complex", fgGraph(v.fg, "bgra"),
     "-c:v", "hevc_videotoolbox", "-alpha_quality", "0.6", "-q:v", "45",
     "-tag:v", "hvc1", "-pix_fmt", "bgra", "-movflags", "+faststart", mov,
   ]);
@@ -107,10 +136,12 @@ function build(name) {
   const webp = join(OUT, `hero-fg-${name}.webp`);
   run([
     "-ss", String(POSTER_AT), "-i", FG, "-frames:v", "1",
-    "-vf", `${v.fg},${KEY},format=rgba`, "-c:v", "libwebp", "-quality", "85", webp,
+    "-filter_complex", fgGraph(v.fg, "rgba"), "-c:v", "libwebp", "-quality", "85", webp,
   ]);
   console.log(`[${name}] fg poster — ${kb(webp)}`);
 }
 
-const which = process.argv[2];
-for (const name of which ? [which] : Object.keys(VARIANTS)) build(name);
+const args = process.argv.slice(2);
+const fgOnly = args.includes("--fg");
+const which = args.find((a) => !a.startsWith("--"));
+for (const name of which ? [which] : Object.keys(VARIANTS)) build(name, fgOnly);
