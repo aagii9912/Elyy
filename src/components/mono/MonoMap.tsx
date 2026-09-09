@@ -26,13 +26,22 @@ import { flatSectionTone } from "@/lib/theme-css";
 const directions = (coords: string) =>
   `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(coords)}`;
 
-/** Figma-гийн ногоон: цэгийн дүүргэлт, гэрэлтэлт, картын өнгө, зураас.
- *  `CARD` нь Figma-гийн картын дүүргэлт (#20700E / 27%) — цэгийн дугуйтай
- *  ЯГ ижил утга тул карт ба цэг нэг гэр бүл шиг харагдана. */
-const PIN = "rgba(126,168,106,0.86)";
-const PIN_ON = "rgba(104,150,82,0.96)";
-const GLOW = "rgba(126,168,106,0.38)";
-const CARD = "rgba(32,112,14,0.27)";
+/** Цэг, карт, зураасны ногоон.
+ *
+ *  `PIN_ON` — сайтын БУСАД газар (төсөл хэрэгжүүлэгчийн цагийн шугамын
+ *  зангилаа, явцын зурвас) хэрэглэдэг ЯГ ижил ногоон = `--color-lime`-ийн
+ *  өгөгдмөл. `PIN` нь мөн ижил ногоон, зөвхөн бүдэг: 1–8 цэгээс АЛЬ нь
+ *  сонгогдсоныг товшилтоор шууд ялгаж харуулна.
+ *
+ *  `CARD` — картын дүүргэлт. Өмнө 27% байсан нь рендерийн дээр наасан
+ *  стикер шиг харагддаг байсныг 16% болгож, дэвсгэрээ нэвт харуулав. */
+const LIME = "#b4d656";
+const PIN = "rgba(180,214,86,0.5)";
+const PIN_ON = LIME;
+const GLOW = "rgba(180,214,86,0.55)";
+/** Ногоон дэвсгэр дээрх дугаар — цагаанаар уншигдахгүй (1.7:1). */
+const PIN_INK = "#1c2610";
+const CARD = "rgba(32,112,14,0.16)";
 const RULE = "#2f6b33";
 
 export function MonoMap({ site }: { site: SiteContent }) {
@@ -77,17 +86,23 @@ export function MonoMap({ site }: { site: SiteContent }) {
             style={{ left: `${p.x}%`, top: `${p.y}%` }}
             className="absolute -translate-x-1/2 -translate-y-1/2"
           >
+            {/* Гэрэлтэлт нь ЗӨВХӨН сонгогдсон цэг дээр — «бүдэг ↔ тод»
+                ялгааг өнгө, хэмжээ, туяа гурвуулаа зэрэг өгнө. */}
             <span
               aria-hidden
               style={{ backgroundColor: GLOW }}
               className={`absolute -inset-1.5 rounded-full blur-[7px] transition-opacity duration-300 ${
-                pin === i ? "opacity-100" : "opacity-60"
+                pin === i ? "opacity-100" : "opacity-0"
               }`}
             />
             <span
-              style={{ backgroundColor: pin === i ? PIN_ON : PIN }}
-              className={`relative grid h-6 w-6 place-items-center rounded-full text-2xs font-bold tabular-nums text-white transition-transform duration-300 sm:h-8 sm:w-8 sm:text-xs md:h-9 md:w-9 md:text-body ${
-                pin === i ? "scale-110" : ""
+              style={{
+                backgroundColor: pin === i ? PIN_ON : PIN,
+                color: PIN_INK,
+                opacity: pin === i ? 1 : 0.82,
+              }}
+              className={`relative grid h-6 w-6 place-items-center rounded-full text-2xs font-bold tabular-nums shadow-[0_1px_6px_rgba(21,23,23,0.28)] transition-transform duration-300 sm:h-8 sm:w-8 sm:text-xs md:h-9 md:w-9 md:text-body ${
+                pin === i ? "scale-115" : ""
               }`}
             >
               {i + 1}
@@ -129,7 +144,7 @@ export function MonoMap({ site }: { site: SiteContent }) {
             <div
               key={pin}
               style={{ backgroundColor: CARD }}
-              className="mono-fade-up flex w-full min-h-[7.5rem] max-w-[26rem] items-center gap-5 rounded-3xl px-6 py-5 shadow-[0_20px_48px_-28px_rgba(21,23,23,0.5)] backdrop-blur-md md:min-h-[9.5rem] md:w-[30.6%] md:min-w-[19rem] md:max-w-none xl:min-h-[11.5rem] xl:gap-6"
+              className="mono-fade-up flex w-full min-h-[9rem] max-w-[26rem] items-center gap-5 rounded-3xl px-6 py-5 shadow-[0_20px_48px_-28px_rgba(21,23,23,0.5)] backdrop-blur-md md:min-h-[10.75rem] md:w-[30.6%] md:min-w-[19rem] md:max-w-none xl:min-h-[12.75rem] xl:gap-6"
             >
               <div className="min-w-0 flex-1">
                 <p className="break-words text-lg font-extrabold uppercase leading-tight text-fg lg:text-h6">
@@ -139,10 +154,11 @@ export function MonoMap({ site }: { site: SiteContent }) {
                   <p className="mt-1.5 text-body leading-snug text-fg/65">{active.description}</p>
                 )}
                 {active.distance && (
+                  /* «Төслөөс» шошго нүднээс хасагдав — зай нь тоо, нэгжээрээ
+                     ойлгомжтой. Дэлгэц уншигчид контекст хэрэгтэй тул
+                     `sr-only`-оор үлдээв (админаас засах талбар нь хэвээр). */
                   <p className="mt-2.5 flex flex-wrap items-baseline gap-x-1.5 gap-y-1">
-                    <span className="text-label font-bold uppercase tracking-caps-sm text-fg/50">
-                      {location.distanceLabel}
-                    </span>
+                    <span className="sr-only">{location.distanceLabel} </span>
                     <span className="text-lg font-extrabold tabular-nums leading-none text-fg lg:text-xl">
                       {active.distance}
                     </span>
@@ -159,7 +175,7 @@ export function MonoMap({ site }: { site: SiteContent }) {
                 <img
                   src={active.image}
                   alt={active.place}
-                  className="aspect-[396/419] h-[5.5rem] shrink-0 rounded-xl object-cover md:h-[7rem] xl:h-[8.75rem]"
+                  className="aspect-[396/419] h-[6.5rem] shrink-0 rounded-xl object-cover md:h-[8.25rem] xl:h-[10.25rem]"
                 />
               )}
             </div>
