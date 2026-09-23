@@ -21,6 +21,7 @@ import type { SiteContent } from "@/lib/site-content";
 import { MonoKicker, useDragScroll } from "./shared";
 import { MonoModal } from "./MonoModal";
 import { flatSectionTone } from "@/lib/theme-css";
+import { trackMetaPixel } from "@/lib/meta-pixel";
 
 type Unit = SiteContent["apartments"]["units"][number];
 
@@ -521,7 +522,10 @@ function UnitInquiry({
         }),
       });
       const json = await res.json().catch(() => null);
-      if (res.ok && json?.ok) setSent(true);
+      if (res.ok && json?.ok) {
+        trackMetaPixel("Lead");
+        setSent(true);
+      }
       else setError(true);
     } catch {
       setError(true);

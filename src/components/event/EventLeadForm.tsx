@@ -6,6 +6,7 @@
 
 import { useState } from "react";
 import type { EventContent } from "@/lib/events";
+import { trackMetaPixel } from "@/lib/meta-pixel";
 
 type Props = {
   slug: string;
@@ -46,7 +47,10 @@ export function EventLeadForm({ slug, eventName, form }: Props) {
         }),
       });
       const json = await res.json().catch(() => null);
-      if (res.ok && json?.ok) setSent(true);
+      if (res.ok && json?.ok) {
+        trackMetaPixel("Lead");
+        setSent(true);
+      }
       else setError(true);
     } catch {
       setError(true);

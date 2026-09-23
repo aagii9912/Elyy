@@ -9,6 +9,7 @@ import type { SiteContent } from "@/lib/site-content";
 import { MonoKicker } from "./shared";
 import { SocialRow } from "./MonoSocial";
 import { flatSectionTone } from "@/lib/theme-css";
+import { trackMetaPixel } from "@/lib/meta-pixel";
 
 export function MonoContact({ site }: { site: SiteContent }) {
   const { contact, brand } = site;
@@ -37,7 +38,10 @@ export function MonoContact({ site }: { site: SiteContent }) {
         }),
       });
       const json = await res.json().catch(() => null);
-      if (res.ok && json?.ok) setSent(true);
+      if (res.ok && json?.ok) {
+        trackMetaPixel("Lead");
+        setSent(true);
+      }
       else setError(true);
     } catch {
       setError(true);

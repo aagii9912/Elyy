@@ -6,6 +6,7 @@ import { LangProvider } from "@/components/LangProvider";
 import { SmoothScroll } from "@/components/SmoothScroll";
 import { Cursor } from "@/components/Cursor";
 import { ScrollProgress } from "@/components/ScrollProgress";
+import { MetaPixelEvents } from "@/components/MetaPixelEvents";
 import { SITE } from "@/lib/content";
 import { DEFAULT_SITE_CONTENT } from "@/lib/site-content";
 
@@ -84,10 +85,16 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="mn" className={`${inter.variable} ${gilroy.variable} ${bebas.variable}`}>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: `!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','501532939274877');fbq('track','PageView');` }} />
+      </head>
       <body className="min-h-dvh bg-bone text-ink">
         <noscript>
           <style>{`.fade-up,.clip-reveal{opacity:1!important;transform:none!important;clip-path:none!important}`}</style>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img height="1" width="1" style={{ display: "none" }} src="https://www.facebook.com/tr?id=501532939274877&ev=PageView&noscript=1" alt="" />
         </noscript>
+        <MetaPixelEvents />
         <LangProvider>
           <SmoothScroll>
             <ScrollProgress />

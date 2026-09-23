@@ -11,6 +11,7 @@
 import { useState } from "react";
 import type { SiteContent } from "@/lib/site-content";
 import { MonoModal } from "./MonoModal";
+import { trackMetaPixel } from "@/lib/meta-pixel";
 
 type Status = "form" | "sending" | "done";
 
@@ -73,7 +74,8 @@ export function BrochureButton({
         }),
       });
       const json = await res.json().catch(() => null);
-      if (!res.ok || !json?.ok) setError(true);
+      if (res.ok && json?.ok) trackMetaPixel("Lead");
+      else setError(true);
     } catch {
       setError(true);
     }
