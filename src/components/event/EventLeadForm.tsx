@@ -4,9 +4,10 @@
    source=event/<slug>, event=<нэр> гэж тэмдэглэснээр борлуулалтын баг
    аль эвентээс ирснийг Sheet-ээс шууд харна. */
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { EventContent } from "@/lib/events";
 import { trackMetaPixel } from "@/lib/meta-pixel";
+import { leadRequestBody, type LeadAttempt } from "@/lib/lead-request";
 
 type Props = {
   slug: string;
@@ -18,6 +19,7 @@ export function EventLeadForm({ slug, eventName, form }: Props) {
   const [sent, setSent] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(false);
+  const attempt = useRef<LeadAttempt | null>(null);
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -36,7 +38,7 @@ export function EventLeadForm({ slug, eventName, form }: Props) {
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+        body: leadRequestBody({
           name: String(data.get("name") ?? ""),
           phone: String(data.get("phone") ?? ""),
           email: String(data.get("email") ?? ""),
@@ -44,7 +46,7 @@ export function EventLeadForm({ slug, eventName, form }: Props) {
           source: `event/${slug}`,
           event: eventName,
           website: String(data.get("website") ?? ""), // honeypot
-        }),
+        }, attempt),
       });
       const json = await res.json().catch(() => null);
       if (res.ok && json?.ok) {
@@ -76,11 +78,11 @@ export function EventLeadForm({ slug, eventName, form }: Props) {
       {/* honeypot */}
       <input type="text" name="website" tabIndex={-1} autoComplete="off" aria-hidden className="hidden" />
 
-      <input type="text" name="name" required placeholder="Нэр" className={inputCls} />
-      <input type="tel" name="phone" required placeholder="Утас" className={inputCls} />
+      <input type="text" name="name" required maxLength={255} placeholder="Нэр" className={inputCls} />
+      <input type="tel" name="phone" required maxLength={50} placeholder="Утас" className={inputCls} />
 
       {form.fields.email && (
-        <input type="email" name="email" placeholder="И-мэйл" className={inputCls} />
+        <input type="email" name="email" maxLength={255} placeholder="И-мэйл" className={inputCls} />
       )}
       {form.fields.guests && (
         <input
@@ -93,7 +95,7 @@ export function EventLeadForm({ slug, eventName, form }: Props) {
         />
       )}
       {form.fields.note && (
-        <textarea name="note" rows={3} placeholder="Нэмэлт мэдээлэл" className={`${inputCls} resize-none`} />
+        <textarea name="note" rows={3} maxLength={1800} placeholder="Нэмэлт мэдээлэл" className={`${inputCls} resize-none`} />
       )}
 
       {error && (

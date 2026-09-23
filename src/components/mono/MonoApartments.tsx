@@ -22,6 +22,7 @@ import { MonoKicker, useDragScroll } from "./shared";
 import { MonoModal } from "./MonoModal";
 import { flatSectionTone } from "@/lib/theme-css";
 import { trackMetaPixel } from "@/lib/meta-pixel";
+import { leadRequestBody, type LeadAttempt } from "@/lib/lead-request";
 
 type Unit = SiteContent["apartments"]["units"][number];
 
@@ -495,6 +496,7 @@ function UnitInquiry({
   const [sent, setSent] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(false);
+  const attempt = useRef<LeadAttempt | null>(null);
 
   if (!unit) return null;
 
@@ -513,13 +515,13 @@ function UnitInquiry({
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+        body: leadRequestBody({
           name: String(data.get("name") ?? ""),
           phone: String(data.get("phone") ?? ""),
           message: `Сонирхсон тип: ${label}${note ? ` — ${note}` : ""}`,
           source: "elysium/mono#apartments",
           website: String(data.get("website") ?? ""), // honeypot
-        }),
+        }, attempt),
       });
       const json = await res.json().catch(() => null);
       if (res.ok && json?.ok) {
@@ -565,6 +567,7 @@ function UnitInquiry({
                 type="text"
                 name="name"
                 required
+                maxLength={255}
                 autoComplete="name"
                 className="w-full border-b border-fg/20 bg-transparent pb-3 pt-2 text-lg font-semibold text-fg focus:border-fg focus:outline-none"
               />
@@ -576,6 +579,7 @@ function UnitInquiry({
                 type="tel"
                 name="phone"
                 required
+                maxLength={50}
                 inputMode="tel"
                 autoComplete="tel"
                 className="w-full border-b border-fg/20 bg-transparent pb-3 pt-2 text-lg font-semibold text-fg focus:border-fg focus:outline-none"
@@ -587,6 +591,7 @@ function UnitInquiry({
               <textarea
                 name="note"
                 rows={2}
+                maxLength={1800}
                 className="w-full resize-none border-b border-fg/20 bg-transparent pb-3 text-base font-medium text-fg focus:border-fg focus:outline-none"
               />
             </label>

@@ -1,10 +1,26 @@
-# Lead холболт — Google Sheet тохируулга
+# Lead холболт — Vertmonhub ба Google Sheet
 
-Вэбийн "Уулзалт товлох" формын дата **борлуулалтын менежерүүдийн Google Sheet-д шууд нэмэгддэг**
-байх тохируулгын заавар. Кодын тал бэлэн (`src/app/api/contact/route.ts`) — зөвхөн
-Google талын тохируулга + env хувьсагчид хэрэгтэй.
+Сайтын бүх маягт `src/app/api/contact/route.ts`-аар Vertmonhub CRM-д бүртгэгдэнэ.
+Google Sheet болон Elysium Supabase-д давхар нөөцөлнө. Vertmonhub хүлээн авснаа
+батлаагүй бол маягт амжилттай гэж харагдахгүй.
 
 ---
+
+## 0. Vertmonhub холболт
+
+Elysium Vercel төслийн `Production` орчинд дараах хоёр env-ийг тохируулна.
+`Preview` орчинд тусдаа туршилтын CRM холбох үед л тэнд мөн тохируулна:
+
+```bash
+VERTMONHUB_LEADS_URL=https://<vertmonhub-domain>/api/integrations/elysium/leads
+VERTMONHUB_LEADS_SECRET=<shared-secret>
+```
+
+`VERTMONHUB_LEADS_SECRET` нь Vertmonhub-ийн хүлээн авах endpoint-ийн нууцтай
+ижил байна. Elysium сервер `Authorization: Bearer ...` header ашиглан `requestId`,
+`name`, `phone`, `email`, `message`, `source`, `event` талбаруудыг JSON-оор илгээнэ.
+Төслийн ID-г Elysium сайт илгээхгүй; Vertmonhub сервер Elysium төслийг тогтооно.
+Хариу HTTP 2xx ба `{ "ok": true }` үед л маягт амжилттай болно.
 
 ## 1. Google Sheet бэлтгэх
 
@@ -12,8 +28,8 @@ Google талын тохируулга + env хувьсагчид хэрэгтэ
 2. Эхний sheet tab-ийн нэрийг **`Leads`** болго (өөр нэр бол `GOOGLE_SHEETS_TAB` env-д тэр нэрийг бич).
 3. Эхний мөрөнд гарчиг мөр үүсгэ:
 
-   | Огноо | Нэр | Утас | И-мэйл | Мессеж | Эх сурвалж |
-   |-------|-----|------|--------|--------|------------|
+   | Огноо | Нэр | Утас | И-мэйл | Мессеж | Эх сурвалж | Эвент |
+   |-------|-----|------|--------|--------|------------|-------|
 
    > Огноо нь **Улаанбаатарын цагийн бүсээр** (Asia/Ulaanbaatar) бичигдэнэ.
 
@@ -60,18 +76,18 @@ curl -X POST http://localhost:3000/api/contact \
   -d '{"name":"Тест","email":"test@example.mn","phone":"99112233","source":"manual-test"}'
 ```
 
-Хариу `{ "ok": true, "delivered": "sheets" }` бол Sheet-д шинэ мөр нэмэгдсэн гэсэн үг.
-`delivered: "log"` бол env дутуу — Vercel/server log-г шалгана.
+Vertmonhub тохируулсан үед `{ "ok": true, "delivered": "vertmonhub+sheets+store" }`
+хариу гурван системд хүрснийг илэрхийлнэ. Аль нэг нөөц систем унавал
+`delivered` зөвхөн амжилттай хүрсэн системүүдийг жагсаана.
 
 ---
 
 ## Ажиллах зарчим
 
-- Форм илгээх → `POST /api/contact` → validation (нэр заавал + утас эсвэл и-мэйлийн аль нэг) → Sheet-д мөр нэмэх.
-- **Env тохируулаагүй үед** (ж: локал dev) lead алдагдахгүй — server log-д бичигдэж,
-  форм амжилттай мэт ажиллана. Production-д env заавал тохируулна.
-- **Хүргэлт алдаатай үед** (Sheet API down г.м.) форм алдааны мессеж харуулж,
-  хэрэглэгч дахин илгээх боломжтой — lead дуутахгүй.
+- Форм илгээх → `POST /api/contact` → validation (нэр заавал + утас эсвэл и-мэйлийн аль нэг) → Vertmonhub, Sheet, Supabase-д зэрэг илгээх.
+- **Vertmonhub env дутуу эсвэл хүргэлт алдаатай үед** маягт алдаа харуулж,
+  ижил `requestId`-тай дахин илгээх боломжтой. Sheet/Supabase нөөц бүртгэлээ оролдоно.
+- **Нөөц хүргэлт алдаатай үед** Vertmonhub баталгаажсан бол маягт амжилттай.
 - **Spam хамгаалалт:** формд нуугдсан `website` honeypot талбар байгаа — bot бөглөвөл
   чимээгүйхэн хаягдана.
 

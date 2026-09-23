@@ -4,8 +4,9 @@
    Posts to /api/contact → Google Sheet (борлуулалтын менежерүүдэд).
    Хуудасны нэгдсэн цайвар суурин дээр, маягт нь цагаан карт дээр. */
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { SiteContent } from "@/lib/site-content";
+import { leadRequestBody, type LeadAttempt } from "@/lib/lead-request";
 import { MonoKicker } from "./shared";
 import { SocialRow } from "./MonoSocial";
 import { flatSectionTone } from "@/lib/theme-css";
@@ -17,6 +18,7 @@ export function MonoContact({ site }: { site: SiteContent }) {
   const [sent, setSent] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(false);
+  const attempt = useRef<LeadAttempt | null>(null);
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -29,13 +31,13 @@ export function MonoContact({ site }: { site: SiteContent }) {
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+        body: leadRequestBody({
           name: String(data.get("name") ?? ""),
           phone: String(data.get("phone") ?? ""),
           message: `Уулзалтын хүссэн огноо: ${date || "сонгоогүй"}`,
           source: "elysium/mono#contact",
           website: String(data.get("website") ?? ""), // honeypot
-        }),
+        }, attempt),
       });
       const json = await res.json().catch(() => null);
       if (res.ok && json?.ok) {
@@ -133,6 +135,7 @@ export function MonoContact({ site }: { site: SiteContent }) {
                   type="text"
                   name="name"
                   required
+                  maxLength={255}
                   placeholder={f.name}
                   className="border-b border-fg/20 bg-transparent pb-3 pt-2 text-lg font-semibold text-fg placeholder:text-fg/35 focus:border-fg focus:outline-none"
                 />
@@ -140,6 +143,7 @@ export function MonoContact({ site }: { site: SiteContent }) {
                   type="tel"
                   name="phone"
                   required
+                  maxLength={50}
                   placeholder={f.phone}
                   className="border-b border-fg/20 bg-transparent pb-3 pt-2 text-lg font-semibold text-fg placeholder:text-fg/35 focus:border-fg focus:outline-none"
                 />

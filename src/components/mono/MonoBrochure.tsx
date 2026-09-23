@@ -2,16 +2,17 @@
 
 /* /mono — "Танилцуулга татах" товч. PDF-ийг шууд нээхийн оронд эхлээд
    нэр / утас / и-мэйл авдаг pop-up гаргаж, хүсэлтийг /api/contact руу
-   (Google Sheet + Supabase) илгээгээд дараа нь татаж өгнө.
+   (Vertmonhub + Google Sheet + Supabase) илгээгээд дараа нь татаж өгнө.
 
    `brochure.enabled: false` бол хуучин зан төлөв рүү буцаж, PDF шууд
-   нээгдэнэ. Илгээхэд алдаа гарвал хэрэглэгчийг барьцаалахгүй — татах
-   холбоос ямар ч тохиолдолд гарч ирнэ. */
+   нээгдэнэ. Илгээхэд алдаа гарвал дахин оролдох боломжтой бөгөөд PDF
+   татах холбоос хэвээр байна. */
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { SiteContent } from "@/lib/site-content";
 import { MonoModal } from "./MonoModal";
 import { trackMetaPixel } from "@/lib/meta-pixel";
+import { leadRequestBody, type LeadAttempt } from "@/lib/lead-request";
 
 type Status = "form" | "sending" | "done";
 
@@ -31,6 +32,7 @@ export function BrochureButton({
   const [open, setOpen] = useState(false);
   const [status, setStatus] = useState<Status>("form");
   const [error, setError] = useState(false);
+  const attempt = useRef<LeadAttempt | null>(null);
 
   /* Гарцаагүй тохиолдолд (тохиргоо унтраалттай, PDF заагаагүй) —
      хуучин шиг энгийн холбоос. */
@@ -64,24 +66,28 @@ export function BrochureButton({
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+        body: leadRequestBody({
           name: String(data.get("name") ?? ""),
           phone: String(data.get("phone") ?? ""),
           email: String(data.get("email") ?? ""),
           message: "Танилцуулга (PDF) татсан",
           source,
           website: String(data.get("website") ?? ""), // honeypot
-        }),
+        }, attempt),
       });
       const json = await res.json().catch(() => null);
-      if (res.ok && json?.ok) trackMetaPixel("Lead");
-      else setError(true);
+      if (res.ok && json?.ok) {
+        trackMetaPixel("Lead");
+        setStatus("done");
+        startDownload();
+      } else {
+        setError(true);
+        setStatus("form");
+      }
     } catch {
       setError(true);
+      setStatus("form");
     }
-    /* Мэдээллээ өгсөн хүнийг сүлжээний алдаанаас болж хоосон буцаахгүй. */
-    setStatus("done");
-    startDownload();
   };
 
   const close = () => {
@@ -90,6 +96,7 @@ export function BrochureButton({
     setTimeout(() => {
       setStatus("form");
       setError(false);
+      attempt.current = null;
     }, 250);
   };
 
@@ -141,6 +148,7 @@ export function BrochureButton({
                   type="text"
                   name="name"
                   required
+                  maxLength={255}
                   autoComplete="name"
                   className="w-full border-b border-night/20 bg-transparent pb-3 pt-2 text-lg font-semibold text-night placeholder:text-night/35 focus:border-night focus:outline-none"
                 />
@@ -154,6 +162,7 @@ export function BrochureButton({
                   type="tel"
                   name="phone"
                   required
+                  maxLength={50}
                   inputMode="tel"
                   autoComplete="tel"
                   className="w-full border-b border-night/20 bg-transparent pb-3 pt-2 text-lg font-semibold text-night placeholder:text-night/35 focus:border-night focus:outline-none"
@@ -168,6 +177,7 @@ export function BrochureButton({
                   type="email"
                   name="email"
                   required
+                  maxLength={255}
                   inputMode="email"
                   autoComplete="email"
                   className="w-full border-b border-night/20 bg-transparent pb-3 pt-2 text-lg font-semibold text-night placeholder:text-night/35 focus:border-night focus:outline-none"
@@ -175,9 +185,12 @@ export function BrochureButton({
               </label>
 
               {error && (
-                <p role="alert" className="text-sm font-semibold text-red-600">
-                  {brochure.error}
-                </p>
+                <div role="alert" className="text-sm font-semibold text-red-600">
+                  <p>{brochure.error}</p>
+                  <a href={brand.brochureUrl} target="_blank" rel="noopener" className="mt-2 inline-block underline">
+                    {brochure.downloadLabel}
+                  </a>
+                </div>
               )}
 
               <p className="text-xs leading-relaxed text-night/45">{brochure.consent}</p>
