@@ -119,6 +119,7 @@ export function MonoScrollStory({
   frameExt = "jpg",
   stillAt = 0.6,
   pointImages,
+  background,
   heightClass = "h-[300vh] md:h-[380vh]",
   exitVeilClass = "bg-ground",
   autoplaySeconds = 0,
@@ -145,6 +146,11 @@ export function MonoScrollStory({
    *  (нэг ч кадр татахгүй), идэвхтэй цэг солигдоход зургууд crossfade
    *  хийнэ. Өгөхгүй бол хуучин ганц still-кадр хэвээр. */
   pointImages?: string[];
+  /** Админаас оруулсан видео/постер. Байхгүй бол хуучин кадрууд. */
+  background?: {
+    desktop: { video: string; poster: string };
+    mobile: { video: string; poster: string };
+  };
   /** Section height — controls how much scroll each point gets. */
   heightClass?: string;
   /** Colour the chapter dips to on the way out — match the next section. */
@@ -165,7 +171,25 @@ export function MonoScrollStory({
   /** Progress window the points share, minus the intro / exit run-outs. */
   const slot = useRef({ lead: 0, span: 1 });
   const [active, setActive] = useState(0);
+  const [mediaDevice, setMediaDevice] = useState<"desktop" | "mobile" | null>(null);
+  const [reduceMotion, setReduceMotion] = useState(false);
   const stillCount = pointImages?.length ?? 0;
+
+  useEffect(() => {
+    const device = window.matchMedia("(min-width: 768px)");
+    const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => {
+      setMediaDevice(device.matches ? "desktop" : "mobile");
+      setReduceMotion(motion.matches);
+    };
+    update();
+    device.addEventListener("change", update);
+    motion.addEventListener("change", update);
+    return () => {
+      device.removeEventListener("change", update);
+      motion.removeEventListener("change", update);
+    };
+  }, []);
 
   /* Эхний гүйлтийн дараа бүлэг өөрөө үргэлжилнэ — 3 дэлгэц гүйлгэж
      байж дуусдаг бүлгийг гараар татах шаардлагагүй болно. */
@@ -194,7 +218,8 @@ export function MonoScrollStory({
     const isMobile = window.matchMedia("(max-width: 767px)").matches;
     /* Мобайл + цэгийн зургууд → canvas хэрэггүй: кадр татахгүй,
        дэвсгэрийг доорх `stillsWrap` зургууд бүрэн хариуцна. */
-    const skipFrames = isMobile && stillCount > 0;
+    const override = background?.[isMobile ? "mobile" : "desktop"];
+    const skipFrames = (isMobile && stillCount > 0) || Boolean(override?.video && (!reduce || override.poster));
     const framePath = framePathIn(frameDir, frameExt);
     const count = frameEnd - frameStart + 1;
     const framesToLoad = !reduce && !isMobile ? count : 1;
@@ -418,7 +443,7 @@ export function MonoScrollStory({
       st.current = null;
       ctx.revert();
     };
-  }, [frameStart, frameEnd, frameDir, frameExt, stillAt, points.length, stillCount]);
+  }, [frameStart, frameEnd, frameDir, frameExt, stillAt, points.length, stillCount, background]);
 
   /* ---- мобайлын цэгийн зургууд — идэвхтэй цэгээ дагаж crossfade ------ */
   useEffect(() => {
@@ -491,6 +516,8 @@ export function MonoScrollStory({
   const accentText = light ? "text-moss" : "text-lime";
   const hairline = light ? "bg-night/15" : "bg-white/18";
   const total = String(points.length).padStart(2, "0");
+  const media = mediaDevice ? background?.[mediaDevice] : null;
+  const mobileOverride = Boolean(background?.mobile.video && (!reduceMotion || background.mobile.poster));
 
   return (
     <section
@@ -512,9 +539,10 @@ export function MonoScrollStory({
         {/* мобайл: кадрын оронд цэг бүрийн рендер — тоо нь өөрийн
             зургаа дээр нь бууна (506 → агаараас, 85% → хашаа, 513 →
             гудамж/зогсоол, 2027 → фасад) */}
-        {stillCount > 0 && (
+        {stillCount > 0 && !mobileOverride && (
           <div ref={stillsWrap} aria-hidden className="absolute inset-0 z-0 md:hidden">
             {pointImages!.map((src, i) => (
+              // eslint-disable-next-line @next/next/no-img-element
               <img
                 key={src}
                 data-still
@@ -528,8 +556,22 @@ export function MonoScrollStory({
         )}
         <canvas
           ref={canvas}
-          className={`absolute inset-0 z-0 h-full w-full ${stillCount > 0 ? "hidden md:block" : ""}`}
+          className={`absolute inset-0 z-0 h-full w-full ${stillCount > 0 || mobileOverride ? "hidden md:block" : ""}`}
         />
+        {media?.video && (!reduceMotion || media.poster) ? (
+          <video
+            key={`${mediaDevice}-${media.video}`}
+            src={media.video}
+            poster={media.poster || undefined}
+            muted
+            loop
+            playsInline
+            autoPlay={!reduceMotion}
+            preload={reduceMotion ? "none" : "metadata"}
+            aria-hidden
+            className="absolute inset-0 z-[1] h-full w-full object-cover"
+          />
+        ) : null}
 
         {/* Хөшиг — ЗҮҮН тийш жинтэй шаантаг + дээд/доод зөөлөн хөшиг.
             Бичвэр бүхэлдээ зүүн баганад суудаг тул тодролыг ЯГ ТЭНД

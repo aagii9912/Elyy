@@ -47,23 +47,6 @@ import type { SiteContent } from "@/lib/site-content";
 import { BrochureButton } from "./MonoBrochure";
 import { sectionTone } from "@/lib/theme-css";
 
-const CLIP = {
-  desktop: {
-    src: "/video/hero-loop-desktop.mp4",
-    poster: "/video/hero-loop-desktop.jpg",
-    fgMov: "/video/hero-fg-desktop.mov",
-    fgWebm: "/video/hero-fg-desktop.webm",
-    fgPoster: "/video/hero-fg-desktop.webp",
-  },
-  mobile: {
-    src: "/video/hero-loop-mobile.mp4",
-    poster: "/video/hero-loop-mobile.jpg",
-    fgMov: "/video/hero-fg-mobile.mov",
-    fgWebm: "/video/hero-fg-mobile.webm",
-    fgPoster: "/video/hero-fg-mobile.webp",
-  },
-} as const;
-
 /** Урд давхарга арынхаас энэ хэмжээнээс их зөрвөл дахин тааруулна (сек).
  *  Кадр 1/24 ≈ 0.042 — нэг кадрын зөрүү ирмэг дээр мэдэгдэхгүй. */
 const SYNC_TOLERANCE = 0.06;
@@ -73,7 +56,7 @@ const SYNC_TOLERANCE = 0.06;
 const DESKTOP_QUERY = "(min-width: 768px)";
 
 /** `still` — хөдөлгөөнгүй горим: клип татахгүй, зөвхөн постер. */
-type Variant = "still" | keyof typeof CLIP;
+type Variant = "still" | "desktop" | "mobile";
 
 export function MonoHero({ site }: { site: SiteContent }) {
   const lenis = useLenis();
@@ -87,7 +70,9 @@ export function MonoHero({ site }: { site: SiteContent }) {
    *  зөрнө). */
   const [bgPlaying, setBgPlaying] = useState(false);
   const [fgPlaying, setFgPlaying] = useState(false);
-  const playing = bgPlaying && fgPlaying;
+  const clip = variant && variant !== "still" ? site.hero.media[variant] : null;
+  const foregroundVideo = Boolean(clip?.foregroundMov || clip?.foregroundWebm);
+  const playing = bgPlaying && (!foregroundVideo || fgPlaying);
 
   const go = (e: React.MouseEvent, href: string) => {
     e.preventDefault();
@@ -106,7 +91,11 @@ export function MonoHero({ site }: { site: SiteContent }) {
     const still =
       window.matchMedia("(prefers-reduced-motion: reduce)").matches || Boolean(conn?.saveData);
 
-    const apply = () => setVariant(still ? "still" : mq.matches ? "desktop" : "mobile");
+    const apply = () => {
+      setBgPlaying(false);
+      setFgPlaying(false);
+      setVariant(still ? "still" : mq.matches ? "desktop" : "mobile");
+    };
     apply();
     mq.addEventListener("change", apply);
 
@@ -165,36 +154,36 @@ export function MonoHero({ site }: { site: SiteContent }) {
     return () => ctx.revert();
   }, []);
 
-  const clip = variant && variant !== "still" ? CLIP[variant] : null;
-
   return (
     <section
       id="top"
       ref={root}
       data-bg="hero"
       data-tone={sectionTone(site.theme, "hero", "dark")}
-      className="relative h-[100svh] min-h-[620px] w-full bg-night"
+      className="relative min-h-[620px] h-[100dvh] w-full bg-night"
     >
       <div className="relative flex h-full w-full overflow-hidden">
         {/* Постер — эхний кадар. Клип ирэх хүртэл, мөн хөдөлгөөнгүй
             горимд энэ л харагдана. `media` нь видеоны matchMedia-тай
             ижил тул хоёр зургийн зөвхөн НЭГ нь татагдана. */}
-        <picture>
-          <source media={DESKTOP_QUERY} srcSet={CLIP.desktop.poster} />
+        {(site.hero.media.mobile.poster || site.hero.media.desktop.poster) && (
+          <picture>
+          <source media={DESKTOP_QUERY} srcSet={site.hero.media.desktop.poster || site.hero.media.mobile.poster} />
           <img
-            src={CLIP.mobile.poster}
+            src={site.hero.media.mobile.poster || site.hero.media.desktop.poster}
             alt=""
             aria-hidden
             fetchPriority="high"
             className="absolute inset-0 z-0 h-full w-full object-cover"
           />
-        </picture>
+          </picture>
+        )}
 
-        {clip && (
+        {clip?.video && (
           <video
-            key={variant}
+            key={`${variant}-${clip.video}`}
             ref={video}
-            src={clip.src}
+            src={clip.video}
             autoPlay
             muted
             loop
@@ -224,21 +213,24 @@ export function MonoHero({ site }: { site: SiteContent }) {
             мөн хөдөлгөөнгүй горимд; клип нь хоёулаа тоглосны дараа.
             `mono-hero-fg` — доод ирмэгийг уусгах маск: chroma key-ийн
             шулуун тайрдас «хүрээ» болж мэдэгдэхийг зогсооно (globals.css). */}
-        <picture>
-          <source media={DESKTOP_QUERY} srcSet={CLIP.desktop.fgPoster} type="image/webp" />
-          <img
-            src={CLIP.mobile.fgPoster}
-            alt=""
-            aria-hidden
-            fetchPriority="high"
-            className={`mono-hero-fg absolute inset-0 z-[3] h-full w-full object-cover transition-opacity duration-700 ease-out ${
-              playing ? "opacity-0" : "opacity-100"
-            }`}
-          />
-        </picture>
-        {clip && (
+        {(["desktop", "mobile"] as const).map((device) => {
+          const poster = site.hero.media[device].foregroundPoster;
+          return poster ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              key={device}
+              src={poster}
+              alt=""
+              aria-hidden
+              className={`mono-hero-fg absolute inset-0 z-[3] h-full w-full object-cover transition-opacity duration-700 ease-out ${
+                device === "desktop" ? "hidden md:block" : "block md:hidden"
+              } ${playing && foregroundVideo ? "opacity-0" : "opacity-100"}`}
+            />
+          ) : null;
+        })}
+        {clip && foregroundVideo && (
           <video
-            key={`fg-${variant}`}
+            key={`fg-${variant}-${clip.foregroundMov}-${clip.foregroundWebm}`}
             ref={fgVideo}
             autoPlay
             muted
@@ -256,10 +248,13 @@ export function MonoHero({ site }: { site: SiteContent }) {
             }`}
           >
             {/* Safari/iOS — HEVC alpha; бусад — VP9 alpha. Дарааллыг бүү соль. */}
-            <source src={clip.fgMov} type='video/quicktime; codecs="hvc1"' />
-            <source src={clip.fgWebm} type='video/webm; codecs="vp9"' />
+            {clip.foregroundMov && <source src={clip.foregroundMov} type='video/quicktime; codecs="hvc1"' />}
+            {clip.foregroundWebm && <source src={clip.foregroundWebm} type='video/webm; codecs="vp9"' />}
           </video>
         )}
+
+        {/* Видеоны дээр, бичиг ба урд блокуудын доор суух зөөлөн сүүдэр. */}
+        <div aria-hidden className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-b from-[#10261e]/35 via-transparent to-[#10261e]/45" />
 
         {/* Бараан хөшиг ЗОРИУДААР байхгүй — клип бүрэн өнгөөрөө
             харагдана. Бичгийн уншигдац нь үсгэн дээрх сүүдрээр
@@ -314,15 +309,15 @@ function HeroCopy({
     <div className="flex h-full w-full flex-col items-center">
       {/* Бүлгийг дээш — гарчиг блокуудын ОРОЙН түвшинд (тэнгэрийн урд,
           блокуудын ард) суух ёстой; төвд байвал блокууд бүрэн халхална. */}
-      <div className="flex flex-1 -translate-y-[7vh] flex-col items-center justify-center text-center">
+      <div className="flex flex-1 -translate-y-[12vh] flex-col items-center justify-center text-center">
         {/* Kicker — өмнө 11px + өтгөн blur сүүдэртэй байсан нь тэнгэр
             дээр «халтартаж» харагддаг байв. Хэмжээг нэмж, сүүдрийг
             бүрмөсөн авав; уншигдац нь одоо хэмжээ, зайнаас гарна. */}
         <p
-          className={`mono-fade-up mb-5 text-sm font-semibold uppercase tracking-caps text-lime md:mb-7 md:text-base md:tracking-caps-lg ${rest}`}
+          className={`mono-fade-up mb-5 flex items-center gap-3 text-xs font-semibold uppercase tracking-caps-sm text-white md:mb-7 md:text-sm md:tracking-caps ${rest}`}
           style={restStyle("0.4s")}
         >
-          {brand.tag}
+          <span aria-hidden className="h-px w-8 bg-[#d4e6bd]" />{brand.tag}<span aria-hidden className="h-px w-8 bg-[#d4e6bd]" />
         </p>
         {/* `mono-h1-hero` — блокуудын ард суух тул ердийн h1-ээс том,
             зузаан, веб дээр нэг мөр. Хоёр давхаргад ижил. */}
@@ -341,7 +336,7 @@ function HeroCopy({
           ))}
         </h1>
         <p
-          className={`mono-fade-up mt-5 max-w-md text-lead font-medium leading-relaxed text-white drop-shadow-[0_1px_12px_rgba(0,0,0,0.5)] md:text-base ${rest}`}
+          className={`mono-fade-up mt-5 max-w-xl text-base font-medium leading-relaxed text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.65)] md:text-lg ${rest}`}
           style={restStyle("0.7s")}
         >
           {hero.sub}

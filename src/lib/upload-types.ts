@@ -1,8 +1,8 @@
 /* Байршуулахыг зөвшөөрсөн файлын төрлүүд — сервер (upload, upload/sign)
    болон админы клиент хоёулаа эндээс уншина. */
 
-/** Зураг — бүх растер төрөл. Танилцуулга — зөвхөн PDF. */
-export const ALLOWED_UPLOAD_TYPES = ["application/pdf"] as const;
+/** Зураг, танилцуулга PDF, дэвсгэр видеоны хөтөч дэмждэг төрлүүд. */
+export const ALLOWED_UPLOAD_TYPES = ["application/pdf", "video/mp4", "video/webm", "video/quicktime"] as const;
 
 export function isAllowedUploadType(contentType: string): boolean {
   return (
@@ -11,4 +11,4 @@ export function isAllowedUploadType(contentType: string): boolean {
   );
 }
 
-export const UPLOAD_TYPE_ERROR = "Зөвхөн зураг эсвэл PDF оруулах боломжтой.";
+export const UPLOAD_TYPE_ERROR = "Зөвхөн зураг, PDF, MP4, WebM эсвэл MOV оруулах боломжтой.";

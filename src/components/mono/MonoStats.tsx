@@ -61,6 +61,7 @@ export function MonoStats({ site }: { site: SiteContent }) {
       frameExt="webp"
       stillAt={0.12}
       pointImages={PLAN_STILLS}
+      background={site.plan.background}
       heightClass="h-[280vh] md:h-[340vh]"
       /* ~2.4 дэлгэц / 13сек — цэг тутамд ~2.4сек уншиж амжина. */
       autoplaySeconds={13}

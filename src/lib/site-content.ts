@@ -399,10 +399,25 @@ export type SiteContent = {
     menuAria: string;
   };
 
-  hero: { sub: string };
+  hero: {
+    sub: string;
+    media: {
+      desktop: { video: string; poster: string; foregroundMov: string; foregroundWebm: string; foregroundPoster: string };
+      mobile: { video: string; poster: string; foregroundMov: string; foregroundWebm: string; foregroundPoster: string };
+    };
+  };
 
   /** Chapter 01 — Ерөнхий төлөвлөлт (тоон үзүүлэлт). */
-  plan: { kicker: string; title: string; points: StoryPointContent[] };
+  plan: {
+    kicker: string;
+    title: string;
+    points: StoryPointContent[];
+    /** Хоосон бол анхны гүйлтэд уягдсан кадрууд хэвээр. */
+    background: {
+      desktop: { video: string; poster: string };
+      mobile: { video: string; poster: string };
+    };
+  };
 
   /** Chapter 02 — ELYS консепц. Зүйл бүрийн эхний үсэг ELYS нэрийг
    *  бүрдүүлнэ; самбар дээр дарахад дэлгэрэнгүй pop-up нээгдэнэ. */
@@ -587,6 +602,8 @@ export type SiteContent = {
      *  яг үүн дээр буудаг тул зургийг сольвол `pins`-ийн байрлалыг
      *  дахин тааруулах шаардлагатай. */
     mapImage: string;
+    /** Гар утасны тусдаа зураг. Хоосон бол веб зургийг ашиглана. */
+    mapImageMobile: string;
     /** Рендер дээрх дугаартай цэгүүд. `x`/`y` нь зургийн өргөн/өндрийн
      *  ХУВЬ (0–100) — ингэснээр зураг ямар ч хэмжээтэй байсан цэг нэг
      *  газраа үлдэнэ. `distance` нь ЗӨВХӨН тоо, нэгжийг `unit` дээр
@@ -602,6 +619,8 @@ export type SiteContent = {
       image: string;
       x: number;
       y: number;
+      xMobile: number;
+      yMobile: number;
     }[];
   };
 
@@ -692,7 +711,7 @@ export function defaultBackground(): Background {
   return {
     kind: "token",
     token: "auto",
-    color: "#f4f4f1",
+    color: "#f3f4ee",
     gradient: {
       type: "linear",
       angle: 180,
@@ -701,7 +720,7 @@ export function defaultBackground(): Background {
          ЭХНИЙ элементээс нөхдөг тул template бүрэн байх шаардлагатай. */
       stops: [
         { color: "#ffffff", at: 0 },
-        { color: "#f4f4f1", at: 100 },
+        { color: "#f3f4ee", at: 100 },
       ],
     },
     image: {
@@ -736,13 +755,13 @@ export const DEFAULT_THEME: ThemeContent = {
   glass: { mode: "default", blur: 20, saturation: 165 },
 
   palette: {
-    ground: "#f4f4f1",
-    surface: "#ffffff",
-    dark: "#151717",
-    muted: "#8a8d8c",
-    accent: "#b4d656",
-    accentDeep: "#3f6a33",
-    film: "#16280f",
+    ground: "#f3f4ee",
+    surface: "#fffef9",
+    dark: "#1b3328",
+    muted: "#6d7c70",
+    accent: "#c5d996",
+    accentDeep: "#426c4c",
+    film: "#142b21",
   },
   page: defaultBackground(),
   sections: {
@@ -812,11 +831,31 @@ export const DEFAULT_SITE_CONTENT: SiteContent = {
 
   hero: {
     sub: "Туул голын салхи илбэсэн бүсэд байршилтай, архитектур болон инженерингийн эргономик шийдэлтэй орон сууц.",
+    media: {
+      desktop: {
+        video: "/video/hero-loop-desktop.mp4",
+        poster: "/video/hero-loop-desktop.jpg",
+        foregroundMov: "/video/hero-fg-desktop.mov",
+        foregroundWebm: "/video/hero-fg-desktop.webm",
+        foregroundPoster: "/video/hero-fg-desktop.webp",
+      },
+      mobile: {
+        video: "/video/hero-loop-mobile.mp4",
+        poster: "/video/hero-loop-mobile.jpg",
+        foregroundMov: "/video/hero-fg-mobile.mov",
+        foregroundWebm: "/video/hero-fg-mobile.webm",
+        foregroundPoster: "/video/hero-fg-mobile.webp",
+      },
+    },
   },
 
   plan: {
     kicker: "Ерөнхий төлөвлөлт",
     title: "Form Follows Function",
+    background: {
+      desktop: { video: "", poster: "" },
+      mobile: { video: "", poster: "" },
+    },
     points: [
       { heading: "506", accent: "", text: "айлын орон сууц · 4 блок" },
       { heading: "85", accent: "%", text: "нийтийн эзэмшлийн талбай — ногоон байгууламж, орон зай" },
@@ -1142,19 +1181,20 @@ export const DEFAULT_SITE_CONTENT: SiteContent = {
       },
     },
     mapImage: "/images/location-aerial.jpg",
+    mapImageMobile: "",
     /* `image` нь ЗААВАЛ хоосон: `mergeValue` эхний элементийг бүх
        хадгалсан цэгийн загвар болгодог тул энд зураг бичвэл түүнийг
        админаас нэмсэн БҮХ цэг рүү тарааж бичнэ. Зургийг `/admin/site →
        Байршил → Зураг дээрх цэгүүд` дээр цэг бүрт нь оруулна. */
     pins: [
-      { place: "Эрэл Групп", description: "", distance: "", unit: "м", image: "", x: 41.6, y: 80.5 },
-      { place: "Поларис их дэлгүүр", description: "", distance: "", unit: "м", image: "", x: 65.1, y: 83.9 },
-      { place: "Анун төв", description: "", distance: "", unit: "м", image: "", x: 90.3, y: 82.2 },
-      { place: "Таван Богд", description: "", distance: "", unit: "м", image: "", x: 80.7, y: 55.9 },
-      { place: "Мишээл экспо", description: "", distance: "", unit: "м", image: "", x: 95.7, y: 51 },
-      { place: "Номин Юнайтед", description: "", distance: "", unit: "м", image: "", x: 67.7, y: 49.6 },
-      { place: "Нарны гүүр", description: "", distance: "", unit: "м", image: "", x: 72.8, y: 44.7 },
-      { place: "Талбай", description: "", distance: "", unit: "м", image: "", x: 80.8, y: 13.8 },
+      { place: "Эрэл Групп", description: "", distance: "", unit: "м", image: "", x: 41.6, y: 80.5, xMobile: 41.6, yMobile: 80.5 },
+      { place: "Поларис их дэлгүүр", description: "", distance: "", unit: "м", image: "", x: 65.1, y: 83.9, xMobile: 65.1, yMobile: 83.9 },
+      { place: "Анун төв", description: "", distance: "", unit: "м", image: "", x: 90.3, y: 82.2, xMobile: 90.3, yMobile: 82.2 },
+      { place: "Таван Богд", description: "", distance: "", unit: "м", image: "", x: 80.7, y: 55.9, xMobile: 80.7, yMobile: 55.9 },
+      { place: "Мишээл экспо", description: "", distance: "", unit: "м", image: "", x: 95.7, y: 51, xMobile: 95.7, yMobile: 51 },
+      { place: "Номин Юнайтед", description: "", distance: "", unit: "м", image: "", x: 67.7, y: 49.6, xMobile: 67.7, yMobile: 49.6 },
+      { place: "Нарны гүүр", description: "", distance: "", unit: "м", image: "", x: 72.8, y: 44.7, xMobile: 72.8, yMobile: 44.7 },
+      { place: "Талбай", description: "", distance: "", unit: "м", image: "", x: 80.8, y: 13.8, xMobile: 80.8, yMobile: 13.8 },
     ],
   },
 
@@ -1346,12 +1386,41 @@ function mergeValue<T>(def: T, val: unknown): T {
 /** Хадгалсан (эсвэл хагас дутуу) өгөгдлөөс бүрэн `SiteContent` гаргана. */
 export function mergeSiteContent(stored: unknown): SiteContent {
   const merged = mergeValue(DEFAULT_SITE_CONTENT, stored);
+  refreshDefaultPalette(merged, stored);
   fillUnitPlans(merged, stored);
+  fillMobilePins(merged, stored);
   return merged;
 }
 
 const isRecord = (v: unknown): v is Record<string, unknown> =>
   v !== null && typeof v === "object" && !Array.isArray(v);
+
+/** Өмнөх өгөгдмөл саарал палитр хадгалагдсан бол шинэ брэндийн
+ *  палитрыг харуулна. Админаас өөрчилсөн өнгөнүүдийг хөндөхгүй. */
+function refreshDefaultPalette(site: SiteContent, stored: unknown) {
+  const rawTheme = isRecord(stored) && isRecord(stored.theme) ? stored.theme : null;
+  const raw = rawTheme && isRecord(rawTheme.palette) ? rawTheme.palette : null;
+  if (!raw) return;
+  const old = {
+    ground: "#f4f4f1", surface: "#ffffff", dark: "#151717", muted: "#8a8d8c",
+    accent: "#b4d656", accentDeep: "#3f6a33", film: "#16280f",
+  };
+  if (Object.entries(old).every(([key, value]) => raw[key] === value)) {
+    site.theme.palette = { ...DEFAULT_THEME.palette };
+  }
+}
+
+/** Хуучин контентод mobile координат байхгүй. Цэг бүрийн веб
+ *  координатаас нөхнө — массивын эхний цэгийн утгыг тарааж болохгүй. */
+function fillMobilePins(site: SiteContent, stored: unknown) {
+  const rawLocation = isRecord(stored) && isRecord(stored.location) ? stored.location : null;
+  const rawPins = Array.isArray(rawLocation?.pins) ? rawLocation.pins : [];
+  site.location.pins.forEach((pin, i) => {
+    const raw = isRecord(rawPins[i]) ? rawPins[i] : null;
+    if (typeof raw?.xMobile !== "number" || !Number.isFinite(raw.xMobile)) pin.xMobile = pin.x;
+    if (typeof raw?.yMobile !== "number" || !Number.isFinite(raw.yMobile)) pin.yMobile = pin.y;
+  });
+}
 
 /** Орон сууцны типүүдийн `views` / `plan` / `floorPlan`-ыг нөхнө.
  *

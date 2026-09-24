@@ -21,10 +21,12 @@ export function PinMapEditor({
   image,
   pins,
   onChange,
+  device = "desktop",
 }: {
   image: string;
   pins: Pin[];
   onChange: (next: Pin[]) => void;
+  device?: "desktop" | "mobile";
 }) {
   const boxRef = useRef<HTMLDivElement>(null);
   const [sel, setSel] = useState(0);
@@ -33,6 +35,8 @@ export function PinMapEditor({
   const dragged = useRef(false);
   /* Идэвхтэй чирэлтийг зогсоох функц — unmount дээр цэвэрлэнэ. */
   const stopDrag = useRef<(() => void) | null>(null);
+  const xKey = device === "mobile" ? "xMobile" : "x";
+  const yKey = device === "mobile" ? "yMobile" : "y";
 
   useEffect(() => () => stopDrag.current?.(), []);
 
@@ -41,7 +45,7 @@ export function PinMapEditor({
     if (!box || box.width === 0 || box.height === 0) return;
     const x = clamp(((clientX - box.left) / box.width) * 100);
     const y = clamp(((clientY - box.top) / box.height) * 100);
-    onChange(pins.map((p, j) => (j === i ? { ...p, x, y } : p)));
+    onChange(pins.map((p, j) => (j === i ? { ...p, [xKey]: x, [yKey]: y } : p)));
   };
 
   /* Чирэлт — `setPointerCapture` зарим хөтөч/оролтод найдваргүй тул
@@ -71,7 +75,7 @@ export function PinMapEditor({
 
   const nudge = (i: number, dx: number, dy: number) => {
     onChange(
-      pins.map((p, j) => (j === i ? { ...p, x: clamp(p.x + dx), y: clamp(p.y + dy) } : p))
+      pins.map((p, j) => (j === i ? { ...p, [xKey]: clamp(p[xKey] + dx), [yKey]: clamp(p[yKey] + dy) } : p))
     );
   };
 
@@ -117,7 +121,7 @@ export function PinMapEditor({
             type="button"
             aria-label={`${i + 1}. ${p.place}`}
             aria-pressed={sel === i}
-            style={{ left: `${p.x}%`, top: `${p.y}%`, touchAction: "none" }}
+            style={{ left: `${p[xKey]}%`, top: `${p[yKey]}%`, touchAction: "none" }}
             onPointerDown={(e) => startDrag(i, e)}
             onClick={(e) => e.stopPropagation()}
             onKeyDown={(e) => {
@@ -146,7 +150,7 @@ export function PinMapEditor({
 
       {active && (
         <p className="mt-2 text-xs text-neutral-500">
-          X {active.x}% · Y {active.y}%
+          X {active[xKey]}% · Y {active[yKey]}%
         </p>
       )}
     </div>

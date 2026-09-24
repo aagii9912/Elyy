@@ -15,7 +15,7 @@ export function Button({
   variant?: "primary" | "ghost" | "danger" | "dark";
 }) {
   const base =
-    "inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50";
+    "inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition-[background-color,transform] hover:-translate-y-px active:translate-y-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0";
   const variants: Record<string, string> = {
     primary: "bg-ink text-white hover:bg-[#1f3d1b]",
     dark: "bg-night text-white hover:bg-black",
@@ -42,7 +42,7 @@ export function Field({
 }) {
   return (
     <label className="block">
-      <span className="mb-1.5 block text-body font-semibold text-neutral-700">{label}</span>
+      <span className="mb-2 block text-body font-semibold text-[#33483a]">{label}</span>
       {children}
       {hint && <span className="mt-1 block text-xs text-neutral-400">{hint}</span>}
     </label>
@@ -50,7 +50,7 @@ export function Field({
 }
 
 const inputCls =
-  "w-full rounded-lg border border-neutral-300 bg-white px-3 py-2.5 text-lead text-neutral-900 outline-none transition-colors placeholder:text-neutral-400 focus:border-ink focus:ring-2 focus:ring-ink/15";
+  "w-full min-h-11 rounded-lg border border-[#d7dfd4] bg-white px-3.5 py-2.5 text-lead text-neutral-900 outline-none transition-[border-color,box-shadow] placeholder:text-neutral-400 focus:border-ink focus:ring-2 focus:ring-ink/15";
 
 export function TextInput(props: React.InputHTMLAttributes<HTMLInputElement>) {
   return <input {...props} className={`${inputCls} ${props.className ?? ""}`} />;
@@ -97,10 +97,10 @@ export function Toggle({
 
 export function Card({ title, children, right }: { title?: string; children: React.ReactNode; right?: React.ReactNode }) {
   return (
-    <section className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm md:p-6">
+    <section className="rounded-2xl border border-[#dfe5da] bg-white p-5 shadow-[0_18px_50px_-40px_rgba(20,53,37,0.35)] md:p-6">
       {title && (
-        <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-lead font-bold text-neutral-900">{title}</h3>
+        <div className="mb-5 flex items-center justify-between border-b border-[#e8ece6] pb-4">
+          <h3 className="font-gilroy text-xl font-bold tracking-tight text-[#203126]">{title}</h3>
           {right}
         </div>
       )}
@@ -256,6 +256,10 @@ export function FileField({
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [manual, setManual] = useState(false);
+  const isVideo = accept.includes("video/");
+  const videoFormats = accept.split(",").filter((type) => type.startsWith("video/"))
+    .map((type) => ({ "video/mp4": "MP4", "video/webm": "WebM", "video/quicktime": "MOV" })[type] ?? type)
+    .join(", ");
 
   const upload = async (file: File) => {
     setBusy(true);
@@ -272,9 +276,20 @@ export function FileField({
   return (
     <div>
       <span className="mb-1.5 block text-body font-semibold text-neutral-700">{label}</span>
+      {isVideo && value && (
+        <video
+          key={value}
+          src={value}
+          controls
+          muted
+          playsInline
+          preload="none"
+          className="mb-2 aspect-video w-full rounded-lg bg-neutral-900 object-contain"
+        />
+      )}
       <div className="flex items-center gap-3 rounded-lg border border-dashed border-neutral-300 bg-neutral-50 px-4 py-3">
         <span aria-hidden className="text-lg">
-          📄
+          {isVideo ? "▶" : "📄"}
         </span>
         {value ? (
           <a
@@ -287,7 +302,7 @@ export function FileField({
           </a>
         ) : (
           <span className="flex-1 text-xs text-neutral-400">
-            {busy ? "Байршуулж байна…" : "Файл хавсаргаагүй"}
+            {busy ? "Байршуулж байна…" : isVideo ? "Видео оруулаагүй" : "Файл хавсаргаагүй"}
           </span>
         )}
       </div>
@@ -304,7 +319,7 @@ export function FileField({
           }}
         />
         <Button type="button" variant="ghost" onClick={() => inputRef.current?.click()} disabled={busy}>
-          {busy ? "Түр хүлээнэ үү…" : value ? "Солих" : "Файл хавсаргах"}
+          {busy ? "Түр хүлээнэ үү…" : value ? "Солих" : isVideo ? "Видео оруулах" : "Файл хавсаргах"}
         </Button>
         <Button type="button" variant="ghost" onClick={() => setManual((v) => !v)}>
           {manual ? "Хаягийг нуух" : "Хаягаар оруулах"}
@@ -319,16 +334,22 @@ export function FileField({
         <div className="mt-2">
           <TextInput
             value={value}
-            placeholder="/brochure.pdf"
+            placeholder={isVideo ? "/video/clip.mp4" : "/brochure.pdf"}
             onChange={(e) => onChange(e.target.value)}
           />
         </div>
       )}
       <span className="mt-1 block text-xs text-neutral-400">
-        PDF · хэмжээний хязгаар байхгүй (3.5MB-аас том файл Storage руу шууд илгээгдэнэ)
+        {isVideo
+          ? `${videoFormats} · том файл Storage руу шууд илгээгдэнэ`
+          : "PDF · хэмжээний хязгаар байхгүй (3.5MB-аас том файл Storage руу шууд илгээгдэнэ)"}
       </span>
       {hint && <span className="mt-0.5 block text-xs text-neutral-400">{hint}</span>}
       {err && <span className="mt-1 block text-xs text-red-500">{err}</span>}
     </div>
   );
+}
+
+export function VideoField(props: Omit<Parameters<typeof FileField>[0], "accept"> & { accept?: string }) {
+  return <FileField {...props} accept={props.accept ?? "video/mp4,video/webm,video/quicktime"} />;
 }

@@ -10,13 +10,11 @@
    ЗУРАГ, нэр, тайлбар, төслөөс хэдэн метр/километр зайтайг харуулна —
    Figma-гийн «1. ЭРЭЛ ГРУПП + гэрэл зураг» бүтэц.
 
-   ⚠️ Цэгийн `x`/`y` нь ЗУРГИЙН хувь тул зургийн хайрцаг зургийн харьцааг
-   яг дагах ёстой (`aspect-[4096/2305]` = Figma фрэйм). Өөр харьцаа өгвөл
-   `object-cover` зургийг тайрч, цэгүүд байрнаасаа гулсана.
+   Цэгийн байрлал зураг тус бүрийн хувиар хадгалагдана. <picture>-ийн
+   байгалийн өндрийг дагаж харуулах тул зураг солиход тайралт үүсэхгүй.
 
-   ⚠️ Ногоон өнгийг ЭНД шууд бичсэн: `/admin/site → Дизайн` нь `--color-moss`
-   болон `--color-lime`-ыг бараан болгож дардаг (mono палитр) тул токен
-   ашиглавал цэгүүд хар гарна. Энэ хэсгийн ногоо нь Figma-гийн утга. */
+   ⚠️ Цэгийн өнгийг ЭНД шууд бичсэн: админы палитр хэсгийн өнгийг
+   өөрчилдөг тул газрын зураг дээрх тэмдэг тусдаа уншигдах ёстой. */
 
 import { useState } from "react";
 import type { SiteContent } from "@/lib/site-content";
@@ -26,23 +24,15 @@ import { flatSectionTone } from "@/lib/theme-css";
 const directions = (coords: string) =>
   `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(coords)}`;
 
-/** Цэг, карт, зураасны ногоон.
- *
- *  `PIN_ON` — сайтын БУСАД газар (төсөл хэрэгжүүлэгчийн цагийн шугамын
- *  зангилаа, явцын зурвас) хэрэглэдэг ЯГ ижил ногоон = `--color-lime`-ийн
- *  өгөгдмөл. `PIN` нь мөн ижил ногоон, зөвхөн бүдэг: 1–8 цэгээс АЛЬ нь
- *  сонгогдсоныг товшилтоор шууд ялгаж харуулна.
- *
- *  `CARD` — картын дүүргэлт. Өмнө 27% байсан нь рендерийн дээр наасан
- *  стикер шиг харагддаг байсныг 16% болгож, дэвсгэрээ нэвт харуулав. */
-const LIME = "#b4d656";
-const PIN = "rgba(180,214,86,0.5)";
+/** Цэг, мэдээллийн карт, зураасны шинэ брэндийн өнгө. */
+const LIME = "#c5d996";
+const PIN = "rgba(197,217,150,0.5)";
 const PIN_ON = LIME;
-const GLOW = "rgba(180,214,86,0.55)";
+const GLOW = "rgba(197,217,150,0.55)";
 /** Ногоон дэвсгэр дээрх дугаар — цагаанаар уншигдахгүй (1.7:1). */
-const PIN_INK = "#1c2610";
-const CARD = "rgba(32,112,14,0.16)";
-const RULE = "#2f6b33";
+const PIN_INK = "#1b3328";
+const CARD = "rgba(27,51,40,0.92)";
+const RULE = "#426c4c";
 
 export function MonoMap({ site }: { site: SiteContent }) {
   const { location } = site;
@@ -57,14 +47,18 @@ export function MonoMap({ site }: { site: SiteContent }) {
       data-tone={flatSectionTone(site.theme, "location")}
       className="relative border-b border-fg/10 bg-ground"
     >
-      {/* Рендер + цэгүүд — хайрцаг нь зургийн харьцааг яг дагана */}
-      <div className="relative w-full" style={{ aspectRatio: "4096 / 2305" }}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={location.mapImage}
-          alt={`${project.label} — ${project.address}`}
-          className="absolute inset-0 h-full w-full object-cover"
-        />
+      {/* Хоёр зураг өөр өөр харьцаатай байж болно. Байгалийн өндрөөр нь
+          харуулахад хувь координат хоёр төхөөрөмж дээр яг таарна. */}
+      <div className="relative w-full">
+        <picture>
+          <source media="(min-width: 768px)" srcSet={location.mapImage} />
+          <img
+            src={location.mapImageMobile || location.mapImage}
+            alt={`${project.label} — ${project.address}`}
+            loading="lazy"
+            className="block h-auto w-full"
+          />
+        </picture>
 
         {/* Зүүн талын цайруулалт — гарчиг ямар ч зураг дээр уншигдана.
             Гар утсанд гарчиг зургийн ДООР ордог тул хэрэггүй. */}
@@ -73,25 +67,27 @@ export function MonoMap({ site }: { site: SiteContent }) {
           className="absolute inset-0 hidden bg-gradient-to-r from-ground via-ground/35 to-transparent md:block"
         />
 
-        {location.pins.map((p, i) => (
-          <button
-            key={`${p.place}-${i}`}
-            type="button"
-            aria-pressed={pin === i}
-            aria-label={p.distance ? `${i + 1}. ${p.place} — ${p.distance} ${p.unit}` : `${i + 1}. ${p.place}`}
-            onClick={() => setPin(i)}
-            onMouseEnter={() => setPin(i)}
-            onFocus={() => setPin(i)}
-            data-cursor-hover
-            style={{ left: `${p.x}%`, top: `${p.y}%` }}
-            className="absolute -translate-x-1/2 -translate-y-1/2"
-          >
+        {(["mobile", "desktop"] as const).map((device) => (
+          <div key={device} className={`absolute inset-0 ${device === "mobile" ? "md:hidden" : "hidden md:block"}`}>
+            {location.pins.map((p, i) => (
+              <button
+                key={`${device}-${p.place}-${i}`}
+                type="button"
+                aria-pressed={pin === i}
+                aria-label={p.distance ? `${i + 1}. ${p.place} — ${p.distance} ${p.unit}` : `${i + 1}. ${p.place}`}
+                onClick={() => setPin(i)}
+                onMouseEnter={() => setPin(i)}
+                onFocus={() => setPin(i)}
+                data-cursor-hover
+                style={{ left: `${device === "mobile" ? p.xMobile : p.x}%`, top: `${device === "mobile" ? p.yMobile : p.y}%` }}
+                className="absolute grid h-11 w-11 -translate-x-1/2 -translate-y-1/2 place-items-center"
+              >
             {/* Гэрэлтэлт нь ЗӨВХӨН сонгогдсон цэг дээр — «бүдэг ↔ тод»
                 ялгааг өнгө, хэмжээ, туяа гурвуулаа зэрэг өгнө. */}
             <span
               aria-hidden
               style={{ backgroundColor: GLOW }}
-              className={`absolute -inset-1.5 rounded-full blur-[7px] transition-opacity duration-300 ${
+              className={`absolute inset-1.5 rounded-full blur-[7px] transition-opacity duration-300 ${
                 pin === i ? "opacity-100" : "opacity-0"
               }`}
             />
@@ -101,13 +97,15 @@ export function MonoMap({ site }: { site: SiteContent }) {
                 color: PIN_INK,
                 opacity: pin === i ? 1 : 0.82,
               }}
-              className={`relative grid h-6 w-6 place-items-center rounded-full text-2xs font-bold tabular-nums shadow-[0_1px_6px_rgba(21,23,23,0.28)] transition-transform duration-300 sm:h-8 sm:w-8 sm:text-xs md:h-9 md:w-9 md:text-body ${
+              className={`relative grid h-7 w-7 place-items-center rounded-full text-2xs font-bold tabular-nums shadow-[0_1px_6px_rgba(21,23,23,0.28)] transition-transform duration-300 sm:h-8 sm:w-8 sm:text-xs md:h-9 md:w-9 md:text-body ${
                 pin === i ? "scale-115" : ""
               }`}
             >
               {i + 1}
             </span>
-          </button>
+              </button>
+            ))}
+          </div>
         ))}
       </div>
 
@@ -144,14 +142,14 @@ export function MonoMap({ site }: { site: SiteContent }) {
             <div
               key={pin}
               style={{ backgroundColor: CARD }}
-              className="mono-fade-up flex w-full min-h-[9rem] max-w-[26rem] items-center gap-5 rounded-3xl px-6 py-5 shadow-[0_20px_48px_-28px_rgba(21,23,23,0.5)] backdrop-blur-md md:min-h-[10.75rem] md:w-[30.6%] md:min-w-[19rem] md:max-w-none xl:min-h-[12.75rem] xl:gap-6"
+              className="mono-fade-up flex w-full min-h-[9rem] max-w-[26rem] items-center gap-5 rounded-2xl border border-white/15 px-6 py-5 text-white shadow-[0_20px_48px_-28px_rgba(21,23,23,0.5)] backdrop-blur-md md:min-h-[10.75rem] md:w-[30.6%] md:min-w-[19rem] md:max-w-none xl:min-h-[12.75rem] xl:gap-6"
             >
               <div className="min-w-0 flex-1">
-                <p className="break-words text-lg font-extrabold uppercase leading-tight text-fg lg:text-h6">
+                <p className="break-words text-lg font-extrabold uppercase leading-tight text-white lg:text-h6">
                   <span className="tabular-nums">{pin + 1}.</span> {active.place}
                 </p>
                 {active.description && (
-                  <p className="mt-1.5 text-body leading-snug text-fg/65">{active.description}</p>
+                  <p className="mt-1.5 text-body leading-snug text-white/75">{active.description}</p>
                 )}
                 {active.distance && (
                   /* «Төслөөс» шошго нүднээс хасагдав — зай нь тоо, нэгжээрээ
@@ -159,10 +157,10 @@ export function MonoMap({ site }: { site: SiteContent }) {
                      `sr-only`-оор үлдээв (админаас засах талбар нь хэвээр). */
                   <p className="mt-2.5 flex flex-wrap items-baseline gap-x-1.5 gap-y-1">
                     <span className="sr-only">{location.distanceLabel} </span>
-                    <span className="text-lg font-extrabold tabular-nums leading-none text-fg lg:text-xl">
+                    <span className="text-lg font-extrabold tabular-nums leading-none text-white lg:text-xl">
                       {active.distance}
                     </span>
-                    <span className="text-label font-bold text-fg/55">{active.unit}</span>
+                    <span className="text-label font-bold text-white/65">{active.unit}</span>
                   </p>
                 )}
               </div>

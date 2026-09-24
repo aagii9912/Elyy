@@ -19,12 +19,12 @@
 
   /* Brand greens — primary text & dark sections */
   --color-ink: #2a5124; /* deep forest green (brand) — primary ink */
-  --color-charcoal: #16280f; /* deepest green — footer / film */
-  --color-moss: #3f6a33; /* mid green — small accents */
+  --color-charcoal: #142b21; /* deepest green — footer / film */
+  --color-moss: #426c4c; /* mid green — small accents */
 
   /* Brand accents */
   --color-gold: #faac32; /* amber — decorative accent (rules, icons, bar) */
-  --color-lime: #b4d656; /* lime — sparing pop */
+  --color-lime: #c5d996; /* softened lime — sparing pop */
 
   /* Typography — Inter (бие) + Gilroy (display). Гуравдахь нь ЗӨВХӨН
      hero-гийн гарчигт зориулсан Bebas Neue; өөр газар БҮҮ хэрэглэ.
@@ -36,17 +36,17 @@
     sans-serif; /* hero display — condensed caps */
 
   /* Neutral monochrome palette — /-ийн үндсэн саарал */
-  --color-night: #151717; /* near-black — ink, CTAs, footer */
-  --color-paper: #f1f1f1; /* light grey alternate band */
-  --color-mist: #8a8d8c; /* muted grey — dimmed/secondary text */
+  --color-night: #1b3328; /* deep evergreen — ink, CTAs, footer */
+  --color-paper: #ecefe6; /* warm alternate band */
+  --color-mist: #6d7c70; /* muted sage — secondary text */
 
   /* Mono (`/`) single light canvas. The page used to alternate
      bg-white / bg-paper / bg-night band by band, which read as uneven
      and far too dark. Every content section now sits on ONE ground and
      separation comes from hairlines + raised white surfaces instead. */
-  --color-ground: #f4f4f1; /* the one page canvas */
-  --color-surface: #ffffff; /* cards / insets raised off the ground */
-  --color-shade: #1c1f1e; /* softened dark for the few cinematic blocks */
+  --color-ground: #f3f4ee; /* limestone tinted page canvas */
+  --color-surface: #fffef9; /* warm white cards */
+  --color-shade: #1b3328; /* evergreen cinematic blocks */
 
   /* Motion */
   --ease-luxe: cubic-bezier(0.16, 1, 0.3, 1);

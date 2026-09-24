@@ -123,14 +123,14 @@ export function MonoHeader({
             <Logo className="h-3 w-auto" />
           </Link>
 
-          <nav className="ml-4 hidden items-center gap-6 lg:flex xl:gap-8">
+          <nav className="ml-4 hidden items-center gap-5 2xl:flex">
             {items.map((item) => (
               <Link
                 key={item.href}
                 href={resolve(item.href)}
                 onClick={(e) => go(e, item.href)}
                 data-cursor-hover
-                className={`text-label font-medium uppercase tracking-caps-sm transition-colors duration-300 ${
+                className={`whitespace-nowrap text-label font-medium uppercase tracking-caps-sm transition-colors duration-300 ${
                   solid ? "text-fg/60 hover:text-fg" : "text-white/70 hover:text-white"
                 }`}
               >
@@ -168,7 +168,7 @@ export function MonoHeader({
               onClick={() => setOpen((v) => !v)}
               /* 44×44 — хүрэх талбайн доод хязгаар; зураас 24px хэвээр тул
                  товч томорсон ч тэмдэг нь өмнөхтэй адил харагдана. */
-              className={`relative z-50 -mr-0.5 flex h-11 w-11 flex-col items-center justify-center gap-[5px] lg:hidden ${open ? "text-fg" : ""}`}
+              className={`relative z-50 -mr-0.5 flex h-11 w-11 flex-col items-center justify-center gap-[5px] 2xl:hidden ${open ? "text-fg" : ""}`}
             >
               <span className={`h-0.5 w-6 bg-current transition-transform duration-300 ${open ? "translate-y-[3px] rotate-45" : ""}`} />
               <span className={`h-0.5 w-6 bg-current transition-transform duration-300 ${open ? "-translate-y-[3px] -rotate-45" : ""}`} />
@@ -179,7 +179,7 @@ export function MonoHeader({
 
       {/* Mobile menu — sibling of <header>, see note above */}
       <div
-        className={`fixed inset-0 z-40 flex flex-col bg-white font-gilroy text-fg transition-[opacity,visibility] duration-500 lg:hidden ${
+        className={`fixed inset-0 z-40 flex flex-col bg-white font-gilroy text-fg transition-[opacity,visibility] duration-500 2xl:hidden ${
           open ? "visible opacity-100" : "invisible opacity-0"
         }`}
       >

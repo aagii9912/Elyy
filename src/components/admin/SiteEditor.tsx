@@ -15,12 +15,13 @@ import {
   type SiteContent,
 } from "@/lib/site-content";
 import { externalHref } from "@/lib/links";
-import { Button, Card, Field, FileField, ImageField, Select, TextArea, TextInput, Toggle } from "./ui";
+import { Button, Card, Field, FileField, ImageField, Select, TextArea, TextInput, Toggle, VideoField } from "./ui";
 import { DesignPanel } from "./DesignFields";
 import { PinMapEditor } from "./PinMapEditor";
 
 type SectionId =
   | "design"
+  | "media"
   | "brand"
   | "brochure"
   | "nav"
@@ -44,6 +45,7 @@ type SectionId =
 
 const SECTIONS: { id: SectionId; label: string; hint: string }[] = [
   { id: "design", label: "🎨 Дизайн", hint: "Өнгө, типографи, дэвсгэр" },
+  { id: "media", label: "Видеонууд", hint: "Нүүр, төлөвлөлт, бүтээцийн клип" },
   { id: "brand", label: "Брэнд & холбоо", hint: "Нэр, уриа, и-мэйл, танилцуулга" },
   { id: "brochure", label: "Танилцуулга татах", hint: "Утас/и-мэйл цуглуулах маягт" },
   { id: "nav", label: "Толгой цэс", hint: "Навигац, товчнууд" },
@@ -56,7 +58,7 @@ const SECTIONS: { id: SectionId; label: string; hint: string }[] = [
   { id: "developer", label: "Төсөл хэрэгжүүлэгч", hint: "Компани, өмнөх төслүүд" },
   { id: "gallery", label: "Зургийн цомог", hint: "Интерьер зургууд" },
   { id: "vr", label: "VR аялал", hint: "360° embed холбоос, постер" },
-  { id: "location", label: "Байршил", hint: "Агаарын рендер, дугаартай цэгүүд" },
+  { id: "location", label: "Байршил", hint: "Веб/гар утасны зураг ба цэгүүд" },
   { id: "contact", label: "Холбоо барих", hint: "Утас, хаяг, маягт" },
   { id: "managers", label: "Борлуулалтын баг", hint: "Менежерүүд" },
   { id: "faq", label: "Түгээмэл асуулт", hint: "Асуулт & хариулт" },
@@ -246,9 +248,15 @@ function StringListEditor({
 export function SiteEditor({ initial }: { initial: SiteContent }) {
   const [content, setContent] = useState<SiteContent>(initial);
   const [section, setSection] = useState<SectionId>("brand");
+  const [mapDevice, setMapDevice] = useState<"desktop" | "mobile">("desktop");
   const [dirty, setDirty] = useState(false);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
+
+  const selectSection = (next: SectionId) => {
+    setSection(next);
+    window.scrollTo(0, 0);
+  };
 
   /** Хуулбар дээр мутаци хийж шинэ төлөв болгоно (гүн, төрөл-аюулгүй). */
   const edit = useCallback((fn: (draft: SiteContent) => void) => {
@@ -303,6 +311,12 @@ export function SiteEditor({ initial }: { initial: SiteContent }) {
         draft.theme = defaults.theme;
         return;
       }
+      if (section === "media") {
+        draft.hero.media = defaults.hero.media;
+        draft.plan.background = defaults.plan.background;
+        draft.equip.items.forEach((item, i) => { item.video = defaults.equip.items[i]?.video ?? ""; });
+        return;
+      }
       // Хэсэг бүр өөрийн нэртэй тохирсон түлхүүрийг эзэмшинэ.
       Object.assign(draft, { [section]: defaults[section] });
       if (section === "plan") draft.storyNav.plan = defaults.storyNav.plan;
@@ -324,6 +338,12 @@ export function SiteEditor({ initial }: { initial: SiteContent }) {
         if (!same(content.theme, defaults.theme)) ids.add(s.id);
         continue;
       }
+      if (s.id === "media") {
+        if (!same(content.hero.media, defaults.hero.media) ||
+          !same(content.plan.background, defaults.plan.background) ||
+          !same(content.equip.items.map((item) => item.video), defaults.equip.items.map((item) => item.video))) ids.add(s.id);
+        continue;
+      }
       const storyKey = s.id === "plan" || s.id === "elys" || s.id === "equip" ? s.id : null;
       const navSame = !storyKey || content.storyNav[storyKey] === defaults.storyNav[storyKey];
       if (!same(content[s.id], defaults[s.id]) || !navSame) ids.add(s.id);
@@ -331,27 +351,27 @@ export function SiteEditor({ initial }: { initial: SiteContent }) {
     return ids;
   }, [content]);
 
-  const body = useMemo(() => renderSection(section, content, edit), [section, content, edit]);
+  const body = useMemo(() => renderSection(section, content, edit, mapDevice, setMapDevice), [section, content, edit, mapDevice]);
 
   return (
     /* Дизайны хэсэг нь хөшүүрэг + амьд preview хоёрыг зэрэгцүүлдэг тул
        илүү өргөн зай авна; бусад хэсэг уншихад тохиромжтой нарийхан. */
-    <div className={`mx-auto px-4 py-8 ${section === "design" ? "max-w-[1700px]" : "max-w-6xl"}`}>
+    <div className={`mx-auto px-4 py-5 md:px-7 md:py-7 ${section === "design" ? "max-w-[1700px]" : "max-w-[1440px]"}`}>
       {/* Наалдмал — дизайны самбар урт тул «Хадгалах» доош гүйхэд алга
           болох ёсгүй. `-mx-4 px-4` нь савны хажуугийн зайг нөхнө. */}
-      <header className="sticky top-0 z-30 -mx-4 mb-6 flex flex-wrap items-center gap-3 border-b border-neutral-200 bg-neutral-50/95 px-4 py-3 backdrop-blur">
+      <header className="sticky top-3 z-30 mb-7 flex flex-wrap items-center gap-4 rounded-2xl border border-white/10 bg-[#183227] px-5 py-4 text-white shadow-[0_20px_45px_-28px_rgba(12,35,23,0.75)] md:px-7">
         <div>
-          <h1 className="text-2xl font-extrabold tracking-tight text-neutral-900">Сайтын контент</h1>
-          <p className="text-sm text-neutral-500">Үндсэн хуудасны бүх текст, зураг</p>
+          <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#bdd0b8]">ELYSIUM / STUDIO</p>
+          <h1 className="mt-1 font-gilroy text-2xl font-semibold tracking-tight">Сайтын удирдлага</h1>
         </div>
         <div className="ml-auto flex flex-wrap items-center gap-2">
           <Link href="/admin">
-            <Button variant="ghost" type="button">← Админ</Button>
+            <Button variant="ghost" type="button" className="!border-white/20 !bg-white/10 !text-white hover:!bg-white/20">← Админ</Button>
           </Link>
           <a href="/" target="_blank" rel="noreferrer">
-            <Button variant="ghost" type="button">Сайт үзэх ↗</Button>
+            <Button variant="ghost" type="button" className="!border-white/20 !bg-white/10 !text-white hover:!bg-white/20">Сайт үзэх ↗</Button>
           </a>
-          <Button variant="primary" type="button" onClick={save} disabled={busy || !dirty}>
+          <Button variant="primary" type="button" onClick={save} disabled={busy || !dirty} className="!bg-[#dce9cf] !text-[#173126] hover:!bg-white">
             {busy ? "Хадгалж байна…" : dirty ? "Хадгалах" : "Хадгалагдсан"}
           </Button>
         </div>
@@ -374,19 +394,29 @@ export function SiteEditor({ initial }: { initial: SiteContent }) {
         </div>
       )}
 
-      <div className="grid gap-6 lg:grid-cols-[240px_1fr]">
+      <div className="mb-5 sm:hidden">
+        <Field label="Засах хэсэг">
+          <Select value={section} onChange={(e) => selectSection(e.target.value as SectionId)}>
+            {SECTIONS.map((s) => <option key={s.id} value={s.id}>{s.label}</option>)}
+          </Select>
+        </Field>
+      </div>
+
+      <div className="grid gap-6 sm:grid-cols-[210px_minmax(0,1fr)] lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-8">
         {/* Хэсгүүдийн жагсаалт */}
-        <nav className="lg:sticky lg:top-[84px] lg:self-start">
-          <ul className="flex gap-2 overflow-x-auto pb-2 lg:flex-col lg:gap-1 lg:overflow-visible lg:pb-0">
+        <nav aria-label="Засварлах хэсгүүд" className="hidden self-start rounded-2xl border border-[#dfe5da] bg-white p-3 sm:sticky sm:top-[112px] sm:block sm:max-h-[calc(100dvh-128px)] sm:overflow-y-auto">
+          <p className="px-3 pb-3 pt-2 text-[10px] font-bold uppercase tracking-[0.2em] text-[#759071]">Агуулга / {SECTIONS.length} хэсэг</p>
+          <ul className="space-y-0.5">
             {SECTIONS.map((s) => (
-              <li key={s.id} className="shrink-0 lg:shrink">
+              <li key={s.id}>
                 <button
                   type="button"
-                  onClick={() => setSection(s.id)}
-                  className={`w-full whitespace-nowrap rounded-lg px-3 py-2.5 text-left text-body font-semibold transition-colors lg:whitespace-normal ${
+                  onClick={() => selectSection(s.id)}
+                  aria-current={section === s.id ? "page" : undefined}
+                  className={`w-full rounded-lg px-3 py-2.5 text-left text-body font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink ${
                     section === s.id
-                      ? "bg-ink text-white"
-                      : "text-neutral-600 hover:bg-neutral-200/60"
+                      ? "bg-[#244431] text-white"
+                      : "text-[#4f6454] hover:bg-[#edf2e9]"
                   }`}
                 >
                   <span className="flex items-center gap-1.5">
@@ -402,7 +432,7 @@ export function SiteEditor({ initial }: { initial: SiteContent }) {
                     )}
                   </span>
                   <span
-                    className={`hidden text-label font-medium lg:block ${
+                    className={`block text-label font-medium ${
                       section === s.id ? "text-white/70" : "text-neutral-400"
                     }`}
                   >
@@ -412,7 +442,7 @@ export function SiteEditor({ initial }: { initial: SiteContent }) {
               </li>
             ))}
           </ul>
-          <p className="mt-3 hidden text-label leading-relaxed text-neutral-400 lg:block">
+          <p className="mt-4 border-t border-[#e8ece6] px-3 pt-4 text-label leading-relaxed text-neutral-400">
             <span aria-hidden className="mr-1 inline-block h-1.5 w-1.5 rounded-full bg-amber-500 align-middle" />
             Өгөгдмөлөөс өөрчлөгдсөн хэсэг. Шинэ өгөгдмөл текстийг татах бол
             тухайн хэсэг дээр “Өгөгдмөл рүү буцаах” дараад хадгална уу.
@@ -420,6 +450,11 @@ export function SiteEditor({ initial }: { initial: SiteContent }) {
         </nav>
 
         <div className="space-y-5">
+          <div className="pb-1">
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#769071]">{String(SECTIONS.findIndex((s) => s.id === section) + 1).padStart(2, "0")} / {SECTIONS.length}</p>
+            <h2 className="mt-1 font-gilroy text-3xl font-semibold tracking-tight text-[#1d3527] md:text-4xl">{SECTIONS.find((s) => s.id === section)?.label}</h2>
+            <p className="mt-1 text-sm text-[#6b7c6e]">{SECTIONS.find((s) => s.id === section)?.hint}</p>
+          </div>
           {body}
           <div className="flex flex-wrap items-center gap-3 border-t border-neutral-200 pt-5">
             <Button variant="primary" type="button" onClick={save} disabled={busy || !dirty}>
@@ -442,7 +477,9 @@ export function SiteEditor({ initial }: { initial: SiteContent }) {
 function renderSection(
   section: SectionId,
   c: SiteContent,
-  edit: (fn: (draft: SiteContent) => void) => void
+  edit: (fn: (draft: SiteContent) => void) => void,
+  mapDevice: "desktop" | "mobile",
+  setMapDevice: (device: "desktop" | "mobile") => void
 ): React.ReactNode {
   switch (section) {
     /* ---------------------------------------------------------- */
@@ -452,6 +489,142 @@ function renderSection(
           theme={c.theme}
           onChange={(next) => edit((d) => void (d.theme = next))}
         />
+      );
+
+    case "media":
+      return (
+        <>
+          <div className="rounded-2xl bg-[#183227] p-6 text-white md:p-8">
+            <p className="text-label font-bold uppercase tracking-caps text-[#bfd4af]">Медиа сан</p>
+            <h2 className="mt-3 font-gilroy text-3xl font-semibold tracking-tight md:text-4xl">Хөдөлгөөн бүрийг удирдах</h2>
+            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-white/70">
+              Нүүр, төлөвлөлт, бүтээцийн клипүүд энд байна. Нүүрийн арын видеог солиход хуучин урд давхарга автоматаар арилна.
+              Шинэ видеонд таарсан тунгалаг урд давхарга байгаа бол доор нь нэмж оруулна.
+            </p>
+          </div>
+          {(["desktop", "mobile"] as const).map((device) => {
+            const media = c.hero.media[device];
+            const label = device === "desktop" ? "Веб" : "Гар утас";
+            return (
+              <Card key={device} title={`Нүүр дэлгэц · ${label}`}>
+                <div className="grid gap-6 xl:grid-cols-2">
+                  <VideoField
+                    label="Арын видео"
+                    value={media.video}
+                    accept="video/mp4,video/webm"
+                    onChange={(url) => edit((d) => {
+                      const target = d.hero.media[device];
+                      if (target.video !== url) {
+                        target.foregroundMov = "";
+                        target.foregroundWebm = "";
+                        target.foregroundPoster = "";
+                      }
+                      target.video = url;
+                    })}
+                    hint="Дуугүй, давтагдан тоглоно. MP4 тохиромжтой. Устгавал зураг нь үлдэнэ."
+                  />
+                  <ImageField
+                    label="Эхний кадр / постер"
+                    value={media.poster}
+                    onChange={(url) => edit((d) => void (d.hero.media[device].poster = url))}
+                    ratio={device === "desktop" ? "16/9" : "9/16"}
+                    maxEdge={2200}
+                    hint="Видео ачаалагдахаас өмнө болон хөдөлгөөн багасгах тохиргоотой үед харагдана."
+                  />
+                </div>
+                <details className="mt-6 border-t border-neutral-200 pt-5">
+                  <summary className="cursor-pointer text-sm font-bold text-neutral-800">Урд тунгалаг давхарга · нэмэлт тохиргоо</summary>
+                  <p className="mt-2 text-body leading-relaxed text-neutral-500">
+                    Барилгыг гарчгийн урд гаргах тусгай видео. Арын видеотой ижил хугацаа, кадртай байх ёстой.
+                    Энгийн арын видео хэрэглэх бол эдгээрийг хоосон үлдээнэ.
+                  </p>
+                  <div className="mt-5 grid gap-6 xl:grid-cols-2">
+                    <VideoField
+                      label="Урд давхарга · WebM"
+                      value={media.foregroundWebm}
+                      accept="video/webm"
+                      onChange={(url) => edit((d) => void (d.hero.media[device].foregroundWebm = url))}
+                      hint="Chrome, Firefox, Android-д тунгалаг WebM."
+                    />
+                    <VideoField
+                      label="Урд давхарга · MOV"
+                      value={media.foregroundMov}
+                      accept="video/quicktime"
+                      onChange={(url) => edit((d) => void (d.hero.media[device].foregroundMov = url))}
+                      hint="Safari/iPhone-д alpha HEVC MOV."
+                    />
+                    <ImageField
+                      label="Урд давхаргын постер"
+                      value={media.foregroundPoster}
+                      onChange={(url) => edit((d) => void (d.hero.media[device].foregroundPoster = url))}
+                      ratio={device === "desktop" ? "16/9" : "9/16"}
+                      maxEdge={2200}
+                      hint="Тунгалаг WebP эсвэл PNG. Хөдөлгөөнгүй горимд энэ давхарга харагдана."
+                    />
+                  </div>
+                </details>
+              </Card>
+            );
+          })}
+          <Card title="Ерөнхий төлөвлөлт · хөдөлгөөнт дэвсгэр">
+            <p className="mb-5 text-body leading-relaxed text-neutral-500">
+              Өгөгдмөлөөр веб дээр гүйлтэд уягдсан кадрууд, гар утсанд үзүүлэлт бүрийн зураг харагдана.
+              Видео оруулбал тухайн төхөөрөмж дээр энэ дэвсгэрийг орлоно.
+            </p>
+            <div className="grid gap-6 xl:grid-cols-2">
+              {(["desktop", "mobile"] as const).map((device) => (
+                <div key={device} className="space-y-4 rounded-xl border border-neutral-200 bg-neutral-50/60 p-4">
+                  <h3 className="font-semibold text-neutral-900">{device === "desktop" ? "Веб" : "Гар утас"}</h3>
+                  <VideoField
+                    label="Дэвсгэр видео"
+                    value={c.plan.background[device].video}
+                    accept="video/mp4,video/webm"
+                    onChange={(url) => edit((d) => void (d.plan.background[device].video = url))}
+                    hint="Хоосон бол өмнөх гүйлтийн визуал хэвээр."
+                  />
+                  <ImageField
+                    label="Видео постер"
+                    value={c.plan.background[device].poster}
+                    onChange={(url) => edit((d) => void (d.plan.background[device].poster = url))}
+                    ratio={device === "desktop" ? "16/9" : "9/16"}
+                    maxEdge={2200}
+                    hint="Видео ачаалагдахаас өмнө болон хөдөлгөөн багасгах горимд харагдана."
+                  />
+                </div>
+              ))}
+            </div>
+          </Card>
+          <Card title="Үндсэн бүтээц · слайдын видеонууд">
+            <p className="mb-5 text-body leading-relaxed text-neutral-500">
+              Слайд бүр өөр клиптэй. Автомат горим нь бэлэн гурван клипийг дарааллаар сонгоно.
+            </p>
+            <div className="space-y-6">
+              {c.equip.items.map((item, i) => (
+                <div key={i} className="rounded-xl border border-neutral-200 bg-neutral-50/60 p-4">
+                  <h3 className="mb-4 font-semibold text-neutral-900">{String(i + 1).padStart(2, "0")} · {item.title}</h3>
+                  <Field label="Клип сонгох">
+                    <Select value={item.video} onChange={(e) => edit((d) => void (d.equip.items[i].video = e.target.value))}>
+                      <option value={CLIP_AUTO}>Автомат</option>
+                      <option value={CLIP_NONE}>Клипгүй · зөвхөн зураг</option>
+                      {STRUCTURE_CLIPS.map((clip) => <option key={clip.value} value={clip.value}>{clip.label}</option>)}
+                      {item.video && item.video !== CLIP_NONE && !STRUCTURE_CLIPS.some((clip) => clip.value === item.video) &&
+                        <option value={item.video}>Миний оруулсан клип</option>}
+                    </Select>
+                  </Field>
+                  <div className="mt-4">
+                    <VideoField
+                      label="Өөр видео оруулах"
+                      value={item.video === CLIP_NONE ? "" : item.video}
+                      accept="video/mp4,video/webm"
+                      onChange={(url) => edit((d) => void (d.equip.items[i].video = url))}
+                      hint="Оруулсан видео дээрх сонголтыг автоматаар солино."
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
+        </>
       );
 
     /* ---------------------------------------------------------- */
@@ -749,29 +922,7 @@ function renderSection(
                       maxEdge={600}
                       hint="Слайдын доод зурваст ЦАГААН тавцан дээр, мөн дэлгэрэнгүй pop-up дотор гарна — тиймээс бараан/өнгөт лого тохиромжтой (цагаан лого харагдахгүй). Тунгалаг дэвсгэртэй PNG/SVG хамгийн зөв."
                     />
-                    <Field
-                      label="Дэвсгэр клип"
-                      hint="Слайдын ард дуугүй давтагдана. «Автомат» үед барилгын үе шатны дарааллаар өөрөө оногдоно — гэхдээ дээрх «Зураг»-ийг тохируулсан слайдад клип тоглохгүй."
-                    >
-                      <Select
-                        value={item.video}
-                        onChange={(e) => set({ video: e.target.value })}
-                      >
-                        <option value={CLIP_AUTO}>Автомат (үе шатны дарааллаар)</option>
-                        <option value={CLIP_NONE}>Клипгүй — зөвхөн зураг</option>
-                        {STRUCTURE_CLIPS.map((clip) => (
-                          <option key={clip.value} value={clip.value}>
-                            {clip.label}
-                          </option>
-                        ))}
-                        {/* Гараар бичсэн танихгүй хаяг байвал алдагдуулахгүй. */}
-                        {item.video &&
-                          item.video !== CLIP_NONE &&
-                          !STRUCTURE_CLIPS.some((clip) => clip.value === item.video) && (
-                            <option value={item.video}>{item.video}</option>
-                          )}
-                      </Select>
-                    </Field>
+                    <p className="text-body text-neutral-500">Энэ слайдын видеог “Видеонууд” хэсгээс солино.</p>
                     <Field
                       label="Холбоос"
                       hint={linkHint(item.link, "Үйлдвэрлэгчийн хуудас. Хоосон бол линк харагдахгүй.")}
@@ -1655,6 +1806,19 @@ function renderSection(
     case "location":
       return (
         <>
+          <div role="group" aria-label="Газрын зургийн хувилбар" className="inline-flex gap-1 rounded-xl border border-neutral-200 bg-white p-1">
+            {(["desktop", "mobile"] as const).map((device) => (
+              <button
+                key={device}
+                type="button"
+                aria-pressed={mapDevice === device}
+                onClick={() => setMapDevice(device)}
+                className={`min-h-11 rounded-lg px-5 text-sm font-bold transition-colors ${mapDevice === device ? "bg-ink text-white" : "text-neutral-600 hover:bg-neutral-100"}`}
+              >
+                {device === "desktop" ? "Веб зураг" : "Гар утасны зураг"}
+              </button>
+            ))}
+          </div>
           <Card title="Гарчиг">
             <div className="grid gap-4 sm:grid-cols-2">
               <Field label="Чиглэл авах товч">
@@ -1701,22 +1865,37 @@ function renderSection(
             </div>
           </Card>
 
-          <Card title="Байршлын зураг">
+          <Card title={mapDevice === "desktop" ? "Веб газрын зураг" : "Гар утасны газрын зураг"}>
             <ImageField
-              label="Агаарын рендер"
-              value={c.location.mapImage}
-              onChange={(url) => edit((d) => void (d.location.mapImage = url))}
-              ratio="16/9"
+              key={mapDevice}
+              label={mapDevice === "desktop" ? "Өргөн агаарын рендер" : "Босоо агаарын рендер"}
+              value={mapDevice === "desktop" ? c.location.mapImage : c.location.mapImageMobile}
+              onChange={(url) => edit((d) => {
+                if (mapDevice === "desktop") d.location.mapImage = url;
+                else {
+                  d.location.mapImageMobile = url;
+                  if (!url) d.location.pins.forEach((pin) => { pin.xMobile = pin.x; pin.yMobile = pin.y; });
+                }
+              })}
+              ratio={mapDevice === "desktop" ? "16/9" : "9/16"}
               maxEdge={2400}
-              hint="Дугаартай цэгүүд ЯГ энэ зураг дээр буудаг — зургаа сольбол доорх цэгүүдийн X/Y-г дахин тааруулна уу."
+              hint={mapDevice === "desktop"
+                ? "Веб дээр харагдана. Зургийг сольсны дараа цэгүүдээ дахин тааруулна уу."
+                : "Хоосон бол веб зураг гарна. Тусдаа босоо зураг оруулбал доорх mobile цэгүүдийг тааруулна уу."}
             />
           </Card>
 
-          <Card title="Зураг дээрх цэгүүд">
+          <Card title={`${mapDevice === "desktop" ? "Веб" : "Гар утасны"} зураг дээрх цэгүүд`}>
             <PinMapEditor
-              image={c.location.mapImage}
+              key={mapDevice}
+              image={mapDevice === "desktop" ? c.location.mapImage : c.location.mapImageMobile || c.location.mapImage}
               pins={c.location.pins}
-              onChange={(next) => edit((d) => void (d.location.pins = next))}
+              device={mapDevice}
+              onChange={(next) => edit((d) => {
+                d.location.pins = mapDevice === "desktop" && !d.location.mapImageMobile
+                  ? next.map((pin) => ({ ...pin, xMobile: pin.x, yMobile: pin.y }))
+                  : next;
+              })}
             />
             <div className="mt-5 border-t border-neutral-200 pt-5" />
             <ListEditor
@@ -1730,6 +1909,8 @@ function renderSection(
                 image: "",
                 x: 50,
                 y: 50,
+                xMobile: 50,
+                yMobile: 50,
               })}
               title={(item) =>
                 item.distance ? `${item.place} · ${item.distance}${item.unit}` : item.place
@@ -1787,24 +1968,32 @@ function renderSection(
                       />
                     </Field>
                     <div className="grid grid-cols-2 gap-3 sm:max-w-xs">
-                      <Field label="X (%)" hint="Зүүн ирмэгээс">
+                      <Field label={`${mapDevice === "desktop" ? "Веб" : "Гар утас"} X (%)`} hint="Зүүн ирмэгээс">
                         <TextInput
                           type="number"
                           min={0}
                           max={100}
                           step={0.1}
-                          value={item.x}
-                          onChange={(e) => set({ x: pct(e.target.value) })}
+                          value={mapDevice === "desktop" ? item.x : item.xMobile}
+                          onChange={(e) => {
+                            const x = pct(e.target.value);
+                            if (mapDevice === "mobile") set({ xMobile: x });
+                            else set(c.location.mapImageMobile ? { x } : { x, xMobile: x });
+                          }}
                         />
                       </Field>
-                      <Field label="Y (%)" hint="Дээд ирмэгээс">
+                      <Field label={`${mapDevice === "desktop" ? "Веб" : "Гар утас"} Y (%)`} hint="Дээд ирмэгээс">
                         <TextInput
                           type="number"
                           min={0}
                           max={100}
                           step={0.1}
-                          value={item.y}
-                          onChange={(e) => set({ y: pct(e.target.value) })}
+                          value={mapDevice === "desktop" ? item.y : item.yMobile}
+                          onChange={(e) => {
+                            const y = pct(e.target.value);
+                            if (mapDevice === "mobile") set({ yMobile: y });
+                            else set(c.location.mapImageMobile ? { y } : { y, yMobile: y });
+                          }}
                         />
                       </Field>
                     </div>
