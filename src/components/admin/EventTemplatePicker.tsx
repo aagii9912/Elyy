@@ -12,7 +12,7 @@ export function EventTemplatePicker({ value, onChange, disabled = false }: {
       <legend className="sr-only">Хуудасны загвар сонгох</legend>
       {([
         ["event", "Эвентийн landing page", "Нүүр зураг, танилцуулга, хөтөлбөр, нэмэлт хэсгүүд болон бүртгэлийн маягт."],
-        ["registration", "Нэг нүүрийн форм", "Хүсэлтийн маягт, зураг болон холбоо барих мэдээлэлтэй бие даасан хуудас."],
+        ["registration", "Нэг нүүрийн форм", "Header, хүсэлтийн маягт, showroom, footer болон менежерүүдтэй амжилтын дэлгэц."],
       ] as const).map(([template, title, description]) => (
         <label key={template} className={`cursor-pointer rounded-xl border-2 p-4 transition-colors focus-within:ring-2 focus-within:ring-ink/30 ${
           value === template ? "border-ink bg-ink/5" : "border-neutral-200 bg-white hover:border-neutral-300"

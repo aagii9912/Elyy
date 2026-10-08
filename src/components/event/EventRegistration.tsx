@@ -1,78 +1,89 @@
+import type { CSSProperties } from "react";
 import type { EventDoc } from "@/lib/events";
 import { ulaanbaatarToday } from "@/lib/event-registration";
+import { defaultRegistrationPage } from "@/lib/registration-page";
 import { loadSiteContent } from "@/lib/site";
 import { externalHref } from "@/lib/links";
 import { SocialRow } from "@/components/mono/MonoSocial";
-import { RegistrationLeadForm } from "./RegistrationLeadForm";
+import { RegistrationExperience } from "./RegistrationExperience";
+import { RegistrationPlaceholder } from "./RegistrationPlaceholder";
 import styles from "./EventRegistration.module.css";
 
 /* eslint-disable @next/next/no-img-element */
 
 export async function EventRegistration({ event }: { event: EventDoc }) {
   const site = await loadSiteContent();
-  const { form, contact } = event.content;
+  const { contact } = event.content;
+  const page = event.content.registrationPage ?? defaultRegistrationPage();
+  const { header, footer, links } = page;
   const address = contact.address?.trim() || site.contact.location;
   const email = contact.email?.trim() || site.brand.email;
-  const mapUrl = externalHref(contact.mapUrl ?? "") ||
-    `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
+  const mapUrl = externalHref(contact.mapUrl) || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
+  const website = externalHref(links.website);
+  const socials = event.content.registrationPage ? links.social : site.footer.social;
+  const footerMap = externalHref(footer.mapUrl);
+  const logo = header.logo ? <img key="brand-logo" className={styles.logo} src={header.logo} alt={header.logoAlt || event.name} /> :
+    <RegistrationPlaceholder key="brand-placeholder" kind="logo" label="Лого" className={styles.logoPlaceholder} />;
 
-  return (
-    <section id="register" className={styles.section} aria-labelledby="registration-title">
-      <header className={form.showIntro ? styles.intro : "sr-only"}>
-        <h2 id="registration-title">{form.title}</h2>
-        <p>{form.subtitle}</p>
-      </header>
-      <div className={styles.layout}>
-        <RegistrationLeadForm slug={event.slug} eventName={event.name} form={form} today={ulaanbaatarToday()} />
-        <aside className={styles.sidebar} aria-label="Борлуулалтын алба">
-          {contact.image ? (
-            <img src={contact.image} alt="Elysium Residence" loading="lazy" className={styles.contactImage} />
-          ) : (
-            <div className={styles.collage} aria-label="Elysium Residence-ийн интерьер">
-              {[
-                "living-04.jpg", "living-09.jpg", "bedroom-03.jpg",
-                "bath-01.jpg", "living-01.jpg", "bedroom-07.jpg",
-              ].map((file) => (
-                <img key={file} src={`/images/interior/${file}`} alt="" loading="lazy" />
-              ))}
-              <span aria-hidden /><span aria-hidden /><span aria-hidden /><span aria-hidden />
-            </div>
-          )}
-
-          <h3 className={styles.contactTitle}>Борлуулалтын алба</h3>
-          <p className={styles.address}>{address}</p>
-          <a href={mapUrl} target="_blank" rel="noopener noreferrer" className={styles.mapLink}>
-            <svg aria-hidden viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7Zm0 10a3 3 0 1 1 0-6 3 3 0 0 1 0 6Z" />
-            </svg>
-            <span>Google Map-аас</span><strong>ХАРАХ</strong>
-          </a>
-
-          <div className={styles.contact}>
-            <h3 className={styles.contactTitle}>Бидэнтэй холбогдох</h3>
-            <div className={styles.contactLinks}>
-              {contact.phone && (
-                <a href={`tel:${contact.phone.replace(/[^+0-9]/g, "")}`}>
-                  <svg aria-hidden viewBox="0 0 24 24" fill="currentColor">
-                    <path d="m6.6 2 3.2 5.6-2.2 2.2a17.8 17.8 0 0 0 6.6 6.6l2.2-2.2 5.6 3.2v2A2.6 2.6 0 0 1 19.2 22C9.6 21.4 2.6 14.4 2 4.8A2.6 2.6 0 0 1 4.6 2h2Z" />
-                  </svg>
-                  {contact.phone}
-                </a>
-              )}
-              {email && (
-                <a href={`mailto:${email}`}>
-                  <svg aria-hidden viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M2 5h20v2l-10 6L2 7V5Zm0 4 10 6 10-6v10H2V9Z" />
-                  </svg>
-                  {email}
-                </a>
-              )}
-            </div>
-            {contact.note && <p className={styles.hours}>{contact.note}</p>}
-            <SocialRow items={site.footer.social} className={styles.socials} />
-          </div>
-        </aside>
+  return <RegistrationExperience event={event} today={ulaanbaatarToday()} page={page} logo={logo}
+    header={<header key="registration-header">
+      <div className={styles.banner}>
+        {header.desktopImage || header.mobileImage ? <picture>
+          {header.mobileImage && <source media="(max-width: 767px)" srcSet={header.mobileImage} />}
+          <img src={header.desktopImage || header.mobileImage} alt="" fetchPriority="high" />
+        </picture> : <RegistrationPlaceholder label="Header зураг" detail="1920 × 400 · Гар утас 1080 × 720" />}
       </div>
-    </section>
-  );
+      <div className={styles.intro}>
+        {logo}
+        <h1 className={!header.title ? styles.emptyText : undefined}>{header.title || "Уриа, гарчиг"}</h1>
+        <p className={!header.body ? styles.emptyText : undefined}>{header.body || "Цаг товлохын зорилго, төслийн товч танилцуулга энд байрлана."}</p>
+      </div>
+    </header>}
+    sidebar={<aside key="registration-sidebar" className={styles.sidebar} aria-label={page.salesTitle}>
+      <div className={styles.showroom}>
+        {contact.image ? <img src={contact.image} alt={`${event.name} — шоурум`} loading="lazy" /> :
+          <RegistrationPlaceholder label="Шоурум зураг / эвлүүлэг" detail="900 × 1200 · 3:4" />}
+      </div>
+      <h3 className={styles.contactTitle}>{page.salesTitle}</h3>
+      <p className={styles.address}>{address}</p>
+      <a href={mapUrl} target="_blank" rel="noopener noreferrer" className={styles.mapLink}>
+        <span aria-hidden>↗</span><span>Google Map-аас</span><strong>ХАРАХ</strong>
+      </a>
+      <div className={styles.contact}>
+        <h3 className={styles.contactTitle}>{page.contactTitle}</h3>
+        <div className={styles.contactLinks}>
+          {contact.phone && <a href={`tel:${contact.phone.replace(/[^+0-9]/g, "")}`}>{contact.phone}</a>}
+          {email && <a href={`mailto:${email}`}>{email}</a>}
+          {website && <a href={website} target="_blank" rel="noopener noreferrer">Вэбсайт үзэх ↗</a>}
+        </div>
+        {contact.note && <p className={styles.hours}>{contact.note}</p>}
+        <SocialRow items={socials} className={styles.socials} />
+      </div>
+    </aside>}
+    footer={<footer key="registration-footer" className={styles.footer} style={{ "--footer-bg": footer.background, "--footer-text": footer.textColor } as CSSProperties}>
+      <div className={styles.footerGrid}>
+        <div className={styles.footerBrand}>
+          {footer.logo ? <img className={styles.logo} src={footer.logo} alt={footer.company || event.name} loading="lazy" /> :
+            <RegistrationPlaceholder kind="logo" label="Компанийн лого" className={styles.logoPlaceholder} />}
+          <h2>{footer.company || "Компанийн нэр"}</h2>
+          <p>{footer.description || "Компанийн товч мэдээлэл энд байрлана."}</p>
+        </div>
+        <div>
+          <h3>Хаяг, байршил</h3>
+          <p>{footer.address || "Оффисын хаяг энд байрлана."}</p>
+          {footerMap ? <a href={footerMap} target="_blank" rel="noopener noreferrer">Газрын зураг дээр харах ↗</a> : <span className={styles.footerPlaceholder}>Газрын зургийн холбоос</span>}
+        </div>
+        <div>
+          <h3>{page.contactTitle}</h3>
+          <div className={styles.footerLinks}>
+            {footer.phone ? <a href={`tel:${footer.phone.replace(/[^+0-9]/g, "")}`}>{footer.phone}</a> : <span className={styles.footerPlaceholder}>Утасны дугаар</span>}
+            {footer.email ? <a href={`mailto:${footer.email}`}>{footer.email}</a> : <span className={styles.footerPlaceholder}>И-мэйл хаяг</span>}
+            {website ? <a href={website} target="_blank" rel="noopener noreferrer">Вэбсайт үзэх ↗</a> : <span className={styles.footerPlaceholder}>Вэбсайтын холбоос</span>}
+          </div>
+          <SocialRow items={links.social} className={styles.footerSocials} />
+        </div>
+      </div>
+      <div className={styles.footerBottom}>{footer.copyright || "Зохиогчийн эрхийн мэдээлэл"}</div>
+    </footer>}
+  />;
 }

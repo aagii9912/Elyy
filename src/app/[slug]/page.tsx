@@ -23,8 +23,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!event) return {};
   const c = event.content;
   const draft = event.status !== "published";
-  const description = c.template === "registration" ? c.form.subtitle : c.hero.subtitle;
-  const image = c.template === "registration" ? c.contact.image : c.hero.image;
+  const description = c.template === "registration" ? c.registrationPage?.header.body || c.form.subtitle : c.hero.subtitle;
+  const image = c.template === "registration" ? c.registrationPage?.header.desktopImage || c.contact.image : c.hero.image;
   return {
     title: event.name,
     description,

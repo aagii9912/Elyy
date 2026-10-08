@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getStore } from "@/lib/store";
 import { isValidSlug, type EventDoc } from "@/lib/events";
 import { validRegistrationOptions } from "@/lib/event-registration";
+import { validRegistrationPage } from "@/lib/registration-page";
 
 export const runtime = "nodejs";
 
@@ -45,6 +46,9 @@ export async function PUT(req: Request, ctx: Ctx) {
         if (label !== undefined && (typeof label !== "string" || !label.trim() || label.length > 100)) {
           return NextResponse.json({ ok: false, error: "Сонголтын гарчиг 1–100 тэмдэгттэй байна." }, { status: 400 });
         }
+      }
+      if (body.content.registrationPage !== undefined && !validRegistrationPage(body.content.registrationPage)) {
+        return NextResponse.json({ ok: false, error: "Header, footer, менежерийн мэдээллийг шалгана уу. Холбоос, и-мэйл, утас болон өнгө зөв утгатай байна." }, { status: 400 });
       }
       patch.content = body.content;
     }

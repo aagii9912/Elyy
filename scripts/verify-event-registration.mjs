@@ -15,6 +15,7 @@ load.extensions[".ts"] = (module, filename) => {
 const { eventRegistrationMessage, registrationOptions, validRegistrationOptions, ulaanbaatarToday, leadSelections, matchesLeadArea } = load("../src/lib/event-registration.ts");
 const { defaultContent, newEvent } = load("../src/lib/events.ts");
 const { leadRequestBody } = load("../src/lib/lead-request.ts");
+const { defaultRegistrationPage, validRegistrationPage } = load("../src/lib/registration-page.ts");
 const today = "2026-10-08";
 const input = { appointmentDate: today, apartmentTypes: ["3 Өрөө", "5 Өрөө"], areaRanges: ["161-182 м.кв", "253-370 м.кв"] };
 const result = eventRegistrationMessage(input, today);
@@ -42,6 +43,27 @@ assert.equal(registrationPage.template, "registration");
 assert.equal(registrationPage.accent, "#b99e7f");
 assert.equal(registrationPage.form.fields.guests, false);
 assert.deepEqual(registrationPage.sections, []);
+assert.equal(fullPage.registrationPage, undefined);
+assert.equal(validRegistrationPage(registrationPage.registrationPage), true);
+const page = defaultRegistrationPage();
+page.header.title = "Цаг товлох";
+page.managers.items[0].name = "Менежер";
+page.managers.items[0].phone = "+976 9900-0000";
+page.managers.items[0].image = "/uploads/portrait.webp";
+page.links.website = "www.example.com";
+page.footer.email = "sales@example.com";
+assert.equal(validRegistrationPage(page), true);
+assert.equal(defaultRegistrationPage().managers.items[0].name, "");
+for (const bad of [
+  null, {}, [],
+  { ...page, header: { ...page.header, desktopImage: "javascript:alert(1)" } },
+  { ...page, links: { ...page.links, website: "javascript:alert(1)" } },
+  { ...page, links: { ...page.links, social: [{ label: "Bad", icon: "link", href: "data:text/html,bad" }] } },
+  { ...page, managers: { ...page.managers, items: [...page.managers.items, page.managers.items[0]] } },
+  { ...page, managers: { ...page.managers, items: Array.from({ length: 13 }, (_, i) => ({ ...page.managers.items[0], id: String(i) })) } },
+  { ...page, footer: { ...page.footer, background: "red;display:none" } },
+  { ...page, footer: { ...page.footer, email: "not-an-email" } },
+]) assert.equal(validRegistrationPage(bad), false);
 assert.equal(newEvent({ id: "test", name: "Test", slug: "test", now: today, template: "registration" }).content.template, "registration");
 assert.equal(registrationOptions({}).apartmentTypes.length, 5);
 const custom = { apartmentTypes: ["2 өрөө"], areaRanges: ["80–100 м²"] };

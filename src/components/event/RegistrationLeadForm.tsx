@@ -12,10 +12,10 @@ type Props = {
   eventName: string;
   form: EventContent["form"];
   today: string;
+  onSuccess: () => void;
 };
 
-export function RegistrationLeadForm({ slug, eventName, form, today }: Props) {
-  const [sent, setSent] = useState(false);
+export function RegistrationLeadForm({ slug, eventName, form, today, onSuccess }: Props) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [selections, setSelections] = useState<{ apartmentTypes: string[]; areaRanges: string[] }>({
@@ -58,7 +58,7 @@ export function RegistrationLeadForm({ slug, eventName, form, today }: Props) {
       const json = await res.json().catch(() => null);
       if (res.ok && json?.ok) {
         trackMetaPixel("Lead");
-        setSent(true);
+        onSuccess();
       } else {
         setError(res.status === 400 && typeof json?.error === "string"
           ? json.error : "Илгээхэд алдаа гарлаа. Дахин оролдоно уу.");
@@ -69,16 +69,6 @@ export function RegistrationLeadForm({ slug, eventName, form, today }: Props) {
       setBusy(false);
     }
   };
-
-  if (sent) {
-    return (
-      <div role="status" className={`${styles.card} ${styles.success}`}>
-        <span aria-hidden className={styles.successMark}>✓</span>
-        <h3>{form.successTitle}</h3>
-        <p>{form.successBody}</p>
-      </div>
-    );
-  }
 
   return (
     <form onSubmit={onSubmit} className={styles.card} aria-label={form.title} aria-busy={busy}>

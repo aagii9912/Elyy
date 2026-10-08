@@ -5,6 +5,8 @@
    хадгалагдана. Public хуудас нь энэ бүтцийг рендерлэнэ.
    ============================================================ */
 
+import { defaultRegistrationPage, type RegistrationPageContent } from "./registration-page";
+
 export type EventStatus = "draft" | "published";
 export type EventTemplate = "event" | "registration";
 
@@ -33,6 +35,7 @@ export type SectionType = Section["type"];
 export type EventContent = {
   /** Хуучин хадгалсан хуудсанд байхгүй бол эвентийн загварыг ашиглана. */
   template?: EventTemplate;
+  registrationPage?: RegistrationPageContent;
   /** Онцлох өнгө (accent) — hex */
   accent: string;
   /** Hero-гийн өнгөний схем */
@@ -183,6 +186,7 @@ export function defaultContent(name: string, template: EventTemplate = "event"):
   const registration = template === "registration";
   return {
     template,
+    ...(registration ? { registrationPage: defaultRegistrationPage() } : {}),
     accent: registration ? "#b99e7f" : "#b4d656",
     theme: "dark",
     hero: {

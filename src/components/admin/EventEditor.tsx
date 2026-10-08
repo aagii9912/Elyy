@@ -9,9 +9,11 @@ import { useRouter } from "next/navigation";
 import type { EventContent, EventDoc, Section, SectionType } from "@/lib/events";
 import { isValidSlug, makeSection } from "@/lib/events";
 import { registrationOptions, validRegistrationOptions } from "@/lib/event-registration";
+import { defaultRegistrationPage, validRegistrationPage, type RegistrationPageContent } from "@/lib/registration-page";
 import { Button, Card, Field, TextInput, TextArea, Toggle, ImageField } from "./ui";
 import { SectionFields, SECTION_LABELS } from "./SectionFields";
 import { EventTemplatePicker } from "./EventTemplatePicker";
+import { RegistrationHeaderFields, RegistrationSupportingFields } from "./RegistrationPageFields";
 
 const SECTION_TYPES: SectionType[] = ["richText", "stats", "agenda", "gallery", "image", "cards", "cta"];
 
@@ -30,6 +32,7 @@ export function EventEditor({
   const [status, setStatus] = useState<EventDoc["status"]>(initial.status);
   const [content, setContent] = useState<EventContent>(initial.content);
   const isRegistration = content.template === "registration";
+  const registrationPage = content.registrationPage ?? defaultRegistrationPage();
 
   const [dirty, setDirty] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -57,6 +60,11 @@ export function EventEditor({
   }, [touch]);
   const patchContact = useCallback((patch: Partial<EventContent["contact"]>) => {
     setContent((c) => ({ ...c, contact: { ...c.contact, ...patch } }));
+    touch();
+  }, [touch]);
+
+  const updateRegistration = useCallback((update: (current: RegistrationPageContent) => RegistrationPageContent) => {
+    setContent((c) => ({ ...c, registrationPage: update(c.registrationPage ?? defaultRegistrationPage()) }));
     touch();
   }, [touch]);
 
@@ -96,6 +104,10 @@ export function EventEditor({
     }
     let savedContent = content;
     if (isRegistration) {
+      if (!validRegistrationPage(registrationPage)) {
+        setMsg({ kind: "err", text: "Header, footer, менежерийн мэдээллийг шалгана уу. Холбоос, и-мэйл, утас болон өнгө зөв утгатай байна." });
+        return;
+      }
       const options = registrationOptions(content.form);
       const apartmentTypes = options.apartmentTypes.map((value) => value.trim()).filter(Boolean);
       const areaRanges = options.areaRanges.map((value) => value.trim()).filter(Boolean);
@@ -103,7 +115,7 @@ export function EventEditor({
         setMsg({ kind: "err", text: "Орон сууц, талбайн сонголт бүр 1–60 тэмдэгттэй, давхцахгүй 1–20 мөр байна." });
         return;
       }
-      savedContent = { ...content, form: { ...content.form, apartmentTypes, areaRanges,
+      savedContent = { ...content, registrationPage, form: { ...content.form, apartmentTypes, areaRanges,
         apartmentLabel: options.apartmentLabel, areaLabel: options.areaLabel } };
     }
     setSaving(true);
@@ -373,6 +385,8 @@ export function EventEditor({
 
         </>}
 
+        {isRegistration && <RegistrationHeaderFields value={registrationPage} onChange={updateRegistration} />}
+
         {/* ---------- Register form ---------- */}
         <Card title="Бүртгэлийн маягт (lead capture)">
           <div className="space-y-4">
@@ -436,6 +450,8 @@ export function EventEditor({
               <TextInput value={content.contact.note} onChange={(e) => patchContact({ note: e.target.value })} />
             </Field>
             {isRegistration && <>
+            <Field label="Борлуулалтын албаны гарчиг"><TextInput maxLength={200} value={registrationPage.salesTitle} onChange={(e) => patchContent({ registrationPage: { ...registrationPage, salesTitle: e.target.value } })} /></Field>
+            <Field label="Холбоо барих хэсгийн гарчиг"><TextInput maxLength={200} value={registrationPage.contactTitle} onChange={(e) => patchContent({ registrationPage: { ...registrationPage, contactTitle: e.target.value } })} /></Field>
             <Field label="И-мэйл хаяг" hint="Хоосон бол үндсэн сайтын и-мэйлийг ашиглана.">
               <TextInput type="email" value={content.contact.email ?? ""} onChange={(e) => patchContact({ email: e.target.value })} />
             </Field>
@@ -448,11 +464,13 @@ export function EventEditor({
               </Field>
             </div>
             <div className="sm:col-span-2">
-              <ImageField label="Маягтын хажуугийн зураг" value={content.contact.image ?? ""} onChange={(image) => patchContact({ image })} ratio="3/4" maxEdge={1200} hint="Хоосон бол Elysium-ийн интерьер зургийн эвлүүлгийг харуулна. Сошиал холбоосыг үндсэн сайтын хөл хэсгээс авна." />
+              <ImageField label="Шоурум зураг / бэлэн эвлүүлэг" value={content.contact.image ?? ""} onChange={(image) => patchContact({ image })} ratio="3/4" maxEdge={1200} hint="900×1200px. Нэг зураг эсвэл урьдчилан бэлдсэн эвлүүлэг оруулна. Хоосон бол placeholder харагдана." />
             </div>
             </>}
           </div>
         </Card>
+
+        {isRegistration && <RegistrationSupportingFields value={registrationPage} onChange={updateRegistration} />}
 
         {/* ---------- Danger ---------- */}
         <div className="flex justify-end pt-2">
