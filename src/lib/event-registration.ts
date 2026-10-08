@@ -67,3 +67,31 @@ export function eventRegistrationMessage(
     ].join("\n"),
   };
 }
+
+/** Read the submitted values, never the landing page's current editable options.
+ * Keep multiple selections together so commas inside custom options are preserved. */
+export function leadSelections(message: string) {
+  const lines = message.split(/\r?\n/);
+  const date = /^Цаг товлох өдөр: (\d{4}-\d{2}-\d{2})$/.exec(lines[0]);
+  if (date && lines[1]?.includes(": ") && lines[2]?.includes(": ")) {
+    return {
+      appointmentDate: date[1],
+      apartmentTypes: lines[1].slice(lines[1].indexOf(": ") + 2),
+      areaRanges: lines[2].slice(lines[2].indexOf(": ") + 2),
+    };
+  }
+
+  // The main site's existing apartment form also records the chosen area.
+  const apartment = /^Сонирхсон тип: .+? · .+? · ([^·\r\n]+) · ([^\r\n]+?)(?: — |$)/.exec(message);
+  return {
+    appointmentDate: /^Уулзалтын хүссэн огноо: (\d{4}-\d{2}-\d{2})(?:\s|$)/.exec(message)?.[1] ?? "",
+    apartmentTypes: apartment?.[1].trim() ?? "",
+    areaRanges: apartment && /^\d+(?:[.,]\d+)?\s*м(?:²|2|\.кв)\.?$/i.test(apartment[2].trim())
+      ? apartment[2].trim() : "",
+  };
+}
+
+export function matchesLeadArea(areaRanges: string, query: string): boolean {
+  const normalize = (value: string) => value.toLowerCase().replace(/[–—−]/g, "-").replace(/\s+/g, "");
+  return normalize(areaRanges).includes(normalize(query));
+}

@@ -12,7 +12,7 @@ load.extensions[".ts"] = (module, filename) => {
   module._compile(outputText, filename);
 };
 
-const { eventRegistrationMessage, registrationOptions, validRegistrationOptions, ulaanbaatarToday } = load("../src/lib/event-registration.ts");
+const { eventRegistrationMessage, registrationOptions, validRegistrationOptions, ulaanbaatarToday, leadSelections, matchesLeadArea } = load("../src/lib/event-registration.ts");
 const { defaultContent, newEvent } = load("../src/lib/events.ts");
 const { leadRequestBody } = load("../src/lib/lead-request.ts");
 const today = "2026-10-08";
@@ -49,6 +49,22 @@ assert.equal(eventRegistrationMessage({ ...input, ...custom }, today, custom).ok
 assert.equal(eventRegistrationMessage(input, today, custom).ok, false);
 const renamed = eventRegistrationMessage({ ...input, ...custom }, today, { ...custom, apartmentLabel: "Сонгох байр", areaLabel: "Талбай" });
 assert.ok(renamed.message.includes("Сонгох байр: 2 өрөө\nТалбай: 80–100 м²"));
+assert.deepEqual(leadSelections(result.message), {
+  appointmentDate: today, apartmentTypes: "3 Өрөө, 5 Өрөө", areaRanges: "161-182 м.кв, 253-370 м.кв",
+});
+assert.equal(leadSelections(renamed.message).areaRanges, "80–100 м²");
+assert.equal(leadSelections(`${renamed.message}\nТэмдэглэл: Сонирхож буй талбайн хэмжээ: 999 м²`).areaRanges, "80–100 м²");
+assert.equal(leadSelections(result.message.replaceAll("\n", "\r\n")).apartmentTypes, "3 Өрөө, 5 Өрөө");
+assert.equal(leadSelections("Танилцуулга (PDF) татсан").areaRanges, "");
+assert.equal(leadSelections("Цаг товлох өдөр: 2026-10-08\nДутуу мэдээлэл").areaRanges, "");
+assert.equal(leadSelections("Сонирхсон тип: E-2 · I ээлж · 2 өрөө · 64.16м² — Үнэ асуух").areaRanges, "64.16м²");
+assert.equal(leadSelections("Сонирхсон тип: C тип · B2 блок · 3 өрөө · 78.67 м²").apartmentTypes, "3 өрөө");
+assert.equal(leadSelections("Сонирхсон тип: E тип · 2 давхар · 2 өрөө · 2-р давхрын төлөвлөлт").areaRanges, "");
+assert.equal(leadSelections("Уулзалтын хүссэн огноо: 2026-10-10").appointmentDate, "2026-10-10");
+assert.equal(matchesLeadArea(leadSelections(result.message).areaRanges, "253 – 370"), true);
+assert.equal(matchesLeadArea(leadSelections(result.message).areaRanges, "201-230"), false);
+assert.equal(matchesLeadArea("", "161"), false);
+assert.equal(matchesLeadArea("", ""), true);
 for (const bad of [[], [""], [" repeat", "repeat"], ["same", "same"], ["x".repeat(61)], [3]]) {
   assert.equal(validRegistrationOptions(bad), false);
 }
@@ -58,4 +74,4 @@ const attempt = { current: null };
 const first = JSON.parse(leadRequestBody(input, attempt));
 assert.equal(JSON.parse(leadRequestBody(input, attempt)).requestId, first.requestId);
 assert.notEqual(JSON.parse(leadRequestBody({ ...input, areaRanges: ["201-230 м.кв"] }, attempt)).requestId, first.requestId);
-console.log("Event registration: required selections, dates, custom options, defaults, and retry IDs passed.");
+console.log("Event registration: required selections, dates, custom options, admin area display/filter, defaults, and retry IDs passed.");
