@@ -8,8 +8,10 @@ import { useCallback, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { EventContent, EventDoc, Section, SectionType } from "@/lib/events";
 import { isValidSlug, makeSection } from "@/lib/events";
+import { registrationOptions, validRegistrationOptions } from "@/lib/event-registration";
 import { Button, Card, Field, TextInput, TextArea, Toggle, ImageField } from "./ui";
 import { SectionFields, SECTION_LABELS } from "./SectionFields";
+import { EventTemplatePicker } from "./EventTemplatePicker";
 
 const SECTION_TYPES: SectionType[] = ["richText", "stats", "agenda", "gallery", "image", "cards", "cta"];
 
@@ -27,6 +29,7 @@ export function EventEditor({
   const [slug, setSlug] = useState(initial.slug);
   const [status, setStatus] = useState<EventDoc["status"]>(initial.status);
   const [content, setContent] = useState<EventContent>(initial.content);
+  const isRegistration = content.template === "registration";
 
   const [dirty, setDirty] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -91,6 +94,18 @@ export function EventEditor({
       setMsg({ kind: "err", text: "Slug буруу байна (жижиг латин үсэг, тоо, зураас)." });
       return;
     }
+    let savedContent = content;
+    if (isRegistration) {
+      const options = registrationOptions(content.form);
+      const apartmentTypes = options.apartmentTypes.map((value) => value.trim()).filter(Boolean);
+      const areaRanges = options.areaRanges.map((value) => value.trim()).filter(Boolean);
+      if (!validRegistrationOptions(apartmentTypes) || !validRegistrationOptions(areaRanges)) {
+        setMsg({ kind: "err", text: "Орон сууц, талбайн сонголт бүр 1–60 тэмдэгттэй, давхцахгүй 1–20 мөр байна." });
+        return;
+      }
+      savedContent = { ...content, form: { ...content.form, apartmentTypes, areaRanges,
+        apartmentLabel: options.apartmentLabel, areaLabel: options.areaLabel } };
+    }
     setSaving(true);
     setMsg(null);
     const useStatus = nextStatus ?? status;
@@ -98,11 +113,12 @@ export function EventEditor({
       const res = await fetch(`/api/admin/events/${initial.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, slug, status: useStatus, content }),
+        body: JSON.stringify({ name, slug, status: useStatus, content: savedContent }),
       });
       const json = await res.json().catch(() => null);
       if (res.ok && json?.ok) {
         setStatus(useStatus);
+        setContent(savedContent);
         setDirty(false);
         setMsg({ kind: "ok", text: nextStatus === "published" ? "Хэвлэгдлээ." : "Хадгалагдлаа." });
       } else {
@@ -190,7 +206,7 @@ export function EventEditor({
         {/* ---------- Settings ---------- */}
         <Card title="Тохиргоо">
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Эвентийн нэр">
+            <Field label="Хуудасны нэр">
               <TextInput value={name} onChange={(e) => { setName(e.target.value); touch(); }} />
             </Field>
             <Field label="Slug (URL)" hint={`Public хаяг: ${publicPath}`}>
@@ -214,10 +230,15 @@ export function EventEditor({
           </div>
         </Card>
 
+        <Card title="Хуудасны загвар">
+          <EventTemplatePicker value={content.template ?? "event"} onChange={(template) => patchContent({ template })} disabled={saving} />
+          <p className="mt-3 text-sm text-neutral-500">Загвар солиход өмнө оруулсан мэдээлэл хадгалагдана.</p>
+        </Card>
+
         {/* ---------- Appearance ---------- */}
         <Card title="Загвар">
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Онцлох өнгө (accent)">
+            <Field label="Онцлох өнгө (accent)" hint="Товч, маягтын хажуугийн гарчиг, зургийн чимэглэлд ашиглана.">
               <div className="flex items-center gap-2">
                 <input
                   type="color"
@@ -228,7 +249,7 @@ export function EventEditor({
                 <TextInput value={content.accent} onChange={(e) => patchContent({ accent: e.target.value })} />
               </div>
             </Field>
-            <Field label="Hero-гийн өнгө" hint="Зурагтай үед текст тод харагдах өнгө.">
+            {!isRegistration && <Field label="Hero-гийн өнгө" hint="Зурагтай үед текст тод харагдах өнгө.">
               <div className="flex gap-2">
                 {(["dark", "light"] as const).map((t) => (
                   <button
@@ -243,10 +264,11 @@ export function EventEditor({
                   </button>
                 ))}
               </div>
-            </Field>
+            </Field>}
           </div>
         </Card>
 
+        {!isRegistration && <>
         {/* ---------- Hero ---------- */}
         <Card title="Hero (эхний дэлгэц)">
           <div className="space-y-4">
@@ -349,9 +371,17 @@ export function EventEditor({
           </div>
         </Card>
 
+        </>}
+
         {/* ---------- Register form ---------- */}
         <Card title="Бүртгэлийн маягт (lead capture)">
           <div className="space-y-4">
+            {isRegistration && <><p className="text-sm leading-relaxed text-neutral-500">
+              Цайвар карттай маягт, баруун талд зураг болон борлуулалтын албаны мэдээлэл харагдана.
+              Огноо, нэр, и-мэйл, утас болон сонголтын хоёр бүлгийг заавал бөглөнө.
+              Бүлэг бүрээс нэг буюу хэд хэдэн сонголт хийнэ.
+            </p>
+            <Toggle checked={content.form.showIntro ?? false} onChange={(value) => patchForm({ showIntro: value })} label="Маягтын гарчиг, тайлбар харуулах" /></>}
             <div className="grid gap-4 sm:grid-cols-2">
               <Field label="Маягтын гарчиг">
                 <TextInput value={content.form.title} onChange={(e) => patchForm({ title: e.target.value })} />
@@ -363,11 +393,24 @@ export function EventEditor({
             <Field label="Тайлбар">
               <TextArea rows={2} value={content.form.subtitle} onChange={(e) => patchForm({ subtitle: e.target.value })} />
             </Field>
+            {isRegistration && <div className="grid gap-4 sm:grid-cols-2">
+              <Field label="Орон сууцны бүлгийн гарчиг">
+                <TextInput maxLength={100} value={content.form.apartmentLabel ?? registrationOptions({}).apartmentLabel} onChange={(e) => patchForm({ apartmentLabel: e.target.value })} />
+              </Field>
+              <Field label="Талбайн бүлгийн гарчиг">
+                <TextInput maxLength={100} value={content.form.areaLabel ?? registrationOptions({}).areaLabel} onChange={(e) => patchForm({ areaLabel: e.target.value })} />
+              </Field>
+              <Field label="Орон сууцны сонголтууд" hint="Нэг мөрөнд нэг сонголт бичнэ.">
+                <TextArea rows={5} value={registrationOptions(content.form).apartmentTypes.join("\n")} onChange={(e) => patchForm({ apartmentTypes: e.target.value.split("\n") })} />
+              </Field>
+              <Field label="Талбайн сонголтууд" hint="Нэг мөрөнд нэг сонголт бичнэ.">
+                <TextArea rows={5} value={registrationOptions(content.form).areaRanges.join("\n")} onChange={(e) => patchForm({ areaRanges: e.target.value.split("\n") })} />
+              </Field>
+            </div>}
             <div>
               <span className="mb-2 block text-body font-semibold text-neutral-700">Нэмэлт талбар</span>
               <div className="flex flex-wrap gap-5 rounded-lg border border-neutral-200 bg-neutral-50 px-4 py-3">
-                <span className="text-sm text-neutral-400">Нэр, Утас (үргэлж)</span>
-                <Toggle checked={content.form.fields.email} onChange={(v) => patchFormFields({ email: v })} label="И-мэйл" />
+                {!isRegistration && <Toggle checked={Boolean(content.form.fields.email)} onChange={(v) => patchFormFields({ email: v })} label="И-мэйл" />}
                 <Toggle checked={content.form.fields.guests} onChange={(v) => patchFormFields({ guests: v })} label="Зочдын тоо" />
                 <Toggle checked={content.form.fields.note} onChange={(v) => patchFormFields({ note: v })} label="Тэмдэглэл" />
               </div>
@@ -392,6 +435,22 @@ export function EventEditor({
             <Field label="Тэмдэглэл (цагийн хуваарь г.м)">
               <TextInput value={content.contact.note} onChange={(e) => patchContact({ note: e.target.value })} />
             </Field>
+            {isRegistration && <>
+            <Field label="И-мэйл хаяг" hint="Хоосон бол үндсэн сайтын и-мэйлийг ашиглана.">
+              <TextInput type="email" value={content.contact.email ?? ""} onChange={(e) => patchContact({ email: e.target.value })} />
+            </Field>
+            <Field label="Google Maps холбоос" hint="Хоосон бол борлуулалтын албаны хаягаар хайна.">
+              <TextInput value={content.contact.mapUrl ?? ""} onChange={(e) => patchContact({ mapUrl: e.target.value })} placeholder="https://maps.google.com/…" />
+            </Field>
+            <div className="sm:col-span-2">
+              <Field label="Борлуулалтын албаны хаяг" hint="Хоосон бол үндсэн сайтын хаягийг ашиглана.">
+                <TextArea rows={2} value={content.contact.address ?? ""} onChange={(e) => patchContact({ address: e.target.value })} />
+              </Field>
+            </div>
+            <div className="sm:col-span-2">
+              <ImageField label="Маягтын хажуугийн зураг" value={content.contact.image ?? ""} onChange={(image) => patchContact({ image })} ratio="3/4" maxEdge={1200} hint="Хоосон бол Elysium-ийн интерьер зургийн эвлүүлгийг харуулна. Сошиал холбоосыг үндсэн сайтын хөл хэсгээс авна." />
+            </div>
+            </>}
           </div>
         </Card>
 

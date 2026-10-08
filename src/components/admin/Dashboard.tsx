@@ -5,8 +5,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import type { EventDoc } from "@/lib/events";
+import type { EventDoc, EventTemplate } from "@/lib/events";
 import { Button, TextInput } from "./ui";
+import { EventTemplatePicker } from "./EventTemplatePicker";
 
 /** `GET /api/admin/upload` оношилгооны хариу. */
 type UploadHealth = { ok: boolean; mode: string; bucket: string | null; error: string | null };
@@ -28,6 +29,7 @@ export function Dashboard({
   const router = useRouter();
   const [events, setEvents] = useState<EventDoc[]>(initialEvents);
   const [name, setName] = useState("");
+  const [template, setTemplate] = useState<EventTemplate>("event");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [checking, setChecking] = useState(false);
@@ -42,7 +44,7 @@ export function Dashboard({
       const res = await fetch("/api/admin/events", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: n }),
+        body: JSON.stringify({ name: n, template }),
       });
       const json = await res.json().catch(() => null);
       if (res.ok && json?.ok) router.push(`/admin/events/${json.event.id}`);
@@ -145,24 +147,29 @@ export function Dashboard({
       </div>
 
       {/* create */}
-      <div className="mb-8 flex flex-col gap-2 rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm sm:flex-row sm:items-center">
+      <div className="mb-8 space-y-4 rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
+        <h2 className="text-lg font-bold text-neutral-900">Landing page үүсгэх</h2>
+        <EventTemplatePicker value={template} onChange={setTemplate} disabled={busy} />
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
         <TextInput
-          placeholder="Шинэ эвентийн нэр (ж: Elysium VIP үзэсгэлэн)"
+          aria-label="Хуудасны нэр"
+          placeholder="Хуудасны нэр (ж: Elysium хүсэлт)"
           value={name}
           onChange={(e) => setName(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && create()}
         />
         <Button variant="primary" type="button" onClick={create} disabled={busy || !name.trim()} className="sm:w-auto">
-          {busy ? "Үүсгэж байна…" : "+ Эвент үүсгэх"}
+          {busy ? "Үүсгэж байна…" : "+ Хуудас үүсгэх"}
         </Button>
+        </div>
       </div>
       {err && <p className="-mt-5 mb-6 text-sm font-semibold text-red-600">{err}</p>}
 
       {/* list */}
       {events.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-neutral-300 py-16 text-center">
-          <p className="text-neutral-500">Одоогоор эвент алга.</p>
-          <p className="mt-1 text-sm text-neutral-400">Дээрх талбарт нэр бичээд эхний эвентээ үүсгээрэй.</p>
+          <p className="text-neutral-500">Одоогоор хуудас алга.</p>
+          <p className="mt-1 text-sm text-neutral-400">Загвараа сонгоод эхний хуудсаа үүсгээрэй.</p>
         </div>
       ) : (
         <ul className="space-y-3">
@@ -187,6 +194,7 @@ export function Dashboard({
                     /{ev.slug} ↗
                   </a>
                   <span>Шинэчилсэн: {fmtDate(ev.updatedAt)}</span>
+                  <span>{ev.content.template === "registration" ? "Нэг нүүрийн форм" : "Эвентийн landing page"}</span>
                 </div>
               </div>
               <div className="flex items-center gap-2">

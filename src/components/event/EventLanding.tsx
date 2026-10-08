@@ -3,8 +3,10 @@
    Онцлох өнгө (accent) нь --accent CSS хувьсагчаар дамжина. */
 
 import type { CSSProperties } from "react";
+import Link from "next/link";
 import type { EventDoc, Section } from "@/lib/events";
 import { EventLeadForm } from "./EventLeadForm";
+import { EventRegistration } from "./EventRegistration";
 
 /* eslint-disable @next/next/no-img-element */
 
@@ -162,11 +164,19 @@ function SectionView({ s }: { s: Section }) {
 
 export function EventLanding({ event }: { event: EventDoc }) {
   const c = event.content;
-  const rootStyle = { "--accent": c.accent || "#b4d656" } as CSSProperties;
+  const rootStyle = { "--accent": c.accent || (c.template === "registration" ? "#b99e7f" : "#b4d656") } as CSSProperties;
   const heroDark = c.theme !== "light";
 
+  if (c.template === "registration") {
+    return (
+      <main style={rootStyle} className="registration-page min-h-dvh bg-white [overflow-wrap:anywhere]">
+        <EventRegistration event={event} />
+      </main>
+    );
+  }
+
   return (
-    <div style={rootStyle} className="font-gilroy">
+    <div style={rootStyle} className="font-gilroy [overflow-wrap:anywhere]">
       {/* ---------- HERO ---------- */}
       <section
         className={`relative flex min-h-[92vh] flex-col overflow-hidden ${
@@ -189,9 +199,9 @@ export function EventLanding({ event }: { event: EventDoc }) {
 
         {/* top bar */}
         <div className={`relative z-10 ${wrap} flex items-center justify-between py-7`}>
-          <a href="/" className="text-lg font-extrabold tracking-tight" data-cursor-hover>
+          <Link href="/" className="text-lg font-extrabold tracking-tight" data-cursor-hover>
             Elysium
-          </a>
+          </Link>
           <a
             href="#register"
             data-cursor-hover
@@ -275,6 +285,7 @@ export function EventLanding({ event }: { event: EventDoc }) {
           </div>
         </div>
       </section>
+
 
       {/* ---------- FOOTER ---------- */}
       <footer className="bg-night pb-12 pt-4 text-white/50">

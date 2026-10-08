@@ -6,6 +6,7 @@
    ============================================================ */
 
 export type EventStatus = "draft" | "published";
+export type EventTemplate = "event" | "registration";
 
 /* ---- Orderable content blocks (урд/хойно нь зөөж болно) ---- */
 export type Section =
@@ -30,6 +31,8 @@ export type Section =
 export type SectionType = Section["type"];
 
 export type EventContent = {
+  /** Хуучин хадгалсан хуудсанд байхгүй бол эвентийн загварыг ашиглана. */
+  template?: EventTemplate;
   /** Онцлох өнгө (accent) — hex */
   accent: string;
   /** Hero-гийн өнгөний схем */
@@ -48,13 +51,18 @@ export type EventContent = {
   form: {
     title: string;
     subtitle: string;
-    /** Нэр, утас үргэлж асууна. Доорхыг нэмж/хасаж болно. */
-    fields: { email: boolean; guests: boolean; note: boolean };
+    /** Эвентийн загварт и-мэйл нэмэлт. Нэг нүүрийн формд заавал асууна. */
+    fields: { email?: boolean; guests: boolean; note: boolean };
+    apartmentTypes?: string[];
+    areaRanges?: string[];
+    apartmentLabel?: string;
+    areaLabel?: string;
+    showIntro?: boolean;
     submitLabel: string;
     successTitle: string;
     successBody: string;
   };
-  contact: { phone: string; note: string };
+  contact: { phone: string; note: string; email?: string; address?: string; mapUrl?: string; image?: string };
 };
 
 export type EventDoc = {
@@ -171,9 +179,11 @@ export function makeSection(type: SectionType): Section {
   }
 }
 
-export function defaultContent(name: string): EventContent {
+export function defaultContent(name: string, template: EventTemplate = "event"): EventContent {
+  const registration = template === "registration";
   return {
-    accent: "#b4d656",
+    template,
+    accent: registration ? "#b99e7f" : "#b4d656",
     theme: "dark",
     hero: {
       kicker: "Elysium Residence · Онцгой арга хэмжээ",
@@ -185,12 +195,12 @@ export function defaultContent(name: string): EventContent {
       image: "",
       ctaLabel: "Бүртгүүлэх",
     },
-    sections: [makeSection("richText"), makeSection("agenda"), makeSection("cta")],
+    sections: registration ? [] : [makeSection("richText"), makeSection("agenda"), makeSection("cta")],
     form: {
       title: "Бүртгүүлэх",
       subtitle: "Мэдээллээ үлдээгээрэй — бид тантай холбогдож баталгаажуулна.",
-      fields: { email: false, guests: true, note: false },
-      submitLabel: "Бүртгүүлэх",
+      fields: { email: registration, guests: !registration, note: false },
+      submitLabel: registration ? "Хүсэлт илгээх" : "Бүртгүүлэх",
       successTitle: "Баярлалаа!",
       successBody: "Таны бүртгэл хүлээн авагдлаа. Бид тантай удахгүй холбогдоно.",
     },
@@ -199,13 +209,13 @@ export function defaultContent(name: string): EventContent {
 }
 
 /** Шинэ EventDoc үүсгэх (id, огноо талбарыг дуудагч талд бөглөнө). */
-export function newEvent(params: { id: string; name: string; slug: string; now: string }): EventDoc {
+export function newEvent(params: { id: string; name: string; slug: string; now: string; template?: EventTemplate }): EventDoc {
   return {
     id: params.id,
     slug: params.slug,
     name: params.name,
     status: "draft",
-    content: defaultContent(params.name),
+    content: defaultContent(params.name, params.template),
     createdAt: params.now,
     updatedAt: params.now,
   };

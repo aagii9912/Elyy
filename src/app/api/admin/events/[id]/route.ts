@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getStore } from "@/lib/store";
 import { isValidSlug, type EventDoc } from "@/lib/events";
+import { validRegistrationOptions } from "@/lib/event-registration";
 
 export const runtime = "nodejs";
 
@@ -26,7 +27,27 @@ export async function PUT(req: Request, ctx: Ctx) {
     const patch: Partial<Omit<EventDoc, "id">> = {};
     if (typeof body.name === "string") patch.name = body.name.trim();
     if (body.status === "draft" || body.status === "published") patch.status = body.status;
-    if (body.content && typeof body.content === "object") patch.content = body.content;
+    if (body.content && typeof body.content === "object") {
+      const template = body.content.template;
+      if (template !== undefined && template !== "event" && template !== "registration") {
+        return NextResponse.json({ ok: false, error: "Хуудасны загвар буруу байна." }, { status: 400 });
+      }
+      for (const key of ["apartmentTypes", "areaRanges"]) {
+        const options = body.content.form?.[key];
+        if (options !== undefined && !validRegistrationOptions(options)) {
+          return NextResponse.json(
+            { ok: false, error: "Сонголт бүр 1–60 тэмдэгттэй, давхцахгүй 1–20 мөр байна." }, { status: 400 },
+          );
+        }
+      }
+      for (const key of ["apartmentLabel", "areaLabel"]) {
+        const label = body.content.form?.[key];
+        if (label !== undefined && (typeof label !== "string" || !label.trim() || label.length > 100)) {
+          return NextResponse.json({ ok: false, error: "Сонголтын гарчиг 1–100 тэмдэгттэй байна." }, { status: 400 });
+        }
+      }
+      patch.content = body.content;
+    }
     if (typeof body.slug === "string") {
       const slug = body.slug.trim().toLowerCase();
       if (!isValidSlug(slug)) {

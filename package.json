@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "verify:responsive-media": "node scripts/verify-responsive-media.mjs"
+    "verify:responsive-media": "node scripts/verify-responsive-media.mjs",
+    "verify:event-registration": "node scripts/verify-event-registration.mjs"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",

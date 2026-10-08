@@ -2,7 +2,7 @@
 export type LeadAttempt = { payload: string; requestId: string };
 
 export function leadRequestBody(
-  payload: Record<string, string>,
+  payload: Record<string, string | string[]>,
   attempt: { current: LeadAttempt | null }
 ): string {
   const serialized = JSON.stringify(payload);

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { JWT } from "google-auth-library";
 import { randomUUID } from "node:crypto";
 import { getStore } from "@/lib/store";
+import { eventRegistrationMessage, registrationOptions } from "@/lib/event-registration";
 
 /* ============================================================
    LEAD CAPTURE → Vertmonhub CRM + Google Sheet + Supabase
@@ -111,11 +112,14 @@ async function forwardToVertmonhub(lead: {
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
+    const body = await request.json().catch(() => null);
+    if (!body || typeof body !== "object" || Array.isArray(body)) {
+      return NextResponse.json({ ok: false, error: "Буруу өгөгдөл." }, { status: 400 });
+    }
     const name = String(body?.name ?? "").trim();
     const email = String(body?.email ?? "").trim();
     const phone = String(body?.phone ?? "").trim();
-    const message = String(body?.message ?? "").trim();
+    let message = String(body?.message ?? "").trim();
     const source = String(body?.source ?? request.headers.get("referer") ?? "unknown").trim();
     // Эвентийн landing page-аас ирсэн бол аль эвент болохыг тэмдэглэнэ.
     const event = String(body?.event ?? "").trim();
@@ -130,6 +134,24 @@ export async function POST(request: Request) {
         { ok: false, error: "Please provide your name and a phone or email." },
         { status: 400 }
       );
+    }
+    const slug = source.startsWith("event/") ? source.slice("event/".length) : null;
+    const eventDoc = slug ? await getStore().getEventBySlug(slug) : null;
+    if (source.startsWith("event/") && !eventDoc) {
+      return NextResponse.json({ ok: false, error: "Бүртгэлийн хуудас олдсонгүй." }, { status: 404 });
+    }
+    if (eventDoc?.content.template === "registration") {
+      if (!email || !/^\+?[\d\s()-]+$/.test(phone) || !/^\d{8,15}$/.test(phone.replace(/\D/g, ""))) {
+        return NextResponse.json(
+          { ok: false, error: "И-мэйл хаяг болон утасны дугаараа зөв оруулна уу." },
+          { status: 400 }
+        );
+      }
+      const registration = eventRegistrationMessage(body, undefined, registrationOptions(eventDoc.content.form));
+      if (!registration.ok) {
+        return NextResponse.json(registration, { status: 400 });
+      }
+      message = [registration.message, message].filter(Boolean).join("\n");
     }
     if (
       name.length > 255 || phone.length > 50 || email.length > 255 ||
@@ -150,18 +172,14 @@ export async function POST(request: Request) {
     const delivered: string[] = [];
     const failures: string[] = [];
 
-    // Эвентийн slug-ийг source-оос салгаж (event/<slug>), эвентийг олно.
-    const slug = source.startsWith("event/") ? source.slice("event/".length) : null;
-
     const [sheetResult, storeResult, crmResult] = await Promise.allSettled([
       sheetsConfigured() ? appendToSheet(leadRow(lead)) : Promise.reject(new Error("not-configured")),
       (async () => {
         const store = getStore();
-        const doc = slug ? await store.getEventBySlug(slug).catch(() => null) : null;
         await store.createLead({
-          eventId: doc?.id ?? null,
-          eventSlug: doc?.slug ?? slug,
-          eventName: doc?.name ?? (event || null),
+          eventId: eventDoc?.id ?? null,
+          eventSlug: eventDoc?.slug ?? slug,
+          eventName: eventDoc?.name ?? (event || null),
           name,
           phone,
           email,

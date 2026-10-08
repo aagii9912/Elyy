@@ -16,13 +16,17 @@ export async function GET() {
   }
 }
 
-/** Шинэ эвент үүсгэх. Body: { name } */
+/** Шинэ хуудас үүсгэх. Body: { name, template? } */
 export async function POST(req: Request) {
   try {
     const body = await req.json().catch(() => null);
     const name = String(body?.name ?? "").trim();
     if (!name) {
       return NextResponse.json({ ok: false, error: "Эвентийн нэр оруулна уу." }, { status: 400 });
+    }
+    const template = body?.template ?? "event";
+    if (template !== "event" && template !== "registration") {
+      return NextResponse.json({ ok: false, error: "Хуудасны загвар буруу байна." }, { status: 400 });
     }
     const store = getStore();
 
@@ -33,7 +37,7 @@ export async function POST(req: Request) {
     let n = 2;
     while (await store.getEventBySlug(slug)) slug = `${base}-${n++}`;
 
-    const doc = newEvent({ id: randomUUID(), name, slug, now: new Date().toISOString() });
+    const doc = newEvent({ id: randomUUID(), name, slug, now: new Date().toISOString(), template });
     try {
       const created = await store.createEvent(doc);
       return NextResponse.json({ ok: true, event: created });

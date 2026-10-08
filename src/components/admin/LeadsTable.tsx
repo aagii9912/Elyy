@@ -125,7 +125,10 @@ export function LeadsTable({ events }: { events: EventDoc[] }) {
               {shown.map((l) => (
                 <tr key={l.id} className="hover:bg-neutral-50">
                   <td className="whitespace-nowrap px-4 py-3 text-neutral-500">{fmt(l.createdAt)}</td>
-                  <td className="px-4 py-3 font-semibold text-neutral-900">{l.name}</td>
+                  <td className="px-4 py-3 text-neutral-900">
+                    <div className="font-semibold">{l.name}</div>
+                    {l.email && <a href={`mailto:${l.email}`} className="mt-1 block text-xs text-neutral-500 hover:underline">{l.email}</a>}
+                  </td>
                   <td className="whitespace-nowrap px-4 py-3">
                     {l.phone ? (
                       <a href={`tel:${l.phone}`} className="font-medium text-ink hover:underline">{l.phone}</a>
@@ -136,7 +139,7 @@ export function LeadsTable({ events }: { events: EventDoc[] }) {
                   <td className="px-4 py-3 text-neutral-600">
                     {l.eventName || <span className="text-neutral-400">Үндсэн сайт</span>}
                   </td>
-                  <td className="px-4 py-3 text-neutral-500">{l.message || "—"}</td>
+                  <td className="whitespace-pre-line px-4 py-3 text-neutral-500">{l.message || "—"}</td>
                 </tr>
               ))}
             </tbody>
