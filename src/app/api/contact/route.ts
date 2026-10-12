@@ -3,6 +3,7 @@ import { JWT } from "google-auth-library";
 import { randomUUID } from "node:crypto";
 import { getStore } from "@/lib/store";
 import { eventRegistrationMessage, registrationOptions } from "@/lib/event-registration";
+import { isLandingPurpose, sanitizeAttribution, type StoredAttribution } from "@/lib/landing-attribution";
 
 /* ============================================================
    LEAD CAPTURE → Vertmonhub CRM + Google Sheet + Supabase
@@ -82,6 +83,7 @@ async function forwardToVertmonhub(lead: {
   message: string;
   source: string;
   event: string;
+  attribution: StoredAttribution;
 }) {
   const url = process.env.VERTMONHUB_LEADS_URL;
   const secret = process.env.VERTMONHUB_LEADS_SECRET;
@@ -101,6 +103,7 @@ async function forwardToVertmonhub(lead: {
       ...(lead.message && { message: lead.message }),
       ...(lead.source && { source: lead.source }),
       ...(lead.event && { event: lead.event }),
+      attribution: lead.attribution,
     }),
     signal: AbortSignal.timeout(8000),
   });
@@ -122,7 +125,7 @@ export async function POST(request: Request) {
     let message = String(body?.message ?? "").trim();
     const source = String(body?.source ?? request.headers.get("referer") ?? "unknown").trim();
     // Эвентийн landing page-аас ирсэн бол аль эвент болохыг тэмдэглэнэ.
-    const event = String(body?.event ?? "").trim();
+    let event = String(body?.event ?? "").trim();
 
     // Honeypot: bot бөглөдөг нуугдсан талбар — чимээгүйхэн амжилттай мэт хариулна
     if (String(body?.website ?? "").trim()) {
@@ -140,6 +143,15 @@ export async function POST(request: Request) {
     if (source.startsWith("event/") && !eventDoc) {
       return NextResponse.json({ ok: false, error: "Бүртгэлийн хуудас олдсонгүй." }, { status: 404 });
     }
+    // Хуудасны нэр, зориулалт, хаягийг хадгалсан эвентээс авна (хүсэлтийн утгад итгэхгүй).
+    if (eventDoc) event = eventDoc.name;
+    const origin = new URL(request.url).origin;
+    const purpose = eventDoc?.content.purpose;
+    const attribution: StoredAttribution = {
+      ...sanitizeAttribution(body?.attribution),
+      ...(isLandingPurpose(purpose) && { pagePurpose: purpose }),
+      pageUrl: eventDoc ? `${origin}/${eventDoc.slug}` : `${origin}/`,
+    };
     if (eventDoc?.content.template === "registration") {
       if (!email || !/^\+?[\d\s()-]+$/.test(phone) || !/^\d{8,15}$/.test(phone.replace(/\D/g, ""))) {
         return NextResponse.json(
@@ -165,7 +177,7 @@ export async function POST(request: Request) {
 
     const suppliedId = String(body?.requestId ?? "").trim();
     const requestId = UUID_RE.test(suppliedId) ? suppliedId : randomUUID();
-    const lead = { requestId, name, phone, email, message, source, event };
+    const lead = { requestId, name, phone, email, message, source, event, attribution };
 
     /* Vertmonhub бол үндсэн CRM. Google Sheet ба Supabase-д зэрэг нөөцөлнө.
        CRM баталгаажаагүй үед маягтад амжилт буцаахгүй. */
@@ -185,6 +197,7 @@ export async function POST(request: Request) {
           email,
           message,
           source,
+          attribution,
         });
       })(),
       forwardToVertmonhub(lead),

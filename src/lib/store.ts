@@ -17,6 +17,7 @@ import { randomUUID } from "crypto";
 import type { EventDoc } from "./events";
 import type { SiteContent } from "./site-content";
 import type { NewsDoc } from "./news";
+import type { StoredAttribution } from "./landing-attribution";
 
 export type UploadInput = { buffer: Buffer; filename: string; contentType: string };
 
@@ -33,6 +34,8 @@ export type LeadInput = {
   email: string;
   message: string;
   source: string;
+  /** Линкийн UTM/referrer + хуудасны зориулалт (байхгүй бол null). */
+  attribution?: StoredAttribution | null;
 };
 
 export type LeadDoc = LeadInput & { id: string; createdAt: string };
@@ -97,6 +100,8 @@ type LeadRow = {
   email: string | null;
   message: string | null;
   source: string | null;
+  /** Migration 20261013120000-аас өмнөх өгөгдлийн санд байхгүй. */
+  attribution?: StoredAttribution | null;
   created_at: string;
 };
 function rowToLead(r: LeadRow): LeadDoc {
@@ -110,6 +115,7 @@ function rowToLead(r: LeadRow): LeadDoc {
     email: r.email ?? "",
     message: r.message ?? "",
     source: r.source ?? "",
+    attribution: r.attribution ?? null,
     createdAt: r.created_at,
   };
 }
@@ -355,7 +361,7 @@ class SupabaseStore implements Store {
 
   async createLead(input: LeadInput): Promise<void> {
     const client = await sb();
-    const { error } = await client.from("event_leads").insert({
+    const row: Record<string, unknown> = {
       event_id: input.eventId,
       event_slug: input.eventSlug,
       event_name: input.eventName,
@@ -364,7 +370,13 @@ class SupabaseStore implements Store {
       email: input.email,
       message: input.message,
       source: input.source,
-    });
+    };
+    let { error } = await client.from("event_leads").insert(input.attribution ? { ...row, attribution: input.attribution } : row);
+    // `attribution` багана нэмэгдээгүй (migration 20261013120000) бол хүсэлтийг attribution-гүй хадгална.
+    if (error && input.attribution && (error.code === "PGRST204" || error.code === "42703")) {
+      console.warn("[leads] event_leads.attribution column missing; saved without attribution");
+      ({ error } = await client.from("event_leads").insert(row));
+    }
     if (error) throw new Error(`Supabase createLead: ${error.message}`);
   }
 

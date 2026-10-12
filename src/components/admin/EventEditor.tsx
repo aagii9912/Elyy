@@ -14,6 +14,7 @@ import { Button, Card, Field, TextInput, TextArea, Toggle, ImageField } from "./
 import { SectionFields, SECTION_LABELS } from "./SectionFields";
 import { EventTemplatePicker } from "./EventTemplatePicker";
 import { RegistrationHeaderFields, RegistrationSupportingFields } from "./RegistrationPageFields";
+import { LandingLinksCard } from "./LandingLinksCard";
 
 const SECTION_TYPES: SectionType[] = ["richText", "stats", "agenda", "gallery", "image", "cards", "cta"];
 
@@ -29,6 +30,7 @@ export function EventEditor({
   const router = useRouter();
   const [name, setName] = useState(initial.name);
   const [slug, setSlug] = useState(initial.slug);
+  const [savedSlug, setSavedSlug] = useState(initial.slug);
   const [status, setStatus] = useState<EventDoc["status"]>(initial.status);
   const [content, setContent] = useState<EventContent>(initial.content);
   const isRegistration = content.template === "registration";
@@ -130,6 +132,7 @@ export function EventEditor({
       const json = await res.json().catch(() => null);
       if (res.ok && json?.ok) {
         setStatus(useStatus);
+        setSavedSlug(slug);
         setContent(savedContent);
         setDirty(false);
         setMsg({ kind: "ok", text: nextStatus === "published" ? "Хэвлэгдлээ." : "Хадгалагдлаа." });
@@ -241,6 +244,15 @@ export function EventEditor({
             </span>
           </div>
         </Card>
+
+        <LandingLinksCard
+          slug={slug}
+          savedSlug={savedSlug}
+          published={status === "published"}
+          purpose={content.purpose}
+          onPurposeChange={(purpose) => patchContent({ purpose })}
+          disabled={saving}
+        />
 
         <Card title="Хуудасны загвар">
           <EventTemplatePicker value={content.template ?? "event"} onChange={(template) => patchContent({ template })} disabled={saving} />

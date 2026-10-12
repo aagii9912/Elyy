@@ -7,6 +7,7 @@ import { SmoothScroll } from "@/components/SmoothScroll";
 import { Cursor } from "@/components/Cursor";
 import { ScrollProgress } from "@/components/ScrollProgress";
 import { MetaPixelEvents } from "@/components/MetaPixelEvents";
+import { LeadAttributionCapture } from "@/components/LeadAttributionCapture";
 import { SITE } from "@/lib/content";
 import { DEFAULT_SITE_CONTENT } from "@/lib/site-content";
 
@@ -95,6 +96,7 @@ export default function RootLayout({
           <img height="1" width="1" style={{ display: "none" }} src="https://www.facebook.com/tr?id=501532939274877&ev=PageView&noscript=1" alt="" />
         </noscript>
         <MetaPixelEvents />
+        <LeadAttributionCapture />
         <LangProvider>
           <SmoothScroll>
             <ScrollProgress />

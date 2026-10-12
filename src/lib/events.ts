@@ -6,6 +6,7 @@
    ============================================================ */
 
 import { defaultRegistrationPage, type RegistrationPageContent } from "./registration-page";
+import type { LandingPurpose } from "./landing-attribution";
 
 export type EventStatus = "draft" | "published";
 export type EventTemplate = "event" | "registration";
@@ -35,6 +36,8 @@ export type SectionType = Section["type"];
 export type EventContent = {
   /** Хуучин хадгалсан хуудсанд байхгүй бол эвентийн загварыг ашиглана. */
   template?: EventTemplate;
+  /** Хуудасны зориулалт: линкэнд UTM байхгүй үед Vertmonhub сувгийг үүгээр тогтооно. Хуучин хуудсанд байхгүй. */
+  purpose?: LandingPurpose;
   registrationPage?: RegistrationPageContent;
   /** Онцлох өнгө (accent) — hex */
   accent: string;

@@ -3,6 +3,7 @@ import { getStore } from "@/lib/store";
 import { isValidSlug, type EventDoc } from "@/lib/events";
 import { validRegistrationOptions } from "@/lib/event-registration";
 import { validRegistrationPage } from "@/lib/registration-page";
+import { isLandingPurpose } from "@/lib/landing-attribution";
 
 export const runtime = "nodejs";
 
@@ -32,6 +33,9 @@ export async function PUT(req: Request, ctx: Ctx) {
       const template = body.content.template;
       if (template !== undefined && template !== "event" && template !== "registration") {
         return NextResponse.json({ ok: false, error: "Хуудасны загвар буруу байна." }, { status: 400 });
+      }
+      if (body.content.purpose !== undefined && !isLandingPurpose(body.content.purpose)) {
+        return NextResponse.json({ ok: false, error: "Хуудасны зориулалт буруу байна." }, { status: 400 });
       }
       for (const key of ["apartmentTypes", "areaRanges"]) {
         const options = body.content.form?.[key];

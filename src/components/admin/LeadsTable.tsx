@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import type { LeadDoc } from "@/lib/store";
 import type { EventDoc } from "@/lib/events";
 import { leadSelections, matchesLeadArea } from "@/lib/event-registration";
+import { attributionSummary } from "@/lib/landing-attribution";
 import { Button } from "./ui";
 
 function fmt(iso: string): string {
@@ -52,10 +53,10 @@ export function LeadsTable({ events }: { events: EventDoc[] }) {
   }, [leads, filter, areaQuery]);
 
   const downloadCsv = () => {
-    const head = ["Бүртгэсэн огноо", "Нэр", "Утас", "И-мэйл", "Сонгосон талбай (м²)", "Орон сууц", "Цаг товлосон өдөр", "Мессеж", "Эвент", "Эх сурвалж"];
+    const head = ["Бүртгэсэн огноо", "Нэр", "Утас", "И-мэйл", "Сонгосон талбай (м²)", "Орон сууц", "Цаг товлосон өдөр", "Мессеж", "Эвент", "Эх сурвалж", "Ирсэн зам"];
     const rows = shown.map((l) =>
       [fmt(l.createdAt), l.name, l.phone, l.email, l.selections.areaRanges, l.selections.apartmentTypes,
-        l.selections.appointmentDate, l.message, l.eventName ?? "", l.source].map(csvCell).join(",")
+        l.selections.appointmentDate, l.message, l.eventName ?? "", l.source, attributionSummary(l.attribution)].map(csvCell).join(",")
     );
     // BOM — Excel кирилл үсгийг зөв уншина.
     const blob = new Blob(["﻿" + [head.map(csvCell).join(","), ...rows].join("\r\n")], {
@@ -128,7 +129,7 @@ export function LeadsTable({ events }: { events: EventDoc[] }) {
 
       {shown.length > 0 && (
         <div className="overflow-x-auto rounded-2xl border border-neutral-200 bg-white shadow-sm">
-          <table className="w-full min-w-[1080px] text-left text-sm">
+          <table className="w-full min-w-[1240px] text-left text-sm">
             <thead className="border-b border-neutral-200 bg-neutral-50 text-xs uppercase tracking-wide text-neutral-500">
               <tr>
                 <th className="px-4 py-3 font-semibold">Нэр / Холбоо барих</th>
@@ -136,6 +137,7 @@ export function LeadsTable({ events }: { events: EventDoc[] }) {
                 <th className="px-4 py-3 font-semibold">Орон сууц</th>
                 <th className="px-4 py-3 font-semibold">Цаг товлосон өдөр</th>
                 <th className="px-4 py-3 font-semibold">Эвент</th>
+                <th className="px-4 py-3 font-semibold">Ирсэн зам</th>
                 <th className="px-4 py-3 font-semibold">Бүртгэсэн огноо</th>
                 <th className="px-4 py-3 font-semibold">Мессеж</th>
               </tr>
@@ -154,6 +156,7 @@ export function LeadsTable({ events }: { events: EventDoc[] }) {
                   <td className="px-4 py-3 text-neutral-600">
                     {l.eventName || <span className="text-neutral-400">Үндсэн сайт</span>}
                   </td>
+                  <td className="max-w-56 break-words px-4 py-3 text-xs text-neutral-600">{attributionSummary(l.attribution) || "—"}</td>
                   <td className="whitespace-nowrap px-4 py-3 text-neutral-500">{fmt(l.createdAt)}</td>
                   <td className="whitespace-pre-line px-4 py-3 text-neutral-500">{l.message || "—"}</td>
                 </tr>

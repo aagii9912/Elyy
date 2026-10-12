@@ -18,9 +18,48 @@ VERTMONHUB_LEADS_SECRET=<shared-secret>
 
 `VERTMONHUB_LEADS_SECRET` нь Vertmonhub-ийн хүлээн авах endpoint-ийн нууцтай
 ижил байна. Elysium сервер `Authorization: Bearer ...` header ашиглан `requestId`,
-`name`, `phone`, `email`, `message`, `source`, `event` талбаруудыг JSON-оор илгээнэ.
+`name`, `phone`, `email`, `message`, `source`, `event`, `attribution` талбаруудыг JSON-оор илгээнэ.
 Төслийн ID-г Elysium сайт илгээхгүй; Vertmonhub сервер Elysium төслийг тогтооно.
 Хариу HTTP 2xx ба `{ "ok": true }` үед л маягт амжилттай болно.
+
+## 0b. Суваг (эвент эсвэл сошиал зар)
+
+Vertmonhub лид бүрд **аль хуудаснаас** (landing page эсвэл үндсэн сайт) болон
+**ямар сувгаар** (эвент, сошиал зар, сошиал пост, вэб) ирснийг харуулна.
+
+- `src/components/LeadAttributionCapture.tsx` зочны линкийн `utm_source`,
+  `utm_medium`, `utm_campaign`, `utm_content`, `utm_term`, `utm_id`, `adset_id`,
+  `ad_id`, `fbclid`, өөр сайтаас шилжсэн бол referrer-ийн **зөвхөн домэйныг**
+  энэ айлчлалын турш `sessionStorage`-д хадгална. Шинэ кампанит линк ирвэл
+  солигдоно. `leadRequestBody` бүх маягтад `attribution`-ыг хавсаргана.
+- `/api/contact` `sanitizeAttribution`-оор allow-list хийж (уртын хязгаар,
+  ID зөвхөн цифр), хуудасны **зориулалт** (`pagePurpose`) ба хаягийг
+  (`pageUrl`, query-гүй) хадгалсан эвентээс нэмнэ. Хүсэлтээс ирсэн
+  зориулалт, нэр, хаягт итгэхгүй.
+- `event_leads.attribution` (jsonb, migration `20261013120000`) нөөцөлнө.
+  Багана нэмэгдээгүй бол хүсэлт attribution-гүй хадгалагдана (лид алдагдахгүй).
+  Google Sheet-ийн багана өөрчлөгдөөгүй.
+- Сувгийг **Vertmonhub ангилна** (нэг дүрэм). Энд зөвхөн түүхий утга.
+
+Админ → хуудас засах → **«Зориулалт ба холбоос»**:
+
+| Зориулалт | Хэзээ |
+|---|---|
+| Эвент | Ярмаг, экспо, нээлттэй өдөрт QR-аар бүртгүүлэх хуудас |
+| Сошиал зар | Facebook/Instagram-ийн төлбөртэй зараас орж ирэх хуудас |
+| Ерөнхий | Олон сувагт ашиглана; суваг зөвхөн линкийн UTM-ээр |
+
+Линкэнд UTM байхгүй үед Vertmonhub сувгийг зориулалтаар тогтооно. Бэлэн линкүүд:
+
+- **Сошиал зар:** Ads Manager → зар → «URL parameters»:
+  `utm_source={{site_source_name}}&utm_medium=paid_social&utm_campaign={{campaign.name}}&utm_content={{ad.name}}&utm_id={{campaign.id}}&adset_id={{adset.id}}&ad_id={{ad.id}}`.
+  Үндсэн сайт руу чиглэсэн зарт ч мөн адил хуулна. `utm_id` нь Vertmonhub-д
+  Meta кампанит ажлын ID болж, `/marketing`-ийн кампанит ажилтай холбогдоно.
+- **Эвентийн QR:** `?utm_source=event&utm_medium=qr&utm_campaign=<slug>` (PNG татна).
+- **Сошиал пост:** `?utm_source=facebook&utm_medium=social&utm_campaign=<slug>`.
+
+`fbclid` ганцаараа зар гэдгийг батлахгүй (Facebook органик постын линкэд ч нэмдэг),
+тиймээс зарын «URL parameters»-ийг заавал тохируулна. Шалгах: `npm run verify:landing-attribution`.
 
 ## 1. Google Sheet бэлтгэх
 

@@ -43,6 +43,13 @@ create table if not exists public.event_leads (
 create index if not exists event_leads_event_idx   on public.event_leads (event_id, created_at desc);
 create index if not exists event_leads_created_idx on public.event_leads (created_at desc);
 
+-- Суваг (UTM, Meta ID, fbclid, referrer-ийн домэйн, хуудасны зориулалт/хаяг).
+-- migration 20261013120000_event_leads_attribution.sql
+alter table public.event_leads add column if not exists attribution jsonb;
+alter table public.event_leads drop constraint if exists event_leads_attribution_object;
+alter table public.event_leads add constraint event_leads_attribution_object
+  check (attribution is null or jsonb_typeof(attribution) = 'object');
+
 alter table public.event_leads enable row level security;
 
 -- ── 1c. site_content хүснэгт (үндсэн сайтын контент) ────────
