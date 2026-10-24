@@ -15,6 +15,7 @@
    ============================================================ */
 
 import { UNIT_PLANS } from "@/lib/unit-plans";
+import STANDS from "./baked-stands.json";
 import { ROOM_HEIGHT } from "./config";
 import type { UnitTypeKey } from "./types";
 
@@ -36,6 +37,10 @@ export type Room = {
 export type Piece = { x: number; y: number; z: number; sx: number; sy: number; sz: number };
 export type Item = Piece & { color: string };
 
+/** Хаалганы нүх. `axis` — хананы чиглэл ("x" — фасадтай зэрэгцээ, `at` нь z),
+    `c` — хананы дагуух төв, `rooms` — холбох өрөөнүүдийн индекс. */
+export type Door = { axis: "x" | "z"; at: number; c: number; w: number; h: number; main: boolean; rooms: number[] };
+
 export type InteriorModel = {
   L: number;
   D: number;
@@ -45,6 +50,7 @@ export type InteriorModel = {
   glass: Piece[];
   frames: Piece[];
   furniture: Item[];
+  doors: Door[];
   /** Гол хаалганы дотор талын цэг — аяллын эхлэл. */
   entry: { x: number; z: number };
 };
@@ -224,6 +230,7 @@ export function buildInterior(type: UnitTypeKey, L: number, D: number): Interior
   const walls: Piece[] = [];
   const glass: Piece[] = [];
   const frames: Piece[] = [];
+  const doors: Door[] = [];
 
   for (const sh of shared) {
     if (sh.mode === "open") continue;
@@ -237,6 +244,7 @@ export function buildInterior(type: UnitTypeKey, L: number, D: number): Interior
     seg(walls, sh.s, c - half, sh.at, 0, H, T_INT);
     seg(walls, c + half, sh.e, sh.at, 0, H, T_INT);
     seg(walls, c - half, c + half, sh.at, DOOR_H, H, T_INT);
+    doors.push({ axis: sh.axis, at: sh.at, c, w: half * 2, h: DOOR_H, main: false, rooms: [sh.a, sh.b] });
   }
 
   /* ---- Гадна хана ---- */
@@ -274,6 +282,7 @@ export function buildInterior(type: UnitTypeKey, L: number, D: number): Interior
   hSeg(walls, -T_EXT, ec - 0.5, zb, 0, H, T_EXT);
   hSeg(walls, ec + 0.5, L + T_EXT, zb, 0, H, T_EXT);
   hSeg(walls, ec - 0.5, ec + 0.5, zb, DOOR_H + 0.1, H, T_EXT);
+  doors.push({ axis: "x", at: zb, c: ec, w: 1, h: DOOR_H + 0.1, main: true, rooms: entryRoom ? [entryRoom.index] : [] });
 
   /* Хажуу хана (хөрш айл, эсвэл гадна тал). */
   vSeg(walls, -T_EXT, D + T_EXT, -T_EXT / 2, 0, H, T_EXT);
@@ -307,6 +316,7 @@ export function buildInterior(type: UnitTypeKey, L: number, D: number): Interior
     glass,
     frames,
     furniture: rooms.flatMap(furnish),
+    doors,
     entry: { x: ec, z: D - 0.9 },
   };
 }
@@ -314,6 +324,26 @@ export function buildInterior(type: UnitTypeKey, L: number, D: number): Interior
 /** Аялал өрөө заагаагүй үед зочны өрөөнөөс эхэлнэ. */
 export function defaultTourRoom(model: InteriorModel): number | null {
   return model.rooms.find((r) => r.kind === "living")?.index ?? null;
+}
+
+/* Bake хийсэн интерьерийн (scripts/interiors/build.py) тавилгагүй «зогсох
+   цэг» — аяллын камер ор, буйдан дээр «зогсохгүй»; `look` — өрөөний
+   тавилгын төв (ор, угаалтуур, гал тогоо) рүү харна. Байхгүй бол өрөөний төв. */
+type Stands = { rooms: Record<string, number[]>; start: number[] | null };
+const STAND = STANDS as Record<string, Stands>;
+
+export type Stand = { x: number; z: number; look?: { x: number; z: number } };
+
+export function standPoint(type: UnitTypeKey, room: Room): Stand {
+  const p = STAND[type]?.rooms[String(room.index)];
+  if (!p) return { x: (room.x0 + room.x1) / 2, z: (room.z0 + room.z1) / 2 };
+  return p.length >= 4 ? { x: p[0], z: p[1], look: { x: p[2], z: p[3] } } : { x: p[0], z: p[1] };
+}
+
+/** Аяллын эхлэл (зочны өрөөний ар хэсэг) — bake хийсэн загварт. */
+export function tourStartPoint(type: UnitTypeKey): { x: number; z: number } | null {
+  const p = STAND[type]?.start;
+  return p ? { x: p[0], z: p[1] } : null;
 }
 
 /* ============================================================

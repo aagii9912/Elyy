@@ -26,6 +26,10 @@
 .DS_Store
 *.pem
 
+# Blender интерьерийн завсрын файл (текстур, EXR, .blend) — scripts/interiors
+/scripts/interiors/.cache/
+__pycache__/
+
 # admin (local dev store — Supabase-гүй үед)
 /.data
 /public/uploads

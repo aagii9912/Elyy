@@ -1,22 +1,33 @@
 "use client";
 
 /* Айлын интерьер — dollhouse (айлын түвшин) ба дотор нь алхах (аялал).
-   MOCKUP: өрөө, хана, тавилгыг `lib/explore/interior.ts` процедураар
-   үүсгэнэ. Бодит интерьер 3D файлаас ирэхэд энэ бүрэлдэхүүн тэр
-   загварыг ачаалж, өрөө тус бүрийн шалыг ижил аргаар сонгоно.
+   Айл/аяллын түвшинд Blender-ээр bake хийсэн загвар (`baked.ts`,
+   scripts/interiors) ачаална; ачаалах хооронд, мөн давхрын төлөвлөлтөд
+   `lib/explore/interior.ts`-ийн процедур хувилбар харагдана. Өрөө сонгох,
+   алхах нь хоёуланд нь процедур шалаар (үл үзэгдэх давхарга) явна.
 
    Аялал: шалан дээр дарж алхана, чирж эргэнэ (мэдрэгч дэлгэц ч мөн),
    гар дээр ↑↓ / W S — урагш хойш, ← → / A D — эргэх. */
 
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { Component, Suspense, use, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useFrame, useThree, type ThreeEvent } from "@react-three/fiber";
 import { Color, Group, InstancedMesh, Object3D, Vector3 } from "three";
 import type { CameraControlsImpl } from "@react-three/drei";
 import { ROOM_HEIGHT, STATUS_META, TOWER_ROTATION, towerOf } from "@/lib/explore/config";
-import { FLOOR_COLOR, buildInterior, defaultTourRoom, type InteriorModel, type Item, type Piece } from "@/lib/explore/interior";
+import {
+  FLOOR_COLOR,
+  buildInterior,
+  defaultTourRoom,
+  standPoint,
+  type InteriorModel,
+  type Item,
+  type Piece,
+} from "@/lib/explore/interior";
 import { frameToWorld, unitPlacement, worldToFrame, type UnitPlacement } from "@/lib/explore/placement";
 import { unitsOn } from "@/lib/explore/units";
+import type { UnitTypeKey } from "@/lib/explore/types";
 import { useExplore, useExploreApi, useNavigate } from "../store";
+import { loadBakedInterior } from "./baked";
 import { EYE } from "./CameraRig";
 
 const tmp = new Object3D();
@@ -107,24 +118,73 @@ function Interior({ unitId, tour, plan = false }: { unitId: string; tour: boolea
   if (!placement || !model) return null;
   const t = towerOf(placement.unit.block);
   const f = placement.frame;
+  const procedural = <Procedural model={model} tour={tour} floors={!plan} />;
   return (
     <group position={[t.x, 0, t.z]} rotation-y={TOWER_ROTATION}>
       <group position={[f.ox, placement.floorY, f.oz]} rotation-y={f.rotY}>
-        <Floors model={model} placement={placement} tour={tour} plan={plan} />
-        <Pieces items={model.walls} color="#f3f0ea" />
-        <Pieces items={model.caps} color="#2f3433" cast={false} />
-        <Pieces items={model.frames} color="#3a3f3e" />
-        <Pieces items={model.glass} color="#d4e6ec" opacity={0.22} />
-        <Furniture items={model.furniture} />
-        {tour && (
-          <mesh position={[model.L / 2, ROOM_HEIGHT - 0.01, model.D / 2]} rotation-x={Math.PI / 2}>
-            <planeGeometry args={[model.L + 0.5, model.D + 0.5]} />
-            <meshStandardMaterial color="#fbfaf7" roughness={1} />
-          </mesh>
+        <Floors model={model} placement={placement} tour={tour} plan={plan} ghost={!plan} />
+        {plan ? (
+          procedural
+        ) : (
+          <BakedBoundary fallback={procedural}>
+            <Suspense fallback={procedural}>
+              <Baked type={placement.unit.type} tour={tour} />
+            </Suspense>
+          </BakedBoundary>
         )}
       </group>
       {tour && <TourControls model={model} placement={placement} />}
     </group>
+  );
+}
+
+/** Blender-ийн загвар (лайтмаптай). */
+function Baked({ type, tour }: { type: UnitTypeKey; tour: boolean }) {
+  const baked = use(loadBakedInterior(type));
+  return (
+    <>
+      {baked.room.map((o) => (
+        <primitive key={o.uuid} object={o} />
+      ))}
+      {tour && baked.ceiling.map((o) => <primitive key={o.uuid} object={o} />)}
+    </>
+  );
+}
+
+/** Загвар ачаалагдахгүй бол (файл алга, сүлжээ) процедур хувилбар. */
+class BakedBoundary extends Component<{ fallback: ReactNode; children: ReactNode }, { failed: boolean }> {
+  state = { failed: false };
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+  render() {
+    return this.state.failed ? this.props.fallback : this.props.children;
+  }
+}
+
+/** Процедур интерьер — давхрын төлөвлөлт, ачаалах үеийн орлуулга. */
+function Procedural({ model, tour, floors }: { model: InteriorModel; tour: boolean; floors: boolean }) {
+  return (
+    <>
+      {floors &&
+        model.rooms.map((r) => (
+          <mesh key={r.index} position={[(r.x0 + r.x1) / 2, 0.02, (r.z0 + r.z1) / 2]} receiveShadow>
+            <boxGeometry args={[r.x1 - r.x0, 0.04, r.z1 - r.z0]} />
+            <meshStandardMaterial color={FLOOR_COLOR[r.kind]} roughness={0.75} />
+          </mesh>
+        ))}
+      <Pieces items={model.walls} color="#f3f0ea" />
+      <Pieces items={model.caps} color="#2f3433" cast={false} />
+      <Pieces items={model.frames} color="#3a3f3e" />
+      <Pieces items={model.glass} color="#d4e6ec" opacity={0.22} />
+      <Furniture items={model.furniture} />
+      {tour && (
+        <mesh position={[model.L / 2, ROOM_HEIGHT - 0.01, model.D / 2]} rotation-x={Math.PI / 2}>
+          <planeGeometry args={[model.L + 0.5, model.D + 0.5]} />
+          <meshStandardMaterial color="#fbfaf7" roughness={1} />
+        </mesh>
+      )}
+    </>
   );
 }
 
@@ -133,11 +193,14 @@ function Floors({
   placement,
   tour,
   plan,
+  ghost,
 }: {
   model: InteriorModel;
   placement: UnitPlacement;
   tour: boolean;
   plan: boolean;
+  /** Загварын дээрх үл үзэгдэх сонголтын давхарга (идэвхтэй өрөөг тодруулна). */
+  ghost: boolean;
 }) {
   const api = useExploreApi();
   const navigate = useNavigate();
@@ -150,6 +213,12 @@ function Floors({
   const [hot, setHot] = useState<number | null>(null);
   const pointerType = useRef("mouse");
   const controls = useThree((s) => s.controls) as CameraControlsImpl | null;
+  const type = placement.unit.type;
+
+  /* Давхрын төлөвлөлтөөс айл сонгоход загварыг урьдчилан татна. */
+  useEffect(() => {
+    if (plan && picked) loadBakedInterior(type).catch(() => {});
+  }, [plan, picked, type]);
 
   const moveTo = (wx: number, wz: number) => {
     if (!controls) return;
@@ -215,20 +284,30 @@ function Floors({
             }}
           >
             <boxGeometry args={[r.x1 - r.x0, 0.04, r.z1 - r.z0]} />
-            <meshStandardMaterial color={color} roughness={0.75} />
+            {ghost ? (
+              <meshBasicMaterial color="#ffffff" transparent opacity={active && !tour ? 0.22 : 0} depthWrite={false} />
+            ) : (
+              <meshStandardMaterial color={color} roughness={0.75} />
+            )}
           </mesh>
         );
       })}
-      {tour && <Rings model={model} onPick={(x, z) => {
-        const w = frameToWorld(placement, x, z);
-        moveTo(w.x, w.z);
-      }} />}
+      {tour && (
+        <Rings
+          model={model}
+          type={type}
+          onPick={(x, z) => {
+            const w = frameToWorld(placement, x, z);
+            moveTo(w.x, w.z);
+          }}
+        />
+      )}
     </>
   );
 }
 
-/** Өрөө бүрийн төвд гэрэлтэх цагираг — дарахад тийш «алхана». */
-function Rings({ model, onPick }: { model: InteriorModel; onPick: (x: number, z: number) => void }) {
+/** Өрөө бүрийн зогсох цэгт (тавилгагүй) гэрэлтэх цагираг — дарахад тийш «алхана». */
+function Rings({ model, type, onPick }: { model: InteriorModel; type: UnitTypeKey; onPick: (x: number, z: number) => void }) {
   const tourRoom = useExplore((s) => s.tourRoom) ?? defaultTourRoom(model);
   const group = useRef<Group>(null);
   useFrame(({ clock }) => {
@@ -241,21 +320,24 @@ function Rings({ model, onPick }: { model: InteriorModel; onPick: (x: number, z:
     <group ref={group}>
       {model.rooms
         .filter((r) => r.index !== tourRoom && (r.x1 - r.x0) > 0.9 && (r.z1 - r.z0) > 0.9)
-        .map((r) => (
-          <mesh
-            key={r.index}
-            position={[(r.x0 + r.x1) / 2, 0.06, (r.z0 + r.z1) / 2]}
-            rotation-x={-Math.PI / 2}
-            onClick={(e) => {
-              if (e.delta > 6) return;
-              e.stopPropagation();
-              onPick((r.x0 + r.x1) / 2, (r.z0 + r.z1) / 2);
-            }}
-          >
-            <ringGeometry args={[0.26, 0.4, 32]} />
-            <meshBasicMaterial color="#c5d996" transparent opacity={0.9} depthWrite={false} />
-          </mesh>
-        ))}
+        .map((r) => {
+          const p = standPoint(type, r);
+          return (
+            <mesh
+              key={r.index}
+              position={[p.x, 0.06, p.z]}
+              rotation-x={-Math.PI / 2}
+              onClick={(e) => {
+                if (e.delta > 6) return;
+                e.stopPropagation();
+                onPick(p.x, p.z);
+              }}
+            >
+              <ringGeometry args={[0.26, 0.4, 32]} />
+              <meshBasicMaterial color="#c5d996" transparent opacity={0.9} depthWrite={false} />
+            </mesh>
+          );
+        })}
     </group>
   );
 }

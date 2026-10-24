@@ -94,7 +94,8 @@ export function createExploreStore(init: ExploreInit) {
     parkingBlock: null,
     season: "summer",
     hour: 16,
-    tourRoom: null,
+    /* URL-аар шууд өрөөнд орсон бол самбар тэр өрөөг харуулна. */
+    tourRoom: view.level === "tour" ? (view.room ?? null) : null,
     focusRoom: null,
     lead: null,
     qr: null,

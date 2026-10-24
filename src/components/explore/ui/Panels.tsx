@@ -696,7 +696,7 @@ export function UnitPanel({ view }: { view: Extract<View, { level: "unit" }> }) 
           </Chip>
         ))}
       </div>
-      <MockNote>Интерьер ба тавилга нь mockup — бодит интерьерийг 3D файлаас ачаална. Талбай, өрөөний жагсаалт нь брошурын албан ёсны тоо.</MockNote>
+      <MockNote>Интерьер ба тавилга нь Blender-ээр гэрэлтүүлгийг bake хийсэн mockup (лавлах рендерийн хэв маяг) — бодит 3D файл ирэхэд солигдоно. Талбай, өрөөний жагсаалт нь брошурын албан ёсны тоо.</MockNote>
     </>
   );
 }
@@ -750,7 +750,7 @@ export function TourPanel({ view }: { view: Extract<View, { level: "tour" }> }) 
         </Btn>
         <Btn onClick={() => navigate({ level: "unit", unitId: unit.id })}>Гарах</Btn>
       </div>
-      <MockNote>Mockup интерьер. Бодит 3D файлын интерьер ирэхэд яг ийм аргаар дотор нь алхана (360° зураг хэрэггүй).</MockNote>
+      <MockNote>Mockup интерьер (Blender, bake хийсэн гэрэлтүүлэг). Бодит 3D файлын интерьер ирэхэд яг ийм аргаар дотор нь алхана (360° зураг хэрэггүй).</MockNote>
     </>
   );
 }

@@ -79,11 +79,13 @@ function useHistorySync() {
   useEffect(() => {
     const onPop = () => {
       const { basePath } = api.getState();
+      const view = parseExplorePath(window.location.pathname, basePath);
       api.setState({
-        view: parseExplorePath(window.location.pathname, basePath),
+        view,
         hover: null,
         picked: null,
         focusRoom: null,
+        tourRoom: view.level === "tour" ? (view.room ?? null) : null,
       });
     };
     window.addEventListener("popstate", onPop);

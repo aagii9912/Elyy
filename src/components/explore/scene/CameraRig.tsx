@@ -13,7 +13,7 @@ import { Box3, PerspectiveCamera, Vector3 } from "three";
 import { basementFloorY, floorBase, towerOf } from "@/lib/explore/config";
 import { parkingById } from "@/lib/explore/parking";
 import { frameToWorld, unitPlacement } from "@/lib/explore/placement";
-import { buildInterior } from "@/lib/explore/interior";
+import { buildInterior, standPoint, tourStartPoint } from "@/lib/explore/interior";
 import type { View } from "@/lib/explore/types";
 import { useExplore } from "../store";
 
@@ -137,18 +137,22 @@ export function tourStart(unitId: string, room?: number) {
   const p = unitPlacement(unitId);
   if (!p) return null;
   const model = buildInterior(p.unit.type, p.frame.L, p.frame.D);
+  const type = p.unit.type;
   const r = room !== undefined ? model.rooms[room] : model.rooms.find((x) => x.kind === "living");
+  const stand = r && (r.kind !== "living" || room !== undefined) ? standPoint(type, r) : null;
   const from = r
-    ? { x: (r.x0 + r.x1) / 2, z: r.kind === "living" && room === undefined ? r.z1 - 1 : (r.z0 + r.z1) / 2 }
+    ? (stand ?? tourStartPoint(type) ?? { x: (r.x0 + r.x1) / 2, z: r.z1 - 1 })
     : model.entry;
-  /* Урд бүсийн өрөө — фасад руу, ар бүсийнх — зочны өрөө рүү харна. */
+  /* Тавилгатай өрөө — тавилга руу; бусад: урд бүсийнх фасад руу,
+     ар бүсийнх зочны өрөө рүү харна. */
   const living = model.rooms.find((x) => x.kind === "living");
   const look =
-    r && r.z0 <= 0.01
+    stand?.look ??
+    (r && r.z0 <= 0.01
       ? { x: from.x, z: -1 }
       : living
         ? { x: (living.x0 + living.x1) / 2, z: (living.z0 + living.z1) / 2 }
-        : { x: from.x, z: 0 };
+        : { x: from.x, z: 0 });
   const eye = frameToWorld(p, from.x, from.z);
   const at = frameToWorld(p, look.x, look.z);
   const y = p.floorY + EYE;
