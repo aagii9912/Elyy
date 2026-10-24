@@ -1,13 +1,19 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { usePathname } from "next/navigation";
 import { gsap } from "@/lib/gsap";
 
 export function Cursor() {
   const dot = useRef<HTMLDivElement>(null);
   const ring = useRef<HTMLDivElement>(null);
+  /* 3D Explorer-т (/explore, /kiosk) төрөлх курсор — 3D-г чирэхэд хоцрох
+     дугуй курсор саад болно, заагч нь объект дээр гараа болж солигдоно. */
+  const pathname = usePathname();
+  const off = Boolean(pathname?.startsWith("/explore") || pathname?.startsWith("/kiosk"));
 
   useEffect(() => {
+    if (off) return;
     if (window.matchMedia("(hover: none), (pointer: coarse)").matches) return;
 
     const root = document.documentElement;
@@ -51,7 +57,9 @@ export function Cursor() {
       gsap.ticker.remove(tick);
       root.classList.remove("has-cursor");
     };
-  }, []);
+  }, [off]);
+
+  if (off) return null;
 
   return (
     <>

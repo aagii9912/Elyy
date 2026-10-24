@@ -1,0 +1,221 @@
+/* ============================================================
+   3D Explorer — бүрхүүл ба 3D дээрх шошгууд.
+   UI нь зөвхөн rem-д суурилсан Tailwind класс ашигладаг тул kiosk
+   горимд үндсэн фонтын хэмжээг томруулахад бүхэлдээ жигд томроно.
+   ============================================================ */
+
+html:has(.explore-shell),
+body:has(.explore-shell) {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+html.explore-kiosk-root {
+  font-size: 20px;
+}
+@media (min-width: 2400px) {
+  html.explore-kiosk-root {
+    font-size: 30px;
+  }
+}
+
+.explore-shell {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background: #e9ece5;
+  color: #1b3328;
+  font-family: var(--font-gilroy), ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+.explore-shell.is-kiosk {
+  user-select: none;
+  -webkit-user-select: none;
+}
+.explore-canvas {
+  position: absolute !important;
+  inset: 0;
+}
+.explore-shell canvas {
+  touch-action: none;
+}
+
+/* ---- 3D дээрх шошго ---- */
+.explore-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  white-space: nowrap;
+  padding: 0.4rem 0.7rem;
+  border-radius: 999px;
+  background: rgb(255 254 249 / 0.93);
+  color: #1b3328;
+  font: 600 0.75rem/1 var(--font-gilroy), ui-sans-serif, sans-serif;
+  border: 1px solid rgb(27 51 40 / 0.12);
+  box-shadow: 0 0.4rem 1.2rem -0.5rem rgb(21 23 23 / 0.35);
+  backdrop-filter: blur(6px);
+}
+.explore-tag strong {
+  font-weight: 800;
+}
+.explore-tag span {
+  color: #4f5f54;
+  font-weight: 600;
+}
+.explore-tag--dark {
+  background: rgb(27 51 40 / 0.94);
+  color: #fff;
+  border-color: transparent;
+}
+.explore-tag--dark span {
+  color: rgb(255 255 255 / 0.72);
+}
+.explore-tag--brand {
+  background: #1b3328;
+  color: #c5d996;
+  border-color: transparent;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  padding: 0.55rem 0.95rem;
+}
+.explore-tag--button {
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    background-color 0.2s ease;
+}
+.explore-tag--button:hover,
+.explore-tag--button:focus-visible {
+  transform: translateY(-2px);
+  background: #fff;
+  outline: none;
+}
+.explore-dot {
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 999px;
+  border: 1px solid rgb(27 51 40 / 0.35);
+  flex: none;
+}
+
+.explore-pin {
+  display: grid;
+  place-items: center;
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 999px;
+  background: rgb(197 217 150 / 0.8);
+  color: #1b3328;
+  font: 800 0.85rem/1 var(--font-gilroy), ui-sans-serif, sans-serif;
+  border: 2px solid #fff;
+  box-shadow: 0 0.3rem 0.9rem -0.25rem rgb(21 23 23 / 0.45);
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    background-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+.explore-pin--soft {
+  background: rgb(255 254 249 / 0.94);
+}
+.explore-pin:hover,
+.explore-pin:focus-visible,
+.explore-pin.is-active {
+  background: #c5d996;
+  transform: scale(1.12);
+  outline: none;
+}
+.explore-pin.is-active {
+  box-shadow:
+    0 0 0 0.4rem rgb(197 217 150 / 0.45),
+    0 0.4rem 1.1rem -0.25rem rgb(21 23 23 / 0.45);
+}
+
+.explore-room {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  padding: 0.3rem 0.55rem;
+  border-radius: 0.6rem;
+  background: rgb(255 254 249 / 0.9);
+  color: #1b3328;
+  font: 600 0.68rem/1.15 var(--font-gilroy), ui-sans-serif, sans-serif;
+  text-align: center;
+  white-space: nowrap;
+  box-shadow: 0 0.25rem 0.8rem -0.4rem rgb(0 0 0 / 0.35);
+}
+.explore-room strong {
+  font-weight: 800;
+  font-size: 0.75rem;
+}
+
+/* ---- UI ---- */
+.explore-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(27 51 40 / 0.25) transparent;
+}
+.explore-range {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 0.35rem;
+  border-radius: 999px;
+  background: rgb(27 51 40 / 0.12);
+  outline: none;
+}
+.explore-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 999px;
+  background: #1b3328;
+  border: 3px solid #c5d996;
+  cursor: pointer;
+}
+.explore-range::-moz-range-thumb {
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 999px;
+  background: #1b3328;
+  border: 3px solid #c5d996;
+  cursor: pointer;
+}
+
+@keyframes explore-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(0.6rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.explore-enter {
+  animation: explore-fade-up 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes explore-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  50% {
+    transform: scale(1.08);
+    opacity: 1;
+  }
+}
+.explore-pulse {
+  animation: explore-pulse 2.2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .explore-enter,
+  .explore-pulse {
+    animation: none;
+  }
+}

@@ -32,8 +32,11 @@ function LenisGsapBridge() {
 export function SmoothScroll({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   // Админ (/admin) — native scroll ашиглана (форм-ийн UX, sticky toolbar
-  // тогтвортой). Бусад бүх маркетингийн хуудсанд Lenis smooth scroll.
-  if (pathname?.startsWith("/admin")) return <>{children}</>;
+  // тогтвортой). 3D Explorer (/explore, /kiosk) — бүтэн дэлгэцийн canvas,
+  // гүйлтгүй. Бусад бүх маркетингийн хуудсанд Lenis smooth scroll.
+  if (pathname?.startsWith("/admin") || pathname?.startsWith("/explore") || pathname?.startsWith("/kiosk")) {
+    return <>{children}</>;
+  }
 
   /* lerp 0.1 нь дугуй мэдрэмжтэй ч гүйлт хурдан “зогсдог”. 0.075 болгож,
      дугуйн алхмыг бага зэрэг зөөлрүүлснээр урт scroll-story бүлгүүд
