@@ -49,6 +49,10 @@ export const STREETS: { x0: number; x1: number; z0: number; z1: number }[] = [
   { x0: 116, x1: 128, z0: -400, z1: 400 },
 ];
 
+/** Бодит хотын загвартай үед зөвхөн хотхоны урд талын (зоорийн рамптай)
+ *  гудамж үлдэнэ — бусдыг OSM-ийн бодит зам орлоно. */
+export const FRONTAGE = { x0: -118, x1: 118, z0: -82, z1: -70 };
+
 export type Amenity = {
   id: string;
   title: string;

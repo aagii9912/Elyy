@@ -16,6 +16,7 @@ import {
   blockLabel,
   floorLabel,
 } from "@/lib/explore/config";
+import { LOCATION_SOURCE } from "@/lib/explore/location";
 import { parentView } from "@/lib/explore/routes";
 import { ALL_UNITS, parseUnitId } from "@/lib/explore/units";
 import type { View } from "@/lib/explore/types";
@@ -34,6 +35,7 @@ export function Overlay() {
       <TopBar />
       <SidePanel />
       <FloorRail />
+      <MapCredit />
       <Legend />
       <CompareTray />
       <Sheets />
@@ -272,6 +274,18 @@ function FloorRail() {
         );
       })}
     </nav>
+  );
+}
+
+/* ---------------- Газрын зургийн эх сурвалж (ODbL) ---------------- */
+
+function MapCredit() {
+  const level = useExplore((s) => s.view.level);
+  if (level === "tour") return null;
+  return (
+    <p className="pointer-events-none absolute bottom-1.5 left-3 text-[0.625rem] font-semibold text-night/50">
+      {LOCATION_SOURCE}
+    </p>
   );
 }
 

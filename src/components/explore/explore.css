@@ -59,6 +59,24 @@ html.explore-kiosk-root {
 .explore-tag strong {
   font-weight: 800;
 }
+/* Байршлын түвшний гудамж, голын нэр (Google Maps шиг). */
+.explore-street {
+  display: inline-block;
+  white-space: nowrap;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #5f6461;
+  text-shadow:
+    0 0 3px #fff,
+    0 0 3px #fff,
+    0 0 6px #fff;
+  pointer-events: none;
+}
+.explore-street--water {
+  color: #3d7ab3;
+  font-style: italic;
+}
 .explore-tag span {
   color: #4f5f54;
   font-weight: 600;

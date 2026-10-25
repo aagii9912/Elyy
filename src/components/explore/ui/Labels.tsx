@@ -23,6 +23,7 @@ import { BASEMENT_CORES, parkingById } from "@/lib/explore/parking";
 import { frameToWorld, unitPlacement } from "@/lib/explore/placement";
 import { slotOf, unitsOn, UNIT_TYPES, ALL_UNITS } from "@/lib/explore/units";
 import { toLocalRect } from "@/lib/explore/plates";
+import { STREET_LABELS } from "@/lib/explore/location";
 import { placePois } from "@/lib/explore/pois";
 import { AMENITIES } from "@/lib/explore/site";
 import type { View } from "@/lib/explore/types";
@@ -99,9 +100,14 @@ function LocationLabels() {
   const pois = useMemo(() => placePois(pins), [pins]);
   return (
     <>
-      <Anchor id="brand" x={0} y={ROOF_Y + 46} z={-35}>
+      <Anchor id="brand" x={0} y={ROOF_Y + 120} z={-35}>
         <div className="explore-tag explore-tag--brand">Elysium Residence</div>
       </Anchor>
+      {STREET_LABELS.map((l, i) => (
+        <Anchor key={l.name} id={`street-${i}`} x={l.x} y={4} z={l.z}>
+          <span className={cn("explore-street", l.kind === "water" && "explore-street--water")}>{l.name}</span>
+        </Anchor>
+      ))}
       {pois.map((p) => (
         <Anchor key={p.index} id={`poi-${p.index}`} x={p.wx} y={66} z={p.wz} interactive>
           <button

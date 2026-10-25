@@ -63,6 +63,8 @@ export type ExploreState = {
   sheetOpen: boolean;
   /** Самбарын хэмжээ (px) — камерын төвийг харагдах хэсэг рүү шилжүүлнэ. */
   panel: { w: number; h: number; desktop: boolean };
+  /** Бодит хотын загвар ачаалагдсан эсэх (процедур гудамж, хөршийг нууна). */
+  cityReady: boolean;
   /** 3D шошгоны бэхэлгээ: DOM элемент + дэлхийн байрлал. `LabelProjector`
    *  кадр бүрд байрлалыг нь шинэчилнэ (реактив биш). */
   anchors: Map<string, Anchor>;
@@ -105,6 +107,7 @@ export function createExploreStore(init: ExploreInit) {
     attract: false,
     sheetOpen: false,
     panel: { w: 0, h: 0, desktop: true },
+    cityReady: false,
     anchors: new Map(),
   }));
 }

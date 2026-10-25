@@ -10,6 +10,7 @@ import { BASEMENT_HEIGHT, PALETTE } from "@/lib/explore/config";
 import { BASEMENT_BOUNDS, STREET_RAMPS } from "@/lib/explore/parking";
 import {
   DECK,
+  FRONTAGE,
   KINDERGARTEN,
   LAWNS,
   NEIGHBORS,
@@ -49,6 +50,7 @@ const OFFSET = { polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnit
 
 export function SiteLandscape() {
   const level = useExplore((s) => s.view.level);
+  const cityReady = useExplore((s) => s.cityReady);
   const xray = level === "basement";
 
   const lawnGeo = useMemo(() => new ShapeGeometry(LAWNS.map(roundRect), 6), []);
@@ -98,8 +100,8 @@ export function SiteLandscape() {
         <meshStandardMaterial color={PALETTE.paving} roughness={0.95} />
       </mesh>
 
-      {/* Гудамж */}
-      {STREETS.map((s, i) => (
+      {/* Гудамж (бодит хот ачаалагдсан бол зөвхөн хотхоны урд гудамж) */}
+      {(cityReady ? [FRONTAGE] : STREETS).map((s, i) => (
         <mesh key={i} position={[(s.x0 + s.x1) / 2, 0.07, (s.z0 + s.z1) / 2]} receiveShadow>
           <boxGeometry args={[s.x1 - s.x0, 0.14, s.z1 - s.z0]} />
           <meshStandardMaterial color={PALETTE.asphalt} roughness={1} {...OFFSET} />
@@ -185,8 +187,8 @@ export function SiteLandscape() {
         </mesh>
       </group>
 
-      {/* Хөрш барилгууд */}
-      {NEIGHBORS.map((n, i) => (
+      {/* Хөрш барилгууд (бодит хот ачаалагдсан бол OSM-ийн барилга) */}
+      {!cityReady && NEIGHBORS.map((n, i) => (
         <mesh key={i} position={[n.x, n.h / 2, n.z]} castShadow receiveShadow>
           <boxGeometry args={[n.w, n.h, n.d]} />
           <meshStandardMaterial color="#f5f4ef" roughness={0.95} transparent={xray} opacity={xray ? 0.25 : 1} />

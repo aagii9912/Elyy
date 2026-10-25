@@ -1,14 +1,16 @@
 "use client";
 
-/* Хотын орчин — «цагаан шавар» массив (instancing, нэг draw call),
-   гудамж, цэцэрлэгт хүрээлэн, Туул гол, уулс. Текстургүй тул маш
-   хөнгөн; бодит хотын загварыг студиэс авмагц энийг солино. */
+/* Хотын орчин — бодит хот (OpenStreetMap / Overture: барилга, зам, гол,
+   цэцэрлэг — `realCity.ts`), алсын уулс. Загвар ачаалагдаагүй (алдаа)
+   үед процедур «цагаан шавар» хот (instancing) орлоно. */
 
-import { useLayoutEffect, useMemo, useRef } from "react";
+import { Component, Suspense, use, useEffect, useLayoutEffect, useMemo, useRef, type ReactNode } from "react";
 import { BufferGeometry, Color, Float32BufferAttribute, InstancedMesh, Object3D, Path, Shape, ShapeGeometry } from "three";
 import { MOUNTAINS, PARK, buildCity, buildParkTrees, buildRoads, riverPoints } from "@/lib/explore/city";
 import { PALETTE } from "@/lib/explore/config";
 import { GROUND_OPENING } from "@/lib/explore/parking";
+import { useExploreApi } from "../store";
+import { loadRealCity } from "./realCity";
 
 const tmp = new Object3D();
 const CITY_A = new Color("#f7f6f1");
@@ -80,11 +82,61 @@ function groundGeometry() {
 }
 
 export function City() {
+  const ground = useMemo(() => groundGeometry(), []);
+  return (
+    <group>
+      <mesh geometry={ground} rotation-x={-Math.PI / 2} receiveShadow>
+        <meshStandardMaterial color={PALETTE.ground} roughness={1} />
+      </mesh>
+      <CityBoundary fallback={<ProceduralCity />}>
+        <Suspense fallback={null}>
+          <RealCity />
+        </Suspense>
+      </CityBoundary>
+      {/* Богд уулын силуэт — манан дунд */}
+      {MOUNTAINS.map((m, i) => (
+        <mesh key={i} position={[m.x, m.h / 2 - 20, m.z]}>
+          <coneGeometry args={[m.r, m.h, 7]} />
+          <meshStandardMaterial color={PALETTE.mountain} roughness={1} flatShading />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+
+function RealCity() {
+  const nodes = use(loadRealCity());
+  const api = useExploreApi();
+  /* Хотхоны процедур гудамж, хөрш барилгыг бодит өгөгдөл орлоно. */
+  useEffect(() => {
+    api.setState({ cityReady: true });
+    return () => api.setState({ cityReady: false });
+  }, [api]);
+  return (
+    <>
+      {nodes.map((o) => (
+        <primitive key={o.uuid} object={o} />
+      ))}
+    </>
+  );
+}
+
+class CityBoundary extends Component<{ fallback: ReactNode; children: ReactNode }, { failed: boolean }> {
+  state = { failed: false };
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+  render() {
+    return this.state.failed ? this.props.fallback : this.props.children;
+  }
+}
+
+/** Процедур «цагаан шавар» хот — бодит загвар ачаалагдаагүй үед. */
+function ProceduralCity() {
   const buildings = useMemo(() => buildCity(), []);
   const roads = useMemo(() => buildRoads(), []);
   const trees = useMemo(() => buildParkTrees(), []);
   const river = useMemo(() => riverGeometry(70), []);
-  const ground = useMemo(() => groundGeometry(), []);
 
   const bRef = useRef<InstancedMesh>(null);
   const rRef = useRef<InstancedMesh>(null);
@@ -110,10 +162,6 @@ export function City() {
 
   return (
     <group>
-      <mesh geometry={ground} rotation-x={-Math.PI / 2} receiveShadow>
-        <meshStandardMaterial color={PALETTE.ground} roughness={1} />
-      </mesh>
-
       <instancedMesh ref={rRef} args={[undefined, undefined, roads.length]} receiveShadow>
         <boxGeometry />
         <meshStandardMaterial color={PALETTE.road} roughness={1} polygonOffset polygonOffsetFactor={-1} polygonOffsetUnits={-1} />
@@ -138,14 +186,6 @@ export function City() {
       <mesh geometry={river} position-y={0.1}>
         <meshStandardMaterial color={PALETTE.water} roughness={0.35} polygonOffset polygonOffsetFactor={-2} polygonOffsetUnits={-2} />
       </mesh>
-
-      {/* Богд уулын силуэт — манан дунд */}
-      {MOUNTAINS.map((m, i) => (
-        <mesh key={i} position={[m.x, m.h / 2 - 20, m.z]}>
-          <coneGeometry args={[m.r, m.h, 7]} />
-          <meshStandardMaterial color={PALETTE.mountain} roughness={1} flatShading />
-        </mesh>
-      ))}
     </group>
   );
 }

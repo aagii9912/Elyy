@@ -2,13 +2,13 @@
    Ойролцоох байршлууд — сайтын «Байршил» хэсгийн цэгүүд (админаас
    засагддаг) 3D дээр.
 
-   Цэгүүдийн бодит координат одоогоор байхгүй тул агаарын рендер
-   (`location.mapImage`) дээрх хувиар байрлалаас нь ойролцоо газрын
-   байрлалыг тооцоолно: рендерийн камер хойд зүг рүү ~35° налуу харж
-   байна гэж үзээд перспективыг буцааж задална. Координат орж ирэхэд
-   (admin → POI) энэ тооцоог шууд lat/lng-ээр солино.
+   Нэр нь бодит газрын зураг дээр (OSM / Overture, `location.ts`) олдсон
+   цэг яг байрлалаараа; бусдыг агаарын рендер (`location.mapImage`) дээрх
+   хувиар байрлалаас ойролцоогоор тооцоолно: рендерийн камер хойд зүг рүү
+   ~35° налуу харж байна гэж үзээд перспективыг буцааж задална.
    ============================================================ */
 
+import { realPoi } from "./location";
 import type { ExplorePoi } from "./types";
 
 const DEG = Math.PI / 180;
@@ -31,6 +31,9 @@ export type PoiPlacement = ExplorePoi & { index: number; wx: number; wz: number;
 
 export function placePois(pins: ExplorePoi[]): PoiPlacement[] {
   return pins.map((p, index) => {
+    /* Бодит газрын зураг дээр нэрээр нь олдсон бол яг байрлал (OSM). */
+    const real = realPoi(p.place);
+    if (real) return { ...p, index, wx: real.x, wz: real.z, meters: Math.hypot(real.x, real.z) };
     const g = ground(p.x, p.y);
     const wx = g.lat - REF.lat;
     const wz = REF.d - g.d;
