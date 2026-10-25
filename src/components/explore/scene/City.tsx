@@ -8,6 +8,7 @@ import { Component, Suspense, use, useEffect, useLayoutEffect, useMemo, useRef, 
 import { BufferGeometry, Color, Float32BufferAttribute, InstancedMesh, Object3D, Path, Shape, ShapeGeometry } from "three";
 import { MOUNTAINS, PARK, buildCity, buildParkTrees, buildRoads, riverPoints } from "@/lib/explore/city";
 import { PALETTE } from "@/lib/explore/config";
+import { SITE_ROTATION } from "@/lib/explore/location";
 import { GROUND_OPENING } from "@/lib/explore/parking";
 import { useExploreApi } from "../store";
 import { loadRealCity } from "./realCity";
@@ -93,13 +94,15 @@ export function City() {
           <RealCity />
         </Suspense>
       </CityBoundary>
-      {/* Богд уулын силуэт — манан дунд */}
-      {MOUNTAINS.map((m, i) => (
-        <mesh key={i} position={[m.x, m.h / 2 - 20, m.z]}>
-          <coneGeometry args={[m.r, m.h, 7]} />
-          <meshStandardMaterial color={PALETTE.mountain} roughness={1} flatShading />
-        </mesh>
-      ))}
+      {/* Богд уулын силуэт — манан дунд (жинхэнэ урд зүгт) */}
+      <group rotation-y={SITE_ROTATION}>
+        {MOUNTAINS.map((m, i) => (
+          <mesh key={i} position={[m.x, m.h / 2 - 20, m.z]}>
+            <coneGeometry args={[m.r, m.h, 7]} />
+            <meshStandardMaterial color={PALETTE.mountain} roughness={1} flatShading />
+          </mesh>
+        ))}
+      </group>
     </group>
   );
 }

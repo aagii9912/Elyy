@@ -5,12 +5,11 @@
    Зоорийн түвшинд тавцан тунгалаг болж доорх B1/B2 харагдана. */
 
 import { useLayoutEffect, useMemo, useRef } from "react";
-import { InstancedMesh, Object3D, Shape, ShapeGeometry } from "three";
+import { ExtrudeGeometry, InstancedMesh, Object3D, Shape, ShapeGeometry } from "three";
 import { BASEMENT_HEIGHT, PALETTE } from "@/lib/explore/config";
 import { BASEMENT_BOUNDS, STREET_RAMPS } from "@/lib/explore/parking";
 import {
   DECK,
-  FRONTAGE,
   KINDERGARTEN,
   LAWNS,
   NEIGHBORS,
@@ -43,8 +42,26 @@ function roundRect(r: RoundRect) {
   return s;
 }
 
-/** Тавцангийн зоорийн дээрх хэсгийн өмнөд хил. */
+/** Тавцангийн зоорийн дээрх хэсгийн урд хил. */
 const DECK_SPLIT = BASEMENT_BOUNDS.z1;
+
+/** Тавцангийн зоорийн дээрх хэсэг — ар захаас рампуудын ховилтой
+ *  (Shape нь XY-д: y = −z), 0.4 м зузаан. */
+function deckBackGeometry() {
+  const s = new Shape();
+  s.moveTo(DECK.x0, -DECK.z0);
+  for (const r of [...STREET_RAMPS].sort((a, b) => a.x0 - b.x0)) {
+    s.lineTo(r.x0, -DECK.z0);
+    s.lineTo(r.x0, -r.z1);
+    s.lineTo(r.x1, -r.z1);
+    s.lineTo(r.x1, -DECK.z0);
+  }
+  s.lineTo(DECK.x1, -DECK.z0);
+  s.lineTo(DECK.x1, -DECK_SPLIT);
+  s.lineTo(DECK.x0, -DECK_SPLIT);
+  s.closePath();
+  return new ExtrudeGeometry(s, { depth: 0.4, bevelEnabled: false });
+}
 
 const OFFSET = { polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 } as const;
 
@@ -53,6 +70,7 @@ export function SiteLandscape() {
   const cityReady = useExplore((s) => s.cityReady);
   const xray = level === "basement";
 
+  const deckBackGeo = useMemo(() => deckBackGeometry(), []);
   const lawnGeo = useMemo(() => new ShapeGeometry(LAWNS.map(roundRect), 6), []);
   const promenadeGeo = useMemo(() => new ShapeGeometry(roundRect(PROMENADE), 4), []);
   const trees = useMemo(() => siteTrees(), []);
@@ -85,8 +103,7 @@ export function SiteLandscape() {
   return (
     <group>
       {/* Подиумын тавцан — зоорийн дээрх хэсэг нь зоорийн түвшинд тунгалаг */}
-      <mesh position={[0, -0.2, (DECK.z0 + DECK_SPLIT) / 2]} receiveShadow>
-        <boxGeometry args={[deckW, 0.4, DECK_SPLIT - DECK.z0]} />
+      <mesh geometry={deckBackGeo} rotation-x={-Math.PI / 2} position-y={-0.4} receiveShadow>
         <meshStandardMaterial
           color={PALETTE.paving}
           roughness={0.95}
@@ -100,15 +117,15 @@ export function SiteLandscape() {
         <meshStandardMaterial color={PALETTE.paving} roughness={0.95} />
       </mesh>
 
-      {/* Гудамж (бодит хот ачаалагдсан бол зөвхөн хотхоны урд гудамж) */}
-      {(cityReady ? [FRONTAGE] : STREETS).map((s, i) => (
+      {/* Гудамж — бодит хот ачаалагдсан бол OSM-ийн бодит зам */}
+      {!cityReady && STREETS.map((s, i) => (
         <mesh key={i} position={[(s.x0 + s.x1) / 2, 0.07, (s.z0 + s.z1) / 2]} receiveShadow>
           <boxGeometry args={[s.x1 - s.x0, 0.14, s.z1 - s.z0]} />
           <meshStandardMaterial color={PALETTE.asphalt} roughness={1} {...OFFSET} />
         </mesh>
       ))}
 
-      {/* Зоорийн рамп — гудамжнаас B1 рүү (газрын нүхээр харагдана) */}
+      {/* Зоорийн рамп — ар талын гудамжнаас B1 рүү (тавцангийн ховилоор) */}
       {STREET_RAMPS.map((r, i) => {
         const len = r.z1 - r.z0;
         const w = r.x1 - r.x0;
@@ -172,7 +189,7 @@ export function SiteLandscape() {
           <meshStandardMaterial color={PALETTE.trunk} roughness={1} />
         </instancedMesh>
 
-        {/* Цэцэрлэгийн барилга (хотхоны баруун урд булан) */}
+        {/* Цэцэрлэгийн барилга (хотхоны −x урд булан) */}
         <mesh
           position={[
             (KINDERGARTEN.x0 + KINDERGARTEN.x1) / 2,

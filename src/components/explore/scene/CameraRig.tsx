@@ -40,22 +40,28 @@ const EXTERIOR = new Set(["location", "site", "basement", "block", "floor"]);
 function poseFor(view: View): Pose | null {
   switch (view.level) {
     case "location":
+      /* Байршлын рендер шиг: урд-баруун урдаас хойд-зүүн хойш (жинхэнэ
+         азимут ~24°) — хотын төв ард, баруун талд. */
       return {
-        target: [240, 0, -300],
-        distance: 2300,
-        polar: 52 * DEG,
+        target: [-250, 0, -450],
+        distance: 2500,
+        polar: 60 * DEG,
+        azimuth: 40 * DEG,
         min: 700,
         max: 5200,
         polarRange: [20 * DEG, 74 * DEG],
-        bounds: [-2600, -10, -3000, 2600, 400, 1500],
+        bounds: [-3000, -10, -3400, 3000, 400, 1800],
         near: 4,
         far: 16000,
       };
     case "site":
+      /* Хотхоны рендер шиг хашааны талаас, өндрөөс — урд талын Алтарганын
+         цамхгууд хашааг халхлахгүй. */
       return {
-        target: [0, 14, -14],
-        distance: 330,
-        polar: 60 * DEG,
+        target: [0, 10, -14],
+        distance: 360,
+        polar: 44 * DEG,
+        azimuth: -30 * DEG,
         min: 110,
         max: 950,
         polarRange: [15 * DEG, 84 * DEG],

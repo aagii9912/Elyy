@@ -10,7 +10,8 @@ Overture/OSM өгөгдлөөс (fetch_overture.py → .cache/*.parquet):
   python scripts/location/build_city.py
   → public/models/location/city.glb, src/lib/explore/location-data.json
 
-Координат: x — зүүн, z — урд (м), төв — site-content.ts-ийн coords.
+Координат: хотхоны (explorer-ийн) систем — доорх FRAME_* (м, +x цамхгийн
+эгнээний дагуу, +z хашаа руу); жинхэнэ хойд зүгтэй FRAME_BEARING-ээр зөрнө.
 Лиценз: ODbL — © OpenStreetMap contributors, Overture Maps Foundation.
 """
 
@@ -24,6 +25,7 @@ import zlib
 import mapbox_earcut as earcut
 import numpy as np
 import pyarrow.parquet as pq
+import shapely
 from shapely import wkb
 from shapely.affinity import affine_transform
 from shapely.geometry import Point, box
@@ -41,11 +43,27 @@ MX = 111320.0 * math.cos(math.radians(LAT0))
 MY = 110574.0
 TO_LOCAL = [MX, 0, 0, -MY, -LNG0 * MX, LAT0 * MY]  # (lng, lat) → (x зүүн, z урд)
 
-# Төслийн талбай (explorer-ийн DECK + урд гудамж, site.ts FRONTAGE) — одоо
-# байгаа барилга, замыг хасна.
-SITE = box(-118, -86, 118, 66)
+# Хотхоны (explorer-ийн) координат. Төсөл бол Бармашийн талбай — ХУД 3-р
+# хороо, Анун төвийн баруун тал (сайтын FAQ), админы coords түүн дээр.
+# Цамхгийн эгнээ талбайн урт тэнхлэгийн дагуу (азимут 154.2°), ар талд нь
+# хоёр эгнээ зам, хашаа нь баруун урагш Алтарганын 44А/Б/В руу (хотхоны
+# рендер). FRAME_BEARING — explorer-ийн −z тэнхлэгийн жинхэнэ азимут (°),
+# FRAME_ORIGIN — explorer-ийн (0, 0) буюу DECK-ийн төв coords-оос (м, x зүүн,
+# z урд). Тооцоо: docs/3D-INTERACTIVE-PLAN.md §M.8.
+FRAME_BEARING = 64.2
+FRAME_ORIGIN = (-35.8, -27.6)
+_C, _S = math.cos(math.radians(FRAME_BEARING)), math.sin(math.radians(FRAME_BEARING))
+TO_SITE = [_C, _S, -_S, _C, -(_C * FRAME_ORIGIN[0] + _S * FRAME_ORIGIN[1]), _S * FRAME_ORIGIN[0] - _C * FRAME_ORIGIN[1]]
+
+# Төслийн талбай (site.ts DECK + 1 м) — доторх одоо байгаа барилга (Бармаш,
+# хойд булангийн барилга г.м.), зам, ногоон бүсийг хасна. Хөрш Алтарганын
+# 44А/Б/В, 67А/Б үлдэнэ.
+SITE = box(-101, -54, 101, 21)
 EXT = META["extent"]
-CLIP = box(-EXT["west"], -EXT["north"], EXT["east"], EXT["south"])
+# Хотын хүрээ — татсан өгөгдлийн (meta extent) тэгш өнцөгт хотхоны
+# координатаар (хойд зүгт зэрэгцсэн тул энд хазгай; хол, манан дунд).
+CLIP = affine_transform(box(-EXT["west"] + 50, -EXT["north"] + 50, EXT["east"] - 50, EXT["south"] - 50), TO_SITE)
+shapely.prepare(CLIP)
 
 
 def load(name):
@@ -53,7 +71,8 @@ def load(name):
 
 
 def local(geom_wkb):
-    return affine_transform(wkb.loads(geom_wkb), TO_LOCAL)
+    """WKB (lng, lat) → хотхоны координат (x, z)."""
+    return affine_transform(affine_transform(wkb.loads(geom_wkb), TO_LOCAL), TO_SITE)
 
 
 def srgb_to_linear(c):
@@ -217,6 +236,8 @@ def buildings(stats):
         if not g.is_valid:
             g = g.buffer(0)
         c = g.centroid
+        if not CLIP.contains(c):
+            continue
         d = math.hypot(c.x, c.y)
         area = g.area
         if g.intersects(SITE) and (g.intersection(SITE).area > 0.4 * area or SITE.contains(c)):
@@ -282,7 +303,7 @@ def roads(stats):
         if r["subtype"] == "rail":
             if d > 6000:
                 continue
-            geom = g.buffer(1.6, cap_style="flat").difference(SITE)
+            geom = g.buffer(1.6, cap_style="flat").difference(SITE).intersection(CLIP)
             flat(bufs["rail"], geom, ys["rail"], srgb_to_linear((190, 190, 196)))
             continue
         if r["subtype"] != "road":
@@ -301,6 +322,8 @@ def roads(stats):
         geom = geom.simplify(0.3 if d < 2000 else 1.0)
         if geom.intersects(SITE):
             geom = geom.difference(SITE)
+        if not CLIP.contains(geom):
+            geom = geom.intersection(CLIP)
         flat(bufs[group], geom, ys[group], srgb_to_linear(col))
         nm = (r["names"] or {}).get("primary") if r["names"] else None
         if nm and r["class"] in ("motorway", "trunk", "primary", "secondary"):
@@ -333,6 +356,8 @@ def nature(stats):
         if not col:
             continue
         g = local(r["geometry"]).buffer(0).intersection(CLIP)
+        if g.intersects(SITE):
+            g = g.difference(SITE)
         flat(cover, g.simplify(4.0), 0.02, srgb_to_linear(col))
     for r in load("land_use"):
         col = GREEN_USE.get(r["class"]) or (GREEN_USE["park"] if r["subtype"] in ("park", "recreation") else None)
@@ -352,6 +377,8 @@ def nature(stats):
         else:
             g = g.buffer(0)
         g = g.intersection(CLIP)
+        if g.is_empty:
+            continue
         if g.intersects(SITE):
             g = g.difference(SITE)
         flat(water, g.simplify(0.8), 0.05, wcol)
@@ -506,6 +533,7 @@ def main():
         "source": "© OpenStreetMap contributors · Overture Maps Foundation",
         "release": META["release"],
         "site": [LAT0, LNG0],
+        "frame": {"bearing": FRAME_BEARING, "origin": list(FRAME_ORIGIN)},
         "extent": META["extent"],
         "pois": pois(),
         "labels": labels,

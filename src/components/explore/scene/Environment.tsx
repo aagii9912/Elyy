@@ -8,6 +8,7 @@ import { useLayoutEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Color, DirectionalLight, Object3D, PointLight } from "three";
 import { PALETTE, basementFloorY, floorBase, towerOf } from "@/lib/explore/config";
+import { toSiteDir } from "@/lib/explore/location";
 import { unitPlacement } from "@/lib/explore/placement";
 import { parseCoords, sunVector } from "@/lib/explore/sun";
 import type { View } from "@/lib/explore/types";
@@ -56,7 +57,11 @@ export function Environment() {
   const target = useMemo(() => new Object3D(), []);
 
   const { lat, lng } = parseCoords(coords);
-  const sun = useMemo(() => sunVector(season, hour, lat, lng), [season, hour, lat, lng]);
+  /* Нар жинхэнэ хойд зүгээр тооцогдоно — хотхоны систем рүү эргүүлнэ. */
+  const sun = useMemo(() => {
+    const v = sunVector(season, hour, lat, lng);
+    return { ...v, ...toSiteDir(v.x, v.z) };
+  }, [season, hour, lat, lng]);
   const focus = focusOf(view);
   const day = Math.max(0, Math.min(1, sun.y * 3));
   const tour = view.level === "tour";
