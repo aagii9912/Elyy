@@ -404,10 +404,14 @@ export function EventEditor({
           <div className="space-y-4">
             {isRegistration && <><p className="text-sm leading-relaxed text-neutral-500">
               Цайвар карттай маягт, баруун талд зураг болон борлуулалтын албаны мэдээлэл харагдана.
-              Огноо, нэр, и-мэйл, утас болон сонголтын хоёр бүлгийг заавал бөглөнө.
+              {content.form.askDate === false ? "Нэр" : "Огноо, нэр"}, и-мэйл, утас болон сонголтын хоёр бүлгийг заавал бөглөнө.
               Бүлэг бүрээс нэг буюу хэд хэдэн сонголт хийнэ.
             </p>
-            <Toggle checked={content.form.showIntro ?? false} onChange={(value) => patchForm({ showIntro: value })} label="Маягтын гарчиг, тайлбар харуулах" /></>}
+            <Toggle checked={content.form.showIntro ?? false} onChange={(value) => patchForm({ showIntro: value })} label="Маягтын гарчиг, тайлбар харуулах" />
+            <div>
+              <Toggle checked={content.form.askDate !== false} onChange={(value) => patchForm({ askDate: value })} label="Цаг товлох өдөр сонгуулах" />
+              <p className="mt-1.5 text-xs text-neutral-500">Өдөрлөг, арга хэмжээний бүртгэлд унтраана — маягтад өдрийн сонголт харагдахгүй.</p>
+            </div></>}
             <div className="grid gap-4 sm:grid-cols-2">
               <Field label="Маягтын гарчиг">
                 <TextInput value={content.form.title} onChange={(e) => patchForm({ title: e.target.value })} />
