@@ -51,6 +51,10 @@ export async function PUT(req: Request, ctx: Ctx) {
           return NextResponse.json({ ok: false, error: "Сонголтын гарчиг 1–100 тэмдэгттэй байна." }, { status: 400 });
         }
       }
+      const askDate = body.content.form?.askDate;
+      if (askDate !== undefined && typeof askDate !== "boolean") {
+        return NextResponse.json({ ok: false, error: "Өдөр сонгуулах тохиргоо буруу байна." }, { status: 400 });
+      }
       if (body.content.registrationPage !== undefined && !validRegistrationPage(body.content.registrationPage)) {
         return NextResponse.json({ ok: false, error: "Header, footer, менежерийн мэдээллийг шалгана уу. Холбоос, и-мэйл, утас болон өнгө зөв утгатай байна." }, { status: 400 });
       }

@@ -63,6 +63,8 @@ export type EventContent = {
     areaRanges?: string[];
     apartmentLabel?: string;
     areaLabel?: string;
+    /** Нэг нүүрийн форм: false бол өдөр сонгуулахгүй (өдөрлөгийн бүртгэл). Байхгүй бол асууна. */
+    askDate?: boolean;
     showIntro?: boolean;
     submitLabel: string;
     successTitle: string;

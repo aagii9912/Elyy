@@ -56,6 +56,28 @@ export function Dashboard({
     }
   };
 
+  /** Хуудсыг бүх контенттой нь шинэ нэрээр ноорог болгон хуулж, засварлагчийг нээнэ. */
+  const duplicate = async (ev: EventDoc) => {
+    const n = prompt("Хуулбарын нэр (хаяг нь нэрээс үүснэ):", `${ev.name} (хуулбар)`)?.trim();
+    if (!n || busy) return;
+    setBusy(true);
+    setErr(null);
+    try {
+      const res = await fetch("/api/admin/events", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: n, copyFrom: ev.id }),
+      });
+      const json = await res.json().catch(() => null);
+      if (res.ok && json?.ok) router.push(`/admin/events/${json.event.id}`);
+      else setErr(json?.error || "Хуулбарлаж чадсангүй.");
+    } catch {
+      setErr("Сүлжээний алдаа.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const togglePublish = async (ev: EventDoc) => {
     const next = ev.status === "published" ? "draft" : "published";
     const res = await fetch(`/api/admin/events/${ev.id}`, {
@@ -190,16 +212,19 @@ export function Dashboard({
                   </span>
                 </div>
                 <div className="mt-0.5 flex flex-wrap items-center gap-x-3 text-sm text-neutral-400">
-                  <a href={`/${ev.slug}?preview=1`} target="_blank" rel="noreferrer" className="font-medium text-ink hover:underline">
+                  <a href={`/${ev.slug}${ev.status === "published" ? "" : "?preview=1"}`} target="_blank" rel="noreferrer" className="font-medium text-ink hover:underline">
                     /{ev.slug} ↗
                   </a>
                   <span>Шинэчилсэн: {fmtDate(ev.updatedAt)}</span>
                   <span>{ev.content.template === "registration" ? "Нэг нүүрийн форм" : "Эвентийн landing page"}</span>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <Button variant="ghost" type="button" onClick={() => togglePublish(ev)}>
                   {ev.status === "published" ? "Ноорог" : "Хэвлэх"}
+                </Button>
+                <Button variant="ghost" type="button" onClick={() => duplicate(ev)} disabled={busy}>
+                  Хуулбарлах
                 </Button>
                 <Button variant="primary" type="button" onClick={() => router.push(`/admin/events/${ev.id}`)}>
                   Засах

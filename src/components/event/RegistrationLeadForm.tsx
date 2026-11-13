@@ -28,8 +28,9 @@ export function RegistrationLeadForm({ slug, eventName, form, today, onSuccess }
     e.preventDefault();
     if (busy) return;
     const data = new FormData(e.currentTarget);
-    const appointmentDate = String(data.get("appointmentDate") ?? "");
-    const registration = eventRegistrationMessage({ appointmentDate, ...selections }, undefined, options);
+    const date: { appointmentDate?: string } = options.askDate
+      ? { appointmentDate: String(data.get("appointmentDate") ?? "") } : {};
+    const registration = eventRegistrationMessage({ ...date, ...selections }, undefined, options);
     if (!registration.ok) {
       setError(registration.error);
       return;
@@ -47,7 +48,7 @@ export function RegistrationLeadForm({ slug, eventName, form, today, onSuccess }
           name: String(data.get("name") ?? ""),
           phone: String(data.get("phone") ?? ""),
           email: String(data.get("email") ?? ""),
-          appointmentDate,
+          ...date,
           ...selections,
           message: [guests && `Зочдын тоо: ${guests}`, note && `Тэмдэглэл: ${note}`].filter(Boolean).join("\n"),
           source: `event/${slug}`,
@@ -74,10 +75,12 @@ export function RegistrationLeadForm({ slug, eventName, form, today, onSuccess }
     <form onSubmit={onSubmit} className={styles.card} aria-label={form.title} aria-busy={busy}>
       <input type="text" name="website" tabIndex={-1} autoComplete="off" aria-hidden className="hidden" />
       <fieldset disabled={busy} className={styles.fields}>
-        <label className={styles.field}>
-          <span>Цаг товлох өдөр сонгох: <span aria-hidden>*</span></span>
-          <input type="date" name="appointmentDate" required min={today} className={styles.input} />
-        </label>
+        {options.askDate && (
+          <label className={styles.field}>
+            <span>Цаг товлох өдөр сонгох: <span aria-hidden>*</span></span>
+            <input type="date" name="appointmentDate" required min={today} className={styles.input} />
+          </label>
+        )}
         <label className={styles.field}>
           <span>Таны нэр <span aria-hidden>*</span></span>
           <input type="text" name="name" required maxLength={255} autoComplete="name" className={styles.input} />

@@ -16,7 +16,7 @@ export async function GET() {
   }
 }
 
-/** Шинэ хуудас үүсгэх. Body: { name, template? } */
+/** Шинэ хуудас үүсгэх. Body: { name, template? } эсвэл хуулбарлах: { name, copyFrom: <id> } */
 export async function POST(req: Request) {
   try {
     const body = await req.json().catch(() => null);
@@ -29,6 +29,11 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: false, error: "Хуудасны загвар буруу байна." }, { status: 400 });
     }
     const store = getStore();
+    // Хуулбар: эх хуудасны бүх контентыг авч, шинэ нэр/slug-тай ноорог үүсгэнэ.
+    const source = body?.copyFrom === undefined ? null : await store.getEvent(String(body.copyFrom));
+    if (body?.copyFrom !== undefined && !source) {
+      return NextResponse.json({ ok: false, error: "Хуулбарлах хуудас олдсонгүй." }, { status: 404 });
+    }
 
     // Нэрнээс slug — reserved/буруу бол fallback, давхцвал -2, -3 залгана.
     let base = slugify(name);
@@ -38,6 +43,7 @@ export async function POST(req: Request) {
     while (await store.getEventBySlug(slug)) slug = `${base}-${n++}`;
 
     const doc = newEvent({ id: randomUUID(), name, slug, now: new Date().toISOString(), template });
+    if (source) doc.content = structuredClone(source.content);
     try {
       const created = await store.createEvent(doc);
       return NextResponse.json({ ok: true, event: created });

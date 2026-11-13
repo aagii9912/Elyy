@@ -87,6 +87,21 @@ assert.equal(matchesLeadArea(leadSelections(result.message).areaRanges, "253 –
 assert.equal(matchesLeadArea(leadSelections(result.message).areaRanges, "201-230"), false);
 assert.equal(matchesLeadArea("", "161"), false);
 assert.equal(matchesLeadArea("", ""), true);
+// Өдөрлөгийн бүртгэл: өдөр асуухгүй хуудас огноогүй хүсэлтийг авч, огнооны мөр бичихгүй.
+const noDate = eventRegistrationMessage({ apartmentTypes: input.apartmentTypes, areaRanges: input.areaRanges }, today, { askDate: false });
+assert.equal(noDate.ok, true);
+assert.equal(noDate.message, "Сонирхож буй орон сууц: 3 Өрөө, 5 Өрөө\nСонирхож буй талбайн хэмжээ: 161-182 м.кв, 253-370 м.кв");
+assert.equal(eventRegistrationMessage({ ...input, appointmentDate: "2020-01-01" }, today, { askDate: false }).message, noDate.message);
+assert.equal(eventRegistrationMessage({ areaRanges: input.areaRanges }, today, { askDate: false }).ok, false);
+assert.equal(eventRegistrationMessage({ apartmentTypes: input.apartmentTypes, areaRanges: input.areaRanges }, today).ok, false);
+assert.equal(registrationOptions({}).askDate, true);
+assert.equal(registrationOptions({ askDate: false }).askDate, false);
+assert.deepEqual(leadSelections(`${noDate.message}\nЗочдын тоо: 2`), {
+  appointmentDate: "", apartmentTypes: "3 Өрөө, 5 Өрөө", areaRanges: "161-182 м.кв, 253-370 м.кв",
+});
+assert.equal(leadSelections("Зочдын тоо: 2\nТэмдэглэл: Талбай: 90 м²").areaRanges, "");
+assert.equal(leadSelections("Тэмдэглэл: нэг\nхоёр: гурав").apartmentTypes, "");
+assert.equal(leadSelections("Уулзалтын хүссэн огноо: 2026-10-10\nТайлбар: байхгүй").appointmentDate, "2026-10-10");
 for (const bad of [[], [""], [" repeat", "repeat"], ["same", "same"], ["x".repeat(61)], [3]]) {
   assert.equal(validRegistrationOptions(bad), false);
 }
