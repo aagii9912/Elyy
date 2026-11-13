@@ -212,7 +212,7 @@ export function Dashboard({
                   </span>
                 </div>
                 <div className="mt-0.5 flex flex-wrap items-center gap-x-3 text-sm text-neutral-400">
-                  <a href={`/${ev.slug}?preview=1`} target="_blank" rel="noreferrer" className="font-medium text-ink hover:underline">
+                  <a href={`/${ev.slug}${ev.status === "published" ? "" : "?preview=1"}`} target="_blank" rel="noreferrer" className="font-medium text-ink hover:underline">
                     /{ev.slug} ↗
                   </a>
                   <span>Шинэчилсэн: {fmtDate(ev.updatedAt)}</span>

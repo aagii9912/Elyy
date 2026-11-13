@@ -188,8 +188,9 @@ export function EventEditor({
           {dirty && <span className="text-xs font-semibold text-amber-600">● Хадгалаагүй</span>}
 
           <div className="ml-auto flex flex-wrap items-center gap-2">
-            <a href={`${publicPath}?preview=1`} target="_blank" rel="noreferrer">
-              <Button variant="ghost" type="button">Урьдчилж үзэх ↗</Button>
+            {/* Хэвлэгдсэн хуудсанд цэвэр хаяг; ?preview=1 зөвхөн ноорогийг үзэхэд хэрэгтэй. */}
+            <a href={`${publicPath}${status === "published" ? "" : "?preview=1"}`} target="_blank" rel="noreferrer">
+              <Button variant="ghost" type="button">{status === "published" ? "Хуудас үзэх ↗" : "Урьдчилж үзэх ↗"}</Button>
             </a>
             {status === "published" ? (
               <Button variant="ghost" type="button" disabled={saving} onClick={() => save("draft")}>
