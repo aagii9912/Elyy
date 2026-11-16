@@ -1,6 +1,7 @@
 "use client";
 
-import { emptyManager, type RegistrationPageContent } from "@/lib/registration-page";
+import { HIGHLIGHT_ICONS, emptyHighlights, emptyManager, type RegistrationHighlights, type RegistrationPageContent } from "@/lib/registration-page";
+import { HighlightIcon } from "@/components/event/HighlightIcon";
 import { Button, Card, Field, ImageField, Select, TextArea, TextInput } from "./ui";
 
 type Props = { value: RegistrationPageContent; onChange: (update: (current: RegistrationPageContent) => RegistrationPageContent) => void };
@@ -18,7 +19,15 @@ function ColorField({ label, value, onChange }: { label: string; value: string; 
 export function RegistrationHeaderFields({ value, onChange }: Props) {
   const patch = (next: Partial<RegistrationPageContent["header"]>) => onChange((current) => ({ ...current, header: { ...current.header, ...next } }));
   const h = value.header;
-  return <Card title="Header — баннер, лого, танилцуулга">
+  const g = value.highlights ?? emptyHighlights();
+  const patchHighlights = (next: Partial<RegistrationHighlights>) => onChange((current) => ({ ...current, highlights: { ...(current.highlights ?? emptyHighlights()), ...next } }));
+  const patchItem = (id: string, next: Partial<RegistrationHighlights["items"][number]>) => patchHighlights({ items: g.items.map((item) => item.id === id ? { ...item, ...next } : item) });
+  const moveItem = (index: number, direction: number) => {
+    const items = [...g.items];
+    [items[index], items[index + direction]] = [items[index + direction], items[index]];
+    patchHighlights({ items });
+  };
+  return <><Card title="Header — баннер, лого, танилцуулга">
     <div className="space-y-5">
       <p className="text-sm text-neutral-500">Хоосон зураг, текстийн оронд placeholder харагдана. Зургаа бэлдэх хэмжээг талбар бүрийн доор харуулав.</p>
       <ImageField label="Header зураг — компьютер" value={h.desktopImage} onChange={(desktopImage) => patch({ desktopImage })} ratio="24/5" maxEdge={1920} />
@@ -30,7 +39,31 @@ export function RegistrationHeaderFields({ value, onChange }: Props) {
       <Field label="Header уриа, гарчиг"><TextInput maxLength={200} value={h.title} placeholder="Уриа, гарчиг" onChange={(e) => patch({ title: e.target.value })} /></Field>
       <Field label="Цаг товлохын зорилго, танилцуулга"><TextArea rows={3} maxLength={3000} value={h.body} onChange={(e) => patch({ body: e.target.value })} /></Field>
     </div>
-  </Card>;
+  </Card>
+  <Card title="Онцлох мэдээлэл — текст, дүрстэй жагсаалт">
+    <div className="space-y-4">
+      <p className="text-sm text-neutral-500">Header-ийн доор, маягтын дээр харагдана. Бүх талбар хоосон бол хуудсанд энэ хэсэг гарахгүй. Дүрсүүд онцлох өнгөөр будагдана.</p>
+      <Field label="Танилцуулга текст" hint="Заавал биш. Мөр шилжүүлэлт хэвээр харагдана."><TextArea rows={3} maxLength={3000} value={g.body} onChange={(e) => patchHighlights({ body: e.target.value })} /></Field>
+      <Field label="Жагсаалтын гарчиг"><TextInput maxLength={200} value={g.title} placeholder="Ж: Энэхүү уулзалтад оролцсоноор:" onChange={(e) => patchHighlights({ title: e.target.value })} /></Field>
+      {g.items.map((item, i) => <div key={item.id} className="space-y-3 rounded-xl border border-neutral-200 p-4">
+        <div className="grid gap-3 sm:grid-cols-[220px_1fr]">
+          <Field label={`Мөр ${i + 1} — дүрс`}><div className="flex items-center gap-2.5">
+            <HighlightIcon name={item.icon} className="h-7 w-7 shrink-0 text-neutral-700" />
+            <Select value={item.icon} onChange={(e) => patchItem(item.id, { icon: e.target.value })}>
+              {HIGHLIGHT_ICONS.map((icon) => <option key={icon.value} value={icon.value}>{icon.label}</option>)}
+            </Select>
+          </div></Field>
+          <Field label={`Мөр ${i + 1} — текст`}><TextArea rows={2} maxLength={300} value={item.text} onChange={(e) => patchItem(item.id, { text: e.target.value })} /></Field>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Button type="button" variant="ghost" disabled={i === 0} onClick={() => moveItem(i, -1)}>↑ Урагш</Button>
+          <Button type="button" variant="ghost" disabled={i === g.items.length - 1} onClick={() => moveItem(i, 1)}>↓ Хойш</Button>
+          <Button type="button" variant="danger" onClick={() => patchHighlights({ items: g.items.filter((x) => x.id !== item.id) })}>Мөр хасах</Button>
+        </div>
+      </div>)}
+      <Button type="button" variant="ghost" disabled={g.items.length >= 12} onClick={() => patchHighlights({ items: [...g.items, { id: crypto.randomUUID(), icon: HIGHLIGHT_ICONS[g.items.length % HIGHLIGHT_ICONS.length].value, text: "" }] })}>+ Мөр нэмэх</Button>
+    </div>
+  </Card></>;
 }
 
 export function RegistrationSupportingFields({ value, onChange }: Props) {
