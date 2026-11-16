@@ -54,6 +54,21 @@ page.links.website = "www.example.com";
 page.footer.email = "sales@example.com";
 assert.equal(validRegistrationPage(page), true);
 assert.equal(defaultRegistrationPage().managers.items[0].name, "");
+// Онцлох мэдээлэл: хуучин хуудсанд байхгүй байж болно; дүрс зөвхөн жагсаалтаас.
+const highlights = { body: "Танилцуулга", title: "Оролцсоноор:", items: [{ id: "a", icon: "building", text: "Мэдээлэл авах" }, { id: "b", icon: "pie", text: "" }] };
+assert.equal(validRegistrationPage({ ...page, highlights }), true);
+assert.deepEqual(defaultRegistrationPage().highlights, { body: "", title: "", items: [] });
+const legacyPage = { ...page };
+delete legacyPage.highlights;
+assert.equal(validRegistrationPage(legacyPage), true);
+for (const badHighlights of [
+  null, { ...highlights, items: "x" }, { ...highlights, title: 5 },
+  { ...highlights, items: [{ id: "a", icon: "skull", text: "x" }] },
+  { ...highlights, items: [{ id: "", icon: "pie", text: "x" }] },
+  { ...highlights, items: [highlights.items[0], highlights.items[0]] },
+  { ...highlights, items: [{ id: "a", icon: "pie", text: "x".repeat(301) }] },
+  { ...highlights, items: Array.from({ length: 13 }, (_, i) => ({ id: String(i), icon: "pie", text: "x" })) },
+]) assert.equal(validRegistrationPage({ ...page, highlights: badHighlights }), false, JSON.stringify(badHighlights)?.slice(0, 80));
 for (const bad of [
   null, {}, [],
   { ...page, header: { ...page.header, desktopImage: "javascript:alert(1)" } },

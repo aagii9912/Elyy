@@ -23,6 +23,13 @@
 .intro h1 { font-family: var(--font-gilroy), sans-serif; font-size: clamp(26px, 3vw, 36px); line-height: 1.2; font-weight: 600; margin: 26px 0 12px; }
 .intro p { max-width: 640px; margin: 0; font-size: 14px; line-height: 1.8; white-space: pre-line; }
 .emptyText { color: #80766a; }
+.highlights { padding: 0 24px 44px; }
+.highlightsInner { max-width: 920px; margin: 0 auto; font-size: 14px; }
+.highlightsInner p { margin: 0 0 24px; line-height: 1.8; white-space: pre-line; }
+.highlightsInner h2 { margin: 0 0 18px; font-size: 15px; line-height: 1.5; font-weight: 700; }
+.highlightList { display: grid; gap: 18px 40px; margin: 0; padding: 0; list-style: none; }
+.highlightList li { display: flex; min-width: 0; align-items: flex-start; gap: 14px; line-height: 1.6; }
+.highlightIcon { width: 26px; height: 26px; flex-shrink: 0; margin-top: -2px; color: var(--accent); }
 .section { padding: 0 24px 64px; scroll-margin-top: 24px; }
 .layout { display: grid; gap: 48px; max-width: 920px; margin: 0 auto; }
 .formIntro { max-width: 920px; margin: 0 auto 28px; }
@@ -94,6 +101,9 @@
 
 @media (min-width: 768px) {
   .section { padding-inline: 40px; }
+  .highlights { padding-inline: 40px; }
+  .highlightList { grid-template-columns: 1fr 1fr; }
+  .highlightList li:last-child:nth-child(odd) { grid-column: 1 / -1; }
   .layout { grid-template-columns: minmax(0, 1.85fr) minmax(0, 1fr); gap: 52px; }
   .sidebar { padding-top: 38px; }
   .footer { padding-inline: 40px; }
@@ -108,7 +118,10 @@
   .logo { width: 160px; height: 64px; }
   .logoPlaceholder { width: 160px; height: 64px; }
   .section { padding: 0 var(--mobile-gutter) 40px; }
-  .layout, .formIntro, .managers, .footerGrid, .footerBottom { max-width: 480px; }
+  .highlights { padding: 0 var(--mobile-gutter) 32px; }
+  .highlightsInner p { margin-bottom: 20px; line-height: 1.7; }
+  .highlightList { gap: 16px; }
+  .layout, .formIntro, .highlightsInner, .managers, .footerGrid, .footerBottom { max-width: 480px; }
   .layout { gap: 32px; }
   .card { padding: 24px 20px; border-radius: 16px; }
   .fields { gap: 24px; }

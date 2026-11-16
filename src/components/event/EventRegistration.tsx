@@ -7,6 +7,7 @@ import { externalHref } from "@/lib/links";
 import { SocialRow } from "@/components/mono/MonoSocial";
 import { RegistrationExperience } from "./RegistrationExperience";
 import { RegistrationPlaceholder } from "./RegistrationPlaceholder";
+import { HighlightIcon } from "./HighlightIcon";
 import styles from "./EventRegistration.module.css";
 
 /* eslint-disable @next/next/no-img-element */
@@ -16,6 +17,9 @@ export async function EventRegistration({ event }: { event: EventDoc }) {
   const { contact } = event.content;
   const page = event.content.registrationPage ?? defaultRegistrationPage();
   const { header, footer, links } = page;
+  const highlightItems = (page.highlights?.items ?? []).filter((item) => item.text.trim());
+  const highlightBody = page.highlights?.body.trim();
+  const highlightTitle = page.highlights?.title.trim();
   const address = contact.address?.trim() || site.contact.location;
   const email = contact.email?.trim() || site.brand.email;
   const mapUrl = externalHref(contact.mapUrl) || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
@@ -38,6 +42,18 @@ export async function EventRegistration({ event }: { event: EventDoc }) {
         <h1 className={!header.title ? styles.emptyText : undefined}>{header.title || "Уриа, гарчиг"}</h1>
         <p className={!header.body ? styles.emptyText : undefined}>{header.body || "Цаг товлохын зорилго, төслийн товч танилцуулга энд байрлана."}</p>
       </div>
+      {(highlightBody || highlightTitle || highlightItems.length > 0) && <div className={styles.highlights}>
+        <div className={styles.highlightsInner}>
+          {highlightBody && <p>{highlightBody}</p>}
+          {highlightTitle && <h2>{highlightTitle}</h2>}
+          {highlightItems.length > 0 && <ul className={styles.highlightList}>
+            {highlightItems.map((item) => <li key={item.id}>
+              <HighlightIcon name={item.icon} className={styles.highlightIcon} />
+              <span>{item.text}</span>
+            </li>)}
+          </ul>}
+        </div>
+      </div>}
     </header>}
     sidebar={<aside key="registration-sidebar" className={styles.sidebar} aria-label={page.salesTitle}>
       <div className={styles.showroom}>

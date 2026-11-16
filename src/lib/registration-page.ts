@@ -10,8 +10,37 @@ export type RegistrationManager = {
   image: string;
 };
 
+/** Онцлох мэдээллийн жагсаалтад сонгох дүрсүүд (админы сонголтын дараалал). */
+export const HIGHLIGHT_ICONS = [
+  { value: "building", label: "Барилга" },
+  { value: "home", label: "Гэр, орон сууц" },
+  { value: "key", label: "Түлхүүр" },
+  { value: "pie", label: "Дугуй диаграм" },
+  { value: "bars", label: "Баганан диаграм" },
+  { value: "percent", label: "Хувь, хүү" },
+  { value: "wallet", label: "Төлбөр, санхүү" },
+  { value: "calendar", label: "Календарь" },
+  { value: "clock", label: "Цаг" },
+  { value: "pin", label: "Байршил" },
+  { value: "video", label: "Онлайн уулзалт" },
+  { value: "users", label: "Хүмүүс" },
+  { value: "check", label: "Зөв тэмдэг" },
+  { value: "star", label: "Од" },
+] as const;
+export type HighlightIconName = (typeof HIGHLIGHT_ICONS)[number]["value"];
+
+export type RegistrationHighlight = { id: string; icon: string; text: string };
+/** Header-ийн доорх текст + дүрстэй жагсаалт. Хоосон бол хуудсанд харагдахгүй. */
+export type RegistrationHighlights = { body: string; title: string; items: RegistrationHighlight[] };
+
+export function emptyHighlights(): RegistrationHighlights {
+  return { body: "", title: "", items: [] };
+}
+
 export type RegistrationPageContent = {
   header: { desktopImage: string; mobileImage: string; logo: string; logoAlt: string; title: string; body: string };
+  /** Хуучин хадгалсан хуудсанд байхгүй. */
+  highlights?: RegistrationHighlights;
   links: { website: string; social: SocialLink[] };
   salesTitle: string;
   contactTitle: string;
@@ -31,6 +60,7 @@ export function emptyManager(id: string): RegistrationManager {
 export function defaultRegistrationPage(): RegistrationPageContent {
   return {
     header: { desktopImage: "", mobileImage: "", logo: "", logoAlt: "", title: "", body: "" },
+    highlights: emptyHighlights(),
     links: {
       website: "",
       social: ["Facebook", "Instagram", "YouTube"].map((label) => ({ label, icon: label.toLowerCase(), href: "" })),
@@ -62,6 +92,12 @@ export function validRegistrationPage(value: unknown): value is RegistrationPage
   if (!record(value)) return false;
   const { header: h, links: l, managers: m, footer: f } = value;
   if (!record(h) || !record(l) || !record(m) || !record(f)) return false;
+  if (value.highlights !== undefined) {
+    const g = value.highlights;
+    if (!record(g) || !text(g.body, 3000) || !text(g.title) || !Array.isArray(g.items) || g.items.length > 12) return false;
+    if (!g.items.every((i) => record(i) && text(i.id, 100) && Boolean(i.id) && text(i.text, 300) && HIGHLIGHT_ICONS.some((icon) => icon.value === i.icon))) return false;
+    if (new Set(g.items.map((i) => i.id)).size !== g.items.length) return false;
+  }
   if (![h.desktopImage, h.mobileImage, h.logo, f.logo].every(media) || !text(h.logoAlt) || !text(h.title) || !text(h.body, 3000)) return false;
   if (!text(value.salesTitle) || !text(value.contactTitle) || !link(l.website)) return false;
   if (!Array.isArray(l.social) || l.social.length > 8 || !l.social.every((s) => record(s) && text(s.label, 60) && text(s.icon, 30) && link(s.href))) return false;
