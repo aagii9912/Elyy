@@ -80,3 +80,19 @@ export async function verifySessionToken(token: string | undefined | null): Prom
 }
 
 export const SESSION_MAX_AGE = SESSION_TTL_SECONDS;
+
+/** Хүчинтэй token-ы хугацааны тал нь өнгөрсөн бол сунгана — идэвхтэй ажиллаж
+ *  буй админ засвар хийх дундаа гэнэт гарахгүй. (Шалгасны дараа л дуудна.) */
+export function shouldRenewSession(token: string): boolean {
+  const exp = Number(token.slice(0, token.indexOf(".")));
+  return exp * 1000 - Date.now() < (SESSION_TTL_SECONDS * 1000) / 2;
+}
+
+/** Нэвтрэлтийн cookie-гийн тохиргоо (login болон сунгалтад нэг ижил). */
+export const SESSION_COOKIE_OPTIONS = {
+  httpOnly: true,
+  sameSite: "lax" as const,
+  secure: process.env.NODE_ENV === "production",
+  path: "/",
+  maxAge: SESSION_TTL_SECONDS,
+};
